@@ -1,0 +1,207 @@
+
+참고자료
+https://booiljung.github.io/technical_articles/c_language/simple_cmake_introduction.html
+https://cgold.readthedocs.io/en/latest/tutorials/cmake-stages.html
+https://www.tuwlab.com/ece/27260
+https://booiljung.github.io/technical_articles/c_language/simple_cmake_introduction.html
+
+-- 빌드형상 --
+Debug : 디버깅 목적의 빌드
+Release : 배포 목적의 빌드
+RelWithDebInfo : 배포 목적의 빌드지만, 디버깅 정보 포함
+MinSizeRel : 최소 크기로 최적화한 배포 목적 빌드
+
+-- 변수 정의 --
+set(<변수명> <값>)
+set(<목록 변수명> <항목> <항목> ...)
+
+
+-- 변수 참조 --
+&변수명
+&{<변수명>}
+
+-- 예약 변수 --
+CMAKE_PROJECT_NAME     : 프로젝트 이름
+CMAKE_BUILD_TYPE       : 빌드 형상
+CMAKE_VERBOSE_MAKEFILE : 빌드 상세 과정을 볼지 여부(project() 명령을 만나면 false로 초기화)
+CMAKE_INSTALL_PREFIX   : 설치 디렉토리
+CMAKE_C_COMPILER       :  C 컴파일러
+CMAKE_C_FLAGS_<빌드형상> : 빌드 형상별 컴파일 옵션
+CMAKE_EXE_LINKER_FLAGS_<빌드_형상> : 빌드 형상별 링크 옵션
+RUNTIME_OUTPUT_DIRECTORY : 빌드 완료한 실행 바이너리 디렉토리
+LIBRARY_OUTPUT_DIRECTORY : 라이브러리 출력 디렉토리
+ARCHIVE_OUTPUT_DIRECTORY : 아카이브(static 라이브러리) 출력 디렉토리
+-- 명령어 --
+
+cmake_minimum_required (VERSION <버전>) 
+-> 최소 버전을 명시
+
+project(<프로젝트명>)
+-> 프로젝트 이름 설정
+
+message([<Type>] <메시지>)
+-> 콘솔에 메시지 출력
+- Type -
+STATUS         : 상태 메시지 출력(메시지 앞에 -- 추가)
+WARNING        : 경고 메시지 출력하고 계속 진행
+AUTHOR_WARNING : 프로젝트 개발자용 경고 메시지 출력 후 계속 진행
+SEND_ERROR     : 오류 메시지 출력 후 게속 진행하지만 Makefile 생성 하지않음
+FATAL_ERROR    : 오류 메시지를 출력하고 작업을 즉시 중단
+
+
+add_executable(<실팽_파일명> <소스파일> <소스파일> ...)
+-> 빌드 최종 결과물로 생성할 실행파일 추가
+
+add_library(<라이브러리 이름> [STATIC|SHARED|MODULE] <소스파일> <소스파일> ...)
+-> 빌드 최종 결과물로 생성할 라이브러리 추가
+
+
+add_dependencies(<target이름> <의존대상> <의존대상> ...)
+-> top-level target간의 의존성 지정
+
+add_subdirectory(<경로> <빌드 결과물 경로>) 
+-> 서브 cmakeList 추가
+
+
+
+install(TARGETS <target목록>
+		RUNTIME DESTINATION <바이너리_설치_경로>
+        LIBRARY DESTINATION <라이브러리_설치_경로>
+        ARCHIVE DESTINATION <아카이브_설치_경로>
+		)
+-> 빌드 완료된 실행 바이너리와 라이브러리 및 기타 부속물(헤더 파일, 리소스 등)들을 시스템의 적절한 위치로 복사하는 동작
+
+
+
+add_compile_options(<옵션> <옵션> ...)
+->소스파일을 컴파일하여 Object파일을 생성할 시 컴파일러에 전달할 옵션을 추가 ( 옵션이여러개인 경우 ""로감싸 전달)
+
+add_definitions(-D<매크로> -D<매크로> ...)
+-> 전처리기에 전달할 매크로 정의(-D)
+
+include_directories(<디렉토리> <디렉토리> ...)
+-> 헤더 디렉토리 추가 (-I)
+
+link_directories(<디렉토리> <디렉토리> ...)
+-> 라이브러리 디렉토리 지정 (-L)
+
+link_libraries(<라이브러리> <라이브러리> ...)
+-> 링크 옵션 추가
+
+target_compile_options(<target이름> PUBLIC <옵션> <옵션> ...)
+-> target 컴파일 옵션 추가
+
+target_compile_definitions(<target이름> PUBLIC <매크로> <매크로>=<값> ...)
+-> target 전처리기 매크로 정의
+
+target_include_directories(<target이름> PUBLIC <디렉토리> <디렉토리> ...)
+-> target 헤더 디렉토리 정의
+
+target_link_libraries(<target이름> PUBLIC <라이브러리> <라이브러리> ...)
+-> target 링크 옵션및 라이브러리 지정
+
+configure_file(<템플릿 파일명> <출력 파일명>)
+-> 빌드 시작 직전 템플릿 파일로부터 파일 자동 생성
+
+
+
+
+add_custom_target(
+			<이름> [ALL] 
+			[COMMENT <출력메시지>]
+			[DEPENDS <의존 대상 목록>]
+			[WORKING_DIRECTORY <작업 디렉토리>]
+			COMMAND <명령>
+			[COMMAND] <명령>]
+			[VERBATIM]
+			...
+			)
+- 통상적인 빌드절차로 생성할수 없는 Target 추가
+<이름>: Target 이름
+[ALL]: make(또는 make all) 명령에서 기본 빌드 대상에 포함할 지 여부
+<출력_메시지>: 명령 실행 전에 콘솔에 출력할 메시지
+<의존_대상_목록>: 이 Target이 의존하는 대상 목록 (공백으로 구분)
+<작업_디렉토리>: 명령을 실행할 위치(pwd)
+<명령> : Target을 생성하기 위한 명령(Recipe)
+[VERBATIM]: <명령>을 Escape하지 않고 그대로 사용하려는 경우 추가 (변수, 공백, 따옴표 등)
+
+
+
+add_custom_command(OUTPUT <출력_파일_목록>
+                [COMMENT <출력_메시지>]
+                [DEPENDS <의존_대상_목록>]
+                [WORKING_DIRECTORY <작업_디렉토리>]
+                COMMAND <명령>
+                [COMMAND <명령>]
+                [VERBATIM]
+                ...
+)
+-> 통상적인 빌드절차로 생성할수 없는 출력 파일 추가( output 버전 )
+
+add_custom_command(
+                TARGET <대상_Target_이름>
+                <PRE_BUILD|PRE_LINK|POST_BUILD>
+                [COMMENT <출력_메시지>]
+                [WORKING_DIRECTORY <작업_디렉토리>]
+                COMMAND <명령>
+                [COMMAND <명령>]
+                [VERBATIM]
+                ...
+)
+-> 특정 target의 빌드 전 / 중 / 후 에 수행할 명령을 추가
+
+
+-- 스크립트 패턴 --
+# 요구 CMake 최소 버전
+CMAKE_MINIMUM_REQUIRED ( VERSION <버전> )
+ 
+# 프로젝트 이름 및 버전
+PROJECT ( "<프로젝트_이름>" )
+SET ( PROJECT_VERSION_MAJOR <주_버전> )
+SET ( PROJECT_VERSION_MINOR <부_버전> )
+ 
+# 빌드 형상(Configuration) 및 주절주절 Makefile 생성 여부
+SET ( CMAKE_BUILD_TYPE <Debug|Release> )
+SET ( CMAKE_VERBOSE_MAKEFILE <true|false> )
+ 
+# 빌드 대상 바이너리 파일명 및 소스파일 목록
+SET ( OUTPUT_ELF
+        "${CMAKE_PROJECT_NAME}-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.out"
+        )
+SET ( SRC_FILES
+        <소스_파일>
+        <소스_파일>
+        ...
+        )
+ 
+# 공통 컴파일러
+SET ( CMAKE_C_COMPILER "<컴파일러>" )
+ 
+# 공통 헤더 파일 Include 디렉토리 (-I)
+INCLUDE_DIRECTORIES ( <디렉토리> <디렉토리> ... )
+ 
+# 공통 컴파일 옵션, 링크 옵션
+ADD_COMPILE_OPTIONS ( <컴파일_옵션> <컴파일_옵션> ... )
+SET ( CMAKE_EXE_LINKER_FLAGS "<링크_옵션> <링크_옵션> ..." )
+ 
+# 공통 링크 라이브러리 (-l)
+LINK_LIBRARIES( <라이브러리> <라이브러리> ... )
+ 
+# 공통 링크 라이브러리 디렉토리 (-L)
+LINK_DIRECTORIES ( <디렉토리> <디렉토리> ... )
+ 
+# "Debug" 형상 한정 컴파일 옵션, 링크 옵션
+SET ( CMAKE_C_FLAGS_DEBUG "<컴파일_옵션> <컴파일_옵션> ..." )
+SET ( CMAKE_EXE_LINKER_FLAGS_DEBUG "<링크_옵션> <링크_옵션> ..." )
+ 
+# "Release" 형상 한정 컴파일 옵션, 링크 옵션
+SET ( CMAKE_C_FLAGS_RELEASE "<컴파일_옵션> <컴파일_옵션> ..." )
+SET ( CMAKE_EXE_LINKER_FLAGS_RELEASE "<링크_옵션> <링크_옵션> ..." )
+ 
+# 출력 디렉토리
+SET ( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BUILD_TYPE} )
+SET ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BUILD_TYPE}/lib )
+SET ( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BUILD_TYPE}/lib )
+ 
+# 빌드 대상 바이너리 추가
+ADD_EXECUTABLE( ${OUTPUT_ELF} ${SRC_FILES} )
