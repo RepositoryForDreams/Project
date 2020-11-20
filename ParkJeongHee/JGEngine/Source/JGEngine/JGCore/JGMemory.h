@@ -73,9 +73,6 @@ namespace JG
 	};
 
 
-
-
-
 	/*
 	* Stack 형식의 할당자 / DeAlloc 시 Alloc을 한 반대 순으로 해야함.
 	*/
@@ -158,6 +155,8 @@ namespace JG
 		ptraddr* mMemoryPool = nullptr;
 		u64 mMemoryCount = 0;
 		u32 mMemoryUnit  = 0;
+		u64 mCurrMemoryIndex = 0;
+		u64 mLastMemoryIndex = 0;
 	};
 
 	/*
@@ -206,13 +205,11 @@ namespace JG
 		u64 heapAllocMem    = 0;
 		u64 singleFrameAllocMem    = 0;
 		u64 doubleBufferedAllocMem = 0;
-		u64 memoryHandleAllocMem = _KB;
 	};
 
 	class JGAllocatorManager
 	{
 		friend JGPoolAllocator;
-
 	public:
 		static void Create(const JGAllocatorDesc& desc);
 		static void Update();
@@ -226,19 +223,13 @@ namespace JG
 		JGAllocatorDesc mDesc;
 
 
-
 		JGStackAllocator       mStackAllocator;
 		JGLinearAllocator      mLinearAllocator;
 		JGHeapAllocator        mHeapAllocator;
 		JGSingleFrameAllocator mSingleFrameAllocator;
 		JGDoubleFrameAllocator mDoubleFrameAllocator;
+
+
+		JGPoolAllocator mMemoryHandleAllocator;
 	};
-
-
-
-
-
-
-
-
 }

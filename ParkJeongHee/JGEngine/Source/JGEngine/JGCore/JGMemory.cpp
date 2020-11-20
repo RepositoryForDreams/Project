@@ -341,24 +341,52 @@ namespace JG
 	JGPoolAllocator::JGPoolAllocator(u64 size, ptraddr address, u32 memoryUnit) : JGAllocator(size, address), mMemoryUnit(memoryUnit)
 	{
 
+		mMemoryCount = mTotalMemSize / mMemoryUnit;
+		mCurrMemoryIndex = 0;
+		mLastMemoryIndex = 0;
+		mMemoryPool  = (ptraddr*)gAllocatorManager->mLinearAllocator.Alloc(mMemoryCount * sizeof(ptraddr));
+
+
+
+		ptraddr curAddr = mStartAddress;
+		for (u64 i = 0; i < mMemoryCount; ++i)
+		{
+			mMemoryPool[i] = curAddr;
+			curAddr += mMemoryUnit;
+		}
+
+
+
 	}
 
 	void* JGPoolAllocator::Alloc()
 	{
-		// 메모리 관리자 플로우
+		if (mUseMemSize > mTotalMemSize)
+			JASSERT("JGPoolAllocator::DeAlloc : mUseMemSize > mTotalMemSize");
 
-		/*
-		1. Stack, Linear 메모리 할당자 생성
-		2. MemoryPool 할당자 생성 -> 이때 Linear 할당자에서 정해진 
-		3. Heap, Single Double 할당자 생성
-		
-		
-		*/
-		return nullptr;
+
+		//
+		void* result = (void*)mMemoryPool[mCurrMemoryIndex++];
+		mCurrMemoryIndex = mCurrMemoryIndex % mMemoryCount;
+		mUseMemSize += mMemoryUnit;
+
+
+		return result;
 	}
 
 	void JGPoolAllocator::DeAlloc(void** ptr)
 	{
+		if (mLastMemoryIndex == mCurrMemoryIndex)
+			JASSERT("JGPoolAllocator::DeAlloc : LastMemoryIndex == CurrMemoryIndex");
+		
+
+
+		mMemoryPool[mLastMemoryIndex++] = (ptraddr)(*ptr);
+		mLastMemoryIndex = mLastMemoryIndex % mMemoryCount;
+		mUseMemSize -= mMemoryUnit;
+
+
+		*ptr = nullptr;
 	}
 
 
@@ -476,10 +504,12 @@ namespace JG
 		mSingleFrameAllocator = JGSingleFrameAllocator(desc.singleFrameAllocMem, startAddr); startAddr    += desc.singleFrameAllocMem;
 		mDoubleFrameAllocator = JGDoubleFrameAllocator(desc.doubleBufferedAllocMem, startAddr); startAddr += desc.doubleBufferedAllocMem;
 
+
+		// mMemoryHandleAllocator = JGPoolAllocator();
+
 	}
 	JGAllocatorManager::~JGAllocatorManager()
 	{
-
 
 		free(mStartAddress);
 
