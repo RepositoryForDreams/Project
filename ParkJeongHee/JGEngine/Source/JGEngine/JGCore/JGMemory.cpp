@@ -348,11 +348,11 @@ namespace JG
 
 
 
-		ptraddr curAddr = mStartAddress;
+		ptraddr currAddr = mStartAddress;
 		for (u64 i = 0; i < mMemoryCount; ++i)
 		{
-			mMemoryPool[i] = curAddr;
-			curAddr += mMemoryUnit;
+			mMemoryPool[i] = currAddr;
+			currAddr += mMemoryUnit;
 		}
 
 
@@ -489,30 +489,65 @@ namespace JG
 
 	JGAllocatorManager::JGAllocatorManager(const JGAllocatorDesc& desc) : mDesc(desc)
 	{
+		u64 memHandleMemSize = mDesc.memoryHandleCount * sizeof(ptraddr);
+		u64 _4bitMemSize   = mDesc._4bitMemoryCount * 4;
+		u64 _8bitMemSize   = mDesc._8bitMemoryCount * 8;
+		u64 _12bitMemSize  = mDesc._12bitMemoryCount * 12;
+		u64 _16bitMemSize  = mDesc._16bitMemoryCount * 16;
+		u64 _32bitMemSize  = mDesc._32bitMemoryCount * 32;
+		u64 _64bitMemSize  = mDesc._64bitMemoryCount * 64;
+		u64 _128bitMemSize = mDesc._128bitMemoryCount * 128;
+	
 
-		mTotalMemory = desc.stackAllocMem + desc.linearAllocMem + desc.heapAllocMem + desc.singleFrameAllocMem + desc.doubleBufferedAllocMem;
 
+		u64 allPoolMemSize  = 
+			_4bitMemSize  + _8bitMemSize + _12bitMemSize + _16bitMemSize +
+			_32bitMemSize +_64bitMemSize + _128bitMemSize+ memHandleMemSize;
+		u64 allPoolMemCount =
+			mDesc._4bitMemoryCount  + mDesc._8bitMemoryCount  + mDesc._12bitMemoryCount  + mDesc._16bitMemoryCount + 
+			mDesc._32bitMemoryCount + mDesc._64bitMemoryCount + mDesc._128bitMemoryCount + mDesc.memoryHandleCount;
+
+
+
+
+		mDesc.linearAllocMem += (allPoolMemCount * sizeof(ptraddr));
+
+
+		mTotalMemory = mDesc.stackAllocMem + mDesc.linearAllocMem + mDesc.heapAllocMem + mDesc.singleFrameAllocMem + mDesc.doubleBufferedAllocMem + allPoolMemSize;
+
+		// 메모리 할당
 		mStartAddress = malloc(mTotalMemory);
 
 		ptraddr startAddr = (ptraddr)mStartAddress;
 
 
 		// Allocator 생성
-		mStackAllocator  = JGStackAllocator(desc.stackAllocMem, startAddr);   startAddr += desc.stackAllocMem;
-		mLinearAllocator = JGLinearAllocator(desc.linearAllocMem, startAddr); startAddr += desc.linearAllocMem;
-		mHeapAllocator   = JGHeapAllocator(desc.heapAllocMem, startAddr);     startAddr += desc.heapAllocMem;
-		mSingleFrameAllocator = JGSingleFrameAllocator(desc.singleFrameAllocMem, startAddr); startAddr    += desc.singleFrameAllocMem;
-		mDoubleFrameAllocator = JGDoubleFrameAllocator(desc.doubleBufferedAllocMem, startAddr); startAddr += desc.doubleBufferedAllocMem;
+		mStackAllocator  = JGStackAllocator(mDesc.stackAllocMem, startAddr);   startAddr += mDesc.stackAllocMem;
+		mLinearAllocator = JGLinearAllocator(mDesc.linearAllocMem, startAddr); startAddr += mDesc.linearAllocMem;
 
 
-		// mMemoryHandleAllocator = JGPoolAllocator();
 
+		mHeapAllocator        = JGHeapAllocator(mDesc.heapAllocMem, startAddr);                 startAddr += mDesc.heapAllocMem;
+		mSingleFrameAllocator = JGSingleFrameAllocator(mDesc.singleFrameAllocMem,startAddr);    startAddr += mDesc.singleFrameAllocMem;
+		mDoubleFrameAllocator = JGDoubleFrameAllocator(mDesc.doubleBufferedAllocMem,startAddr); startAddr += mDesc.doubleBufferedAllocMem;
+
+
+
+
+		mMemoryHandleAllocator = JGPoolAllocator(memHandleMemSize, startAddr, sizeof(ptraddr)); startAddr += memHandleMemSize;
+
+		m4bytePoolAllocator   = JGPoolAllocator(_4bitMemSize, startAddr, 4); startAddr += _4bitMemSize;
+		m8bytePoolAllocator   = JGPoolAllocator(_8bitMemSize, startAddr, 8); startAddr += _8bitMemSize;
+		m12bytePoolAllocator  = JGPoolAllocator(_12bitMemSize, startAddr, 12); startAddr += _12bitMemSize;
+		m16bytePoolAllocator  = JGPoolAllocator(_16bitMemSize, startAddr, 16); startAddr += _16bitMemSize;
+		m32bytePoolAllocator  = JGPoolAllocator(_32bitMemSize, startAddr, 32); startAddr += _32bitMemSize;
+		m64bytePoolAllocator  = JGPoolAllocator(_64bitMemSize, startAddr, 64); startAddr += _64bitMemSize;
+		m128bytePoolAllocator = JGPoolAllocator(_128bitMemSize, startAddr, 128); startAddr += _128bitMemSize;
 	}
 	JGAllocatorManager::~JGAllocatorManager()
 	{
 
 		free(mStartAddress);
-
 	}
 
 
