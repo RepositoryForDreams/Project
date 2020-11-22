@@ -339,7 +339,7 @@ namespace JG
 	void JGHeapAllocator::MemoryDefragmenter(u64 countPerFrame)
 	{
 		
-		ptraddr curPos = mMemoryDefragAddr;
+		ptraddr curPos = mMemoryDefragCurrAddr;
 		u64 count = 0;
 		/*
 		일단 현재 메모리 조각모음할때 시작점은 게속 증가하지만
@@ -357,26 +357,65 @@ namespace JG
 			++count;
 
 			BlockHeader bh = (*(BlockHeader*)curPos);
-			if (bh.handle != 0)
+
+			
+			if (bh.handle != 0 && emptyBlockAddr != 0)
 			{
-				if (emptyBlockAddr != 0)
-				{
-					ptraddr* memPtr = (ptraddr*)bh.handle;
-				}
+				ptraddr* memPtr = (ptraddr*)bh.handle;
 				
+				// 메모리 댕기기
+				// 전블록|비어있는블록|현재블록|다음블록
+				// 
+		
+				BlockHeader* emptyBH = (BlockHeader*)emptyBlockAddr;
+				BlockHeader* allocBH = (BlockHeader*)curPos;
+				BlockHeader* prevBH  = (BlockHeader*)emptyBH->prev;
+				BlockHeader* nextBH  = (BlockHeader*)allocBH->next;
+
+				BlockHeader newAllocBH;
+				newAllocBH.blockSize = allocBH->blockSize;
+				newAllocBH.handle = allocBH->handle;
+				newAllocBH.prev = (ptraddr)prevBH;
+				newAllocBH.next = (ptraddr)emptyBH + newAllocBH.blockSize;
+
+
+				BlockHeader newEmptyBH;
+				newEmptyBH.blockSize = emptyBH->blockSize;
+				newEmptyBH.handle = 0;
+				newEmptyBH.prev = (ptraddr)emptyBH;
+				newEmptyBH.next = (ptraddr)nextBH;
 
 
 
+				// 현재 블록 빈블록 스왑
+				(*emptyBH) = newAllocBH;
+				*((BlockHeader*)newAllocBH.next) = newEmptyBH;
 
+
+				if (prevBH != nullptr)
+					prevBH->next = newEmptyBH.prev;
+				if(nextBH != nullptr)
+					nextBH->prev = newAllocBH.next;
+
+
+
+				// 메모리 핸들 메모리 주소 변경
+				*memPtr = (ptraddr)emptyBH;
+
+				emptyBlockAddr = newAllocBH.next;
+				
 			}
-			// 비어있는 메모리 블럭이면.
-			else
+			// 비어있는 메모리 블럭이면. 
+			else if(bh.handle == 0)
 			{
+				// 마지막 블록이면
+				if (bh.next == 0)
+				{
+					emptyBlockAddr = mStartAddress;
+					break;
+				}
 				emptyBlockAddr = curPos;
 			}
-
-
-
 
 
 			curPos += bh.blockSize;
@@ -384,7 +423,7 @@ namespace JG
 
 		
 
-
+		mMemoryDefragCurrAddr = mMemoryDefragCurrAddr;
 
 	}
 
@@ -530,6 +569,7 @@ namespace JG
 	}
 	void JGAllocatorManager::Update()
 	{
+		gAllocatorManager->mHeapAllocator.MemoryDefragmenter(gAllocatorManager->mDesc.MemoryDefragmenterCountPerFrame);
 		gAllocatorManager->mSingleFrameAllocator.Clear();
 		gAllocatorManager->mDoubleFrameAllocator.Swap();
 

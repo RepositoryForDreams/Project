@@ -140,7 +140,7 @@ namespace JG
 		};
 	private:
 		ptraddr mCurrStartAddr = 0;
-		ptraddr mMemoryDefragAddr = 0;
+		ptraddr mMemoryDefragCurrAddr = 0;
 	};
 
 	/*
@@ -230,7 +230,7 @@ namespace JG
 			_MB,_MB,_MB,_MB,_MB,_MB,
 		};
 
-
+		u64 MemoryDefragmenterCountPerFrame = 1;
 		//
 		bool IsSafeNull = true;
 	};
