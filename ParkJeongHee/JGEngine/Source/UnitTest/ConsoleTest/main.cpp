@@ -100,14 +100,14 @@ void blockDeAllocatePrint(string name, void* ptr)
 
 int main()
 {
-	JGAllocatorDesc desc;
-	desc.stackAllocMem = 256;
-	desc.linearAllocMem = 256;
-	desc.heapAllocMem = 1024;
-	desc.singleFrameAllocMem = 128;
-	desc.doubleBufferedAllocMem = 256;
+	//JGAllocatorDesc desc;
+	//desc.stackAllocMem = 256;
+	//desc.linearAllocMem = 256;
+	//desc.heapAllocMem = 1024;
+	//desc.singleFrameAllocMem = 128;
+	//desc.doubleBufferedAllocMem = 256;
 
-	JG::JGAllocatorManager AllocManager(desc);
+	//JG::JGAllocatorManager AllocManager(desc);
 
 
 	//// stack วาด็

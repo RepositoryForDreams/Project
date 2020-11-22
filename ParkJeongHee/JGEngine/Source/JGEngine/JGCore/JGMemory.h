@@ -24,14 +24,6 @@ namespace JG
 		SingleFrame,
 		DoubleFrame1,
 		DoubleFrame2,
-		_4BytePool,
-		_8BytePool,
-		_12BytePool,
-		_16BytePool,
-		_32BytePool,
-		_64BytePool,
-		_128BytePool,
-
 		Count
 	};
 
@@ -82,11 +74,12 @@ namespace JG
 		~JGMemoryHandle();
 	public:
 		void* Get() const;
+		bool  IsValid() const {
+			return Get() != nullptr;
+		}
 	private:
 		EJGMemoryHandleLocation mLocation = EJGMemoryHandleLocation::Count;
-		u64 mRefCount = 0;
 		ptraddr* mPtr = nullptr;
-
 	};
 
 
@@ -167,15 +160,15 @@ namespace JG
 		void  MemoryDefragmenter(u64 count_per_frame);
 	private:
 		void Swap(ptraddr* prev, ptraddr* next);
-	private:
+	public:
 		struct BlockHeader
 		{
 			ptraddr prev = 0;         // 전 블록의 주솟값
 			ptraddr next = 0;         // 다음 블록의 주솟값
 			u64     blockSize = 0;    // 블록 사이즈(전체)
-			bool    used = false; // 사용 했나 안했나
-			byte    padding[7] = { 0,0,0,0,0,0,0 };   //
+			ptraddr handle = 0;
 		};
+	private:
 		ptraddr mCurrStartAddr = 0;
 	};
 
@@ -188,7 +181,10 @@ namespace JG
 	public:
 		JGPoolAllocator() = default;
 		JGPoolAllocator(u64 size, ptraddr address, u32 memoryUnit);
-		virtual ~JGPoolAllocator() = default;
+		virtual ~JGPoolAllocator() {
+			free(mMemoryPool);
+			mMemoryPool = nullptr;
+		}
 	public:
 		void* Alloc();
 		void DeAlloc(void** ptr);
@@ -250,86 +246,13 @@ namespace JG
 		u64 DoubleBufferedAllocMem = 0;
 
 		u64 MemoryHandleCount[(i32)EJGMemoryHandleLocation::Count] = {
-			_MB,_MB,_MB,_MB,_MB,_MB,_MB,_MB,_MB,_MB,_MB,_MB, _MB
+			_MB,_MB,_MB,_MB,_MB,_MB,
 		};
 
-
-		u64 _4BitMemoryCount = 0;
-		u64 _8BitMemoryCount = 0;
-		u64 _12BitMemoryCount = 0;
-		u64 _16BitMemoryCount = 0;
-		u64 _32BitMemoryCount = 0;
-		u64 _64BitMemoryCount = 0;
-		u64 _128BitMemoryCount = 0;
 
 		//
 		bool IsSafeNull = true;
 	};
-
-	struct JGLinearAllocatorDebugInfo
-	{
-		u64 TotalMemory    = 0;
-		u64 TotalUseMemory = 0;
-		ptraddr StartAddress = 0;
-		ptraddr LastAddress  = 0;
-		ptraddr CurrentAddress = 0;
-	};
-	struct JGStackAllocatorDebugInfo
-	{
-		u64 TotalMemory = 0;
-		u64 TotalUseMemory = 0;
-		ptraddr StartAddress = 0;
-		ptraddr LastAddress = 0;
-		ptraddr TopAddress = 0;
-	};
-	
-	struct JGHeapAllocatorDebugInfo
-	{
-		struct JGMemoryBlock
-		{
-			ptraddr prev = 0;
-			ptraddr next = 0;
-			u64     size = 0;
-			bool    used = false;
-		};
-		u64 TotalMemory = 0;
-		u64 TotalUseMemory = 0;
-		ptraddr StartAddress = 0;
-		ptraddr LastAddress = 0;
-		ptraddr CurrentAddress = 0;
-
-
-		u64 MemoryBlockCount = 0;
-		JGMemoryBlock* MemoryBlocks;
-	};
-
-	struct JGPoolAllocatorDebugInfo
-	{
-		u64 MemoryUnit     = 0;
-		u64 TotalMemory    = 0;
-		u64 TotalUseMemory = 0;
-	};
-
-	struct JGMemoryDebugInfo
-	{
-		u64 TotalMemory    = 0;
-		u64 TotalUseMemory = 0;
-
-		JGLinearAllocatorDebugInfo LinearDebugInfo;
-		JGStackAllocatorDebugInfo  StackDebugInfo;
-		JGHeapAllocatorDebugInfo   HeapDebugInfo;
-		u64 PoolCount = 0;
-		JGPoolAllocatorDebugInfo* PoolDebugInfos;
-
-	};
-
-	/*
-
-	각저장소에 맞는 메모리 핸들 할당자를 가지고있다.
-	
-	디버깅 모드일때는 초기화할때마다 메모리핸들을 이용하여 null로 초기화지만
-	
-	*/
 	class JGAllocatorManager
 	{
 		friend JGMemoryHandle::~JGMemoryHandle();
@@ -350,7 +273,6 @@ namespace JG
 		static JGMemoryHandle HeapAlloc(u64 size);
 		static JGMemoryHandle SingleFrameAlloc(u64 size);
 		static JGMemoryHandle DoubleFrameAlloc(u64 size);
-		static JGMemoryHandle MemoryPoolAlloc(u64 size);
 		static void DeAlloc(JGMemoryHandle handle);
 	public:
 		JGAllocatorManager(const JGAllocatorDesc& desc);
@@ -362,22 +284,12 @@ namespace JG
 		ptraddr mTotalMemory;
 		JGAllocatorDesc mDesc;
 
-		JGLinearAllocator      mProxyAllocator;
 		JGStackAllocator       mStackAllocator;
 		JGLinearAllocator      mLinearAllocator;
 		JGHeapAllocator        mHeapAllocator;
 		JGSingleFrameAllocator mSingleFrameAllocator;
 		JGDoubleFrameAllocator mDoubleFrameAllocator;
 
-
-	
-		JGPoolAllocator m4bytePoolAllocator;
-		JGPoolAllocator m8bytePoolAllocator;
-		JGPoolAllocator m12bytePoolAllocator;
-		JGPoolAllocator m16bytePoolAllocator;
-		JGPoolAllocator m32bytePoolAllocator;
-		JGPoolAllocator m64bytePoolAllocator;
-		JGPoolAllocator m128bytePoolAllocator;
 
 		JGPoolAllocator mMemoryHandleAllocator[(i32)EJGMemoryHandleLocation::Count];
 	};
