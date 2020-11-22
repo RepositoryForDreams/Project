@@ -155,8 +155,9 @@ int main()
 		t1->unsignNum = 2;
 
 		t2->numArray[1] = 4;
-
 		t3->num = 15;
+
+
 
 	}
 
@@ -177,6 +178,10 @@ int main()
 
 		t3->num = 15;
 
+
+		JGAllocatorManager::DeAlloc(std::move(m2));
+		JGAllocatorManager::DeAlloc(std::move(m1));
+		JGAllocatorManager::DeAlloc(std::move(m3));
 	}
 
 

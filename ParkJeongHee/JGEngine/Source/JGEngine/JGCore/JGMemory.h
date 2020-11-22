@@ -140,6 +140,7 @@ namespace JG
 		};
 	private:
 		ptraddr mCurrStartAddr = 0;
+		ptraddr mMemoryDefragAddr = 0;
 	};
 
 	/*

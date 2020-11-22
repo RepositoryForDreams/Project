@@ -338,6 +338,52 @@ namespace JG
 
 	void JGHeapAllocator::MemoryDefragmenter(u64 countPerFrame)
 	{
+		
+		ptraddr curPos = mMemoryDefragAddr;
+		u64 count = 0;
+		/*
+		일단 현재 메모리 조각모음할때 시작점은 게속 증가하지만
+		중간에 매모리 해제를 할 경우
+		병합할려는 빈 블록이 메모리 조각모음주소나 해제할려는 블록이 메모리 조각모음 주소하는 모시기면은 메모리 조각모음 위치를 다음 블록으로 바꿈
+
+
+
+		*/
+		ptraddr emptyBlockAddr = 0;
+
+		while (count < countPerFrame)
+		{
+			if (curPos == 0) curPos = mStartAddress;
+			++count;
+
+			BlockHeader bh = (*(BlockHeader*)curPos);
+			if (bh.handle != 0)
+			{
+				if (emptyBlockAddr != 0)
+				{
+					ptraddr* memPtr = (ptraddr*)bh.handle;
+				}
+				
+
+
+
+
+			}
+			// 비어있는 메모리 블럭이면.
+			else
+			{
+				emptyBlockAddr = curPos;
+			}
+
+
+
+
+
+			curPos += bh.blockSize;
+		}
+
+		
+
 
 
 	}
@@ -563,7 +609,7 @@ namespace JG
 			gAllocatorManager->mStackAllocator.DeAlloc((void**)handle.mPtr);
 			break;
 		case EJGMemoryHandleLocation::Heap:
-			gAllocatorManager->mStackAllocator.DeAlloc((void**)handle.mPtr);
+			gAllocatorManager->mHeapAllocator.DeAlloc((void**)handle.mPtr);
 			break;
 		case EJGMemoryHandleLocation::Linear:
 		case EJGMemoryHandleLocation::SingleFrame:
