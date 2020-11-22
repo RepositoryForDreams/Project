@@ -1,6 +1,7 @@
 #pragma once
 #include "Define.h"
 #include "TypeDefine.h"
+#include "Abstract.h"
 
 /*
 1. 메모리 할당
@@ -29,38 +30,7 @@ namespace JG
 
 
 
-	template<class T>
-	class JGBasePtr
-	{
-	public:
-		virtual ~JGBasePtr() = default;
-	};
-
-
-	template<class T>
-	class JGUniquePtr : public JGBasePtr<T>
-	{
-	public:
-		virtual ~JGUniquePtr() = default;
-
-
-	};
-
-	template<class T>
-	class JGWeakPtr : public JGBasePtr<T>
-	{
-	public:
-		virtual ~JGWeakPtr() = default;
-	};
-
-	template<class T>
-	class JGSharedPtr : public JGBasePtr<T>
-	{
-	public:
-		virtual ~JGSharedPtr() = default;
-	};
-
-	class JGMemoryHandle
+	class JGMemoryHandle 
 	{
 		friend class JGAllocatorManager;
 
@@ -138,8 +108,8 @@ namespace JG
 		virtual ~JGLinearAllocator() = default;
 	public:
 		void* Alloc(u64 size);
-		void* GetCurrentPtr() const {
-			return (void*)mCurrentAddress;
+		ptraddr GetCurrentPtr() const {
+			return mCurrentAddress;
 		}
 	private:
 		ptraddr mCurrentAddress = 0;
@@ -181,19 +151,29 @@ namespace JG
 	public:
 		JGPoolAllocator() = default;
 		JGPoolAllocator(u64 size, ptraddr address, u32 memoryUnit);
-		virtual ~JGPoolAllocator() {
-			free(mMemoryPool);
-			mMemoryPool = nullptr;
-		}
 	public:
 		void* Alloc();
 		void DeAlloc(void** ptr);
+
+		u64 GetHeadIndex() const {
+			return mHeadMemoryIndex;
+		}
+		u64 GetTailIndex() const {
+			return mTailMemoryIndex;
+		}
+		u64 GetMemoryUnit() const {
+			return mMemoryUnit;
+		}
+		void Destroy() {
+			free(mMemoryPool);
+			mMemoryPool = nullptr;
+		}
 	private:
 		ptraddr* mMemoryPool = nullptr;
 		u64 mMemoryCount = 0;
 		u32 mMemoryUnit  = 0;
-		u64 mCurrMemoryIndex = 0;
-		u64 mLastMemoryIndex = 0;
+		u64 mHeadMemoryIndex = 0;
+		u64 mTailMemoryIndex = 0;
 	};
 
 	/*
@@ -253,6 +233,36 @@ namespace JG
 		//
 		bool IsSafeNull = true;
 	};
+	class JGStackAllocatorDebugInfo
+	{
+	public:
+		struct JGStackMemoryBlock
+		{
+			u64 Size = 0;
+			ptraddr Address = 0;
+		};
+		u64 TotalMemory = 0;
+		u64 UseMemory = 0;
+		ptraddr StartAddress = 0;
+		ptraddr LastAddress  = 0;
+		ptraddr TopAddress = 0;
+	};
+
+	class JGLinearAllocatorDebugInfo
+	{
+	public:
+		struct JGLinearMemoryBlock
+		{
+			u64 Size = 0;
+			ptraddr Address = 0;
+		};
+		u64 TotalMemory = 0;
+		u64 UseMemory = 0;
+		ptraddr StartAddress = 0;
+		ptraddr LastAddress = 0;
+		ptraddr CurrAddress = 0;
+	};
+
 	class JGAllocatorManager
 	{
 		friend JGMemoryHandle::~JGMemoryHandle();
@@ -274,12 +284,16 @@ namespace JG
 		static JGMemoryHandle SingleFrameAlloc(u64 size);
 		static JGMemoryHandle DoubleFrameAlloc(u64 size);
 		static void DeAlloc(JGMemoryHandle handle);
+
+
+		static JGStackAllocatorDebugInfo  GetStackAllocatorDebugInfo();
+		static JGLinearAllocatorDebugInfo GetLinearAllocatorDebugInfo();
 	public:
 		JGAllocatorManager(const JGAllocatorDesc& desc);
 		~JGAllocatorManager();
 	private:
 		static JGMemoryHandle AllocMemoryHandle(EJGMemoryHandleLocation location);
-	private:
+	public:
 		void*   mStartAddress = nullptr;
 		ptraddr mTotalMemory;
 		JGAllocatorDesc mDesc;

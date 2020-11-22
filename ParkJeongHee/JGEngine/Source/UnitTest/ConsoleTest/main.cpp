@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-
+#include <crtdbg.h>
 #include "JGMemory.h"
 #include "JGMath.h"
 #pragma comment(lib, "../Bin/lib/Debug/JGCore.lib")
@@ -92,7 +92,17 @@ struct BlockHeader
 //
 //}
 
+struct TestData
+{
+	int num = 0;
+	float fnum = 0.0f;
+	u64 unsignNum = 0;
+};
 
+struct TestData2
+{
+	int numArray[20] = { 0, };
+};
 void blockDeAllocatePrint(string name, void* ptr)
 {
 	BlockHeader* bh = (BlockHeader*)((u64)ptr - sizeof(BlockHeader));
@@ -100,144 +110,78 @@ void blockDeAllocatePrint(string name, void* ptr)
 
 int main()
 {
-	//JGAllocatorDesc desc;
-	//desc.stackAllocMem = 256;
-	//desc.linearAllocMem = 256;
-	//desc.heapAllocMem = 1024;
-	//desc.singleFrameAllocMem = 128;
-	//desc.doubleBufferedAllocMem = 256;
+	JGAllocatorDesc desc;
+	desc.StackAllocMem = 256;
+	desc.LinearAllocMem = 256;
+	desc.HeapAllocMem = 1024;
+	desc.SingleFrameAllocMem = 128;
+	desc.DoubleBufferedAllocMem = 256;
 
-	//JG::JGAllocatorManager AllocManager(desc);
+	JG::JGAllocatorManager::Create(desc);
 
+	// Stack
+	{
+		auto m1 = JGAllocatorManager::StackAlloc(sizeof(TestData));
+		auto m2 = JGAllocatorManager::StackAlloc(sizeof(TestData2));
+		auto m3 = JGAllocatorManager::StackAlloc(sizeof(TestData));
 
-	//// stack 할당
-	//{
-	//	StackAllocatorInfoPrint(AllocManager);
+		auto t1 = (TestData*)m1.Get();
+		auto t2 = (TestData2*)m2.Get();
+		auto t3 = (TestData*)m3.Get();
 
-	//	void* p1 = (test*)AllocManager.GetStackAllocator().Alloc(sizeof(test));
-	//
-	//	blockStackAllocatePrint("p1", p1, sizeof(test));
+		t1->fnum = 50.0f;
+		t1->unsignNum = 2;
 
-	//	void* p2 = (test*)AllocManager.GetStackAllocator().Alloc(sizeof(test) * 10);
+		t2->numArray[1] = 4;
 
-	//	blockStackAllocatePrint("p2", p2, sizeof(test) * 10);
+		t3->num = 15;
 
-	//	void* p3 = (test*)AllocManager.GetStackAllocator().Alloc(sizeof(test) * 4);
+		JGAllocatorManager::DeAlloc(std::move(m3));
+		JGAllocatorManager::DeAlloc(std::move(m2));
+		JGAllocatorManager::DeAlloc(std::move(m1));
+	}
+	
+	// Linear
+	{
+		auto m1 = JGAllocatorManager::LinearAlloc(sizeof(TestData));
+		auto m2 = JGAllocatorManager::LinearAlloc(sizeof(TestData2));
+		auto m3 = JGAllocatorManager::LinearAlloc(sizeof(TestData));
 
-	//	blockStackAllocatePrint("p3", p3, sizeof(test) * 4);
+		auto t1 = (TestData*)m1.Get();
+		auto t2 = (TestData2*)m2.Get();
+		auto t3 = (TestData*)m3.Get();
 
+		t1->fnum = 50.0f;
+		t1->unsignNum = 2;
 
+		t2->numArray[1] = 4;
 
-	//	StackAllocatorInfoPrint(AllocManager);
+		t3->num = 15;
 
+	}
 
-	//	AllocManager.GetStackAllocator().DeAlloc(&p3);
+	// Heap
+	{
+		auto m1 = JGAllocatorManager::HeapAlloc(sizeof(TestData));
+		auto m2 = JGAllocatorManager::HeapAlloc(sizeof(TestData2));
+		auto m3 = JGAllocatorManager::HeapAlloc(sizeof(TestData));
 
-	//	StackAllocatorInfoPrint(AllocManager);
+		auto t1 = (TestData*)m1.Get();
+		auto t2 = (TestData2*)m2.Get();
+		auto t3 = (TestData*)m3.Get();
 
-	//	AllocManager.GetStackAllocator().DeAlloc(&p2);
+		t1->fnum = 50.0f;
+		t1->unsignNum = 2;
 
-	//	StackAllocatorInfoPrint(AllocManager);
+		t2->numArray[1] = 4;
 
-	//	AllocManager.GetStackAllocator().DeAlloc(&p1);
+		t3->num = 15;
 
-	//	StackAllocatorInfoPrint(AllocManager);
-
-	//}
-
-	//// Linear 할당
-	//{
-
-	//	LinearAllocatorInfoPrint(AllocManager);
-
-	//	void* p1 = (test*)AllocManager.GetLinearAllocator().Alloc(sizeof(test));
-
-	//	blockLinearAllocatePrint("p1", p1, sizeof(test));
-	//	LinearAllocatorInfoPrint(AllocManager);
-
-
-
-	//	void* p2 = (test*)AllocManager.GetLinearAllocator().Alloc(sizeof(test) * 10);
-	//	blockLinearAllocatePrint("p2", p2, sizeof(test) * 10);
-	//	LinearAllocatorInfoPrint(AllocManager);
-
-
-
-	//	void* p3 = (test*)AllocManager.GetLinearAllocator().Alloc(sizeof(test) * 4);
-
-	//	blockLinearAllocatePrint("p3", p3, sizeof(test) * 4);
-	//	LinearAllocatorInfoPrint(AllocManager);
-	//}
-
-	//// Heap 할당
-	//{
-	//	void* p1 = (test*)AllocManager.GetHeapAllocator().Alloc(sizeof(test));
-	//	void* p2 = (test*)AllocManager.GetHeapAllocator().Alloc(sizeof(test) * 4);
-	//	void* p3 = (test*)AllocManager.GetHeapAllocator().Alloc(sizeof(test) * 10);
-	//	void* p4 = (test*)AllocManager.GetHeapAllocator().Alloc(sizeof(test) * 3);
-
-	//	HeapAllocatorInfoPrint(AllocManager);
-
-	//	cout << "할당 해제" << endl << endl;
-	//	AllocManager.GetHeapAllocator().DeAlloc(&p2);
-	//	AllocManager.GetHeapAllocator().DeAlloc(&p4);
-	//	AllocManager.GetHeapAllocator().DeAlloc(&p1);
-	//	HeapAllocatorInfoPrint(AllocManager);
+	}
 
 
-
-	//	cout << "다시 할당" << endl << endl;
-	//	p2 = (test*)AllocManager.GetHeapAllocator().Alloc(sizeof(test) * 30);
-	//	p4 = (test*)AllocManager.GetHeapAllocator().Alloc(sizeof(test) * 3);
-	//	void* p5 = (test*)AllocManager.GetHeapAllocator().Alloc(sizeof(test) * 17);
-	//	void* p6 = (test*)AllocManager.GetHeapAllocator().Alloc(sizeof(test) * 3);
-	//	HeapAllocatorInfoPrint(AllocManager);
-
-
-	//	cout << "할당 해제" << endl << endl;
-	//	AllocManager.GetHeapAllocator().DeAlloc(&p2);
-	//	AllocManager.GetHeapAllocator().DeAlloc(&p5);
-	//	
-	//	HeapAllocatorInfoPrint(AllocManager);
-
-	//}
-
-	//// SingleAllocator 할당
-	//{
-	//	test* p1 = (test*)AllocManager.GetSingleFrameAllocator().Alloc(sizeof(test));
-	//	test* p2 = (test*)AllocManager.GetSingleFrameAllocator().Alloc(sizeof(test) * 3);
-	//	p1->a = 3;
-	//	p1->b = 6;
-	//	AllocManager.GetSingleFrameAllocator().Clear();
-
-	//	test* p3 = (test*)AllocManager.GetSingleFrameAllocator().Alloc(sizeof(test));
-	//	p3->a = 1;
-	//	p3->b = 2;
-	//	p1 = nullptr;
-	//	p2 = nullptr;
-
-	//}
-	//{
-	//	test* p1 = (test*)AllocManager.GetDoubleFrameAllocator().Alloc(sizeof(test));
-	//	test* p2 = (test*)AllocManager.GetDoubleFrameAllocator().Alloc(sizeof(test) * 3);
-	//	p1->a = 2;
-	//	
-	//	AllocManager.GetDoubleFrameAllocator().Swap();
-
-	//	test* p3 = (test*)AllocManager.GetDoubleFrameAllocator().Alloc(sizeof(test));
-	//	p3->a = 2;
-	//	test* p4 = (test*)AllocManager.GetDoubleFrameAllocator().Alloc(sizeof(test) * 3);
-
-	//	AllocManager.GetDoubleFrameAllocator().Swap();
-
-	//	test* p5 = (test*)AllocManager.GetDoubleFrameAllocator().Alloc(sizeof(test));
-	//	p5->a = 0;
-	//	test* p6 = (test*)AllocManager.GetDoubleFrameAllocator().Alloc(sizeof(test) * 3);
-	//}
-
-
-
-
+	JG::JGAllocatorManager::Destroy();
+	_CrtDumpMemoryLeaks();
 	return 0;
 }
 

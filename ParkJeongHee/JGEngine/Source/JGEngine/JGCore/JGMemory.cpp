@@ -4,6 +4,12 @@ namespace JG
 {
 	static JGAllocatorManager* gAllocatorManager = nullptr;
 
+
+	JGMemoryHandle::~JGMemoryHandle()
+	{
+		if (mPtr == nullptr) return;
+		gAllocatorManager->mMemoryHandleAllocator[(u8)mLocation].DeAlloc((void**)&mPtr);
+	}
 	JGMemoryHandle::JGMemoryHandle(JGMemoryHandle&& rhs) noexcept
 	{
 		mPtr = rhs.mPtr;
@@ -13,7 +19,6 @@ namespace JG
 		rhs.mPtr = nullptr;
 		rhs.mLocation = EJGMemoryHandleLocation::Count;
 	}
-
 	JGMemoryHandle& JGMemoryHandle::operator=(JGMemoryHandle&& rhs) noexcept
 	{
 		mPtr = rhs.mPtr;
@@ -21,16 +26,9 @@ namespace JG
 		rhs.mPtr      = nullptr;
 		rhs.mLocation = EJGMemoryHandleLocation::Count;
 		return *this;
-		// TODO: 여기에 return 문을 삽입합니다.
 	}
 
-	JGMemoryHandle::~JGMemoryHandle()
-	{
-		if (mPtr == nullptr) return;
-		if (mRefCount == 0) {
-			gAllocatorManager->mMemoryHandleAllocator[(i32)mLocation].DeAlloc((void**)mPtr);
-		}
-	}
+
 
 	void* JGMemoryHandle::Get() const
 	{
@@ -356,8 +354,8 @@ namespace JG
 	{
 
 		mMemoryCount = mTotalMemSize / mMemoryUnit;
-		mCurrMemoryIndex = 0;
-		mLastMemoryIndex = 0;
+		mHeadMemoryIndex = 0;
+		mTailMemoryIndex = 0;
 		mMemoryPool  = (ptraddr*)malloc(mMemoryCount * sizeof(ptraddr));
 		if(mMemoryPool == nullptr)
 			JASSERT("JGPoolAllocator::JGPoolAllocator : fail malloc");
@@ -380,8 +378,8 @@ namespace JG
 
 
 		//
-		void* result = (void*)mMemoryPool[mCurrMemoryIndex++];
-		mCurrMemoryIndex = mCurrMemoryIndex % mMemoryCount;
+		void* result = (void*)mMemoryPool[mHeadMemoryIndex++];
+		mHeadMemoryIndex = mHeadMemoryIndex % mMemoryCount;
 		mUseMemSize += mMemoryUnit;
 
 
@@ -390,13 +388,13 @@ namespace JG
 
 	void JGPoolAllocator::DeAlloc(void** ptr)
 	{
-		if (mLastMemoryIndex == mCurrMemoryIndex)
-			JASSERT("JGPoolAllocator::DeAlloc : LastMemoryIndex == CurrMemoryIndex");
+		if (mTailMemoryIndex == mHeadMemoryIndex)
+			JASSERT("JGPoolAllocator::DeAlloc : LastMemoryIndex == mHeadMemoryIndex");
 		
 
 
-		mMemoryPool[mLastMemoryIndex++] = (ptraddr)(*ptr);
-		mLastMemoryIndex = mLastMemoryIndex % mMemoryCount;
+		mMemoryPool[mTailMemoryIndex++] = (ptraddr)(*ptr);
+		mTailMemoryIndex = mTailMemoryIndex % mMemoryCount;
 		mUseMemSize -= mMemoryUnit;
 
 
@@ -495,6 +493,13 @@ namespace JG
 		if (gAllocatorManager == nullptr) return;
 
 
+		for (EJGMemoryHandleLocation i = EJGMemoryHandleLocation::Stack; i < EJGMemoryHandleLocation::Count;)
+		{
+			gAllocatorManager->mMemoryHandleAllocator[(i32)i].Destroy();
+			i = (EJGMemoryHandleLocation)((i32)i + 1);
+		}
+
+
 		delete gAllocatorManager;
 		gAllocatorManager = nullptr;
 	}
@@ -556,27 +561,55 @@ namespace JG
 		{
 		case EJGMemoryHandleLocation::Stack:
 			gAllocatorManager->mStackAllocator.DeAlloc((void**)handle.mPtr);
-		
-			break;
-		case EJGMemoryHandleLocation::Linear:
-			JASSERT("JGAllocatorManager::DeAlloc : Linear Memory is not supported DeAlloc");
 			break;
 		case EJGMemoryHandleLocation::Heap:
 			gAllocatorManager->mStackAllocator.DeAlloc((void**)handle.mPtr);
 			break;
+		case EJGMemoryHandleLocation::Linear:
 		case EJGMemoryHandleLocation::SingleFrame:
-			JASSERT("JGAllocatorManager::DeAlloc : SingleFrame Memory is not supported DeAlloc");
-			break;
 		case EJGMemoryHandleLocation::DoubleFrame1:
 		case EJGMemoryHandleLocation::DoubleFrame2:
-			JASSERT("JGAllocatorManager::DeAlloc : DoubleFrame Memory is not supported DeAlloc");
 			break;
 		}
-
-		gAllocatorManager->mMemoryHandleAllocator[(u8)handle.mLocation].DeAlloc((void**)&handle.mPtr);
 	}
 
 
+
+	JGStackAllocatorDebugInfo JGAllocatorManager::GetStackAllocatorDebugInfo()
+	{
+		JGStackAllocatorDebugInfo info;
+		auto& stackAllocator = gAllocatorManager->mStackAllocator;
+
+
+		info.TotalMemory = stackAllocator.GetTotalMemory();
+		info.UseMemory = stackAllocator.GetUseMemory();
+		info.StartAddress = stackAllocator.GetStartPtr();
+		info.LastAddress = info.StartAddress + info.TotalMemory;
+		info.TopAddress = stackAllocator.GetTopPtr();
+
+
+
+
+		return info;
+	}
+
+	JGLinearAllocatorDebugInfo JGAllocatorManager::GetLinearAllocatorDebugInfo()
+	{
+		JGLinearAllocatorDebugInfo info;
+		auto& linearAllocator = gAllocatorManager->mLinearAllocator;
+
+
+		info.TotalMemory = linearAllocator.GetTotalMemory();
+		info.UseMemory = linearAllocator.GetUseMemory();
+		info.StartAddress = linearAllocator.GetStartPtr();
+		info.LastAddress = info.StartAddress + info.TotalMemory;
+		info.CurrAddress = linearAllocator.GetCurrentPtr();
+
+
+
+
+		return info;
+	}
 
 	JGAllocatorManager::JGAllocatorManager(const JGAllocatorDesc& desc) : mDesc(desc)
 	{
