@@ -235,6 +235,7 @@ namespace JG
 
 
 			bool isCurrStartAddr = (mCurrStartAddr == (ptraddr)startBH || mCurrStartAddr == (ptraddr)prevBH || mCurrStartAddr == (ptraddr)nextBH);
+			bool isMemDefragCurrAddr = (mMemoryDefragCurrAddr == (ptraddr)startBH || mMemoryDefragCurrAddr == (ptraddr)prevBH || mMemoryDefragCurrAddr == (ptraddr)nextBH);
 			// 양쪽 병합
 			if (prevBH->handle == 0 && nextBH->handle == 0)
 			{
@@ -248,6 +249,8 @@ namespace JG
 					((BlockHeader*)(nextBH->next))->prev = (ptraddr)prevBH;
 				}
 				if (isCurrStartAddr) mCurrStartAddr = (ptraddr)prevBH;
+				if(isMemDefragCurrAddr) mMemoryDefragCurrAddr = (ptraddr)prevBH;
+
 			}
 			// 오른쪽 병합
 			else if (prevBH->handle != 0 && nextBH->handle == 0)
@@ -263,6 +266,7 @@ namespace JG
 					((BlockHeader*)(nextBH->next))->prev = (ptraddr)startBH;
 				}
 				if (isCurrStartAddr) mCurrStartAddr = (ptraddr)startBH;
+				if (isMemDefragCurrAddr) mMemoryDefragCurrAddr = (ptraddr)startBH;
 			}
 			// 왼쪽 병합
 			else if (prevBH->handle == 0 && nextBH->handle != 0)
@@ -275,6 +279,7 @@ namespace JG
 				nextBH->prev = (ptraddr)prevBH;
 
 				if (isCurrStartAddr) mCurrStartAddr = (ptraddr)prevBH;
+				if (isMemDefragCurrAddr) mMemoryDefragCurrAddr = (ptraddr)prevBH;
 			}
 			// 병합 X
 			else
@@ -339,7 +344,7 @@ namespace JG
 	void JGHeapAllocator::MemoryDefragmenter(u64 countPerFrame)
 	{
 		
-		ptraddr curPos = mMemoryDefragCurrAddr;
+		ptraddr curPos = mStartAddress;
 		u64 count = 0;
 		/*
 		일단 현재 메모리 조각모음할때 시작점은 게속 증가하지만
@@ -363,14 +368,27 @@ namespace JG
 			{
 				ptraddr* memPtr = (ptraddr*)bh.handle;
 				
-				// 메모리 댕기기
-				// 전블록|비어있는블록|현재블록|다음블록
-				// 
+
+				
+
+
+
 		
 				BlockHeader* emptyBH = (BlockHeader*)emptyBlockAddr;
 				BlockHeader* allocBH = (BlockHeader*)curPos;
 				BlockHeader* prevBH  = (BlockHeader*)emptyBH->prev;
 				BlockHeader* nextBH  = (BlockHeader*)allocBH->next;
+
+				bool isCurrStartAddr = (mCurrStartAddr == (ptraddr)emptyBH || mCurrStartAddr == (ptraddr)allocBH);
+
+
+				// 살짝 메모리를 다른 곳에 저장해둠
+				u64 tempMemSize = allocBH->blockSize - sizeof(BlockHeader);
+				void* tempMem = gAllocatorManager->mStackAllocator.Alloc(tempMemSize);
+				memcpy_s(
+					tempMem, tempMemSize,
+					(void*)((ptraddr)allocBH + sizeof(BlockHeader)), tempMemSize);
+
 
 				BlockHeader newAllocBH;
 				newAllocBH.blockSize = allocBH->blockSize;
@@ -386,24 +404,54 @@ namespace JG
 				newEmptyBH.next = (ptraddr)nextBH;
 
 
+				if (prevBH != nullptr)
+					prevBH->next = newEmptyBH.prev;
+				if (nextBH != nullptr)
+				{
+					nextBH->prev = newAllocBH.next;
+					// 다음 블록이 비어져있다면 병합 시도 
+					if (nextBH->handle == 0)
+					{
+						newEmptyBH.blockSize = newEmptyBH.blockSize + nextBH->blockSize;
+						newEmptyBH.next = nextBH->next;
+						if (nextBH->next != 0)
+						{
+							((BlockHeader*)(nextBH->next))->prev = newAllocBH.next;
+						}
+						if (!isCurrStartAddr && mCurrStartAddr == (ptraddr)nextBH) isCurrStartAddr = true;
+					}
+				}
+
+
 
 				// 현재 블록 빈블록 스왑
 				(*emptyBH) = newAllocBH;
 				*((BlockHeader*)newAllocBH.next) = newEmptyBH;
 
+	
+				// 메모리 복제
+				u64 allocMemSize = newAllocBH.blockSize - sizeof(BlockHeader);
+				memcpy_s(
+					(void*)((ptraddr)emptyBH + sizeof(BlockHeader)), allocMemSize, 
+					tempMem, allocMemSize);
 
-				if (prevBH != nullptr)
-					prevBH->next = newEmptyBH.prev;
-				if(nextBH != nullptr)
-					nextBH->prev = newAllocBH.next;
+				// 임시 저장소 메모리 해제
+				gAllocatorManager->mStackAllocator.DeAlloc(&tempMem);
 
+
+				if (isCurrStartAddr) mCurrStartAddr = newAllocBH.next;
 
 
 				// 메모리 핸들 메모리 주소 변경
-				*memPtr = (ptraddr)emptyBH;
+				*memPtr = (ptraddr)emptyBH + sizeof(BlockHeader);
+
+	
+
 
 				emptyBlockAddr = newAllocBH.next;
-				
+				mMemoryDefragCurrAddr = newAllocBH.next;
+				curPos = newEmptyBH.next;
+		
 			}
 			// 비어있는 메모리 블럭이면. 
 			else if(bh.handle == 0)
@@ -411,20 +459,20 @@ namespace JG
 				// 마지막 블록이면
 				if (bh.next == 0)
 				{
-					emptyBlockAddr = mStartAddress;
+					emptyBlockAddr = 0;
+					curPos = mStartAddress;
 					break;
 				}
 				emptyBlockAddr = curPos;
+				mMemoryDefragCurrAddr = curPos;
+				curPos += bh.blockSize;
 			}
-
-
-			curPos += bh.blockSize;
+			else
+			{
+				mMemoryDefragCurrAddr = curPos;
+				curPos += bh.blockSize;
+			}
 		}
-
-		
-
-		mMemoryDefragCurrAddr = mMemoryDefragCurrAddr;
-
 	}
 
 	void JGHeapAllocator::Swap(ptraddr* prev, ptraddr* next)
@@ -588,6 +636,11 @@ namespace JG
 
 		delete gAllocatorManager;
 		gAllocatorManager = nullptr;
+	}
+
+	JGAllocatorManager* JGAllocatorManager::GetInstance()
+	{
+		return gAllocatorManager;
 	}
 
 	JGMemoryHandle JGAllocatorManager::StackAlloc(u64 size)

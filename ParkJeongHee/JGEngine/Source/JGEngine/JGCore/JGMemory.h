@@ -135,8 +135,9 @@ namespace JG
 		{
 			ptraddr prev = 0;         // 전 블록의 주솟값
 			ptraddr next = 0;         // 다음 블록의 주솟값
-			u64     blockSize = 0;    // 블록 사이즈(전체)
 			ptraddr handle = 0;
+			u64     blockSize = 0;    // 블록 사이즈(전체)
+
 		};
 	private:
 		ptraddr mCurrStartAddr = 0;
@@ -277,7 +278,7 @@ namespace JG
 		static void Create(const JGAllocatorDesc& desc);
 		static void Update();
 		static void Destroy();
-
+		static JGAllocatorManager* GetInstance();
 
 		static JGMemoryHandle StackAlloc(u64 size);
 		static JGMemoryHandle LinearAlloc(u64 size);
