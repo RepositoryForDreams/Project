@@ -96,64 +96,66 @@ namespace JG
 		void* result = nullptr;
 
 		ptraddr lastAddr = mStartAddress + mTotalMemSize;
-		u64     bhSize = sizeof(BlockHeader);
+		//u64     bhSize = sizeof(BlockHeader);
 
 
 		u8 roundsCnt = 0;
 		for (ptraddr pos = mCurrStartAddr; pos < lastAddr;)
 		{
 			BlockHeader startBH = *(BlockHeader*)pos;
-			ptraddr	    startAddr = pos;
-			if (startBH.handle == 0 && startBH.blockSize >= size + bhSize)
+			if (startBH.handle == 0 && startBH.blockSize >= size + sizeof(BlockHeader))
 			{
-				u64 leftSize  = size + bhSize;
+				u64 leftSize  = size + sizeof(BlockHeader);
 				u64 rightSize = startBH.blockSize - leftSize;
 
 
 				// 기본 메모리보다 크기가 작다면 통합 할당
-				if (rightSize < bhSize + sizeof(ptraddr))
+				if (rightSize < sizeof(BlockHeader) + sizeof(ptraddr))
 				{
-					BlockHeader bh;
-					bh.blockSize = leftSize + rightSize;
-					bh.prev = startBH.prev;
-					bh.next = startBH.next;
+					//BlockHeader bh;
+					//bh.blockSize = leftSize + rightSize;
+					//bh.prev = startBH.prev;
+					//bh.next = startBH.next;
 
-					*(BlockHeader*)startAddr = bh;
+					BlockHeader* bh = (BlockHeader*)pos;
+					bh->blockSize = leftSize + rightSize;
+					bh->prev = startBH.prev;
+					bh->next = startBH.next;
 
-					result = (void*)(startAddr + bhSize);
-					mCurrStartAddr = startAddr + bh.blockSize;
-					mUseMemSize += bh.blockSize;
+					//*(BlockHeader*)pos = bh;
+
+					result = (void*)(pos + sizeof(BlockHeader));
+					mCurrStartAddr = bh->next;
+					mUseMemSize += bh->blockSize;
 				}
 				// 아니라면 기존 방식대로 할당
 				else
 				{
-					BlockHeader leftBH;
-					leftBH.blockSize = leftSize;
-					leftBH.prev = startBH.prev;
-					leftBH.next = startAddr + leftBH.blockSize;
-					*(BlockHeader*)startAddr = leftBH;
-
-					
+					// 왼쪽
+					BlockHeader*  leftBH = ((BlockHeader*)pos);
+					leftBH->blockSize = leftSize;
+					leftBH->prev = startBH.prev;
+					leftBH->next = pos + leftSize;
 
 
 
-					BlockHeader rightBH;
-					rightBH.blockSize = rightSize;
-					rightBH.handle = 0;
-					rightBH.prev = startAddr;
-					rightBH.next = startBH.next;
-					*(BlockHeader*)(leftBH.next) = rightBH;
+					// 오른쪽 
+					BlockHeader* rightBH = (BlockHeader*)leftBH->next;
+					rightBH->blockSize = rightSize;
+					rightBH->handle = 0;
+					rightBH->prev = pos;
+					rightBH->next = startBH.next;
 
-					if(rightBH.next != 0)
+
+					if (rightBH->next != 0)
 					{
-						((BlockHeader*)(rightBH.next))->prev = leftBH.next;
+						((BlockHeader*)(rightBH->next))->prev = leftBH->next;
 					}
 
 
-
-					result = (void*)(startAddr + bhSize);
-					mCurrStartAddr = leftBH.next;
-					mUseMemSize += leftBH.blockSize;
+					result = (void*)(pos + sizeof(BlockHeader));
+					mCurrStartAddr = (ptraddr)rightBH;
+					mUseMemSize += leftBH->blockSize;
 				}
 				break;
 			}
@@ -277,8 +279,10 @@ namespace JG
 				startBH->prev = startBH->prev;
 				startBH->next = nextBH->next;
 				startBH->handle = 0;
-
-				((BlockHeader*)(nextBH->next))->prev = (ptraddr)startBH;
+				
+				if(nextBH->next != 0)
+					((BlockHeader*)(nextBH->next))->prev = (ptraddr)startBH;
+				
 				if (isCurrStartAddr) mCurrStartAddr = (ptraddr)startBH;
 			}
 			else
@@ -438,6 +442,7 @@ namespace JG
 				{
 					curPos = 0;
 					mMemoryDefragCurrAddr = 0;
+					break;
 				}
 				else
 				{
@@ -735,8 +740,8 @@ namespace JG
 	{
 		JGMemoryHandle handle = JGAllocatorManager::AllocMemoryHandle(EJGMemoryHandleLocation::Heap);
 		*(handle.mPtr) = (ptraddr)gAllocatorManager->mHeapAllocator.Alloc(size);
-		auto bh = (JGHeapAllocator::BlockHeader*)((*(handle.mPtr)) - sizeof(JGHeapAllocator::BlockHeader));
-		bh->handle = (ptraddr)handle.mPtr;
+		((JGHeapAllocator::BlockHeader*)((*(handle.mPtr)) - sizeof(JGHeapAllocator::BlockHeader)))->handle = (ptraddr)handle.mPtr;
+
 		return std::move(handle);
 	}
 
@@ -760,6 +765,7 @@ namespace JG
 		
 		return handle;
 	}
+
 
 	void JGAllocatorManager::DeAlloc(JGMemoryHandle& handle)
 	{

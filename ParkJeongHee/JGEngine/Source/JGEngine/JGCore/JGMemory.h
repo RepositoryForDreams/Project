@@ -3,6 +3,7 @@
 #include "TypeDefine.h"
 #include "Abstract.h"
 
+#include <type_traits>
 /*
 1. 메모리 할당
 2. 타이머
@@ -60,8 +61,8 @@ namespace JG
 			return Get() != nullptr;
 		}
 	private:
-		EJGMemoryHandleLocation mLocation = EJGMemoryHandleLocation::Count;
 		ptraddr* mPtr = nullptr;
+		EJGMemoryHandleLocation mLocation = EJGMemoryHandleLocation::Count;
 	};
 
 
@@ -253,7 +254,12 @@ namespace JG
 		JGUniquePtr& operator=(const JGUniquePtr& copy) = delete;
 	public:
 		JGUniquePtr() = default;
-		JGUniquePtr(JGUniquePtr&& rhs) {
+		template<class ... Args>
+		JGUniquePtr(const JGMemoryHandle& handle, Args&& ... args): mHandle(handle) {
+			new(mHandle.Get()) T(std::forward<Args>(args)...);
+		}
+
+		JGUniquePtr(JGUniquePtr&& rhs) noexcept {
 			Reset();
 			mHandle.mPtr      = rhs.mHandle.mPtr;
 			mHandle.mLocation = rhs.mHandle.mLocation;
@@ -262,7 +268,7 @@ namespace JG
 			rhs.mHandle.mLocation = EJGMemoryHandleLocation::Count;
 		}
 
-		JGUniquePtr& operator=(JGUniquePtr&& rhs) {
+		JGUniquePtr& operator=(JGUniquePtr&& rhs)  noexcept {
 			Reset();
 			mHandle.mPtr = rhs.mHandle.mPtr;
 			mHandle.mLocation = rhs.mHandle.mLocation;
@@ -286,14 +292,23 @@ namespace JG
 		}
 		void Reset() {
 			if (mHandle.Get()) {
+				if (std::is_base_of<JGObject, T>().value)
+				{
+					Get()->~T();
+				}
 				// 소멸자 호출되는지 확인해보기
 				JGAllocatorManager::DeAlloc(mHandle);
 			}
+			else return;
 			mHandle.mPtr = nullptr;
 			mHandle.mLocation = EJGMemoryHandleLocation::Count;
 		}
 	private:
 		JGMemoryHandle mHandle;
+
+	private:
+		template<class T, class ...Args>
+		friend JGUniquePtr<T> CreateUniquePtr(Args&& ... args);
 	};
 
 
@@ -311,37 +326,6 @@ namespace JG
 	private:
 		ptraddr* mPtr = 0;
 	};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 	struct JGAllocatorDesc
@@ -392,13 +376,6 @@ namespace JG
 
 	class JGAllocatorManager
 	{
-		friend JGMemoryHandle::~JGMemoryHandle();
-		friend JGStackAllocator;
-		friend JGLinearAllocator;
-		friend JGHeapAllocator;
-		friend JGSingleFrameAllocator;
-		friend JGDoubleFrameAllocator;
-		friend JGPoolAllocator;
 	public:
 		static void Create(const JGAllocatorDesc& desc);
 		static void Update();
@@ -408,11 +385,6 @@ namespace JG
 
 		static JGAllocatorManager* GetInstance();
 	public:
-		//template<class T>
-		//JGUniquePtr CreateUniquePtr(JGObject)
-
-
-
 	public:
 		static JGStackAllocatorDebugInfo  GetStackAllocatorDebugInfo();
 		static JGLinearAllocatorDebugInfo GetLinearAllocatorDebugInfo();
@@ -423,14 +395,12 @@ namespace JG
 		static JGMemoryHandle SingleFrameAlloc(u64 size);
 		static JGMemoryHandle DoubleFrameAlloc(u64 size);
 		static void DeAlloc(JGMemoryHandle& handle);
-
-
 	public:
 		JGAllocatorManager(const JGAllocatorDesc& desc);
 		~JGAllocatorManager();
 	private:
 		static JGMemoryHandle AllocMemoryHandle(EJGMemoryHandleLocation location);
-	public:
+	private:
 		void*   mStartAddress = nullptr;
 		ptraddr mTotalMemory;
 		JGAllocatorDesc mDesc;
@@ -443,6 +413,25 @@ namespace JG
 
 
 		JGPoolAllocator mMemoryHandleAllocator[(i32)EJGMemoryHandleLocation::Count];
+
+
+
+	private:
+		friend JGStackAllocator;
+		friend JGLinearAllocator;
+		friend JGHeapAllocator;
+		friend JGSingleFrameAllocator;
+		friend JGDoubleFrameAllocator;
+		friend JGPoolAllocator;
+		template<class T>
+		friend class JGUniquePtr;
+		template<class T>
+		friend class JGWeakPtr;
+		template<class T>
+		friend class JGSharedPtr;
+
+		template<class T, class ...Args>
+		friend	JGUniquePtr<T> CreateUniquePtr(Args&& ... args);
 	};
 
 
@@ -451,6 +440,18 @@ namespace JG
 
 
 	// CreateUniquePtr
+	template<class T, class ...Args>
+	JGUniquePtr<T> CreateUniquePtr(Args&& ... args)
+	{
+		// JGObject에 파생된 클래스 라면
+
+		JGMemoryHandle handle = JGAllocatorManager::HeapAlloc(sizeof(T));
+		if (handle.IsValid())
+		{
+			return JGUniquePtr<T>(handle);
+		}
+		else return JGUniquePtr<T>();
+	}
 	// CreateWeakPtr
 	// CreateSharedPtr
 }

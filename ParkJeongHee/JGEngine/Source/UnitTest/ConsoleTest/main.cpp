@@ -73,36 +73,48 @@ void blockHeapAllocatePrint(void* ptr)
 //	printf("\n\n");
 //}
 //
-void HeapAllocatorInfoPrint()
+//void HeapAllocatorInfoPrint()
+//{
+//
+//	printf("HeapAllocator 정보 \n");
+//	void* start = (void*)JG::JGAllocatorManager::GetInstance()->mHeapAllocator.GetStartPtr();
+//	BlockHeader* bh = (BlockHeader*)start;
+//	while (true)
+//	{
+//
+//		blockHeapAllocatePrint(bh);
+//		if (bh->next == 0) break;
+//		bh = (BlockHeader*)bh->next;
+//		
+//	}
+//
+//
+//
+//}
+
+#include <chrono>
+
+
+
+class TestObject : public JGObject
 {
-
-	printf("HeapAllocator 정보 \n");
-	void* start = (void*)JG::JGAllocatorManager::GetInstance()->mHeapAllocator.GetStartPtr();
-	BlockHeader* bh = (BlockHeader*)start;
-	while (true)
-	{
-
-		blockHeapAllocatePrint(bh);
-		if (bh->next == 0) break;
-		bh = (BlockHeader*)bh->next;
-		
+public:
+	TestObject() {
+	
 	}
-
-
-
-}
-
-struct TestData
-{
-	int num = 0;
-	float fnum = 0.0f;
-	u64 unsignNum = 0;
+	virtual ~TestObject() {
+	
+	}
 };
 
-struct TestData2
+class TT
 {
-	int numArray[20] = { 0, };
+public:
+	TT() {}
+	~TT() {}
 };
+
+
 void blockDeAllocatePrint(string name, void* ptr)
 {
 	BlockHeader* bh = (BlockHeader*)((u64)ptr - sizeof(BlockHeader));
@@ -112,36 +124,40 @@ int main()
 {
 	// 문제점 발견
 	JGAllocatorDesc desc;
-	desc.StackAllocMem = 256;
-	desc.LinearAllocMem = 256;
-	desc.HeapAllocMem = 1024;
+	desc.StackAllocMem = _MB * 100;
+	desc.LinearAllocMem = _MB * 100;
+	desc.HeapAllocMem = _MB * 100;
 	desc.SingleFrameAllocMem = 128;
 	desc.DoubleBufferedAllocMem = 256;
 	desc.MemoryDefragmenterCountPerFrame = 20;
 	JG::JGAllocatorManager::Create(desc);
-	//// Heap
-	//{
-	//	auto m1 = JGAllocatorManager::SingleFrameAlloc(32);
-	//	auto m2 = JGAllocatorManager::SingleFrameAlloc(32);
-	//	auto m3 = JGAllocatorManager::SingleFrameAlloc(32);
-	//	auto m4 = JGAllocatorManager::SingleFrameAlloc(32);
 
-	//	auto m13 = JGAllocatorManager::DoubleFrameAlloc(32);
-	//	auto m23 = JGAllocatorManager::DoubleFrameAlloc(32);
-	//	auto m33 = JGAllocatorManager::DoubleFrameAlloc(32);
-	//	auto m43 = JGAllocatorManager::DoubleFrameAlloc(32);
+	std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
 
-	//	JGAllocatorManager::Update();
-
-	//	auto m12 = JGAllocatorManager::DoubleFrameAlloc(32);
-	//	auto m22 = JGAllocatorManager::DoubleFrameAlloc(32);
-	//	auto m32 = JGAllocatorManager::DoubleFrameAlloc(32);
-	//	auto m42 = JGAllocatorManager::DoubleFrameAlloc(32);
-
-	//	JGAllocatorManager::Update();
-	//}
+	std::unique_ptr<TestObject> testNew[10000];
+	for (int i = 0; i < 10000; ++i)
+	{
+		testNew[i] = std::make_unique<TestObject>();
+	}
 
 
+
+	std::chrono::duration<double> sec = std::chrono::system_clock::now() - start;
+
+	cout << "new 10000번 메모리 할당 : " << sec.count() << endl;
+
+	start = std::chrono::system_clock::now();
+
+	JGUniquePtr<TestObject> testNew2[10000];
+	for (int i = 0; i < 10000; ++i)
+	{
+		testNew2[i] = CreateUniquePtr<TestObject>();
+	}
+
+	sec = std::chrono::system_clock::now() - start;
+
+	cout << "custom 10000번 메모리 할당 : " << sec.count() << endl;
+	
 	JG::JGAllocatorManager::Destroy();
 	_CrtDumpMemoryLeaks();
 	return 0;
