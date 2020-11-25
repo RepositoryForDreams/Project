@@ -2,12 +2,25 @@
 
 
 
-
-class Interface
+namespace JG
 {
-public:
-	virtual ~Interface() = default;
-};
+	class Interface
+	{
+	public:
+		virtual ~Interface() = default;
+	};
+
+
+	class JGObject
+	{
+	public:
+		JGObject() = default;
+		virtual ~JGObject() = default;
+	};
+
+
+}
+
 
 
 

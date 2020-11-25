@@ -4,39 +4,6 @@ namespace JG
 {
 	static JGAllocatorManager* gAllocatorManager = nullptr;
 
-	JGMemoryHandle::JGMemoryHandle(JGMemoryHandle&& rhs) noexcept
-	{
-		mPtr = rhs.mPtr;
-		mLocation = rhs.mLocation;
-		mRefCount = rhs.mRefCount;
-
-
-		rhs.mPtr = nullptr;
-		rhs.mLocation = EJGMemoryHandleLocation::Count;
-		rhs.mRefCount = 0;
-	}
-
-	JGMemoryHandle& JGMemoryHandle::operator=(JGMemoryHandle&& rhs) noexcept
-	{
-		mPtr = rhs.mPtr;
-		mLocation = rhs.mLocation;
-		mRefCount = rhs.mRefCount;
-		rhs.mPtr      = nullptr;
-		rhs.mLocation = EJGMemoryHandleLocation::Count;
-		rhs.mRefCount = 0;
-		return *this;
-		// TODO: 여기에 return 문을 삽입합니다.
-	}
-
-	JGMemoryHandle::~JGMemoryHandle()
-	{
-		if (mPtr == nullptr) return;
-
-		--mRefCount;
-		if (mRefCount == 0) {
-			gAllocatorManager->mMemoryHandleAllocator[(i32)mLocation].DeAlloc((void**)mPtr);
-		}
-	}
 
 	void* JGMemoryHandle::Get() const
 	{
@@ -115,7 +82,7 @@ namespace JG
 		startBH->prev = 0;
 		startBH->next = 0;
 		startBH->blockSize = mTotalMemSize;
-		startBH->used = false;
+		startBH->handle = 0;
 	}
 
 
@@ -129,66 +96,66 @@ namespace JG
 		void* result = nullptr;
 
 		ptraddr lastAddr = mStartAddress + mTotalMemSize;
-		u64     bhSize = sizeof(BlockHeader);
+		//u64     bhSize = sizeof(BlockHeader);
 
 
 		u8 roundsCnt = 0;
 		for (ptraddr pos = mCurrStartAddr; pos < lastAddr;)
 		{
 			BlockHeader startBH = *(BlockHeader*)pos;
-			ptraddr	    startAddr = pos;
-			if (startBH.used == false && startBH.blockSize >= size + bhSize)
+			if (startBH.handle == 0 && startBH.blockSize >= size + sizeof(BlockHeader))
 			{
-				u64 leftSize  = size + bhSize;
+				u64 leftSize  = size + sizeof(BlockHeader);
 				u64 rightSize = startBH.blockSize - leftSize;
 
 
 				// 기본 메모리보다 크기가 작다면 통합 할당
-				if (rightSize < bhSize + sizeof(ptraddr))
+				if (rightSize < sizeof(BlockHeader) + sizeof(ptraddr))
 				{
-					BlockHeader bh;
-					bh.blockSize = leftSize + rightSize;
-					bh.used = true;
-					bh.prev = startBH.prev;
-					bh.next = startBH.next;
+					//BlockHeader bh;
+					//bh.blockSize = leftSize + rightSize;
+					//bh.prev = startBH.prev;
+					//bh.next = startBH.next;
 
-					*(BlockHeader*)startAddr = bh;
+					BlockHeader* bh = (BlockHeader*)pos;
+					bh->blockSize = leftSize + rightSize;
+					bh->prev = startBH.prev;
+					bh->next = startBH.next;
 
-					result = (void*)(startAddr + bhSize);
-					mCurrStartAddr = startAddr + bh.blockSize;
-					mUseMemSize += bh.blockSize;
+					//*(BlockHeader*)pos = bh;
+
+					result = (void*)(pos + sizeof(BlockHeader));
+					mCurrStartAddr = bh->next;
+					mUseMemSize += bh->blockSize;
 				}
 				// 아니라면 기존 방식대로 할당
 				else
 				{
-					BlockHeader leftBH;
-					leftBH.blockSize = leftSize;
-					leftBH.used = true;
-					leftBH.prev = startBH.prev;
-					leftBH.next = startAddr + leftBH.blockSize;
-					*(BlockHeader*)startAddr = leftBH;
-
-					
+					// 왼쪽
+					BlockHeader*  leftBH = ((BlockHeader*)pos);
+					leftBH->blockSize = leftSize;
+					leftBH->prev = startBH.prev;
+					leftBH->next = pos + leftSize;
 
 
 
-					BlockHeader rightBH;
-					rightBH.blockSize = rightSize;
-					rightBH.used = false;
-					rightBH.prev = startAddr;
-					rightBH.next = startBH.next;
-					*(BlockHeader*)(leftBH.next) = rightBH;
+					// 오른쪽 
+					BlockHeader* rightBH = (BlockHeader*)leftBH->next;
+					rightBH->blockSize = rightSize;
+					rightBH->handle = 0;
+					rightBH->prev = pos;
+					rightBH->next = startBH.next;
 
-					if(rightBH.next != 0)
+
+					if (rightBH->next != 0)
 					{
-						((BlockHeader*)(rightBH.next))->prev = leftBH.next;
+						((BlockHeader*)(rightBH->next))->prev = leftBH->next;
 					}
 
 
-
-					result = (void*)(startAddr + bhSize);
-					mCurrStartAddr = leftBH.next;
-					mUseMemSize += leftBH.blockSize;
+					result = (void*)(pos + sizeof(BlockHeader));
+					mCurrStartAddr = (ptraddr)rightBH;
+					mUseMemSize += leftBH->blockSize;
 				}
 				break;
 			}
@@ -245,27 +212,30 @@ namespace JG
 
 
 			bool isCurrStartAddr = (mCurrStartAddr == (ptraddr)startBH || mCurrStartAddr == (ptraddr)prevBH || mCurrStartAddr == (ptraddr)nextBH);
+			bool isMemDefragCurrAddr = (mMemoryDefragCurrAddr == (ptraddr)startBH || mMemoryDefragCurrAddr == (ptraddr)prevBH || mMemoryDefragCurrAddr == (ptraddr)nextBH);
 			// 양쪽 병합
-			if (prevBH->used == false && nextBH->used == false)
+			if (prevBH->handle == 0 && nextBH->handle == 0)
 			{
 				prevBH->blockSize = prevBH->blockSize + startBH->blockSize + nextBH->blockSize;
 				prevBH->prev = prevBH->prev;
 				prevBH->next = nextBH->next;
-				prevBH->used = false;
+				prevBH->handle = 0;
 
 				if (nextBH->next != 0)
 				{
 					((BlockHeader*)(nextBH->next))->prev = (ptraddr)prevBH;
 				}
 				if (isCurrStartAddr) mCurrStartAddr = (ptraddr)prevBH;
+				if(isMemDefragCurrAddr) mMemoryDefragCurrAddr = (ptraddr)prevBH;
+
 			}
 			// 오른쪽 병합
-			else if (prevBH->used == true && nextBH->used == false)
+			else if (prevBH->handle != 0 && nextBH->handle == 0)
 			{
 				startBH->blockSize = startBH->blockSize + nextBH->blockSize;
 				startBH->prev = startBH->prev;
 				startBH->next = nextBH->next;
-				startBH->used = false;
+				startBH->handle = 0;
 
 				
 				if (nextBH->next != 0)
@@ -273,23 +243,25 @@ namespace JG
 					((BlockHeader*)(nextBH->next))->prev = (ptraddr)startBH;
 				}
 				if (isCurrStartAddr) mCurrStartAddr = (ptraddr)startBH;
+				if (isMemDefragCurrAddr) mMemoryDefragCurrAddr = (ptraddr)startBH;
 			}
 			// 왼쪽 병합
-			else if (prevBH->used == false && nextBH->used == true)
+			else if (prevBH->handle == 0 && nextBH->handle != 0)
 			{
 				prevBH->blockSize = prevBH->blockSize + startBH->blockSize;
 				prevBH->prev      = prevBH->prev;
 				prevBH->next      = startBH->next;
-				prevBH->used      = false;
+				prevBH->handle = 0;
 
 				nextBH->prev = (ptraddr)prevBH;
 
 				if (isCurrStartAddr) mCurrStartAddr = (ptraddr)prevBH;
+				if (isMemDefragCurrAddr) mMemoryDefragCurrAddr = (ptraddr)prevBH;
 			}
 			// 병합 X
 			else
 			{
-				startBH->used = false;
+				startBH->handle = 0;
 			}
 
 		}
@@ -299,22 +271,24 @@ namespace JG
 			// 다음 블럭이 할당된 블럭인지 확인
 			BlockHeader* nextBH = (BlockHeader*)startBH->next;
 			bool isCurrStartAddr = (mCurrStartAddr == (ptraddr)startBH ||  mCurrStartAddr == (ptraddr)nextBH);
-			if (nextBH->used == false)
+			if (nextBH->handle == 0)
 			{
 				// 합병 시작
 				BlockHeader bh;
 				startBH->blockSize = startBH->blockSize + nextBH->blockSize;
 				startBH->prev = startBH->prev;
 				startBH->next = nextBH->next;
-				startBH->used = false;
-
-				((BlockHeader*)(nextBH->next))->prev = (ptraddr)startBH;
+				startBH->handle = 0;
+				
+				if(nextBH->next != 0)
+					((BlockHeader*)(nextBH->next))->prev = (ptraddr)startBH;
+				
 				if (isCurrStartAddr) mCurrStartAddr = (ptraddr)startBH;
 			}
 			else
 			{
 				// 그냥 할당만 해제
-				startBH->used = false;
+				startBH->handle = 0;
 			}
 		}
 		// 마지막 블럭
@@ -322,24 +296,24 @@ namespace JG
 		{
 			BlockHeader* prevBH = (BlockHeader*)startBH->prev;
 			bool isCurrStartAddr = (mCurrStartAddr == (ptraddr)startBH || mCurrStartAddr == (ptraddr)prevBH);
-			if(prevBH->used == false)
+			if(prevBH->handle == 0)
 			{
 				prevBH->blockSize = prevBH->blockSize + startBH->blockSize;
 				prevBH->prev = prevBH->prev;
 				prevBH->next = startBH->next;
-				prevBH->used = false;
+				prevBH->handle = 0;
 
 				if (isCurrStartAddr) mCurrStartAddr = (ptraddr)prevBH;
 			}
 			else
 			{
-				startBH->used = false;
+				startBH->handle = 0;
 			}
 
 		}
 		else
 		{
-			startBH->used = false;
+			startBH->handle = 0;
 		}
 
 		mUseMemSize -= deAllocatedBlockSize;
@@ -348,26 +322,141 @@ namespace JG
 
 	void JGHeapAllocator::MemoryDefragmenter(u64 countPerFrame)
 	{
-		BlockHeader* bh = (BlockHeader*)mStartAddress;
-		u64 blockCnt = 0;
-		ptraddr transPoint = 0;
-		while (blockCnt < countPerFrame)
+		
+		ptraddr curPos = mMemoryDefragCurrAddr;
+		u64 count = 0;
+		/*
+		일단 현재 메모리 조각모음할때 시작점은 게속 증가하지만
+		중간에 매모리 해제를 할 경우
+		병합할려는 빈 블록이 메모리 조각모음주소나 해제할려는 블록이 메모리 조각모음 주소하는 모시기면은 메모리 조각모음 위치를 다음 블록으로 바꿈
+
+
+
+		*/
+		ptraddr emptyBlockAddr = 0;
+
+		while (count < countPerFrame)
 		{
-			if (bh->used == false)
+			if (curPos == 0) {
+				curPos = mStartAddress;
+				emptyBlockAddr = 0;
+			}
+			++count;
+
+			BlockHeader bh = (*(BlockHeader*)curPos);
+
+			
+			if (bh.handle != 0 && emptyBlockAddr != 0)
 			{
-				transPoint = (ptraddr)bh;
+				ptraddr* memPtr = (ptraddr*)bh.handle;
+				
+
+				
+
+
+
+		
+				BlockHeader* emptyBH = (BlockHeader*)emptyBlockAddr;
+				BlockHeader* allocBH = (BlockHeader*)curPos;
+				BlockHeader* prevBH  = (BlockHeader*)emptyBH->prev;
+				BlockHeader* nextBH  = (BlockHeader*)allocBH->next;
+
+				bool isCurrStartAddr = (mCurrStartAddr == (ptraddr)emptyBH || mCurrStartAddr == (ptraddr)allocBH);
+
+
+				// 살짝 메모리를 다른 곳에 저장해둠
+				u64 tempMemSize = allocBH->blockSize - sizeof(BlockHeader);
+				void* tempMem = gAllocatorManager->mStackAllocator.Alloc(tempMemSize);
+				memcpy_s(
+					tempMem, tempMemSize,
+					(void*)((ptraddr)allocBH + sizeof(BlockHeader)), tempMemSize);
+
+
+				BlockHeader newAllocBH;
+				newAllocBH.blockSize = allocBH->blockSize;
+				newAllocBH.handle = allocBH->handle;
+				newAllocBH.prev = (ptraddr)prevBH;
+				newAllocBH.next = (ptraddr)emptyBH + newAllocBH.blockSize;
+
+
+				BlockHeader newEmptyBH;
+				newEmptyBH.blockSize = emptyBH->blockSize;
+				newEmptyBH.handle = 0;
+				newEmptyBH.prev = (ptraddr)emptyBH;
+				newEmptyBH.next = (ptraddr)nextBH;
+
+
+				if (prevBH != nullptr)
+					prevBH->next = newEmptyBH.prev;
+				if (nextBH != nullptr)
+				{
+					nextBH->prev = newAllocBH.next;
+					// 다음 블록이 비어져있다면 병합 시도 
+					if (nextBH->handle == 0)
+					{
+						newEmptyBH.blockSize = newEmptyBH.blockSize + nextBH->blockSize;
+						newEmptyBH.next = nextBH->next;
+						if (nextBH->next != 0)
+						{
+							((BlockHeader*)(nextBH->next))->prev = newAllocBH.next;
+						}
+						if (!isCurrStartAddr && mCurrStartAddr == (ptraddr)nextBH) isCurrStartAddr = true;
+					}
+				}
+
+
+
+				// 현재 블록 빈블록 스왑
+				(*emptyBH) = newAllocBH;
+				*((BlockHeader*)newAllocBH.next) = newEmptyBH;
+
+	
+				// 메모리 복제
+				u64 allocMemSize = newAllocBH.blockSize - sizeof(BlockHeader);
+				memcpy_s(
+					(void*)((ptraddr)emptyBH + sizeof(BlockHeader)), allocMemSize, 
+					tempMem, allocMemSize);
+
+				// 임시 저장소 메모리 해제
+				gAllocatorManager->mStackAllocator.DeAlloc(&tempMem);
+
+
+				if (isCurrStartAddr) mCurrStartAddr = newAllocBH.next;
+
+
+				// 메모리 핸들 메모리 주소 변경
+				*memPtr = (ptraddr)emptyBH + sizeof(BlockHeader);
+
+	
+
+
+				emptyBlockAddr = newAllocBH.next;
+				mMemoryDefragCurrAddr = newAllocBH.next;
+				curPos = newEmptyBH.next;
+			}
+			// 비어있는 메모리 블럭이면. 
+			else if(bh.handle == 0)
+			{
+				// 마지막 블록이면
+				if (bh.next == 0)
+				{
+					curPos = 0;
+					mMemoryDefragCurrAddr = 0;
+					break;
+				}
+				else
+				{
+					emptyBlockAddr = curPos;
+					mMemoryDefragCurrAddr = curPos;
+					curPos += bh.blockSize;
+				}
+
 			}
 			else
 			{
-				if (transPoint != 0)
-				{
-
-					Swap(&transPoint, (ptraddr*)(&bh));
-					
-
-				}
+				mMemoryDefragCurrAddr = curPos;
+				curPos += bh.blockSize;
 			}
-			bh = (BlockHeader*)bh->next;
 		}
 	}
 
@@ -383,11 +472,11 @@ namespace JG
 	{
 
 		mMemoryCount = mTotalMemSize / mMemoryUnit;
-		mCurrMemoryIndex = 0;
-		mLastMemoryIndex = 0;
-		mMemoryPool  = (ptraddr*)gAllocatorManager->mProxyAllocator.Alloc(mMemoryCount * sizeof(ptraddr));
-
-
+		mHeadMemoryIndex = 0;
+		mTailMemoryIndex = 0;
+		mMemoryPool  = (ptraddr*)malloc(mMemoryCount * sizeof(ptraddr));
+		if(mMemoryPool == nullptr)
+			JASSERT("JGPoolAllocator::JGPoolAllocator : fail malloc");
 
 		ptraddr currAddr = mStartAddress;
 		for (u64 i = 0; i < mMemoryCount; ++i)
@@ -407,8 +496,8 @@ namespace JG
 
 
 		//
-		void* result = (void*)mMemoryPool[mCurrMemoryIndex++];
-		mCurrMemoryIndex = mCurrMemoryIndex % mMemoryCount;
+		void* result = (void*)mMemoryPool[mHeadMemoryIndex++];
+		mHeadMemoryIndex = mHeadMemoryIndex % mMemoryCount;
 		mUseMemSize += mMemoryUnit;
 
 
@@ -417,17 +506,30 @@ namespace JG
 
 	void JGPoolAllocator::DeAlloc(void** ptr)
 	{
-		if (mLastMemoryIndex == mCurrMemoryIndex)
-			JASSERT("JGPoolAllocator::DeAlloc : LastMemoryIndex == CurrMemoryIndex");
+		if (mTailMemoryIndex == mHeadMemoryIndex)
+			JASSERT("JGPoolAllocator::DeAlloc : LastMemoryIndex == mHeadMemoryIndex");
 		
 
 
-		mMemoryPool[mLastMemoryIndex++] = (ptraddr)(*ptr);
-		mLastMemoryIndex = mLastMemoryIndex % mMemoryCount;
+		mMemoryPool[mTailMemoryIndex++] = (ptraddr)(*ptr);
+		mTailMemoryIndex = mTailMemoryIndex % mMemoryCount;
 		mUseMemSize -= mMemoryUnit;
 
 
 		*ptr = nullptr;
+	}
+
+	void JGPoolAllocator::Clear()
+	{
+		mUseMemSize = 0;
+		mHeadMemoryIndex = 0;
+		mTailMemoryIndex = 0;
+	}
+
+	ptraddr JGPoolAllocator::GetMemory(u64 index)
+	{
+		if (index >= mMemoryCount) JASSERT("JGPoolAllocator::GetMemory : index >= mMemoryCount"); 
+		return mMemoryPool[index];
 	}
 
 
@@ -513,17 +615,107 @@ namespace JG
 	}
 	void JGAllocatorManager::Update()
 	{
+		gAllocatorManager->mHeapAllocator.MemoryDefragmenter(gAllocatorManager->mDesc.MemoryDefragmenterCountPerFrame);
 		gAllocatorManager->mSingleFrameAllocator.Clear();
 		gAllocatorManager->mDoubleFrameAllocator.Swap();
 
+
+		// 
+		if (gAllocatorManager->mDesc.IsSafeNull)
+		{
+			u64 headIndex = gAllocatorManager->mMemoryHandleAllocator[(u8)EJGMemoryHandleLocation::SingleFrame].GetHeadIndex();
+			u64 tailIndex = gAllocatorManager->mMemoryHandleAllocator[(u8)EJGMemoryHandleLocation::SingleFrame].GetTailIndex();
+			u64 memoryCount = gAllocatorManager->mMemoryHandleAllocator[(u8)EJGMemoryHandleLocation::SingleFrame].GetMemoryCount();
+
+			u64 currIndex = tailIndex;
+			while (headIndex != currIndex)
+			{
+				ptraddr* memHandlePtr = (ptraddr*)gAllocatorManager->mMemoryHandleAllocator[(u8)EJGMemoryHandleLocation::SingleFrame].GetMemory(currIndex);
+				*memHandlePtr = 0;
+				currIndex = (currIndex + 1) % memoryCount;
+			}
+
+
+			u64 frameIndex = gAllocatorManager->mDoubleFrameAllocator.GetCurrentFrameIndex();
+			EJGMemoryHandleLocation location = (frameIndex == 0) ? EJGMemoryHandleLocation::DoubleFrame1 : EJGMemoryHandleLocation::DoubleFrame2;
+		
+
+
+			headIndex = gAllocatorManager->mMemoryHandleAllocator[(u8)location].GetHeadIndex();
+			tailIndex = gAllocatorManager->mMemoryHandleAllocator[(u8)location].GetTailIndex();
+			memoryCount = gAllocatorManager->mMemoryHandleAllocator[(u8)location].GetMemoryCount();
+			currIndex = tailIndex;
+			while (headIndex != currIndex)
+			{
+				ptraddr* memHandlePtr = (ptraddr*)gAllocatorManager->mMemoryHandleAllocator[(u8)location].GetMemory(currIndex);
+				*memHandlePtr = 0;
+				currIndex = (currIndex + 1) % memoryCount;
+			}
+		}
+
+		// SingleFrame, DoubleFrame 메모리 핸들 Pool 할당자 초기화
+		gAllocatorManager->mMemoryHandleAllocator[(u8)EJGMemoryHandleLocation::SingleFrame].Clear();
+		u64 frameIndex = gAllocatorManager->mDoubleFrameAllocator.GetCurrentFrameIndex();
+		(frameIndex == 0) ?
+			gAllocatorManager->mMemoryHandleAllocator[(u8)EJGMemoryHandleLocation::DoubleFrame1].Clear() :
+			gAllocatorManager->mMemoryHandleAllocator[(u8)EJGMemoryHandleLocation::DoubleFrame2].Clear();
+		
 	}
 	void JGAllocatorManager::Destroy()
 	{
 		if (gAllocatorManager == nullptr) return;
 
 
+		for (EJGMemoryHandleLocation i = EJGMemoryHandleLocation::Stack; i < EJGMemoryHandleLocation::Count;)
+		{
+			gAllocatorManager->mMemoryHandleAllocator[(i32)i].Destroy();
+			i = (EJGMemoryHandleLocation)((i32)i + 1);
+		}
+
+
 		delete gAllocatorManager;
 		gAllocatorManager = nullptr;
+	}
+
+	JGAllocatorManager* JGAllocatorManager::GetInstance()
+	{
+		return gAllocatorManager;
+	}
+
+	JGStackAllocatorDebugInfo JGAllocatorManager::GetStackAllocatorDebugInfo()
+	{
+		JGStackAllocatorDebugInfo info;
+		auto& stackAllocator = gAllocatorManager->mStackAllocator;
+
+
+		info.TotalMemory = stackAllocator.GetTotalMemory();
+		info.UseMemory = stackAllocator.GetUseMemory();
+		info.StartAddress = stackAllocator.GetStartPtr();
+		info.LastAddress = info.StartAddress + info.TotalMemory;
+		info.TopAddress = stackAllocator.GetTopPtr();
+
+
+
+
+		return info;
+	}
+
+	JGLinearAllocatorDebugInfo JGAllocatorManager::GetLinearAllocatorDebugInfo()
+	{
+		JGLinearAllocatorDebugInfo info;
+		auto& linearAllocator = gAllocatorManager->mLinearAllocator;
+
+
+		info.TotalMemory = linearAllocator.GetTotalMemory();
+		info.UseMemory = linearAllocator.GetUseMemory();
+		info.StartAddress = linearAllocator.GetStartPtr();
+		info.LastAddress = info.StartAddress + info.TotalMemory;
+		info.CurrAddress = linearAllocator.GetCurrentPtr();
+
+
+
+
+		return info;
 	}
 
 	JGMemoryHandle JGAllocatorManager::StackAlloc(u64 size)
@@ -548,6 +740,7 @@ namespace JG
 	{
 		JGMemoryHandle handle = JGAllocatorManager::AllocMemoryHandle(EJGMemoryHandleLocation::Heap);
 		*(handle.mPtr) = (ptraddr)gAllocatorManager->mHeapAllocator.Alloc(size);
+		((JGHeapAllocator::BlockHeader*)((*(handle.mPtr)) - sizeof(JGHeapAllocator::BlockHeader)))->handle = (ptraddr)handle.mPtr;
 
 		return std::move(handle);
 	}
@@ -569,32 +762,42 @@ namespace JG
 		JGMemoryHandle handle = JGAllocatorManager::AllocMemoryHandle(frameLocation);
 		*(handle.mPtr) = (ptraddr)gAllocatorManager->mDoubleFrameAllocator.Alloc(size);
 
-
+		
 		return handle;
 	}
 
-	JGMemoryHandle JGAllocatorManager::MemoryPoolAlloc(u64 size)
+
+	void JGAllocatorManager::DeAlloc(JGMemoryHandle& handle)
 	{
-
-
-
-		return JGMemoryHandle();
-	}
-
-	void JGAllocatorManager::DeAlloc(JGMemoryHandle handle)
-	{
+		
+		if (handle.mLocation == EJGMemoryHandleLocation::Count) return;
+		if (handle.Get() == nullptr) return;
 		//std::make_unique
+		switch (handle.mLocation)
+		{
+		case EJGMemoryHandleLocation::Stack:
+			gAllocatorManager->mStackAllocator.DeAlloc((void**)handle.mPtr);
+			gAllocatorManager->mMemoryHandleAllocator[(u8)handle.mLocation].DeAlloc((void**)&handle.mPtr);
+			break;
+		case EJGMemoryHandleLocation::Heap:
+			gAllocatorManager->mHeapAllocator.DeAlloc((void**)handle.mPtr);
+			gAllocatorManager->mMemoryHandleAllocator[(u8)handle.mLocation].DeAlloc((void**)&handle.mPtr);
+			break;
+		case EJGMemoryHandleLocation::Linear:
+		case EJGMemoryHandleLocation::SingleFrame:
+		case EJGMemoryHandleLocation::DoubleFrame1:
+		case EJGMemoryHandleLocation::DoubleFrame2:
+			break;
+		}
+
+
 	}
+
 
 
 
 	JGAllocatorManager::JGAllocatorManager(const JGAllocatorDesc& desc) : mDesc(desc)
 	{
-		// Proxy 할당자 메모리 계산
-		/*
-		1. 메모리 풀 할당
-		2. 메모리 핸들 할당
-		*/
 		u64 memoryHandleCount = 0;
 		for (EJGMemoryHandleLocation i = EJGMemoryHandleLocation::Stack; i < EJGMemoryHandleLocation::Count;)
 		{
@@ -603,44 +806,21 @@ namespace JG
 			i = (EJGMemoryHandleLocation)((i32)i + 1);
 		}
 
-		u64 _4bitMemSize   = mDesc._4BitMemoryCount * 4;
-		u64 _8bitMemSize   = mDesc._8BitMemoryCount * 8;
-		u64 _12bitMemSize  = mDesc._12BitMemoryCount * 12;
-		u64 _16bitMemSize  = mDesc._16BitMemoryCount * 16;
-		u64 _32bitMemSize  = mDesc._32BitMemoryCount * 32;
-		u64 _64bitMemSize  = mDesc._64BitMemoryCount * 64;
-		u64 _128bitMemSize = mDesc._128BitMemoryCount * 128;
 	
 
 
-		u64 allPoolMemSize  = 
-			_4bitMemSize  + _8bitMemSize + _12bitMemSize + _16bitMemSize +
-			_32bitMemSize +_64bitMemSize + _128bitMemSize;
-
-		u64 allPoolMemCount =
-			mDesc._4BitMemoryCount  + mDesc._8BitMemoryCount  + mDesc._12BitMemoryCount  + mDesc._16BitMemoryCount + 
-			mDesc._32BitMemoryCount + mDesc._64BitMemoryCount + mDesc._128BitMemoryCount;
+		u64 memoryHandleMemSize = (memoryHandleCount * sizeof(ptraddr));
 
 
 
-
-		u64 proxyAllocMem = ((allPoolMemCount + memoryHandleCount) * sizeof(ptraddr));
-
-
-
-		mTotalMemory = proxyAllocMem + mDesc.StackAllocMem + mDesc.LinearAllocMem + mDesc.HeapAllocMem + mDesc.SingleFrameAllocMem + mDesc.DoubleBufferedAllocMem + allPoolMemSize;
+		mTotalMemory = memoryHandleMemSize + mDesc.StackAllocMem + mDesc.LinearAllocMem + mDesc.HeapAllocMem + mDesc.SingleFrameAllocMem + mDesc.DoubleBufferedAllocMem;
 
 		// 메모리 할당
 		mStartAddress = malloc(mTotalMemory);
 
 		ptraddr startAddr = (ptraddr)mStartAddress;
 
-
-		// Allocator 생성
-
-
 		// Proxy, Stack, Linear 제일 우선
-		mProxyAllocator  = JGLinearAllocator(proxyAllocMem, startAddr); startAddr += proxyAllocMem;
 		mStackAllocator  = JGStackAllocator(mDesc.StackAllocMem, startAddr);   startAddr += mDesc.StackAllocMem;
 		mLinearAllocator = JGLinearAllocator(mDesc.LinearAllocMem, startAddr); startAddr += mDesc.LinearAllocMem;
 
@@ -649,16 +829,6 @@ namespace JG
 		mHeapAllocator        = JGHeapAllocator(mDesc.HeapAllocMem, startAddr);                 startAddr += mDesc.HeapAllocMem;
 		mSingleFrameAllocator = JGSingleFrameAllocator(mDesc.SingleFrameAllocMem,startAddr);    startAddr += mDesc.SingleFrameAllocMem;
 		mDoubleFrameAllocator = JGDoubleFrameAllocator(mDesc.DoubleBufferedAllocMem,startAddr); startAddr += mDesc.DoubleBufferedAllocMem;
-
-
-		// 메모리 풀 할당자 생성
-		m4bytePoolAllocator   = JGPoolAllocator(_4bitMemSize, startAddr, 4); startAddr += _4bitMemSize;
-		m8bytePoolAllocator   = JGPoolAllocator(_8bitMemSize, startAddr, 8); startAddr += _8bitMemSize;
-		m12bytePoolAllocator  = JGPoolAllocator(_12bitMemSize, startAddr, 12); startAddr += _12bitMemSize;
-		m16bytePoolAllocator  = JGPoolAllocator(_16bitMemSize, startAddr, 16); startAddr += _16bitMemSize;
-		m32bytePoolAllocator  = JGPoolAllocator(_32bitMemSize, startAddr, 32); startAddr += _32bitMemSize;
-		m64bytePoolAllocator  = JGPoolAllocator(_64bitMemSize, startAddr, 64); startAddr += _64bitMemSize;
-		m128bytePoolAllocator = JGPoolAllocator(_128bitMemSize, startAddr, 128); startAddr += _128bitMemSize;
 
 
 
@@ -681,7 +851,6 @@ namespace JG
 		JGMemoryHandle handle;
 		handle.mPtr = (ptraddr*)gAllocatorManager->mMemoryHandleAllocator[(i32)location].Alloc();
 		handle.mLocation = location;
-		handle.mRefCount = 1;
 
 		return std::move(handle);
 	}
