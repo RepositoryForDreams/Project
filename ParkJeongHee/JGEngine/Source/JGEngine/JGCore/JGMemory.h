@@ -27,6 +27,7 @@ namespace JG
 		DoubleFrame2,
 		Count
 	};
+	
 
 
 
@@ -166,10 +167,14 @@ namespace JG
 		u64 GetMemoryUnit() const {
 			return mMemoryUnit;
 		}
+		u64 GetMemoryCount() const {
+			return mMemoryCount;
+		}
 		void Destroy() {
 			free(mMemoryPool);
 			mMemoryPool = nullptr;
 		}
+		ptraddr GetMemory(u64 index);
 	private:
 		ptraddr* mMemoryPool = nullptr;
 		u64 mMemoryCount = 0;

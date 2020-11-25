@@ -21,6 +21,10 @@ namespace JG
 	}
 	JGMemoryHandle& JGMemoryHandle::operator=(JGMemoryHandle&& rhs) noexcept
 	{
+		if (mPtr)
+		{
+			JASSERT("GMemoryHandle::operator= : Memory handle already contains memory.");
+		}
 		mPtr = rhs.mPtr;
 		mLocation = rhs.mLocation;
 		rhs.mPtr      = nullptr;
@@ -344,7 +348,7 @@ namespace JG
 	void JGHeapAllocator::MemoryDefragmenter(u64 countPerFrame)
 	{
 		
-		ptraddr curPos = mStartAddress;
+		ptraddr curPos = mMemoryDefragCurrAddr;
 		u64 count = 0;
 		/*
 		일단 현재 메모리 조각모음할때 시작점은 게속 증가하지만
@@ -358,7 +362,10 @@ namespace JG
 
 		while (count < countPerFrame)
 		{
-			if (curPos == 0) curPos = mStartAddress;
+			if (curPos == 0) {
+				curPos = mStartAddress;
+				emptyBlockAddr = 0;
+			}
 			++count;
 
 			BlockHeader bh = (*(BlockHeader*)curPos);
@@ -451,7 +458,6 @@ namespace JG
 				emptyBlockAddr = newAllocBH.next;
 				mMemoryDefragCurrAddr = newAllocBH.next;
 				curPos = newEmptyBH.next;
-		
 			}
 			// 비어있는 메모리 블럭이면. 
 			else if(bh.handle == 0)
@@ -459,13 +465,16 @@ namespace JG
 				// 마지막 블록이면
 				if (bh.next == 0)
 				{
-					emptyBlockAddr = 0;
-					curPos = mStartAddress;
-					break;
+					curPos = 0;
+					mMemoryDefragCurrAddr = 0;
 				}
-				emptyBlockAddr = curPos;
-				mMemoryDefragCurrAddr = curPos;
-				curPos += bh.blockSize;
+				else
+				{
+					emptyBlockAddr = curPos;
+					mMemoryDefragCurrAddr = curPos;
+					curPos += bh.blockSize;
+				}
+
 			}
 			else
 			{
@@ -532,6 +541,12 @@ namespace JG
 
 
 		*ptr = nullptr;
+	}
+
+	ptraddr JGPoolAllocator::GetMemory(u64 index)
+	{
+		if (index >= mMemoryCount) JASSERT("JGPoolAllocator::GetMemory : index >= mMemoryCount"); 
+		return mMemoryPool[index];
 	}
 
 
@@ -620,6 +635,40 @@ namespace JG
 		gAllocatorManager->mHeapAllocator.MemoryDefragmenter(gAllocatorManager->mDesc.MemoryDefragmenterCountPerFrame);
 		gAllocatorManager->mSingleFrameAllocator.Clear();
 		gAllocatorManager->mDoubleFrameAllocator.Swap();
+
+		// 0    1 
+		// 1    0
+		if (gAllocatorManager->mDesc.IsSafeNull)
+		{
+			u64 headIndex = gAllocatorManager->mMemoryHandleAllocator[(u8)EJGMemoryHandleLocation::SingleFrame].GetHeadIndex();
+			u64 tailIndex = gAllocatorManager->mMemoryHandleAllocator[(u8)EJGMemoryHandleLocation::SingleFrame].GetTailIndex();
+			u64 memoryCount = gAllocatorManager->mMemoryHandleAllocator[(u8)EJGMemoryHandleLocation::SingleFrame].GetMemoryCount();
+
+			u64 currIndex = tailIndex;
+			while (headIndex != currIndex)
+			{
+				ptraddr* memHandlePtr = (ptraddr*)gAllocatorManager->mMemoryHandleAllocator[(u8)EJGMemoryHandleLocation::SingleFrame].GetMemory(currIndex);
+				*memHandlePtr = 0;
+				currIndex = (currIndex + 1) % memoryCount;
+			}
+
+
+			u64 frameIndex = gAllocatorManager->mDoubleFrameAllocator.GetCurrentFrameIndex();
+			EJGMemoryHandleLocation location = (frameIndex == 0) ? EJGMemoryHandleLocation::DoubleFrame1 : EJGMemoryHandleLocation::DoubleFrame2;
+		
+
+
+			headIndex = gAllocatorManager->mMemoryHandleAllocator[(u8)location].GetHeadIndex();
+			tailIndex = gAllocatorManager->mMemoryHandleAllocator[(u8)location].GetTailIndex();
+			memoryCount = gAllocatorManager->mMemoryHandleAllocator[(u8)location].GetMemoryCount();
+			currIndex = tailIndex;
+			while (headIndex != currIndex)
+			{
+				ptraddr* memHandlePtr = (ptraddr*)gAllocatorManager->mMemoryHandleAllocator[(u8)location].GetMemory(currIndex);
+				*memHandlePtr = 0;
+				currIndex = (currIndex + 1) % memoryCount;
+			}
+		}
 
 	}
 	void JGAllocatorManager::Destroy()

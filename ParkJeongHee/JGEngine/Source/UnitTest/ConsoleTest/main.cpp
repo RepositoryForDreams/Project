@@ -117,56 +117,28 @@ int main()
 	desc.HeapAllocMem = 1024;
 	desc.SingleFrameAllocMem = 128;
 	desc.DoubleBufferedAllocMem = 256;
-	desc.MemoryDefragmenterCountPerFrame = 3;
+	desc.MemoryDefragmenterCountPerFrame = 20;
 	JG::JGAllocatorManager::Create(desc);
 	// Heap
 	{
-		auto m1 = JGAllocatorManager::HeapAlloc(sizeof(TestData));
-		auto m2 = JGAllocatorManager::HeapAlloc(sizeof(TestData2));
-		auto m3 = JGAllocatorManager::HeapAlloc(sizeof(TestData));
+		auto m1 = JGAllocatorManager::SingleFrameAlloc(32);
+		auto m2 = JGAllocatorManager::SingleFrameAlloc(32);
+		auto m3 = JGAllocatorManager::SingleFrameAlloc(32);
+		auto m4 = JGAllocatorManager::SingleFrameAlloc(32);
 
-		auto t1 = (TestData*)m1.Get();
-		auto t2 = (TestData2*)m2.Get();
-		auto t3 = (TestData*)m3.Get();
+		auto m13 = JGAllocatorManager::DoubleFrameAlloc(32);
+		auto m23 = JGAllocatorManager::DoubleFrameAlloc(32);
+		auto m33 = JGAllocatorManager::DoubleFrameAlloc(32);
+		auto m43 = JGAllocatorManager::DoubleFrameAlloc(32);
 
-		t1->fnum = 50.0f;
-		t1->unsignNum = 2;
-
-		t2->numArray[1] = 4;
-
-		t3->num = 15;
-		
-
-		JGAllocatorManager::DeAlloc(std::move(m2));
-		HeapAllocatorInfoPrint();
-
-		cout << endl; 		cout << endl;
-		cout << "Memory Defrag" << endl;
-		cout << endl;
 		JGAllocatorManager::Update();
-		auto newt3 = (TestData*)m3.Get();
-		HeapAllocatorInfoPrint();
 
+		auto m12 = JGAllocatorManager::DoubleFrameAlloc(32);
+		auto m22 = JGAllocatorManager::DoubleFrameAlloc(32);
+		auto m32 = JGAllocatorManager::DoubleFrameAlloc(32);
+		auto m42 = JGAllocatorManager::DoubleFrameAlloc(32);
 
-
-		auto mm1 = JGAllocatorManager::HeapAlloc(sizeof(TestData2));
-		auto mm2 = JGAllocatorManager::HeapAlloc(sizeof(TestData2));
-		auto mm3 = JGAllocatorManager::HeapAlloc(sizeof(TestData2));
-		cout << endl; 		cout << endl;
-		HeapAllocatorInfoPrint();
-
-		JGAllocatorManager::DeAlloc(std::move(mm1));
-		JGAllocatorManager::DeAlloc(std::move(mm2));
-		JGAllocatorManager::DeAlloc(std::move(m1));
-		cout << endl; 		cout << endl;
-		HeapAllocatorInfoPrint();
-
-
-		cout << endl; 		cout << endl;
-		cout << "Memory Defrag" << endl;
-		cout << endl;
 		JGAllocatorManager::Update();
-		HeapAllocatorInfoPrint();
 	}
 
 
