@@ -17,6 +17,16 @@
 
 namespace JG
 {
+	/*
+	UniquePtr 구현
+	SharedPtr 구현
+	WeakPtr 구현
+	메모리 누수 감지 구현
+	할당 시 생성자 소멸자 하도록 구현
+	
+	
+	
+	*/
 	enum class EJGMemoryHandleLocation : u8
 	{
 		Stack,
@@ -27,22 +37,23 @@ namespace JG
 		DoubleFrame2,
 		Count
 	};
-	
+
+
 
 
 
 	class JGMemoryHandle 
 	{
 		friend class JGAllocatorManager;
-
+		template<class T>
+		friend class JGUniquePtr;
+		template<class T>
+		friend class JGWeakPtr;
+		template<class T>
+		friend class JGSharedPtr;
 	public:
-		JGMemoryHandle(const JGMemoryHandle& copy) = delete;
-		JGMemoryHandle& operator=(const JGMemoryHandle& copy) = delete;
-	public:
-		JGMemoryHandle() = default;
-		JGMemoryHandle(JGMemoryHandle&& rhs) noexcept;
-		JGMemoryHandle& operator=(JGMemoryHandle&& rhs) noexcept;
-		~JGMemoryHandle();
+		JGMemoryHandle()  = default;
+		~JGMemoryHandle() = default;
 	public:
 		void* Get() const;
 		bool  IsValid() const {
@@ -156,8 +167,8 @@ namespace JG
 		JGPoolAllocator(u64 size, ptraddr address, u32 memoryUnit);
 	public:
 		void* Alloc();
-		void DeAlloc(void** ptr);
-
+		void  DeAlloc(void** ptr);
+		void  Clear();
 		u64 GetHeadIndex() const {
 			return mHeadMemoryIndex;
 		}
@@ -224,6 +235,115 @@ namespace JG
 		u8 mCurrentFrameIndex = 0;
 	};
 
+
+
+
+
+
+
+
+
+
+
+	template<class T>
+	class JGUniquePtr
+	{
+	private:
+		JGUniquePtr(const JGUniquePtr& copy) = delete;
+		JGUniquePtr& operator=(const JGUniquePtr& copy) = delete;
+	public:
+		JGUniquePtr() = default;
+		JGUniquePtr(JGUniquePtr&& rhs) {
+			Reset();
+			mHandle.mPtr      = rhs.mHandle.mPtr;
+			mHandle.mLocation = rhs.mHandle.mLocation;
+
+			rhs.mHandle.mPtr = nullptr;
+			rhs.mHandle.mLocation = EJGMemoryHandleLocation::Count;
+		}
+
+		JGUniquePtr& operator=(JGUniquePtr&& rhs) {
+			Reset();
+			mHandle.mPtr = rhs.mHandle.mPtr;
+			mHandle.mLocation = rhs.mHandle.mLocation;
+
+			rhs.mHandle.mPtr = nullptr;
+			rhs.mHandle.mLocation = EJGMemoryHandleLocation::Count;
+			return *this;
+		}
+
+		T* operator->() {
+			return (T*)mHandle.Get();
+		}
+
+		~JGUniquePtr()
+		{
+			Reset();
+		}
+	public:
+		T* Get() {
+			return (T*)mHandle.Get();
+		}
+		void Reset() {
+			if (mHandle.Get()) {
+				// 소멸자 호출되는지 확인해보기
+				JGAllocatorManager::DeAlloc(mHandle);
+			}
+			mHandle.mPtr = nullptr;
+			mHandle.mLocation = EJGMemoryHandleLocation::Count;
+		}
+	private:
+		JGMemoryHandle mHandle;
+	};
+
+
+	template<class T>
+	class JGSharedPtr
+	{
+	private:
+		JGMemoryHandle mHandle;
+	};
+
+
+	template<class T>
+	class JGWeakPtr
+	{
+	private:
+		ptraddr* mPtr = 0;
+	};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	struct JGAllocatorDesc
 	{
 		u64 StackAllocMem   = 0;
@@ -283,18 +403,28 @@ namespace JG
 		static void Create(const JGAllocatorDesc& desc);
 		static void Update();
 		static void Destroy();
-		static JGAllocatorManager* GetInstance();
 
+
+
+		static JGAllocatorManager* GetInstance();
+	public:
+		//template<class T>
+		//JGUniquePtr CreateUniquePtr(JGObject)
+
+
+
+	public:
+		static JGStackAllocatorDebugInfo  GetStackAllocatorDebugInfo();
+		static JGLinearAllocatorDebugInfo GetLinearAllocatorDebugInfo();
+	private:
 		static JGMemoryHandle StackAlloc(u64 size);
 		static JGMemoryHandle LinearAlloc(u64 size);
 		static JGMemoryHandle HeapAlloc(u64 size);
 		static JGMemoryHandle SingleFrameAlloc(u64 size);
 		static JGMemoryHandle DoubleFrameAlloc(u64 size);
-		static void DeAlloc(JGMemoryHandle handle);
+		static void DeAlloc(JGMemoryHandle& handle);
 
 
-		static JGStackAllocatorDebugInfo  GetStackAllocatorDebugInfo();
-		static JGLinearAllocatorDebugInfo GetLinearAllocatorDebugInfo();
 	public:
 		JGAllocatorManager(const JGAllocatorDesc& desc);
 		~JGAllocatorManager();
@@ -314,4 +444,13 @@ namespace JG
 
 		JGPoolAllocator mMemoryHandleAllocator[(i32)EJGMemoryHandleLocation::Count];
 	};
+
+
+
+
+
+
+	// CreateUniquePtr
+	// CreateWeakPtr
+	// CreateSharedPtr
 }

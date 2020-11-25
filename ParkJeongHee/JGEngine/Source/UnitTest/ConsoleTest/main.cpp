@@ -119,27 +119,27 @@ int main()
 	desc.DoubleBufferedAllocMem = 256;
 	desc.MemoryDefragmenterCountPerFrame = 20;
 	JG::JGAllocatorManager::Create(desc);
-	// Heap
-	{
-		auto m1 = JGAllocatorManager::SingleFrameAlloc(32);
-		auto m2 = JGAllocatorManager::SingleFrameAlloc(32);
-		auto m3 = JGAllocatorManager::SingleFrameAlloc(32);
-		auto m4 = JGAllocatorManager::SingleFrameAlloc(32);
+	//// Heap
+	//{
+	//	auto m1 = JGAllocatorManager::SingleFrameAlloc(32);
+	//	auto m2 = JGAllocatorManager::SingleFrameAlloc(32);
+	//	auto m3 = JGAllocatorManager::SingleFrameAlloc(32);
+	//	auto m4 = JGAllocatorManager::SingleFrameAlloc(32);
 
-		auto m13 = JGAllocatorManager::DoubleFrameAlloc(32);
-		auto m23 = JGAllocatorManager::DoubleFrameAlloc(32);
-		auto m33 = JGAllocatorManager::DoubleFrameAlloc(32);
-		auto m43 = JGAllocatorManager::DoubleFrameAlloc(32);
+	//	auto m13 = JGAllocatorManager::DoubleFrameAlloc(32);
+	//	auto m23 = JGAllocatorManager::DoubleFrameAlloc(32);
+	//	auto m33 = JGAllocatorManager::DoubleFrameAlloc(32);
+	//	auto m43 = JGAllocatorManager::DoubleFrameAlloc(32);
 
-		JGAllocatorManager::Update();
+	//	JGAllocatorManager::Update();
 
-		auto m12 = JGAllocatorManager::DoubleFrameAlloc(32);
-		auto m22 = JGAllocatorManager::DoubleFrameAlloc(32);
-		auto m32 = JGAllocatorManager::DoubleFrameAlloc(32);
-		auto m42 = JGAllocatorManager::DoubleFrameAlloc(32);
+	//	auto m12 = JGAllocatorManager::DoubleFrameAlloc(32);
+	//	auto m22 = JGAllocatorManager::DoubleFrameAlloc(32);
+	//	auto m32 = JGAllocatorManager::DoubleFrameAlloc(32);
+	//	auto m42 = JGAllocatorManager::DoubleFrameAlloc(32);
 
-		JGAllocatorManager::Update();
-	}
+	//	JGAllocatorManager::Update();
+	//}
 
 
 	JG::JGAllocatorManager::Destroy();
