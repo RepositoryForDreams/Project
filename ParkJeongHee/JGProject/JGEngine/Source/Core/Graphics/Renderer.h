@@ -9,13 +9,12 @@ namespace JG
 	{
 	public:
 		// BeginDraw(카메라, 타겟이될 텍스쳐)
-		virtual void BeginDraw() = 0;
-		virtual void EndDraw()   = 0;
+		 // 여기서 커맨드 리스트를 가져 온다.
+		virtual void Begin() = 0;
 
-		
-		virtual void Bind(const ITexture& texture)      = 0;
-		virtual void Bind(const IVertexBuffer& vBuffer) = 0;
-		virtual void Bind(const IIndexBuffer& iBuffer)  = 0;
+
+		// 커맨드 큐에 집어 넣는다.
+		virtual void End()   = 0;
 	};
 
 
@@ -23,8 +22,9 @@ namespace JG
 	{
 	public:
 		// BeginDraw(카메라, 타겟이될 텍스쳐)
-		virtual void BeginDraw() = 0;
-		virtual void EndDraw()   = 0;
+		// 
+		virtual void Begin() = 0;
+		virtual void End()   = 0;
 
 		// DrawQuad(위치, 회전, 스케일, 텍스쳐,색,  Flag)
 		virtual void DrawQuad() = 0;

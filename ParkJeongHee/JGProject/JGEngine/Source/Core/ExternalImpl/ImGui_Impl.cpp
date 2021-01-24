@@ -3,6 +3,7 @@
 #include "Imgui/imgui.h"
 #include "Imgui/imgui_impl_dx12.h"
 #include "Imgui/imgui_impl_win32.h"
+#include "Platform/Graphics/DirectX12/DirectX12API.h"
 // NOTE
 // DIRECTX 12 INCLUDE
 #include <d3d12.h>
@@ -10,14 +11,6 @@
 #include <tchar.h>
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "DXGI.lib")
-#ifdef _DEBUG
-#define DX12_ENABLE_DEBUG_LAYER
-#endif
-
-#ifdef DX12_ENABLE_DEBUG_LAYER
-#include <dxgidebug.h>
-#pragma comment(lib, "dxguid.lib")
-#endif
 
 
 JG::EWindowPlatform g_Platform;
@@ -78,31 +71,11 @@ namespace DirectX12
             sd.Stereo = FALSE;
         }
 
-        // [DEBUG] Enable debug interface
-#ifdef DX12_ENABLE_DEBUG_LAYER
-        ID3D12Debug* pdx12Debug = NULL;
-        if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&pdx12Debug))))
-            pdx12Debug->EnableDebugLayer();
-#endif
 
-        // Create device
-        D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_11_0;
-        if (D3D12CreateDevice(NULL, featureLevel, IID_PPV_ARGS(&g_pd3dDevice)) != S_OK)
-            return false;
+        g_pd3dDevice = JG::DirectX12API::GetD3DDevice();
+    	
 
-        // [DEBUG] Setup debug interface to break on any warnings/errors
-#ifdef DX12_ENABLE_DEBUG_LAYER
-        if (pdx12Debug != NULL)
-        {
-            ID3D12InfoQueue* pInfoQueue = NULL;
-            g_pd3dDevice->QueryInterface(IID_PPV_ARGS(&pInfoQueue));
-            pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
-            pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
-            pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
-            pInfoQueue->Release();
-            pdx12Debug->Release();
-        }
-#endif
+
 
         {
             D3D12_DESCRIPTOR_HEAP_DESC desc = {};
@@ -185,16 +158,7 @@ namespace DirectX12
         if (g_pd3dSrvDescHeap) { g_pd3dSrvDescHeap->Release(); g_pd3dSrvDescHeap = NULL; }
         if (g_fence) { g_fence->Release(); g_fence = NULL; }
         if (g_fenceEvent) { CloseHandle(g_fenceEvent); g_fenceEvent = NULL; }
-        if (g_pd3dDevice) { g_pd3dDevice->Release(); g_pd3dDevice = NULL; }
-
-#ifdef DX12_ENABLE_DEBUG_LAYER
-        IDXGIDebug1* pDebug = NULL;
-        if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&pDebug))))
-        {
-            pDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_SUMMARY);
-            pDebug->Release();
-        }
-#endif
+       // if (g_pd3dDevice) { g_pd3dDevice->Release(); g_pd3dDevice = NULL; }
     }
 
     void CreateRenderTarget()

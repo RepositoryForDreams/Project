@@ -21,9 +21,6 @@ namespace JG
 	public:
 		static UniquePtr<IGraphicsAPI> Create(EGraphicsAPI api);
 	};
-
-
-	
 }
 
 
