@@ -20,6 +20,25 @@ namespace JG
 	{
 		Windows,
 	};
+	enum class EGraphicsAPI
+	{
+		DirectX12,
+		DirectX11,
+		OpenGL,
+		Vulkan,
+	};
+	inline String GraphicsAPIToString(EGraphicsAPI api)
+	{
+		switch(api)
+		{
+			case EGraphicsAPI::DirectX12: return TT("DirectX12");
+			case EGraphicsAPI::DirectX11: return TT("DirectX11");
+			case EGraphicsAPI::OpenGL:    return TT("OpenGL");
+			case EGraphicsAPI::Vulkan:    return TT("Vulkan");
+			default: return TT("None");
+		}
+	}
+	
 
 	enum class EKeyCode
 	{

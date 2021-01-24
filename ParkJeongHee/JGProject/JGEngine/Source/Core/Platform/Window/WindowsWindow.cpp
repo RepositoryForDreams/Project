@@ -54,12 +54,7 @@ namespace JG
 		MSG msg;
 		if(PeekMessage(&msg, mHandle, 0,0, PM_REMOVE))
 		{
-			if(msg.message == WM_QUIT)
-			{
-				WindowCallBackFn::WindowCloseCallBack();
-				
-			}
-			else
+			if(msg.message != WM_QUIT)
 			{
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);

@@ -2,6 +2,7 @@
 #include "JGCore.h"
 #include "Platform/Window/Window.h"
 #include "Class/LayerStack.h"
+#include "Graphics/GraphicsAPI.h"
 int main(int argc, char** argv);
 
 
@@ -16,8 +17,9 @@ namespace JG
 	{
 		static Application* smInstance;
 	private:
-		UniquePtr<IWindow>    mWindow;
-		UniquePtr<LayerStack> mLayerStack;
+		UniquePtr<IWindow>		mWindow;
+		UniquePtr<LayerStack>	mLayerStack;
+		UniquePtr<IGraphicsAPI> mGraphcisAPI;
 
 
 		bool mIsRunning = true;
@@ -46,7 +48,8 @@ namespace JG
 			return *smInstance;
 		}
 	public:
-		IWindow* GetWindow() const;
+		IWindow*	 GetWindow() const;
+		EGraphicsAPI GetGraphicsAPI() const;
 	private:
 		friend int ::main(int argc, char** argv);
 	};

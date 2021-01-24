@@ -8,8 +8,6 @@ namespace JG
 {
 	class JGEditor : public Application
 	{
-
-
 	protected:
 		virtual void OpenImpl() override;
 		virtual void CloseImpl() override;

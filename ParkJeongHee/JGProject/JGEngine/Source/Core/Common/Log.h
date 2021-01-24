@@ -23,6 +23,13 @@ namespace JG
 			smClientLogger = spdlog::stdout_color_mt("App");
 			smClientLogger->set_level(spdlog::level::trace);
 		}
+		~Log()
+		{
+			smCoreLogger.reset();
+			smClientLogger.reset();
+			spdlog::shutdown();
+		
+		}
 
 	};
 }

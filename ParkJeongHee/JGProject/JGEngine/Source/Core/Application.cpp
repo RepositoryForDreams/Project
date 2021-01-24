@@ -30,8 +30,8 @@ namespace JG
 
 		// TODO
 		// 필요한 멤버 클래스 생성
-		mLayerStack = CreateUniquePtr<LayerStack>();
-
+		mLayerStack  = CreateUniquePtr<LayerStack>();
+		mGraphcisAPI = IGraphicsAPI::Create(EGraphicsAPI::DirectX12);
 		
 
 
@@ -62,11 +62,15 @@ namespace JG
 		else
 		{
 			JG_CORE_INFO("Successed Create Window");
+			mGraphcisAPI->Create();
+
+
+			
 			mIsRunning = true;
 			return true;
 		}
 
-		
+		return true;
 	}
 	void Application::Run()
 	{
@@ -98,6 +102,8 @@ namespace JG
 	void Application::Destroy()
 	{
 		mLayerStack.reset();
+		mGraphcisAPI->Destroy();
+		mGraphcisAPI.reset();
 		mWindow.reset();
 		Log::Destroy();
 	}
@@ -160,5 +166,10 @@ namespace JG
 	IWindow* Application::GetWindow() const
 	{
 		return mWindow.get();
+	}
+
+	EGraphicsAPI Application::GetGraphicsAPI() const
+	{
+		return mGraphcisAPI->GetAPI();
 	}
 }
