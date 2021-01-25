@@ -1,13 +1,18 @@
 #include "pch.h"
 #include "DirectX12API.h"
+#include "DirectX12FrameBuffer.h"
 #include "Utill/DirectX12Helper.h"
-
+#include "Utill/DescriptorAllocator.h"
 
 namespace JG
 {
 	static ComPtr<IDXGIFactory4> gFactory;
 	static ComPtr<ID3D12Device>  gDevice;
-
+	static UniquePtr<DescriptorAllocator> gCSUAllocator;
+	static UniquePtr<DescriptorAllocator> gRTVAllocator;
+	static UniquePtr<DescriptorAllocator> gDSVAllocator;
+	static std::vector<UniquePtr<DirectX12FrameBuffer>> gFrameBuffers;
+	static u64 mFrameBufferIndex = 0;
 	
 	bool DirectX12API::Create()
 	{
@@ -39,6 +44,15 @@ namespace JG
 			return false;
 		}
 
+		// NOTE
+		// DescriptiorAllcator 持失
+		gCSUAllocator = CreateUniquePtr<DescriptorAllocator>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		gRTVAllocator = CreateUniquePtr<DescriptorAllocator>(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+		gRTVAllocator = CreateUniquePtr<DescriptorAllocator>(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+		
+		// FrameBuffer 持失
+
+		
 		JG_CORE_INFO("DirectX12 Init End");
 		return true;
 	}
@@ -61,5 +75,10 @@ namespace JG
 	ID3D12Device* DirectX12API::GetD3DDevice()
 	{
 		return gDevice.Get();
+	}
+
+	u64 DirectX12API::GetFrameBufferIndex()
+	{
+		return mFrameBufferIndex;
 	}
 }

@@ -8,8 +8,7 @@ namespace JG
 {
 	void* DirectX12VertexBuffer::GetUserData() const
 	{
-
-		
+		return nullptr;
 	}
 
 	bool DirectX12VertexBuffer::CreateBuffer(float* datas, u32 count)
@@ -20,6 +19,7 @@ namespace JG
 
 	void* DirectX12IndexBuffer::GetUserData() const
 	{
+		return nullptr;
 	}
 
 	bool DirectX12IndexBuffer::CreateBuffer(u32* datas, u32 count)

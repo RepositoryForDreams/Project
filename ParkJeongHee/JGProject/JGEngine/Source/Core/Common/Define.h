@@ -10,6 +10,7 @@
 #include <set>
 #include <unordered_set>
 #include <memory>
+#include <utility>
 
 #define _KB   1024
 #define _2KB  2048
@@ -35,6 +36,8 @@
 #define _512MB 536870912
 
 #define _GB 1073741824
+
+#define TT(x) L##x
 
 
 namespace JG
@@ -101,27 +104,23 @@ namespace JG
 	using SharedPtr = std::shared_ptr<T>;
 	template<class T>
 	using WeakPtr   = std::weak_ptr<T>;
-
+	
 	template<class T, class ...Args>
 	UniquePtr<T> CreateUniquePtr(Args&& ... args)
 	{
-		return std::make_unique<T>(std::foward<Args>(args)...);
+		return std::make_unique<T>(std::forward<Args>(args)...);
 	}
 
 	template<class T, class ...Args>
 	SharedPtr<T> CreateSharedPtr(Args&& ... args)
 	{
-		return std::make_shared<T>(std::foward<Args>(args)...);
+		return std::make_shared<T>(std::forward<Args>(args)...);
 	}
 
 
 	// String
 	using String = std::wstring;
 	using wchar  = wchar_t;
-
-#define TT(x) L##x
-
-
 }
 
 

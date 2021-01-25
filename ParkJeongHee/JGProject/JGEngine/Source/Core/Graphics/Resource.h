@@ -40,9 +40,6 @@ namespace JG
 		static SharedPtr<IIndexBuffer> Create(String name, u32* datas, u32 count);
 	};
 	
-
-
-
 	using TextureID = u64;
 	class ITexture : public IResource
 	{
