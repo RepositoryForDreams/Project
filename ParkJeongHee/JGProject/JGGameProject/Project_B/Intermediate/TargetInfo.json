@@ -1,0 +1,14 @@
+{
+	"Targets": [
+		{
+			"Name": "Project_B",
+			"Path": "C:\\Project\\ParkJeongHee\\JGProject\\JGGameProject\\Project_B\\Source\\Project_B.Target.cs",
+			"Type": "Game"
+		},
+		{
+			"Name": "Project_BEditor",
+			"Path": "C:\\Project\\ParkJeongHee\\JGProject\\JGGameProject\\Project_B\\Source\\Project_BEditor.Target.cs",
+			"Type": "Editor"
+		}
+	]
+}
