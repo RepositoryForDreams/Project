@@ -17,6 +17,21 @@
 #pragma comment(lib,"Dxgi.lib")
 #pragma comment(lib,"dxguid.lib")
 
+#if defined(min)
+#undef min
+#endif
+
+#if defined(max)
+#undef max
+#endif
+#if defined(far)
+#undef far
+#endif
+
+#if defined(near)
+#undef near
+#endif
+
 
 using namespace Microsoft::WRL;
 
