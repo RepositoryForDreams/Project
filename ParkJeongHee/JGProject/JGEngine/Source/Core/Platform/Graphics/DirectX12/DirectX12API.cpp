@@ -1,9 +1,10 @@
 #include "pch.h"
 #include "DirectX12API.h"
 #include "DirectX12FrameBuffer.h"
+
 #include "Utill/DirectX12Helper.h"
 #include "Utill/DescriptorAllocator.h"
-
+#include "Utill/CommandQueue.h"
 namespace JG
 {
 	static ComPtr<IDXGIFactory4> gFactory;
@@ -11,8 +12,15 @@ namespace JG
 	static UniquePtr<DescriptorAllocator> gCSUAllocator;
 	static UniquePtr<DescriptorAllocator> gRTVAllocator;
 	static UniquePtr<DescriptorAllocator> gDSVAllocator;
+
+	static UniquePtr<CommandQueue> gGraphicsCommandQueue;
+	static UniquePtr<CommandQueue> gComputeCommandQueue;
+	static UniquePtr<CommandQueue> gCopyCommandQueue;
 	static std::vector<UniquePtr<DirectX12FrameBuffer>> gFrameBuffers;
-	static u64 mFrameBufferIndex = 0;
+	static const u64 gFrameBufferCount = 3;
+	static u64 gFrameBufferIndex = 0;
+
+
 	
 	bool DirectX12API::Create()
 	{
@@ -35,8 +43,8 @@ namespace JG
 		if(gDevice)
 		{
 			JG_CORE_INFO("Success Create D3D12Device");
-			JG_CORE_TRANCE(ws2s(String(TT("Description : ")) + adapterDesc.Description));
-			JG_CORE_TRANCE("VideoMemory : {0}  MB", adapterDesc.DedicatedVideoMemory / 1024 / 1024);
+			JG_CORE_TRACE(ws2s(String(TT("Description : ")) + adapterDesc.Description));
+			JG_CORE_TRACE("VideoMemory : {0}  MB", adapterDesc.DedicatedVideoMemory / 1024 / 1024);
 		}
 		else
 		{
@@ -46,18 +54,40 @@ namespace JG
 
 		// NOTE
 		// DescriptiorAllcator 持失
+		JG_CORE_INFO("Create DescriptorAllocator...");
 		gCSUAllocator = CreateUniquePtr<DescriptorAllocator>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		gRTVAllocator = CreateUniquePtr<DescriptorAllocator>(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 		gRTVAllocator = CreateUniquePtr<DescriptorAllocator>(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
-		
-		// FrameBuffer 持失
 
-		
+
+		JG_CORE_INFO("Create CommandQueue...");
+		gGraphicsCommandQueue = CreateUniquePtr<CommandQueue>(gFrameBufferCount, D3D12_COMMAND_LIST_TYPE_DIRECT);
+		gComputeCommandQueue  = CreateUniquePtr<CommandQueue>(gFrameBufferCount, D3D12_COMMAND_LIST_TYPE_COMPUTE);
+		gCopyCommandQueue	  = CreateUniquePtr<CommandQueue>(gFrameBufferCount, D3D12_COMMAND_LIST_TYPE_COPY);
+
+		JG_CORE_INFO("Create FrameBuffer...");
+		for (u64 i = 0; i < gFrameBufferCount; ++i)
+		{
+			// FrameBuffer 持失
+		}
+
+		// FrameBuffer 持失
 		JG_CORE_INFO("DirectX12 Init End");
 		return true;
 	}
 	void DirectX12API::Destroy()
 	{
+		Flush();
+
+		gCSUAllocator.reset();
+		gRTVAllocator.reset();
+		gDSVAllocator.reset();
+
+		gGraphicsCommandQueue.reset();
+		gComputeCommandQueue.reset();
+		gCopyCommandQueue.reset();
+
+		gFrameBuffers.clear();
 
 		gDevice.Reset();
 		gFactory.Reset();
@@ -79,6 +109,38 @@ namespace JG
 
 	u64 DirectX12API::GetFrameBufferIndex()
 	{
-		return mFrameBufferIndex;
+		return gFrameBufferIndex;
+	}
+
+
+	void DirectX12API::Begin()
+	{
+		gGraphicsCommandQueue->Begin();
+		gComputeCommandQueue->Begin();
+		gCopyCommandQueue->Begin();
+	}
+	void DirectX12API::End()
+	{
+		// TODO
+		// FrameBuffer Update
+
+		gGraphicsCommandQueue->End();
+		gComputeCommandQueue->End();
+		gCopyCommandQueue->End();
+
+
+		// TODO
+		// SwapBuffer
+
+		gFrameBufferIndex = (gFrameBufferIndex + 1) % gFrameBufferCount;
+		gCSUAllocator->UpdatePage();
+		gRTVAllocator->UpdatePage();
+		gRTVAllocator->UpdatePage();
+	}
+	void DirectX12API::Flush()
+	{
+		gGraphicsCommandQueue->Flush();
+		gComputeCommandQueue->Flush();
+		gCopyCommandQueue->Flush();
 	}
 }

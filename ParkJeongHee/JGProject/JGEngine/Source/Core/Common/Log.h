@@ -35,7 +35,7 @@ namespace JG
 }
 
 #if   _DEBUG
-#define JG_CORE_TRANCE(...)   ::JG::Log::GetCoreLogger()->trace(__VA_ARGS__)
+#define JG_CORE_TRACE(...)   ::JG::Log::GetCoreLogger()->trace(__VA_ARGS__)
 #define JG_CORE_INFO(...)     ::JG::Log::GetCoreLogger()->info(__VA_ARGS__)
 #define JG_CORE_WARN(...)     ::JG::Log::GetCoreLogger()->warn(__VA_ARGS__)
 #define JG_CORE_ERROR(...)    ::JG::Log::GetCoreLogger()->error(__VA_ARGS__)
@@ -49,7 +49,7 @@ namespace JG
 #endif //  
 
 #if   _DEBUG
-#define JG_TRANCE(...)   ::JG::Log::GetClientLogger()->trace(__VA_ARGS__)
+#define JG_TRACE(...)   ::JG::Log::GetClientLogger()->trace(__VA_ARGS__)
 #define JG_INFO(...)     ::JG::Log::GetClientLogger()->info(__VA_ARGS__)
 #define JG_WARN(...)     ::JG::Log::GetClientLogger()->warn(__VA_ARGS__)
 #define JG_ERROR(...)    ::JG::Log::GetClientLogger()->error(__VA_ARGS__)

@@ -1,7 +1,8 @@
 ﻿#include "pch.h"
 #include "GraphicsAPI.h"
+#include "Application.h"
 #include "Platform/Graphics/DirectX12/DirectX12API.h"
-
+#include "Platform/Graphics/DirectX12/DirectX12Renderer.h"
 
 
 namespace JG

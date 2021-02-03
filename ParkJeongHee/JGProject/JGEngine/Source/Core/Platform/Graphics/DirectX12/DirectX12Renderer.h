@@ -1,7 +1,13 @@
 ﻿#pragma once
+#include "JGCore.h"
+#include "Graphics/Renderer.h"
 
-class DirectX12Renderer
+
+
+namespace JG
 {
-public:
-	
-};
+
+}
+
+
+

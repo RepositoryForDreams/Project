@@ -1,12 +1,5 @@
 ﻿#pragma once
 #include "JGCore.h"
-#include "Resource.h"
-#include "Shader.h"
-
-
-
-
-
 
 
 namespace JG
@@ -17,7 +10,11 @@ namespace JG
 		virtual bool Create()  = 0;
 		virtual void Destroy() = 0;
 		virtual EGraphicsAPI GetAPI() const = 0;
-
+	protected:
+		friend class Renderer;
+		virtual void Begin() = 0;
+		virtual void End()	 = 0;
+		virtual void Flush() = 0;
 	public:
 		static UniquePtr<IGraphicsAPI> Create(EGraphicsAPI api);
 	};

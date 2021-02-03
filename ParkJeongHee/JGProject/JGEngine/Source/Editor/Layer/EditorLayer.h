@@ -25,7 +25,7 @@ namespace JG
 		virtual String GetLayerName()  override;
 
 	private:
-		bool EditorLayer::Resize(AppResizeEvent& e);
+		bool Resize(AppResizeEvent& e);
 	};
 }
 

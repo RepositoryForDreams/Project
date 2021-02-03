@@ -15,8 +15,6 @@ namespace JG
 		JGASSERT_IF(SUCCEEDED(hr) , "Failed Create Fence Object");
 	}
 
-
-
 	void Fence::WaitForFenceValue(uint64_t value, std::chrono::milliseconds duration)
 	{
 		std::lock_guard<std::mutex> lock(mEventMutex);

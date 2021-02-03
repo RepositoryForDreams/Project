@@ -30,6 +30,6 @@ int main(int argc, char** argv)
 
 	delete app;
 	app = nullptr;
-	//std::atexit(Leak);
+	std::atexit(Leak);
 	return 0;
 }

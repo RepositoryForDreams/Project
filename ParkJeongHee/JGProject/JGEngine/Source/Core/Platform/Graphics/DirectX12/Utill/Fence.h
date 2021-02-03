@@ -15,7 +15,6 @@ namespace JG
 	
 	public:
 		Fence();
-		~Fence() = default;
 
 		
 		uint64_t GetValue() const {

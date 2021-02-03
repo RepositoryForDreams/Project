@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "Application.h"
 #include "Platform/Window/WindowsWindow.h"
+#include "Graphics/Renderer.h"
 using namespace std;
 namespace JG
 {
@@ -81,6 +82,7 @@ namespace JG
 		
 		while(mIsRunning)
 		{
+			Renderer::Begin();
 			mWindow->Update();
 			mLayerStack->ForEach([&](ILayer * layer)
 			{
@@ -90,6 +92,7 @@ namespace JG
 			{
 				layer->LateUpdate();
 			});
+			Renderer::End();
 		}
 
 		
@@ -167,9 +170,8 @@ namespace JG
 	{
 		return mWindow.get();
 	}
-
-	EGraphicsAPI Application::GetGraphicsAPI() const
+	IGraphicsAPI* Application::GetGraphicsAPI() const
 	{
-		return mGraphcisAPI->GetAPI();
+		return mGraphcisAPI.get();
 	}
 }

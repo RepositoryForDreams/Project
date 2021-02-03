@@ -48,8 +48,8 @@ namespace JG
 			return *smInstance;
 		}
 	public:
-		IWindow*	 GetWindow() const;
-		EGraphicsAPI GetGraphicsAPI() const;
+		IWindow*	  GetWindow() const;
+		IGraphicsAPI* GetGraphicsAPI() const;
 	private:
 		friend int ::main(int argc, char** argv);
 	};

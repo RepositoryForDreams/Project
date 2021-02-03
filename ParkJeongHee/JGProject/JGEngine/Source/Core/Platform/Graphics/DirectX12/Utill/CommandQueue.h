@@ -9,8 +9,8 @@
 
 namespace JG
 {
-	class Fence;
 	class CommandList;
+	class Fence;
 	class CommandQueue
 	{
 	private:
@@ -20,10 +20,10 @@ namespace JG
 		std::map<i32, std::vector<CommandList*>> mExpectExcuteCmdLists;
 		std::map<u64, std::queue<UniquePtr<CommandList>>>     mPendingCmdLists;
 		UniquePtr<Fence> mFence;
-		u64 mBufferIndex = 0;
 		std::vector<u64> mFenceValue;
 	public:
 		CommandQueue(u64 bufferCount, D3D12_COMMAND_LIST_TYPE type);
+		~CommandQueue();
 	public:
 		CommandList* RequestCommandList(int priority);
 		void Begin();

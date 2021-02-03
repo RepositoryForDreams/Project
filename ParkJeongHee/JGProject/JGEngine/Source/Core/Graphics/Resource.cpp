@@ -10,9 +10,11 @@ namespace JG
 {
 	SharedPtr<IVertexBuffer> IVertexBuffer::Create(String name, float* datas, u32 count)
 	{
-		JGASSERT_IF(datas == nullptr, TT("Data is Null"));
-		
-		switch(Application::GetInstance().GetGraphicsAPI())
+		JGASSERT_IF(datas != nullptr, TT("Data is Null"));
+		auto api = Application::GetInstance().GetGraphicsAPI();
+		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
+
+		switch(api->GetAPI())
 		{
 		case EGraphicsAPI::DirectX12:
 			{
@@ -31,8 +33,10 @@ namespace JG
 	SharedPtr<IIndexBuffer> IIndexBuffer::Create(String name, u32* datas, u32 count)
 	{
 		JGASSERT_IF(datas == nullptr, TT("Data is Null"));
+		auto api = Application::GetInstance().GetGraphicsAPI();
+		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
 
-		switch (Application::GetInstance().GetGraphicsAPI())
+		switch (api->GetAPI())
 		{
 		case EGraphicsAPI::DirectX12:
 		{

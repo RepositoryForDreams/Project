@@ -21,8 +21,6 @@ namespace JG
 		static    bool show_another_window = false;
   
 
-        
-
         if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
 
@@ -75,7 +73,7 @@ namespace JG
 	{
         ImGui::ExternalImpl_Init(
             Application::GetInstance().GetWindow()->GetPlatform(),
-            Application::GetInstance().GetGraphicsAPI(),
+            Application::GetInstance().GetGraphicsAPI()->GetAPI(),
             Application::GetInstance().GetWindow()->GetHandle()
         );
 	}
