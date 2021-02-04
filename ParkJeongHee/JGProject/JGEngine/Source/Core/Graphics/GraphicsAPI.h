@@ -7,10 +7,13 @@ namespace JG
 	class IGraphicsAPI 
 	{
 	public:
-		virtual bool Create()  = 0;
-		virtual void Destroy() = 0;
 		virtual EGraphicsAPI GetAPI() const = 0;
 	protected:
+		friend class Application;
+		virtual bool Create() = 0;
+		virtual void Destroy() = 0;
+
+
 		friend class Renderer;
 		virtual void Begin() = 0;
 		virtual void End()	 = 0;

@@ -29,23 +29,34 @@ namespace JG
 	// Close
 	// CommandQueue 에 떤져줌
 
+
+
+	/* 
+	* 설정 값
+	* BufferCount = 3
+	* DynamicDescriptorAllocator Size
+	* UploadAllocator Size 
+	
+	
+	*/
 	
 	class DirectX12API : public IGraphicsAPI
 	{
-	private:
-
 	public:
-		virtual bool Create() override;
-		virtual void Destroy() override;
 		virtual EGraphicsAPI GetAPI()const override;
-
 	public:
 		static IDXGIFactory4* GetDXGIFactory();
 		static ID3D12Device*  GetD3DDevice();
 		static u64			  GetFrameBufferIndex();
 	protected:
+		// Application
+		virtual bool Create() override;
+		virtual void Destroy() override;
+		// Renderer
 		virtual void Begin() override;
 		virtual void End()   override;
 		virtual void Flush() override;
+
+		
 	};
 }

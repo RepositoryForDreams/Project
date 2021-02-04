@@ -1,24 +1,94 @@
 ﻿#include "pch.h"
 #include "RootSignature.h"
 #include "Platform/Graphics/DirectX12/DirectX12API.h"
-std::unordered_map<JG::u64, ComPtr<ID3D12RootSignature>> g_RootSigCahce;
+
+
+
 
 namespace JG
 {
+	static std::unordered_map<JG::u64, ComPtr<ID3D12RootSignature>> gRootSigCahce;
+
+
+	void RootSignature::InitAsDescriptorTable(D3D12_DESCRIPTOR_RANGE_TYPE type, u32 numDescriptor, u32 register_num, u32 register_space, D3D12_SHADER_VISIBILITY visibility)
+	{
+		u32 rootParam = (u32)mRootSigInitType.size();
+		mDescriptorTableInfoByRootParam[rootParam] = DescriptorTableInfo(type, numDescriptor);
+
+		auto range = CreateUniquePtr<CD3DX12_DESCRIPTOR_RANGE>();
+		range->Init(type, numDescriptor, register_num, register_space);
+
+		CD3DX12_ROOT_PARAMETER param;
+		param.InitAsDescriptorTable(1, range.get(), visibility);
+
+
+		mRootParams.push_back(param);
+		mDescriptorRanges.push_back(move(range));
+
+		mRootSigInitType.push_back(__DescriptorTable__);
+	}
+	void RootSignature::InitAsSRV(u32 register_num, u32 register_space, D3D12_SHADER_VISIBILITY visibility)
+	{
+		CD3DX12_ROOT_PARAMETER param;
+
+		param.InitAsShaderResourceView(register_num, register_space, visibility);
+		mRootParams.push_back(param);
+
+
+
+		mRootSigInitType.push_back(__ShaderResourceView__);
+	}
+	void RootSignature::InitAsUAV(u32 register_num, u32 register_space, D3D12_SHADER_VISIBILITY visibility)
+	{
+		CD3DX12_ROOT_PARAMETER param;
+
+		param.InitAsUnorderedAccessView(register_num, register_space, visibility);
+		mRootParams.push_back(param);
+
+		mRootSigInitType.push_back(__UnorderedAccessView__);
+	}
+	void RootSignature::InitAsCBV(u32 register_num, u32 register_space, D3D12_SHADER_VISIBILITY visibility)
+	{
+		CD3DX12_ROOT_PARAMETER param;
+
+		param.InitAsConstantBufferView(register_num, register_space, visibility);
+		mRootParams.push_back(param);
+
+		mRootSigInitType.push_back(__ConstantBufferView__);
+	}
+	void RootSignature::InitAsConstant(u32 btSize, u32 register_num, u32 register_space, D3D12_SHADER_VISIBILITY visibility)
+	{
+		CD3DX12_ROOT_PARAMETER param;
+
+		param.InitAsConstants(btSize / 4, register_num, register_space, visibility);
+		mRootParams.push_back(param);
+
+		mRootSigInitType.push_back(__Constant__);
+	}
+	void RootSignature::AddStaticSamplerState(const CD3DX12_STATIC_SAMPLER_DESC& desc)
+	{
+		mSamplerState.push_back(desc);
+	}
+	RootSignature::DescriptorTableInfo RootSignature::GetDescriptorTableRangeType(u32 rootparam) const
+	{
+		JGASSERT_IF(mDescriptorTableInfoByRootParam.find(rootparam) != mDescriptorTableInfoByRootParam.end(),
+			"GetDescriptorTableInfo : nonexist DescriptorTable in rootparam");
+
+		return mDescriptorTableInfoByRootParam.at(rootparam);
+	}
 	bool RootSignature::Finalize()
 	{
-
-		CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc((u32)m_RootParams.size(),
-			m_RootParams.data(), (u32)m_SamplerState.size(), m_SamplerState.data(),
+		CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc((u32)mRootParams.size(),
+			mRootParams.data(), (u32)mSamplerState.size(), mSamplerState.data(),
 			D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
 		u64 HashCode = HashState(&rootSigDesc.Flags);
 
-		HashCode = HashState(rootSigDesc.pStaticSamplers, m_SamplerState.size(), HashCode);
+		HashCode = HashState(rootSigDesc.pStaticSamplers, mSamplerState.size(), HashCode);
 
 
 
-		for (u32 param = 0; param < (u32)m_RootParams.size(); ++param)
+		for (u32 param = 0; param < (u32)mRootParams.size(); ++param)
 		{
 			const D3D12_ROOT_PARAMETER& RootParam = rootSigDesc.pParameters[param];
 
@@ -37,12 +107,12 @@ namespace JG
 		{
 			static std::mutex s_HashMapMutex;
 			std::lock_guard<std::mutex> CS(s_HashMapMutex);
-			auto iter = g_RootSigCahce.find(HashCode);
+			auto iter = gRootSigCahce.find(HashCode);
 
 			// Reserve space so the next inquiry will find that someone got here first.
-			if (iter == g_RootSigCahce.end())
+			if (iter == gRootSigCahce.end())
 			{
-				RSRef = g_RootSigCahce[HashCode].GetAddressOf();
+				RSRef = gRootSigCahce[HashCode].GetAddressOf();
 				firstCompile = true;
 			}
 			else
@@ -51,18 +121,22 @@ namespace JG
 
 		if (firstCompile)
 		{
-			m_D3D_RootSig = CreateD3DRootSignature(DirectX12API::GetD3DDevice(), &rootSigDesc);
-			if (m_D3D_RootSig == nullptr) assert("failed CreateRootSig");
-			g_RootSigCahce[HashCode] = m_D3D_RootSig.Get();
+			mD3DRootSig = CreateD3DRootSignature(DirectX12API::GetD3DDevice(), &rootSigDesc);
+			if (mD3DRootSig == nullptr) assert("failed CreateRootSig");
+			gRootSigCahce[HashCode] = mD3DRootSig.Get();
 		}
 		else
 		{
 			while (*RSRef == nullptr)
 				std::this_thread::yield();
-			m_D3D_RootSig = *RSRef;
+			mD3DRootSig = *RSRef;
 		}
 
-		m_DescriptorRanges.clear();
+		mDescriptorRanges.clear();
 		return true;
+	}
+	void RootSignature::ClearCache()
+	{
+		gRootSigCahce.clear();
 	}
 }

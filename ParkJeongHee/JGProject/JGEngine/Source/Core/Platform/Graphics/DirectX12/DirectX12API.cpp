@@ -5,6 +5,7 @@
 #include "Utill/DirectX12Helper.h"
 #include "Utill/DescriptorAllocator.h"
 #include "Utill/CommandQueue.h"
+#include "Utill/RootSignature.h"
 namespace JG
 {
 	static ComPtr<IDXGIFactory4> gFactory;
@@ -20,15 +21,34 @@ namespace JG
 	static const u64 gFrameBufferCount = 3;
 	static u64 gFrameBufferIndex = 0;
 
+	EGraphicsAPI DirectX12API::GetAPI() const
+	{
+		return EGraphicsAPI::DirectX12;
+	}
 
-	
+	IDXGIFactory4* DirectX12API::GetDXGIFactory()
+	{
+		return gFactory.Get();
+	}
+
+	ID3D12Device* DirectX12API::GetD3DDevice()
+	{
+		return gDevice.Get();
+	}
+
+	u64 DirectX12API::GetFrameBufferIndex()
+	{
+		return gFrameBufferIndex;
+	}
+
+
 	bool DirectX12API::Create()
 	{
 		JG_CORE_INFO("DirectX12 Init Start");
 
 		//
 		gFactory = CreateDXGIFactory();
-		if(gFactory)
+		if (gFactory)
 		{
 			JG_CORE_INFO("Success Create DXGIFactroy");
 		}
@@ -40,7 +60,7 @@ namespace JG
 		DXGI_ADAPTER_DESC1 adapterDesc = {};
 		gDevice = CreateD3DDevice(gFactory, false, &adapterDesc);
 
-		if(gDevice)
+		if (gDevice)
 		{
 			JG_CORE_INFO("Success Create D3D12Device");
 			JG_CORE_TRACE(ws2s(String(TT("Description : ")) + adapterDesc.Description));
@@ -63,14 +83,13 @@ namespace JG
 		JG_CORE_INFO("Create CommandQueue...");
 		gGraphicsCommandQueue = CreateUniquePtr<CommandQueue>(gFrameBufferCount, D3D12_COMMAND_LIST_TYPE_DIRECT);
 		gComputeCommandQueue  = CreateUniquePtr<CommandQueue>(gFrameBufferCount, D3D12_COMMAND_LIST_TYPE_COMPUTE);
-		gCopyCommandQueue	  = CreateUniquePtr<CommandQueue>(gFrameBufferCount, D3D12_COMMAND_LIST_TYPE_COPY);
+		gCopyCommandQueue     = CreateUniquePtr<CommandQueue>(gFrameBufferCount, D3D12_COMMAND_LIST_TYPE_COPY);
 
 		JG_CORE_INFO("Create FrameBuffer...");
 		for (u64 i = 0; i < gFrameBufferCount; ++i)
 		{
 			// FrameBuffer 持失
 		}
-
 		// FrameBuffer 持失
 		JG_CORE_INFO("DirectX12 Init End");
 		return true;
@@ -78,6 +97,8 @@ namespace JG
 	void DirectX12API::Destroy()
 	{
 		Flush();
+
+		RootSignature::ClearCache();
 
 		gCSUAllocator.reset();
 		gRTVAllocator.reset();
@@ -91,25 +112,6 @@ namespace JG
 
 		gDevice.Reset();
 		gFactory.Reset();
-	}
-	EGraphicsAPI DirectX12API::GetAPI() const
-	{
-		return EGraphicsAPI::DirectX12;
-	}
-
-	IDXGIFactory4* DirectX12API::GetDXGIFactory()
-	{
-		return gFactory.Get();
-	}
-
-	ID3D12Device* DirectX12API::GetD3DDevice()
-	{
-		return gDevice.Get();
-	}
-
-	u64 DirectX12API::GetFrameBufferIndex()
-	{
-		return gFrameBufferIndex;
 	}
 
 

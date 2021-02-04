@@ -5,79 +5,80 @@
 
 namespace JG
 {
-	DynamicDescriptorAllocator::DynamicDescriptorAllocator(uint32_t numDescriptor)
+	DynamicDescriptorAllocator::DynamicDescriptorAllocator(u32 numDescriptor)
 	{
-		m_IncreaseSize = DirectX12API::GetD3DDevice()->GetDescriptorHandleIncrementSize(
+		mIncreaseSize = DirectX12API::GetD3DDevice()->GetDescriptorHandleIncrementSize(
 			D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV
 		);
-		RequestDescriptorHeap();
+		mD3DHeap = CreateD3DDescriptorHeap(DirectX12API::GetD3DDevice(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+			D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, mNumDescriptor);
 	}
 
 	void DynamicDescriptorAllocator::CommitRootSignature(RootSignature& rootSig)
 	{
-
 		Reset();
-		for (int i = 0; i < (int)rootSig.m_RootSigInitType.size(); ++i)
+		for (i32 i = 0; i < (i32)rootSig.mRootSigInitType.size(); ++i)
 		{
-			m_RootParamInitTypeMap[i] = rootSig.m_RootSigInitType[i];
+			mRootParamInitTypeMap[i] = rootSig.mRootSigInitType[i];
 		}
 
-		for (auto& info_pair : rootSig.m_DescriptorTableInfoByRootParam)
+		for (auto& info_pair : rootSig.mDescriptorTableInfoByRootParam)
 		{
-			uint32_t rootParam = info_pair.first;
-			uint32_t numDescriptor = info_pair.second.numDescirptor;
-			auto     rangeType = info_pair.second.type;
+			u32 rootParam	   = info_pair.first;
+			u32 numDescriptor  = info_pair.second.NumDescirptor;
+			auto     rangeType = info_pair.second.Type;
 
-			m_DescriptorTableType[rootParam] = rangeType;
-			m_CPUCache[rootParam].numDescriptor = numDescriptor;
+			mDescriptorTableType[rootParam]    = rangeType;
+			mCPUCache[rootParam].NumDescriptor = numDescriptor;
 		}
 	}
-	void DynamicDescriptorAllocator::CommitDescriptorTable(uint32_t rootParam, const std::vector<D3D12_CPU_DESCRIPTOR_HANDLE>& handles)
+	void DynamicDescriptorAllocator::CommitDescriptorTable(u32 rootParam, const std::vector<D3D12_CPU_DESCRIPTOR_HANDLE>& handles)
 	{
-		auto& cpuHandles = m_CPUCache[rootParam].cpuHandles;
+		auto& cpuHandles = mCPUCache[rootParam].CPUHandles;
 		cpuHandles.insert(cpuHandles.end(), handles.begin(), handles.end());
 	}
 	void DynamicDescriptorAllocator::Reset()
 	{
-		m_PushedHandleOffset = 0;
-		m_RootParamInitTypeMap.clear();
-		m_DescriptorTableType.clear();
-		m_CPUCache.clear();
-		RequestDescriptorHeap();
+		mPushedHandleOffset = 0;
+		mRootParamInitTypeMap.clear();
+		mDescriptorTableType.clear();
+		mCPUCache.clear();
 	}
 
 
 	void DynamicDescriptorAllocator::PushDescriptorTable(ComPtr<ID3D12GraphicsCommandList> d3dCmdList, ComPtr<ID3D12DescriptorHeap> d3dDescriptorHeap, bool is_graphics)
 	{
-		if (m_ResizeDirty) return;
-		if (d3dDescriptorHeap != m_CurrentD3DHeap.DescriptorHeap)
+		if (d3dDescriptorHeap != mD3DHeap)
 		{
-			d3dDescriptorHeap = m_CurrentD3DHeap.DescriptorHeap;
+			RequestDescriptorHeap();
+			d3dDescriptorHeap = mD3DHeap;
 			d3dCmdList->SetDescriptorHeaps(1, d3dDescriptorHeap.GetAddressOf());
 		}
-		if (!m_CPUCache.empty())
+		if (!mCPUCache.empty())
 		{
 			std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> cpu_Handles;
-			CD3DX12_CPU_DESCRIPTOR_HANDLE startCPU(m_CurrentD3DHeap.DescriptorHeap->GetCPUDescriptorHandleForHeapStart());
-			CD3DX12_GPU_DESCRIPTOR_HANDLE startGPU(m_CurrentD3DHeap.DescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-			for (auto& cache_pair : m_CPUCache)
+			CD3DX12_CPU_DESCRIPTOR_HANDLE startCPU(mD3DHeap->GetCPUDescriptorHandleForHeapStart());
+			CD3DX12_GPU_DESCRIPTOR_HANDLE startGPU(mD3DHeap->GetGPUDescriptorHandleForHeapStart());
+			for (auto& cache_pair : mCPUCache)
 			{
-				int  rootParam = cache_pair.first;
-				auto handles = cache_pair.second.cpuHandles.data();
+				i32  rootParam = cache_pair.first;
+				auto handles = cache_pair.second.CPUHandles.data();
 
 
-				uint32_t handleCount = (uint32_t)cache_pair.second.cpuHandles.size();
+				u32 handleCount = (u32)cache_pair.second.CPUHandles.size();
 				if (handleCount == 0) continue;
-				auto gpu = startGPU.Offset(m_PushedHandleOffset, m_IncreaseSize);
-				auto cpu = startCPU.Offset(m_PushedHandleOffset, m_IncreaseSize);
-				m_PushedHandleOffset += handleCount;
-				if (m_PushedHandleOffset >= m_CurrentD3DHeap.numDescriptor)
+				auto gpu = startGPU.Offset(mPushedHandleOffset, mIncreaseSize);
+				auto cpu = startCPU.Offset(mPushedHandleOffset, mIncreaseSize);
+
+				mPushedHandleOffset += handleCount;
+
+				if (mPushedHandleOffset >= mNumDescriptor)
 				{
-					m_PushedHandleOffset = m_CurrentD3DHeap.numDescriptor;
-					m_ResizeDirty = true;
+					mPushedHandleOffset = mNumDescriptor;
+					JG_CORE_CRITICAL("Need Add DynamicDescriptorAllocator Size  {0} => {1} ", mNumDescriptor, mNumDescriptor * 2);
 				}
 
-				std::vector<uint32_t> srcDescriptorRangeSize(handleCount, 1);
+				std::vector<u32> srcDescriptorRangeSize(handleCount, 1);
 
 				DirectX12API::GetD3DDevice()->CopyDescriptors(
 					1, &cpu, &handleCount,
@@ -92,26 +93,35 @@ namespace JG
 				{
 					d3dCmdList->SetComputeRootDescriptorTable(rootParam, gpu);
 				}
-				cache_pair.second.cpuHandles.clear();
+				cache_pair.second.CPUHandles.clear();
 			}
 
 		}
 	}
-	void DynamicDescriptorAllocator::RequestDescriptorHeap()
+	i32 DynamicDescriptorAllocator::GetDescriptorInitAsType(u32 rootParam) const
 	{
-		if (m_CurrentD3DHeap.DescriptorHeap && m_ResizeDirty)
-		{
-			m_CurrentD3DHeap.numDescriptor *= 2;
-			m_ResizeDirty = false;
-			m_CurrentD3DHeap.DescriptorHeap = CreateD3DDescriptorHeap(DirectX12API::GetD3DDevice(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-				D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, m_CurrentD3DHeap.numDescriptor);
-		}
-		else if (m_CurrentD3DHeap.DescriptorHeap == nullptr)
-		{
-			m_CurrentD3DHeap.DescriptorHeap = CreateD3DDescriptorHeap(DirectX12API::GetD3DDevice(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-				D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, m_CurrentD3DHeap.numDescriptor);
-		}
+		JGASSERT_IF(mRootParamInitTypeMap.find(rootParam) != mRootParamInitTypeMap.end(),
+			"DynamicDescriptorAllocator::GetDescriptorInitAsType  :  NonExistent rootParam");
+		return mRootParamInitTypeMap.at(rootParam);
+	}
+	D3D12_DESCRIPTOR_RANGE_TYPE DynamicDescriptorAllocator::GetDescriptorTableType(u32 rootParam) const
+	{
+		JGASSERT_IF(mDescriptorTableType.find(rootParam) != mDescriptorTableType.end(),
+			"DynamicDescriptorAllocator::GetDescriptorTableType  :  NonExistent rootParam");
+		return mDescriptorTableType.at(rootParam);
 	}
 
-	
+	void DynamicDescriptorAllocator::RequestDescriptorHeap()
+	{
+		if (mResizeDirty == false)
+		{
+			return;
+		}
+		JG_CORE_ERROR("Resize DynamicDescriptorHeap Size {0} => {1}", mNumDescriptor, mNumDescriptor * 2);
+		mNumDescriptor *= 2;
+
+		mD3DHeap = CreateD3DDescriptorHeap(DirectX12API::GetD3DDevice(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+			D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, mNumDescriptor);
+	}
+
 }
