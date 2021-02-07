@@ -1,14 +1,17 @@
 #pragma once
 #include "Graphics/GraphicsAPI.h"
+#include "Graphics/GraphicsDefine.h"
 
 
-
-
+enum   DXGI_FORMAT;
 struct ID3D12Device;
 struct IDXGIFactory4;
 struct ID3D12Resource;
+
 namespace JG
 {
+	class  CommandQueue;
+	class DescriptorAllocation;
 	// Rendering Flow
 	//
 	// ¸Ç Ã³À½
@@ -47,7 +50,16 @@ namespace JG
 	public:
 		static IDXGIFactory4* GetDXGIFactory();
 		static ID3D12Device*  GetD3DDevice();
+		static CommandQueue*  GetGraphicsCommandQueue();
+		static CommandQueue*  GetComputeCommandQueue();
+		static CommandQueue*  GetCopyCommandQueue();
+		static u64			  GetFrameBufferCount();
 		static u64			  GetFrameBufferIndex();
+
+
+		static DescriptorAllocation RTVAllocate();
+		static DescriptorAllocation DSVAllocate();
+		static DescriptorAllocation CSUAllocate();
 	protected:
 		// Application
 		virtual bool Create() override;
@@ -56,7 +68,8 @@ namespace JG
 		virtual void Begin() override;
 		virtual void End()   override;
 		virtual void Flush() override;
-
-		
 	};
+
+
+	DXGI_FORMAT ConvertDirectX12TextureFormat(ETextureFormat format);
 }

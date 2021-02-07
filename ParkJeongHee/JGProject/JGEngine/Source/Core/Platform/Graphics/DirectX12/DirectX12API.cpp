@@ -35,13 +35,39 @@ namespace JG
 	{
 		return gDevice.Get();
 	}
-
+	CommandQueue* DirectX12API::GetGraphicsCommandQueue()
+	{
+		return gGraphicsCommandQueue.get();
+	}
+	CommandQueue* DirectX12API::GetComputeCommandQueue()
+	{
+		return gComputeCommandQueue.get();
+	}
+	CommandQueue* DirectX12API::GetCopyCommandQueue()
+	{
+		return gCopyCommandQueue.get();
+	}
+	u64	DirectX12API::GetFrameBufferCount()
+	{
+		return gFrameBufferCount;
+	}
 	u64 DirectX12API::GetFrameBufferIndex()
 	{
 		return gFrameBufferIndex;
 	}
 
-
+	DescriptorAllocation DirectX12API::RTVAllocate()
+	{
+		return gRTVAllocator->Allocate();
+	}
+	DescriptorAllocation DirectX12API::DSVAllocate()
+	{
+		return gDSVAllocator->Allocate();
+	}
+	DescriptorAllocation DirectX12API::CSUAllocate()
+	{
+		return gCSUAllocator->Allocate();
+	}
 	bool DirectX12API::Create()
 	{
 		JG_CORE_INFO("DirectX12 Init Start");
@@ -94,6 +120,8 @@ namespace JG
 		JG_CORE_INFO("DirectX12 Init End");
 		return true;
 	}
+
+
 	void DirectX12API::Destroy()
 	{
 		Flush();
@@ -144,5 +172,16 @@ namespace JG
 		gGraphicsCommandQueue->Flush();
 		gComputeCommandQueue->Flush();
 		gCopyCommandQueue->Flush();
+	}
+	DXGI_FORMAT ConvertDirectX12TextureFormat(ETextureFormat format)
+	{
+
+		switch (format)
+		{
+		case ETextureFormat::R8G8B8A8_Unorm: return DXGI_FORMAT_R8G8B8A8_UNORM;
+		default:
+			JG_CORE_ERROR("This {0} DirectX12 TextureFormat is not supported convert ETextureFormat", ws2s(TextureFormatToString(format)));
+			return DXGI_FORMAT_UNKNOWN;
+		}
 	}
 }

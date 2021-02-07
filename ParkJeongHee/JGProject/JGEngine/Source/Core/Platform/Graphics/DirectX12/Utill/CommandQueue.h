@@ -29,6 +29,10 @@ namespace JG
 		void Begin();
 		void End();
 		void Flush();
+
+		ID3D12CommandQueue* Get() const {
+			return mD3DCmdQueue.Get();
+		}
 	private:
 		CommandList* RequestCommandList();
 	};

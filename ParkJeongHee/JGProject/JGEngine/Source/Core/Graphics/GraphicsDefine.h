@@ -8,6 +8,22 @@
 
 namespace JG
 {
+	enum class ETextureFormat
+	{
+		None,
+		R8G8B8A8_Unorm,
+		
+	};
+	inline String TextureFormatToString(ETextureFormat format)
+	{
+		switch (format)
+		{
+		case ETextureFormat::R8G8B8A8_Unorm: return TT("R8G8B8A8_Unorm");
+		default: return TT("None");
+		}
+	}
+
+
 	class ScissorRect
 	{
 	public:
@@ -36,7 +52,10 @@ namespace JG
 		Viewport(f32 topLeftX, f32 topLeftY, f32 w, f32 h) {}
 	};
 
-
+	/* InputLayout 
+	
+	
+	*/
 
 	
 	
