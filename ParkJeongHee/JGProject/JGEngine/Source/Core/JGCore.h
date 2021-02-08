@@ -11,7 +11,7 @@
 #include "Common/Interface.h"
 #include "Common/String.h"
 #include "Common/Log.h"
-
+#include "Common/Color.h"
 
 #include "Event/Events.h"
 #include "Event/ApplicationEvents.h"

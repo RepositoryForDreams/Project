@@ -4,6 +4,7 @@
 
 namespace JG
 {
+	class IRenderContext;
 	class IGraphicsAPI 
 	{
 	public:
@@ -18,6 +19,7 @@ namespace JG
 		virtual void Begin() = 0;
 		virtual void End()	 = 0;
 		virtual void Flush() = 0;
+		virtual void SubmitRenderContext(SharedPtr<IRenderContext> renderContext) = 0;
 	public:
 		static UniquePtr<IGraphicsAPI> Create(EGraphicsAPI api);
 	};

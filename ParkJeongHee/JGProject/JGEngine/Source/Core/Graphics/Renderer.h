@@ -3,13 +3,17 @@
 
 namespace JG
 {
-
+	class IRenderContext;
 	class Renderer
 	{
-	public:
+	private:
+		friend class Application;
 		static void Begin();
 		static void End();
+	
+	public:
 		static void Flush();
+		static void SubmitRenderContext(SharedPtr<IRenderContext> context);
 	};
 
 	class Renderer3D

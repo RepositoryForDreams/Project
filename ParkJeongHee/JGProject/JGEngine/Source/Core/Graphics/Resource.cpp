@@ -32,7 +32,7 @@ namespace JG
 
 	SharedPtr<IIndexBuffer> IIndexBuffer::Create(String name, u32* datas, u32 count)
 	{
-		JGASSERT_IF(datas == nullptr, TT("Data is Null"));
+		JGASSERT_IF(datas != nullptr, TT("Data is Null"));
 		auto api = Application::GetInstance().GetGraphicsAPI();
 		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
 

@@ -5,7 +5,7 @@
 
 namespace JG
 {
-	DynamicDescriptorAllocator::DynamicDescriptorAllocator(u32 numDescriptor)
+	DynamicDescriptorAllocator::DynamicDescriptorAllocator(u32 numDescriptor) : mNumDescriptor(numDescriptor)
 	{
 		mIncreaseSize = DirectX12API::GetD3DDevice()->GetDescriptorHandleIncrementSize(
 			D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV

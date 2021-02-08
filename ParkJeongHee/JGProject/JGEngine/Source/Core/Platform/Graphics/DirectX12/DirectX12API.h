@@ -10,6 +10,7 @@ struct ID3D12Resource;
 
 namespace JG
 {
+	class IRenderContext;
 	class  CommandQueue;
 	class DescriptorAllocation;
 	// Rendering Flow
@@ -68,6 +69,7 @@ namespace JG
 		virtual void Begin() override;
 		virtual void End()   override;
 		virtual void Flush() override;
+		virtual void SubmitRenderContext(SharedPtr<IRenderContext> renderContext) override;
 	};
 
 

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "DirectX12API.h"
 #include "DirectX12FrameBuffer.h"
-
+#include "DirectX12RenderContext.h"
 #include "Utill/DirectX12Helper.h"
 #include "Utill/DescriptorAllocator.h"
 #include "Utill/CommandQueue.h"
@@ -18,6 +18,7 @@ namespace JG
 	static UniquePtr<CommandQueue> gComputeCommandQueue;
 	static UniquePtr<CommandQueue> gCopyCommandQueue;
 	static std::vector<UniquePtr<DirectX12FrameBuffer>> gFrameBuffers;
+	static std::unordered_map<ptraddr, SharedPtr<IRenderContext>> gRenderContexts;
 	static const u64 gFrameBufferCount = 3;
 	static u64 gFrameBufferIndex = 0;
 
@@ -103,7 +104,7 @@ namespace JG
 		JG_CORE_INFO("Create DescriptorAllocator...");
 		gCSUAllocator = CreateUniquePtr<DescriptorAllocator>(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		gRTVAllocator = CreateUniquePtr<DescriptorAllocator>(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-		gRTVAllocator = CreateUniquePtr<DescriptorAllocator>(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+		gDSVAllocator = CreateUniquePtr<DescriptorAllocator>(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 
 
 		JG_CORE_INFO("Create CommandQueue...");
@@ -127,6 +128,8 @@ namespace JG
 		Flush();
 
 		RootSignature::ClearCache();
+		gRenderContexts.clear();
+
 
 		gCSUAllocator.reset();
 		gRTVAllocator.reset();
@@ -153,6 +156,10 @@ namespace JG
 	{
 		// TODO
 		// FrameBuffer Update
+		for (auto& iter : gRenderContexts)
+		{
+			iter.second->Update();
+		}
 
 		gGraphicsCommandQueue->End();
 		gComputeCommandQueue->End();
@@ -161,6 +168,11 @@ namespace JG
 
 		// TODO
 		// SwapBuffer
+		for (auto& iter : gRenderContexts)
+		{
+			iter.second->Present();
+		}
+
 
 		gFrameBufferIndex = (gFrameBufferIndex + 1) % gFrameBufferCount;
 		gCSUAllocator->UpdatePage();
@@ -172,6 +184,21 @@ namespace JG
 		gGraphicsCommandQueue->Flush();
 		gComputeCommandQueue->Flush();
 		gCopyCommandQueue->Flush();
+	}
+	void DirectX12API::SubmitRenderContext(SharedPtr<IRenderContext> renderContext)
+	{
+		if (renderContext == nullptr)
+		{
+			return;
+		}
+		auto settings = renderContext->GetSettings();
+		auto iter = gRenderContexts.find(settings.Handle);
+		if (iter != gRenderContexts.end())
+		{
+			return;
+		}
+		gRenderContexts.emplace(settings.Handle, renderContext);
+
 	}
 	DXGI_FORMAT ConvertDirectX12TextureFormat(ETextureFormat format)
 	{

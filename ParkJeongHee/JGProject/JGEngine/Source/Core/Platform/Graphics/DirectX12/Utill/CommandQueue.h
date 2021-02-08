@@ -25,7 +25,7 @@ namespace JG
 		CommandQueue(u64 bufferCount, D3D12_COMMAND_LIST_TYPE type);
 		~CommandQueue();
 	public:
-		CommandList* RequestCommandList(int priority);
+		CommandList* RequestCommandList(i32 priority);
 		void Begin();
 		void End();
 		void Flush();

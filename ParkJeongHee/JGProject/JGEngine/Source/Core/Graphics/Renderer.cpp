@@ -28,4 +28,11 @@ namespace JG
 
 		api->Flush();
 	}
+	void Renderer::SubmitRenderContext(SharedPtr<IRenderContext> context)
+	{
+		auto api = Application::GetInstance().GetGraphicsAPI();
+		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
+
+		api->SubmitRenderContext(context);
+	}
 }

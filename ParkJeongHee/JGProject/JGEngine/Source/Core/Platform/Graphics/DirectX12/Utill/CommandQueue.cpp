@@ -18,7 +18,7 @@ namespace JG
 
 	CommandQueue::~CommandQueue() = default;
 
-	CommandList* CommandQueue::RequestCommandList(int priority) 
+	CommandList* CommandQueue::RequestCommandList(i32 priority) 
 	{
 		auto cmdList = RequestCommandList();
 		mExpectExcuteCmdLists[priority].push_back(cmdList);

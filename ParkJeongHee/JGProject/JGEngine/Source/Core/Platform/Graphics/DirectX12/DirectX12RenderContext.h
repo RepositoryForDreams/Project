@@ -10,15 +10,16 @@ namespace JG
 		std::vector<ComPtr<ID3D12Resource>> mBackBuffers;
 		std::vector<DescriptorAllocation>   mRTVs;
 		ComPtr<IDXGISwapChain4>				mSwapChain;
+		RenderContextSettings mSettings;
 	public:
+		virtual bool Init(const RenderContextSettings& settings) override;
+		virtual void Update() override;
+		virtual bool Present() override;
+
+
 		virtual void SubmitTexture(const Texture& texture) override;
 		virtual void Resize(u32 width, u32 height)		   override;
-	protected:
-		virtual bool Init(const RenderContextSettings& settings) override;
-		virtual void Destroy() override;
-	public:
-		
-
+		virtual const RenderContextSettings& GetSettings() const override;
 	};
 
 
