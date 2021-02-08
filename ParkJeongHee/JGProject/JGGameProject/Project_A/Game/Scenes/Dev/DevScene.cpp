@@ -12,7 +12,7 @@ cocos2d::Scene* DevScene::createScene()
 
 bool DevScene::init()
 {
-	if (!Scene::init())
+	if (!JGScene::init())
 	{
 		return false;
 	}
