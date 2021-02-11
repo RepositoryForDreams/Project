@@ -13,7 +13,7 @@ namespace JG
 	class RootSignature;
 	class CommandList
 	{
-	private:
+	protected:
 		ComPtr<ID3D12PipelineState> mBindedGraphicsPSO = nullptr;
 		ComPtr<ID3D12PipelineState> mBindedComputePSO = nullptr;
 		ComPtr<ID3D12RootSignature> mBindedGraphicsRootSig = nullptr;
@@ -53,7 +53,8 @@ namespace JG
 
 	class GraphicsCommandList : public CommandList
 	{
-
+	public:
+		virtual ~GraphicsCommandList() = default;
 	public:
 		void SetViewport(const Viewport& viewport);
 		void SetViewports(const std::vector<Viewport>& viewports);
@@ -70,11 +71,11 @@ namespace JG
 
 
 		//void BindConstantBuffer(uint32_t rootparam, ConstantBuffer& buffer);
-		void BindDynamicConstantBuffer(u32 rootparam, const void* data, u64 elementSize);
+		void BindDynamicConstantBuffer(u32 rootParam, const void* data, u64 elementSize);
 
 
 		// void BindStructuredBuffer(u32 rootparam, StructuredBuffer& buffer);
-		void BindDynamicStructuredBuffer(u32 rootparam, const  void* data, u64 elementSize, u64 elementCount);
+		void BindDynamicStructuredBuffer(u32 rootParam, const  void* data, u64 elementSize, u64 elementCount);
 
 		void BindConstants(u32 rootparam, u32 btSize, void* data, u32 offset = 0);
 
@@ -85,7 +86,6 @@ namespace JG
 
 		// void BindIndexBuffer(IndexBuffer& iBuffer);
 		void BindDynamicIndexBuffer(const std::vector<u32>& indices);
-		void BindDynamicIndexBuffer(const u32* iData, u64 count);
 		void SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY topology);
 		//void Draw(GraphicsCommandKeyPtr cmdKey,
 		//	uint32_t vertexCount, uint32_t instanceCount,

@@ -47,6 +47,8 @@ namespace JG
 
 	public:
 		virtual TextureID GetTextureID() const = 0;
+	public:
+		
 	};
 }
 

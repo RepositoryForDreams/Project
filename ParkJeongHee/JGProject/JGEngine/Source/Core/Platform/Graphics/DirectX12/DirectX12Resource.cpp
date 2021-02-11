@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 #include "DirectX12Resource.h"
-
+#include "DirectX12API.h"
 
 
 
@@ -27,5 +27,25 @@ namespace JG
 
 
 		return true;
+	}
+
+	DirectX12Texture::DirectX12Texture()
+	{
+		// Resource 생성
+		// Resource 등록
+
+
+
+		
+	}
+
+	void* DirectX12Texture::GetUserData() const
+	{
+		return nullptr;
+	}
+
+	TextureID DirectX12Texture::GetTextureID() const
+	{
+		return 0;
 	}
 }
