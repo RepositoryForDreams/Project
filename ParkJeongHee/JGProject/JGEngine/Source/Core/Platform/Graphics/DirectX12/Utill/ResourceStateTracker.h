@@ -7,7 +7,7 @@ namespace JG
 	class ResourceState
 	{
 	public:
-		std::map<uint32_t, D3D12_RESOURCE_STATES> StateMap;
+		std::map<u32, D3D12_RESOURCE_STATES> StateMap;
 		D3D12_RESOURCE_STATES State;
 	public:
 		D3D12_RESOURCE_STATES Get(uint32_t subresource) const {
@@ -47,7 +47,10 @@ namespace JG
 		u64 RefCount = 0;
 	public:
 		ResourceInfo() = default;
-		ResourceInfo(const String name, u64 refCount) : Name(name), RefCount(refCount) {}
+		ResourceInfo(const String name, D3D12_RESOURCE_STATES initState) : Name(name), RefCount(1) 
+		{
+			State.Set(D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, initState);
+		}
 	};
 
 	class ResourceStateTracker
@@ -71,7 +74,7 @@ namespace JG
 		static void Lock();
 		static void UnLock();
 		static void ForEach(const std::function<void(const ID3D12Resource*, const ResourceInfo&)>& action);
-		static void RegisterResource(const String& name, ID3D12Resource* d3dResource);
+		static void RegisterResource(const String& name, ID3D12Resource* d3dResource, D3D12_RESOURCE_STATES initState);
 		static void SetResourceName(ID3D12Resource* d3dResource, const String& name);
 		static bool GetResourceName(ID3D12Resource* d3dResource, String* out_name);
 		static void UnRegisterResource(ID3D12Resource* d3dResource);

@@ -177,7 +177,7 @@ namespace JG
 			action(_pair.first, _pair.second);
 		}
 	}
-	void ResourceStateTracker::RegisterResource(const String& name, ID3D12Resource* d3dResource)
+	void ResourceStateTracker::RegisterResource(const String& name, ID3D12Resource* d3dResource, D3D12_RESOURCE_STATES initState)
 	{
 		if (d3dResource == nullptr) return;
 
@@ -186,7 +186,8 @@ namespace JG
 		if (iter == gResourceRefMap.end())
 		{
 			JG_CORE_TRACE("Register {0} in ResourceRefMap", ws2s(name));
-			gResourceRefMap.emplace(d3dResource, ResourceInfo(name, 1));
+			
+			gResourceRefMap.emplace(d3dResource, ResourceInfo(name, initState));
 		}
 		else
 		{

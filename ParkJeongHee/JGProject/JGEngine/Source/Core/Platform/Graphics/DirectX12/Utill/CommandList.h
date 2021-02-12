@@ -61,6 +61,9 @@ namespace JG
 		void SetScissorRect(const ScissorRect& rect);
 		void SetScissorRects(const std::vector<ScissorRect>& rects);
 
+
+
+
 		//void ClearRenderTarget(GraphicsCommandKeyPtr cmdKey, RenderTarget& renderTarget, D3D12_CLEAR_FLAGS clearFlags = D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL);
 		//void SetRenderTarget(GraphicsCommandKeyPtr cmdKey, RenderTarget& renderTarget);
 		void BindRootSignature(RootSignature& rootSig);

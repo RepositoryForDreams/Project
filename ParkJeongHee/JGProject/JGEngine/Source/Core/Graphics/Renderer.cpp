@@ -6,29 +6,30 @@
 
 namespace JG
 {
-	void Renderer::Begin()
+	void Renderer3D::SubmitRenderContext(SharedPtr<IRenderContext> context)
 	{
 		auto api = Application::GetInstance().GetGraphicsAPI();
 		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
 
-		api->Begin();
+		api->SubmitRenderContext(context);
 	}
 
-	void Renderer::End()
+
+
+
+	void Renderer2D::Begin()
 	{
-		auto api = Application::GetInstance().GetGraphicsAPI();
-		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
 
-		api->End();
+
 	}
-	void Renderer::Flush()
+
+	SharedPtr<ITexture> Renderer2D::End()
 	{
-		auto api = Application::GetInstance().GetGraphicsAPI();
-		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
+		return SharedPtr<ITexture>();
 
-		api->Flush();
 	}
-	void Renderer::SubmitRenderContext(SharedPtr<IRenderContext> context)
+
+	void Renderer2D::SubmitRenderContext(SharedPtr<IRenderContext> context)
 	{
 		auto api = Application::GetInstance().GetGraphicsAPI();
 		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");

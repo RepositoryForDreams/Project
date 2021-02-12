@@ -17,7 +17,7 @@ namespace JG
 			DirectX12API::GetGraphicsCommandQueue()->Get(),
 			ConvertDirectX12TextureFormat(mSettings.Format),
 			mSettings.Width, mSettings.Height,
-			DirectX12API::GetFrameBufferCount());
+			(u32)DirectX12API::GetFrameBufferCount());
 
 
 		if (mSwapChain == nullptr)
@@ -30,7 +30,7 @@ namespace JG
 		for (u64 i = 0; i < DirectX12API::GetFrameBufferCount(); ++i)
 		{
 			mRTVs[i] = DirectX12API::RTVAllocate();
-			mSwapChain->GetBuffer(i, IID_PPV_ARGS(mBackBuffers[i].GetAddressOf()));
+			mSwapChain->GetBuffer((u32)i, IID_PPV_ARGS(mBackBuffers[i].GetAddressOf()));
 			DirectX12API::GetD3DDevice()->CreateRenderTargetView(mBackBuffers[i].Get(), nullptr, mRTVs[i].CPU());
 		}
 		return true;
@@ -100,11 +100,11 @@ namespace JG
 
 		mSettings.Width = desc.Width;
 		mSettings.Height = desc.Height;
-		mSwapChain->ResizeBuffers(DirectX12API::GetFrameBufferCount(), desc.Width, desc.Height, desc.Format, desc.Flags);
+		mSwapChain->ResizeBuffers((u32)DirectX12API::GetFrameBufferCount(), desc.Width, desc.Height, desc.Format, desc.Flags);
 
 		for (u64 i = 0; i < DirectX12API::GetFrameBufferCount(); ++i)
 		{
-			mSwapChain->GetBuffer(i, IID_PPV_ARGS(mBackBuffers[i].GetAddressOf()));
+			mSwapChain->GetBuffer((u32)i, IID_PPV_ARGS(mBackBuffers[i].GetAddressOf()));
 			DirectX12API::GetD3DDevice()->CreateRenderTargetView(mBackBuffers[i].Get(), nullptr, mRTVs[i].CPU());
 		}
 

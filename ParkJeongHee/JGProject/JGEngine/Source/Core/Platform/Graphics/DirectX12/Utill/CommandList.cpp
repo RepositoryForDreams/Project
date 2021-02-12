@@ -140,7 +140,7 @@ namespace JG
 				viewports[i].Width, viewports[i].Height,
 				viewports[i].MinDepth, viewports[i].MaxDepth);
 		}
-		mD3DCommandList->RSSetViewports(d3dViewports.size(), d3dViewports.data());
+		mD3DCommandList->RSSetViewports((u32)d3dViewports.size(), d3dViewports.data());
 	}
 
 	void GraphicsCommandList::SetScissorRect(const ScissorRect& rect)
@@ -155,7 +155,7 @@ namespace JG
 		{
 			d3dRects[i] = CD3DX12_RECT(rects[i].Left, rects[i].Top, rects[i].Right, rects[i].Bottom);
 		}
-		mD3DCommandList->RSSetScissorRects(d3dRects.size(), d3dRects.data());
+		mD3DCommandList->RSSetScissorRects((u32)d3dRects.size(), d3dRects.data());
 	}
 
 	void GraphicsCommandList::BindRootSignature(RootSignature& rootSig)
@@ -177,6 +177,8 @@ namespace JG
 
 	void GraphicsCommandList::BindTextures(u32 rootParam, ID3D12Resource** textures, void** desc, uint32_t textureCount)
 	{
+
+
 	}
 
 	void GraphicsCommandList::BindDynamicConstantBuffer(u32 rootParam, const void* data, u64 elementSize)

@@ -2,12 +2,39 @@
 #include "DirectX12API.h"
 #include "DirectX12FrameBuffer.h"
 #include "DirectX12RenderContext.h"
+#include "DirectX12Resource.h"
+#include "DirectX12Shader.h"
 #include "Utill/DirectX12Helper.h"
 #include "Utill/DescriptorAllocator.h"
 #include "Utill/CommandQueue.h"
 #include "Utill/RootSignature.h"
+#include "Utill/PipelineState.h"
+
 namespace JG
 {
+	struct Renderer2DItem
+	{
+		u64 IdentificationID = 0; // PSO ID
+		u64 TextureIndex     = 0; // 텍스쳐 ID
+	};
+	struct Renderer2DData
+	{
+		// 공용 데이터
+		UniquePtr<DirectX12Texture> RTTexture;
+		Color ClearColor;
+
+
+
+		// DirectX12 에서만 필요한 데이터
+		UniquePtr<RootSignature>          RootSignature;
+		UniquePtr<GraphicsPipelineState>  TexturePSO;
+		UniquePtr<GraphicsPipelineState>  TextPSO;
+	};
+
+
+
+
+
 	static ComPtr<IDXGIFactory4> gFactory;
 	static ComPtr<ID3D12Device>  gDevice;
 	static UniquePtr<DescriptorAllocator> gCSUAllocator;
@@ -17,6 +44,8 @@ namespace JG
 	static UniquePtr<CommandQueue> gGraphicsCommandQueue;
 	static UniquePtr<CommandQueue> gComputeCommandQueue;
 	static UniquePtr<CommandQueue> gCopyCommandQueue;
+	static UniquePtr<Renderer2DData> gRenderer2DData;
+
 	static std::vector<UniquePtr<DirectX12FrameBuffer>> gFrameBuffers;
 	static std::unordered_map<ptraddr, SharedPtr<IRenderContext>> gRenderContexts;
 	static const u64 gFrameBufferCount = 3;
@@ -117,6 +146,11 @@ namespace JG
 		{
 			// FrameBuffer 생성
 		}
+
+		if (!ReadyRenderer2D())
+		{
+			return false;
+		}
 		// FrameBuffer 생성
 		JG_CORE_INFO("DirectX12 Init End");
 		return true;
@@ -200,6 +234,74 @@ namespace JG
 		gRenderContexts.emplace(settings.Handle, renderContext);
 
 	}
+	void DirectX12API::Renderer2D_Begin_Impl()
+	{
+
+
+	}
+	void DirectX12API::Renderer2D_End_Impl()
+	{
+
+
+	}
+	SharedPtr<IRenderContext> DirectX12API::CreateRenderContext(const RenderContextSettings& settings)
+	{
+		auto context = CreateSharedPtr<DirectX12RenderContext>();
+		if (!context->Init(settings))
+		{
+			JG_CORE_ERROR("Failed Create DirectX12RenderContext");
+			return nullptr;
+		}
+		return context;
+	}
+	SharedPtr<IVertexBuffer> DirectX12API::CreateVertexBuffer(String name, void* datas, u64 elementSize, u64 elementCount)
+	{
+		auto vBuffer = CreateSharedPtr<DirectX12VertexBuffer>();
+		vBuffer->SetName(name);
+		if (!vBuffer->CreateBuffer(datas, elementSize, elementCount))
+		{
+			JG_CORE_ERROR("Failed Create VertexBuffer {0}", ws2s(name));
+			return nullptr;
+		}
+		return vBuffer;
+	}
+	SharedPtr<IIndexBuffer> DirectX12API::CreateIndexBuffer(String name, u32* datas, u32 count)
+	{
+		auto iBuffer = CreateSharedPtr<DirectX12IndexBuffer>();
+		iBuffer->SetName(name);
+		if (!iBuffer->CreateBuffer(datas, count))
+		{
+			JG_CORE_ERROR("Failed Create IndexBuffer {0}", ws2s(name));
+			return nullptr;
+		}
+		return iBuffer;
+	}
+	SharedPtr<IShader> DirectX12API::CreateShader(const String& sourceCode, ShaderFlags flags, const String& error)
+	{
+		auto shader = CreateSharedPtr<DirectX12Shader>();
+		if (!shader->Compile(sourceCode, flags, error))
+		{
+			JG_CORE_ERROR("Failed Compile Shader \n Error : {0}  \n SourceCode : \n {1} ", ws2s(error), ws2s(sourceCode));
+			return nullptr;
+		}
+		return shader;
+	}
+	bool DirectX12API::ReadyRenderer2D()
+	{
+		// NOTE
+// Renderer2D 준비
+		JG_CORE_INFO("Ready Renderer2D...");
+		gRenderer2DData = CreateUniquePtr<Renderer2DData>();
+
+
+
+		//auto CreateShader("")
+
+
+
+
+		return false;
+	}
 	DXGI_FORMAT ConvertDirectX12TextureFormat(ETextureFormat format)
 	{
 
@@ -211,4 +313,13 @@ namespace JG
 			return DXGI_FORMAT_UNKNOWN;
 		}
 	}
+
+
+
+
+
+	// DirectX 12 Renderer2D API
+
+
+
 }

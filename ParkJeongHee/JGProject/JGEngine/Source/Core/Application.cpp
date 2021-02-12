@@ -82,7 +82,7 @@ namespace JG
 		
 		while(mIsRunning)
 		{
-			Renderer::Begin();
+			mGraphcisAPI->Begin();
 			mWindow->Update();
 			mLayerStack->ForEach([&](ILayer * layer)
 			{
@@ -92,7 +92,7 @@ namespace JG
 			{
 				layer->LateUpdate();
 			});
-			Renderer::End();
+			mGraphcisAPI->End();
 		}
 
 		

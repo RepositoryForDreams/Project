@@ -12,23 +12,6 @@ namespace JG
 		auto api = Application::GetInstance().GetGraphicsAPI();
 		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
 
-		switch (api->GetAPI())
-		{
-		case EGraphicsAPI::DirectX12:
-		{
-			auto result = CreateSharedPtr<DirectX12RenderContext>();
-			if (!result->Init(settings))
-			{
-				JG_CORE_ERROR("Failed Create DirectX12RenderContext");
-				return nullptr;
-			}
-			return result;
-		}
-		break;
-		default:
-			JG_CORE_ERROR("This API not supported Create IRenderContext");
-		}
-		return nullptr;
-
+		return api->CreateRenderContext(settings);
 	}
 }
