@@ -8,11 +8,9 @@ public:
 	static cocos2d::Scene* createScene();
 
 	virtual bool init() override;
-
+	virtual void update(float delta) override;
 
 	CREATE_FUNC(DevScene);
 private:
-	
-
 	
 };

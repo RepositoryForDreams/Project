@@ -1,13 +1,13 @@
 #include "DevScene.h"
 
 #include "../Game/UIExtension/UIExtension.h"
-
+#include "../Game/Layer/DebugLayer.h"
 
 using namespace cocos2d;
 
 cocos2d::Scene* DevScene::createScene()
 {
-	return DevScene::create();
+	return DevScene::create();;
 }
 
 bool DevScene::init()
@@ -16,6 +16,7 @@ bool DevScene::init()
 	{
 		return false;
 	}
+	
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
@@ -33,7 +34,7 @@ bool DevScene::init()
 	redSprite->setColor(Color3B::RED);
 	blueSprite->setColor(Color3B::BLUE);
 	greenSprite->setColor(Color3B::GREEN);
-
+	redSprite->setAnchorPoint(Vec2::ANCHOR_TOP_RIGHT);
 
 	redSprite->setPosition(0, 0);
 	blueSprite->setPosition(1300, 200);
@@ -97,25 +98,39 @@ greenSprite->getAnchorPoint().x, greenSprite->getAnchorPoint().y
 		addChild(label);
 
 		//
-		{
-			auto panel = Sprite::create("blank.png");
-			panel->setContentSize(Size(1000, 1000));
-			panel->setPosition(Vec2(visibleSize.width * 0.5f, visibleSize.height * 0.5f));
-			auto btn = UIExtension::CreateButton(
-				panel,
-				Vec2(panel->getContentSize().width * 0.5f, panel->getContentSize().height * 0.5f),
-				Size(400,200),
-				"blank.png", "", "", ui::Widget::TextureResType::LOCAL);
+		//{
+		//	auto panel = Sprite::create("blank.png");
+		//	panel->setContentSize(Size(1000, 1000));
+		//	panel->setPosition(Vec2(visibleSize.width * 0.5f, visibleSize.height * 0.5f));
+		//	auto btn = UIExtension::CreateButton(
+		//		panel,
+		//		Vec2(panel->getContentSize().width * 0.5f, panel->getContentSize().height * 0.5f),
+		//		Size(400,200),
+		//		"blank.png", "", "", ui::Widget::TextureResType::LOCAL);
 
-			btn->setColor(Color3B::GRAY);
-			btn->setTitleLabel(Label::createWithSystemFont("NextSscene..", "Arial", 32));
-			//btn->setPosition(Vec2(panel->getContentSize().width * 0.5f, panel->getContentSize().height * 0.5f));
-			//btn->setScale9Enabled(true);
-			//btn->setContentSize(Size(200, 400));
+		//	btn->setColor(Color3B::GRAY);
+		//	btn->setTitleLabel(Label::createWithSystemFont("NextSscene..", "Arial", 32));
+		//	//btn->setPosition(Vec2(panel->getContentSize().width * 0.5f, panel->getContentSize().height * 0.5f));
+		//	//btn->setScale9Enabled(true);
+		//	//btn->setContentSize(Size(200, 400));
 
-			addChild(panel);
-			//panel->addChild(btn);
-		}
+		//	addChild(panel);
+		//	//panel->addChild(btn);
+		//}
 	}
+	
+	//this->scheduleOnce(std::bind(&DevScene::Start, this), 2.0f, "Start");
+	LogOnScreen(Color3B::RED, 5.0F, "Start!! ohoho");
+	LogOnScreen(Color3B::BLUE, 7.0F, "Start!! ohoho");
+	LogOnScreen(Color3B::WHITE, 9.0F, "Start!! ohoho");
+	LogOnScreen(Color3B::ORANGE, 11.0F, "Start!! ohoho");
+	LogOnScreen(Color3B::YELLOW, 13.0F, "Start!! ohoho");
 	return true;
 }
+
+void DevScene::update(float delta)
+{
+
+	
+}
+
