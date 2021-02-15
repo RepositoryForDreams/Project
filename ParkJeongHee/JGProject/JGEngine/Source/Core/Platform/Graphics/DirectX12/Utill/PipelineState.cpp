@@ -4,24 +4,24 @@
 
 namespace JG
 {
-	DXGI_FORMAT ConvertShaderDataType(ShaderDataType type)
+	DXGI_FORMAT ConvertShaderDataType(EShaderDataType type)
 	{
 		switch (type)
 		{
-		case ShaderDataType::_float: return DXGI_FORMAT_R32_FLOAT;
-		case ShaderDataType::_float2: return DXGI_FORMAT_R32G32_FLOAT;
-		case ShaderDataType::_float3: return DXGI_FORMAT_R32G32B32_FLOAT;
-		case ShaderDataType::_float4: return DXGI_FORMAT_R32G32B32A32_FLOAT;
+		case EShaderDataType::_float: return DXGI_FORMAT_R32_FLOAT;
+		case EShaderDataType::_float2: return DXGI_FORMAT_R32G32_FLOAT;
+		case EShaderDataType::_float3: return DXGI_FORMAT_R32G32B32_FLOAT;
+		case EShaderDataType::_float4: return DXGI_FORMAT_R32G32B32A32_FLOAT;
 
-		case ShaderDataType::_int: return  DXGI_FORMAT_R32_SINT;
-		case ShaderDataType::_int2: return DXGI_FORMAT_R32G32_SINT;
-		case ShaderDataType::_int3: return DXGI_FORMAT_R32G32B32_SINT;
-		case ShaderDataType::_int4: return DXGI_FORMAT_R32G32B32A32_SINT;
+		case EShaderDataType::_int: return  DXGI_FORMAT_R32_SINT;
+		case EShaderDataType::_int2: return DXGI_FORMAT_R32G32_SINT;
+		case EShaderDataType::_int3: return DXGI_FORMAT_R32G32B32_SINT;
+		case EShaderDataType::_int4: return DXGI_FORMAT_R32G32B32A32_SINT;
 
-		case ShaderDataType::_uint: return DXGI_FORMAT_R32_UINT;
-		case ShaderDataType::_uint2: return DXGI_FORMAT_R32G32_UINT;
-		case ShaderDataType::_uint3: return DXGI_FORMAT_R32G32B32_UINT;
-		case ShaderDataType::_uint4: return DXGI_FORMAT_R32G32B32A32_UINT;
+		case EShaderDataType::_uint: return DXGI_FORMAT_R32_UINT;
+		case EShaderDataType::_uint2: return DXGI_FORMAT_R32G32_UINT;
+		case EShaderDataType::_uint3: return DXGI_FORMAT_R32G32B32_UINT;
+		case EShaderDataType::_uint4: return DXGI_FORMAT_R32G32B32A32_UINT;
 
 		default:
 			JG_CORE_ERROR("ConvertShaderDataType :: not supported ShaderDataType");

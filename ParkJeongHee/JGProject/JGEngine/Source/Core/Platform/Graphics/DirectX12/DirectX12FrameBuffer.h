@@ -2,9 +2,19 @@
 
 
 
+#include "JGCore.h"
+#include "Utill/DirectX12Helper.h"
+#include "Graphics/FrameBuffer.h"
 
-class DirectX12FrameBuffer
+
+namespace JG
 {
-public:
-	
-};
+	// CommandList
+	class DirectX12FrameBuffer : public FrameBuffer
+	{
+	public:
+
+	};
+}
+
+

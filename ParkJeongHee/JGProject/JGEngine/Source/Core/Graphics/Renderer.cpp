@@ -2,38 +2,70 @@
 #include "Renderer.h"
 #include "Application.h"
 #include "Platform/Graphics/DirectX12/DirectX12API.h"
-#include "Platform/Graphics/DirectX12/DirectX12Renderer.h"
 
 namespace JG
 {
-	void Renderer3D::SubmitRenderContext(SharedPtr<IRenderContext> context)
-	{
-		auto api = Application::GetInstance().GetGraphicsAPI();
-		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
+	static std::unordered_map<std::thread::id, bool> gRendererTriggerMap;
+	static std::shared_mutex gMutex;
 
-		api->SubmitRenderContext(context);
-	}
+	void RegisterThreadID();
+	
 
 
-
-
+	
 	void Renderer2D::Begin()
 	{
+		auto threadID = std::this_thread::get_id();
+		RegisterThreadID();
+		if(gRendererTriggerMap[threadID] == true)
+		{
+			JG_CORE_ERROR("{0} : Already Call Begin", std::hash<std::thread::id>()(threadID));
+			return;
+		}
+		gRendererTriggerMap[threadID] = true;
 
-
+		// Renderer
+		// CommandList 준비
 	}
 
 	SharedPtr<ITexture> Renderer2D::End()
 	{
-		return SharedPtr<ITexture>();
+		auto threadID = std::this_thread::get_id();
+		RegisterThreadID();
 
+
+		if(gRendererTriggerMap[threadID] == false)
+		{
+			JG_CORE_ERROR("{0} : Not Call Begin", std::hash<std::thread::id>()(threadID));
+			return nullptr;
+		}
+		gRendererTriggerMap[threadID] = false;
+
+		
+		
+
+		return nullptr;
 	}
 
-	void Renderer2D::SubmitRenderContext(SharedPtr<IRenderContext> context)
-	{
-		auto api = Application::GetInstance().GetGraphicsAPI();
-		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
 
-		api->SubmitRenderContext(context);
+
+
+
+	void RegisterThreadID()
+	{
+		auto threadID = std::this_thread::get_id();
+		bool isFind = false;
+		{
+			std::shared_lock<std::shared_mutex> lock(gMutex);
+			isFind = gRendererTriggerMap.find(threadID) != gRendererTriggerMap.end();
+		}
+
+		if (isFind == false)
+		{
+			{
+				std::lock_guard<std::shared_mutex> lock(gMutex);
+				gRendererTriggerMap.emplace(threadID, false);
+			}
+		}
 	}
 }

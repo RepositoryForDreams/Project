@@ -5,7 +5,7 @@
 
 namespace JG
 {
-	SharedPtr<IShader> IShader::Create(const String& sourceCode, ShaderFlags flags, const String& error)
+	SharedPtr<IShader> IShader::Create(const String& sourceCode, EShaderFlags flags, const String& error)
 	{
 		auto api = Application::GetInstance().GetGraphicsAPI();
 		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");

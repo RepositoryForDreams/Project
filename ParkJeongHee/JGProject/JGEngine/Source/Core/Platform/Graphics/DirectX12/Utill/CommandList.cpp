@@ -121,6 +121,8 @@ namespace JG
 
 	}
 
+
+
 	void GraphicsCommandList::SetViewport(const Viewport& viewport)
 	{
 		
@@ -294,5 +296,11 @@ namespace JG
 		mD3DCommandList->IASetPrimitiveTopology(topology);
 	}
 
+	void GraphicsCommandList::DrawIndexed(u32 indexCount, u32 instancedCount, u32 startIndexLocation,
+		u32 startVertexLocation, u32 startInstanceLocation)
+	{
+		mDynamicDescriptorAllocator->PushDescriptorTable(mD3DCommandList, mBindedDescriptorHeap, true);
+		mD3DCommandList->DrawIndexedInstanced(indexCount, instancedCount, startIndexLocation, startVertexLocation, startInstanceLocation);
+	}
 }
 

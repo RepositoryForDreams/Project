@@ -12,28 +12,6 @@
 
 namespace JG
 {
-	struct Renderer2DItem
-	{
-		u64 IdentificationID = 0; // PSO ID
-		u64 TextureIndex     = 0; // 텍스쳐 ID
-	};
-	struct Renderer2DData
-	{
-		// 공용 데이터
-		UniquePtr<DirectX12Texture> RTTexture;
-		Color ClearColor;
-
-
-
-		// DirectX12 에서만 필요한 데이터
-		UniquePtr<RootSignature>          RootSignature;
-		UniquePtr<GraphicsPipelineState>  TexturePSO;
-		UniquePtr<GraphicsPipelineState>  TextPSO;
-	};
-
-
-
-
 
 	static ComPtr<IDXGIFactory4> gFactory;
 	static ComPtr<ID3D12Device>  gDevice;
@@ -44,18 +22,32 @@ namespace JG
 	static UniquePtr<CommandQueue> gGraphicsCommandQueue;
 	static UniquePtr<CommandQueue> gComputeCommandQueue;
 	static UniquePtr<CommandQueue> gCopyCommandQueue;
-	static UniquePtr<Renderer2DData> gRenderer2DData;
 
 	static std::vector<UniquePtr<DirectX12FrameBuffer>> gFrameBuffers;
 	static std::unordered_map<ptraddr, SharedPtr<IRenderContext>> gRenderContexts;
 	static const u64 gFrameBufferCount = 3;
 	static u64 gFrameBufferIndex = 0;
 
+	// thread id = rendererID, commandList 획득  =  FrameBufferf
+	// mutex = 
 	EGraphicsAPI DirectX12API::GetAPI() const
 	{
 		return EGraphicsAPI::DirectX12;
 	}
-
+	void DirectX12API::SubmitRenderContext(SharedPtr<IRenderContext> renderContext)
+	{
+		if (renderContext == nullptr)
+		{
+			return;
+		}
+		auto settings = renderContext->GetSettings();
+		auto iter = gRenderContexts.find(settings.Handle);
+		if (iter != gRenderContexts.end())
+		{
+			return;
+		}
+		gRenderContexts.emplace(settings.Handle, renderContext);
+	}
 	IDXGIFactory4* DirectX12API::GetDXGIFactory()
 	{
 		return gFactory.Get();
@@ -141,17 +133,6 @@ namespace JG
 		gComputeCommandQueue  = CreateUniquePtr<CommandQueue>(gFrameBufferCount, D3D12_COMMAND_LIST_TYPE_COMPUTE);
 		gCopyCommandQueue     = CreateUniquePtr<CommandQueue>(gFrameBufferCount, D3D12_COMMAND_LIST_TYPE_COPY);
 
-		JG_CORE_INFO("Create FrameBuffer...");
-		for (u64 i = 0; i < gFrameBufferCount; ++i)
-		{
-			// FrameBuffer 생성
-		}
-
-		if (!ReadyRenderer2D())
-		{
-			return false;
-		}
-		// FrameBuffer 생성
 		JG_CORE_INFO("DirectX12 Init End");
 		return true;
 	}
@@ -219,31 +200,7 @@ namespace JG
 		gComputeCommandQueue->Flush();
 		gCopyCommandQueue->Flush();
 	}
-	void DirectX12API::SubmitRenderContext(SharedPtr<IRenderContext> renderContext)
-	{
-		if (renderContext == nullptr)
-		{
-			return;
-		}
-		auto settings = renderContext->GetSettings();
-		auto iter = gRenderContexts.find(settings.Handle);
-		if (iter != gRenderContexts.end())
-		{
-			return;
-		}
-		gRenderContexts.emplace(settings.Handle, renderContext);
 
-	}
-	void DirectX12API::Renderer2D_Begin_Impl()
-	{
-
-
-	}
-	void DirectX12API::Renderer2D_End_Impl()
-	{
-
-
-	}
 	SharedPtr<IRenderContext> DirectX12API::CreateRenderContext(const RenderContextSettings& settings)
 	{
 		auto context = CreateSharedPtr<DirectX12RenderContext>();
@@ -254,7 +211,7 @@ namespace JG
 		}
 		return context;
 	}
-	SharedPtr<IVertexBuffer> DirectX12API::CreateVertexBuffer(String name, void* datas, u64 elementSize, u64 elementCount)
+	SharedPtr<IVertexBuffer> DirectX12API::CreateVertexBuffer(const String& name, void* datas, u64 elementSize, u64 elementCount)
 	{
 		auto vBuffer = CreateSharedPtr<DirectX12VertexBuffer>();
 		vBuffer->SetName(name);
@@ -265,7 +222,7 @@ namespace JG
 		}
 		return vBuffer;
 	}
-	SharedPtr<IIndexBuffer> DirectX12API::CreateIndexBuffer(String name, u32* datas, u32 count)
+	SharedPtr<IIndexBuffer> DirectX12API::CreateIndexBuffer(const String& name, u32* datas, u64 count)
 	{
 		auto iBuffer = CreateSharedPtr<DirectX12IndexBuffer>();
 		iBuffer->SetName(name);
@@ -276,7 +233,7 @@ namespace JG
 		}
 		return iBuffer;
 	}
-	SharedPtr<IShader> DirectX12API::CreateShader(const String& sourceCode, ShaderFlags flags, const String& error)
+	SharedPtr<IShader> DirectX12API::CreateShader(const String& sourceCode, EShaderFlags flags, const String& error)
 	{
 		auto shader = CreateSharedPtr<DirectX12Shader>();
 		if (!shader->Compile(sourceCode, flags, error))
@@ -285,22 +242,6 @@ namespace JG
 			return nullptr;
 		}
 		return shader;
-	}
-	bool DirectX12API::ReadyRenderer2D()
-	{
-		// NOTE
-// Renderer2D 준비
-		JG_CORE_INFO("Ready Renderer2D...");
-		gRenderer2DData = CreateUniquePtr<Renderer2DData>();
-
-
-
-		//auto CreateShader("")
-
-
-
-
-		return false;
 	}
 	DXGI_FORMAT ConvertDirectX12TextureFormat(ETextureFormat format)
 	{

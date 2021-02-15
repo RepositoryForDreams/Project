@@ -36,7 +36,8 @@ namespace JG
 		virtual void SetUint4(const String& name, const JVector4Uint& value) override;
 		virtual void SetFloat4x4(const String& name, const JMatrix& value)   override;
 	public:
-		virtual bool Compile(const String& sourceCode, ShaderFlags flags, const String& error) override; 
+		virtual bool Compile(const String& sourceCode, EShaderFlags flags, const String& error) override;
+		virtual void Bind();
 	};
 }
 

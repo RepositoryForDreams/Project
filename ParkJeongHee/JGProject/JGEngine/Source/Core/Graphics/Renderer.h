@@ -12,8 +12,6 @@ namespace JG
 	public:
 
 
-		static void SubmitRenderContext(SharedPtr<IRenderContext> context);
-
 	};
 	// 같은 Shader 라면 
 	// 차피 VertexArray 다
@@ -43,7 +41,6 @@ namespace JG
 
 		// 그린 텍스쳐 반환
 		static SharedPtr<ITexture> End();
-		static void SubmitRenderContext(SharedPtr<IRenderContext> context);
 		
 	};
 }

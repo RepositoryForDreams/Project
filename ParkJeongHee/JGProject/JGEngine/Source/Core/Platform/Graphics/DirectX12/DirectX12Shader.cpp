@@ -43,9 +43,13 @@ namespace JG
 	void DirectX12Shader::SetFloat4x4(const String& name, const JMatrix& value)
 	{
 	}
-	bool DirectX12Shader::Compile(const String& sourceCode, ShaderFlags flags, const String& error)
+	bool DirectX12Shader::Compile(const String& sourceCode, EShaderFlags flags, const String& error)
 	{
 		return false;
+	}
+
+	void DirectX12Shader::Bind()
+	{
 	}
 }
 

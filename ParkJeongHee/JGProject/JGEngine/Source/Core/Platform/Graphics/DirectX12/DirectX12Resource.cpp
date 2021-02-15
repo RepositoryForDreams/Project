@@ -6,44 +6,114 @@
 
 namespace JG
 {
-	void DirectX12VertexBuffer::Reset()
+	DirectX12VertexBuffer::~DirectX12VertexBuffer()
 	{
-		if (mD3DResource == nullptr)
+		if (mCPUData)
 		{
-			return;
+			free(mCPUData);
+			mCPUData = nullptr;
 		}
-		ResourceStateTracker::UnRegisterResource(mD3DResource.Get());
-		mD3DResource.Reset();
-	}
-	void* DirectX12VertexBuffer::GetUserData() const
-	{
-		return nullptr;
 	}
 
 	bool DirectX12VertexBuffer::CreateBuffer(void* datas, u64 elementSize, u64 elementCount)
 	{
+		if(mCPUData)
+		{
+			free(mCPUData);
+			mCPUData = nullptr;
+		}
+		mElementSize  = elementSize;
+		mElementCount = elementCount;
 
+		
+		u64 btSize = mElementSize * mElementCount;
+		
+		mCPUData = malloc(btSize);
+		if(mCPUData == nullptr)
+		{
+			JG_CORE_ERROR("Failed Malloc CPUData in VertexBuffer : {0}", ws2s(GetName()));
+			return false;
+		}
+		
+		memcpy(mCPUData, datas, btSize);
+
+		JG_CORE_INFO("Successed Create VertexBuffer =>  Name : {0}  ElementSize = {1}   ElementCount = {2}", ws2s(GetName()), mElementSize, mElementCount);
 		return true;
 	}
 
-	void* DirectX12IndexBuffer::GetUserData() const
+	void DirectX12VertexBuffer::Bind()
 	{
-		return nullptr;
+
+		
+		// 추후 구현
+
+		
 	}
 
-	bool DirectX12IndexBuffer::CreateBuffer(u32* datas, u32 count)
+
+	DirectX12IndexBuffer::~DirectX12IndexBuffer()
 	{
+		if (mCPUData)
+		{
+			free(mCPUData);
+			mCPUData = nullptr;
+		}
+	}
 
+	bool DirectX12IndexBuffer::CreateBuffer(u32* datas, u64 count)
+	{
+		if (mCPUData)
+		{
+			free(mCPUData);
+			mCPUData = nullptr;
+		}
+		mIndexCount = count;
 
+		u64 btSize = sizeof(u32) * count;
+
+		mCPUData = (u32*)malloc(btSize);
+		if (mCPUData == nullptr)
+		{
+			JG_CORE_ERROR("Failed Malloc CPUData in IndexBuffer : {0}", ws2s(GetName()));
+			return false;
+		}
+		memcpy(mCPUData, datas, btSize);
+
+		JG_CORE_INFO("Successed Create IndexBuffer =>  Name : {0}  IndexCount = {1}", ws2s(GetName()),mIndexCount);
 		return true;
 	}
 
-	void DirectX12Texture::SetD3DResource(const String& name, ComPtr<ID3D12Resource> d3dResource, D3D12_RESOURCE_STATES initState)
+	void DirectX12IndexBuffer::Bind()
+	{
+
+		
+	}
+
+
+	DirectX12Texture::~DirectX12Texture()
+	{
+		
+	}
+
+	TextureID DirectX12Texture::GetTextureID() const
+	{
+		return 0;
+	}
+
+	void DirectX12Texture::Bind()
+	{
+
+		
+	}
+
+	void DirectX12Texture::Create(const String& name, const TextureInfo& info)
 	{
 		Reset();
-		mD3DResource = d3dResource;
-		ResourceStateTracker::RegisterResource(name, mD3DResource.Get(), initState);
+
+		// 생성
+		ResourceStateTracker::RegisterResource(name, mD3DResource.Get(), D3D12_RESOURCE_STATE_COMMON);
 	}
+
 	void DirectX12Texture::Reset()
 	{
 		if (mD3DResource == nullptr)
@@ -52,14 +122,5 @@ namespace JG
 		}
 		ResourceStateTracker::UnRegisterResource(mD3DResource.Get());
 		mD3DResource.Reset();
-	}
-	void* DirectX12Texture::GetUserData() const
-	{
-		return nullptr;
-	}
-
-	TextureID DirectX12Texture::GetTextureID() const
-	{
-		return 0;
 	}
 }

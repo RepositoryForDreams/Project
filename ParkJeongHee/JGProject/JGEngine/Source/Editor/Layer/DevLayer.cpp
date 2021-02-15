@@ -32,7 +32,8 @@ namespace JG
 			1920, 1080);
 
 		mRenderContext = IRenderContext::Create(settings);
-		Renderer2D::SubmitRenderContext(mRenderContext);
+
+		Application::GetInstance().GetGraphicsAPI()->SubmitRenderContext(mRenderContext);
 	}
 	void DevLayer::Destroy()
 	{

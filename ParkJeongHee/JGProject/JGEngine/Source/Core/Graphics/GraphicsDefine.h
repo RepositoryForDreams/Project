@@ -9,6 +9,9 @@
 namespace JG
 {
 #define MAX_RENDERTARGET 8
+
+	using TextureID = u64;
+	
 	enum class ETextureFormat
 	{
 		None,
@@ -24,7 +27,41 @@ namespace JG
 		}
 	}
 
-	enum class ShaderDataType
+
+	ENUM_FLAG(ETextureFlags)
+		enum class ETextureFlags
+	{
+		None			   = 0x00001,
+		Allow_RenderTarget = 0x00002,
+		Allow_DepthStencil = 0x00004,
+		
+	};
+
+	struct TextureInfo
+	{
+		u32 Width = 0;
+		u32 Height = 0;
+		ETextureFormat Format = ETextureFormat::None;
+		ETextureFlags Flags   = ETextureFlags::None;
+	};
+
+
+
+	ENUM_FLAG(EShaderFlags)
+		enum class EShaderFlags
+	{
+		None = 0x000,
+		Allow_VertexShader = 0x001,
+		Allow_PixelShader = 0x002,
+		Allow_GeometryShader = 0x004,
+		Allow_HullShader = 0x008,
+		Allow_DomainShader = 0x016,
+
+
+	};
+
+	
+	enum class EShaderDataType
 	{
 		unknown,
 		_bool, 
@@ -34,49 +71,49 @@ namespace JG
 		_float3x3, _float4x4,
 	};
 
-	inline u64 GetShaderDataTypeSize(ShaderDataType type)
+	inline u64 GetShaderDataTypeSize(EShaderDataType type)
 	{
 		switch (type)
 		{
-		case ShaderDataType::_bool: return 1;
-		case ShaderDataType::_int:  return 4;
-		case ShaderDataType::_int2: return 8;
-		case ShaderDataType::_int3: return 12;
-		case ShaderDataType::_int4: return 16;
-		case ShaderDataType::_uint: return 4;
-		case ShaderDataType::_uint2: return 8;
-		case ShaderDataType::_uint3: return 12;
-		case ShaderDataType::_uint4: return 16;
-		case ShaderDataType::_float: return 4;
-		case ShaderDataType::_float2: return 8;
-		case ShaderDataType::_float3: return 12;
-		case ShaderDataType::_float4: return 16;
-		case ShaderDataType::_float3x3: return 36;
-		case ShaderDataType::_float4x4: return 64;
+		case EShaderDataType::_bool: return 1;
+		case EShaderDataType::_int:  return 4;
+		case EShaderDataType::_int2: return 8;
+		case EShaderDataType::_int3: return 12;
+		case EShaderDataType::_int4: return 16;
+		case EShaderDataType::_uint: return 4;
+		case EShaderDataType::_uint2: return 8;
+		case EShaderDataType::_uint3: return 12;
+		case EShaderDataType::_uint4: return 16;
+		case EShaderDataType::_float: return 4;
+		case EShaderDataType::_float2: return 8;
+		case EShaderDataType::_float3: return 12;
+		case EShaderDataType::_float4: return 16;
+		case EShaderDataType::_float3x3: return 36;
+		case EShaderDataType::_float4x4: return 64;
 		default:
 			JG_CORE_CRITICAL("not supported ShaderDataType");
 			return 0;
 		}
 	}
-	inline String ShaderDataTypeToString(ShaderDataType type)
+	inline String ShaderDataTypeToString(EShaderDataType type)
 	{
 		switch (type)
 		{
-		case ShaderDataType::_bool:		return TT("bool");
-		case ShaderDataType::_int:		return TT("int");
-		case ShaderDataType::_int2:		return TT("int2");
-		case ShaderDataType::_int3:		return TT("int3");
-		case ShaderDataType::_int4:		return TT("int4");
-		case ShaderDataType::_uint:		return TT("uint");
-		case ShaderDataType::_uint2:	return TT("uint2");
-		case ShaderDataType::_uint3:	return TT("uint3");
-		case ShaderDataType::_uint4:	return TT("uin4");
-		case ShaderDataType::_float:	return TT("float");
-		case ShaderDataType::_float2:	return TT("float2");
-		case ShaderDataType::_float3:	return TT("float3");
-		case ShaderDataType::_float4:   return TT("float4");
-		case ShaderDataType::_float3x3: return TT("float3x3");
-		case ShaderDataType::_float4x4: return TT("float4x4");
+		case EShaderDataType::_bool:		return TT("bool");
+		case EShaderDataType::_int:		return TT("int");
+		case EShaderDataType::_int2:		return TT("int2");
+		case EShaderDataType::_int3:		return TT("int3");
+		case EShaderDataType::_int4:		return TT("int4");
+		case EShaderDataType::_uint:		return TT("uint");
+		case EShaderDataType::_uint2:	return TT("uint2");
+		case EShaderDataType::_uint3:	return TT("uint3");
+		case EShaderDataType::_uint4:	return TT("uin4");
+		case EShaderDataType::_float:	return TT("float");
+		case EShaderDataType::_float2:	return TT("float2");
+		case EShaderDataType::_float3:	return TT("float3");
+		case EShaderDataType::_float4:   return TT("float4");
+		case EShaderDataType::_float3x3: return TT("float3x3");
+		case EShaderDataType::_float4x4: return TT("float4x4");
 		default:
 			JG_CORE_CRITICAL("not supported ShaderDataType");
 			return TT("unknown");

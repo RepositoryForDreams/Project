@@ -1,22 +1,20 @@
 ﻿#pragma once
 
 #include "JGCore.h"
-
+#include "GraphicsDefine.h"
 
 namespace JG
 {
-	ENUM_FLAG(ShaderFlags)
-	enum class ShaderFlags
-	{
-		None = 0x000,
-		Allow_VertexShader   = 0x001,
-		Allow_PixelShader	 = 0x002,
-		Allow_GeometryShader = 0x004,
-		Allow_HullShader     = 0x008,
-		Allow_DomainShader   = 0x016,
+	/* Shader
+	 * HLSL 컴 파일 하고 모시기 하고하는곳
+	 * Compile 할때 코드 분석
+	 *
+	 * 
+	 */
 
 
-	};
+	
+
 	/* Shader 자체
 	
 	*/
@@ -37,9 +35,10 @@ namespace JG
 		virtual void SetUint4(const String& name, const JVector4Uint& value) = 0;
 		virtual void SetFloat4x4(const String& name, const JMatrix& value)   = 0;
 	protected:
-		virtual bool Compile(const String& sourceCode, ShaderFlags flags, const String& error) = 0;
+		virtual bool Compile(const String& sourceCode, EShaderFlags flags, const String& error) = 0;
+		virtual void Bind() = 0;
 	public:
-		static SharedPtr<IShader> Create(const String& sourceCode, ShaderFlags flags, const String& error);
+		static SharedPtr<IShader> Create(const String& sourceCode, EShaderFlags flags, const String& error);
 	};
 
 

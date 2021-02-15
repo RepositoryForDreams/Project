@@ -29,7 +29,7 @@ namespace JG
 			ClearColor(clearColor) {}
 
 	};
-	class IRenderContext
+	class  IRenderContext
 	{
 	public:
 		virtual bool Init(const RenderContextSettings& settings) = 0;

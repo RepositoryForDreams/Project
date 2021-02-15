@@ -48,7 +48,7 @@ namespace JG
 		void FlushResourceBarrier();
 
 		void CopyResource(ID3D12Resource* dest, ID3D12Resource* src);
-
+		//void CopyBuffer(ID3D12Resource* buffer, void* data, u64 elementSize, u64 elementCount);
 	};
 
 	class GraphicsCommandList : public CommandList
@@ -60,10 +60,6 @@ namespace JG
 		void SetViewports(const std::vector<Viewport>& viewports);
 		void SetScissorRect(const ScissorRect& rect);
 		void SetScissorRects(const std::vector<ScissorRect>& rects);
-
-
-
-
 		//void ClearRenderTarget(GraphicsCommandKeyPtr cmdKey, RenderTarget& renderTarget, D3D12_CLEAR_FLAGS clearFlags = D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL);
 		//void SetRenderTarget(GraphicsCommandKeyPtr cmdKey, RenderTarget& renderTarget);
 		void BindRootSignature(RootSignature& rootSig);
@@ -90,14 +86,9 @@ namespace JG
 		// void BindIndexBuffer(IndexBuffer& iBuffer);
 		void BindDynamicIndexBuffer(const std::vector<u32>& indices);
 		void SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY topology);
-		//void Draw(GraphicsCommandKeyPtr cmdKey,
-		//	uint32_t vertexCount, uint32_t instanceCount,
-		//	uint32_t startVertexLocation = 0, uint32_t startInstanceLocation = 0);
-		//static void DrawIndexed(GraphicsCommandKeyPtr cmdKey,
-		//	uint32_t indexCount, uint32_t  instanceCount = 1,
-		//	uint32_t startIndexLocation = 0, uint32_t startVertexLocation = 0, uint32_t startInstanceLocation = 0);
 
 
+		void DrawIndexed(u32 indexCount, u32 instancedCount = 1, u32 startIndexLocation = 0, u32 startVertexLocation = 0, u32 startInstanceLocation = 0);
 	};
 
 	

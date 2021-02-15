@@ -11,9 +11,9 @@ namespace JG
 	public:
 		const char* SementicName = nullptr;
 		u32 SementicSlot = 0;
-		ShaderDataType Type = ShaderDataType::unknown;
+		EShaderDataType Type = EShaderDataType::unknown;
 	public:
-		InputElement(ShaderDataType type, const char* sementicName, u32 sementicSlot)
+		InputElement(EShaderDataType type, const char* sementicName, u32 sementicSlot)
 			: Type(type), SementicName(sementicName), SementicSlot(sementicSlot) {}
 	};
 	class InputLayout
@@ -21,7 +21,7 @@ namespace JG
 	private:
 		std::vector<InputElement> mInputElements;
 	public:
-		void Add(ShaderDataType type, const char* sementicName, u32 sementicSlot)
+		void Add(EShaderDataType type, const char* sementicName, u32 sementicSlot)
 		{
 			mInputElements.push_back(InputElement(type, sementicName, sementicSlot));
 		}

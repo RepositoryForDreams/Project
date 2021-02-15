@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "JGCore.h"
-
+#include "GraphicsDefine.h"
 
 namespace JG
 {
@@ -9,6 +9,8 @@ namespace JG
 	private:
 		String mName = TT("IResource");
 	public:
+		IResource() = default;
+		virtual ~IResource() = default;
 		virtual void SetName(const String& name)
 		{
 			mName = name;
@@ -17,8 +19,11 @@ namespace JG
 		{
 			return mName;
 		}
-	public:
-		virtual void* GetUserData() const = 0;
+	protected:
+		virtual void Bind() = 0;
+	private:
+		IResource(const IResource&) = delete;
+		const IResource& operator=(const IResource&) = delete;
 	};
 
 	class Buffer : public IResource { };
@@ -27,39 +32,38 @@ namespace JG
 	class IVertexBuffer : public Buffer
 	{
 	public:
-		IVertexBuffer() = default;
+		virtual ~IVertexBuffer() = default;
 	protected:
 		virtual bool CreateBuffer(void* datas, u64 elementSize, u64 elementCount) = 0;
 	public:
 		static SharedPtr<IVertexBuffer> Create(String name, void* datas, u64 elementSize,  u64 elementCount);
-	private:
-		IVertexBuffer(const IVertexBuffer&) = delete;
-		const IVertexBuffer& operator=(const IVertexBuffer&) = delete;
 	};
 
 	class IIndexBuffer : public Buffer
 	{
 	public:
-		IIndexBuffer() = default;
+		virtual ~IIndexBuffer() = default;
 	protected:
-		virtual bool CreateBuffer(u32* datas, u32 count) = 0;
+		virtual bool CreateBuffer(u32* datas, u64 count) = 0;
 	public:
-		static SharedPtr<IIndexBuffer> Create(String name, u32* datas, u32 count);
-	private:
-		IIndexBuffer(const IIndexBuffer&) = delete;
-		const IIndexBuffer& operator=(const IIndexBuffer&) = delete;
+		static SharedPtr<IIndexBuffer> Create(String name, u32* datas, u64 count);
 	};
 	
-	using TextureID = u64;
+
+
+	
 	class ITexture : public IResource
 	{
-
-		//
+	public:
+		virtual ~ITexture() = default;
 	public:
 		virtual TextureID GetTextureID() const = 0;
 	private:
 		ITexture(const ITexture& texture) = delete;
 		const ITexture& operator=(const ITexture& texture) = delete;
+	public:
+		static SharedPtr<ITexture> Create(const String& name, const TextureInfo& info);
+		static SharedPtr<ITexture> CreateFromFile(const String& path);
 	};
 }
 

@@ -17,12 +17,22 @@ namespace JG
 		return api->CreateVertexBuffer(name, datas, elementSize, elementCount);
 	}
 
-	SharedPtr<IIndexBuffer> IIndexBuffer::Create(String name, u32* datas, u32 count)
+	SharedPtr<IIndexBuffer> IIndexBuffer::Create(String name, u32* datas, u64 count)
 	{
 		JGASSERT_IF(datas != nullptr, TT("Data is Null"));
 		auto api = Application::GetInstance().GetGraphicsAPI();
 		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
 
 		return api->CreateIndexBuffer(name, datas, count);
+	}
+
+	SharedPtr<ITexture> ITexture::Create(const String& name, const TextureInfo& info)
+	{
+		return nullptr;
+	}
+
+	SharedPtr<ITexture> ITexture::CreateFromFile(const String& path)
+	{
+		return nullptr;
 	}
 }

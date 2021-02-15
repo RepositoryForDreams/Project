@@ -48,6 +48,7 @@ namespace JG
 	{
 	public:
 		virtual EGraphicsAPI GetAPI()const override;
+		virtual void SubmitRenderContext(SharedPtr<IRenderContext> renderContext) override;
 	public:
 		static IDXGIFactory4* GetDXGIFactory();
 		static ID3D12Device*  GetD3DDevice();
@@ -69,18 +70,12 @@ namespace JG
 		virtual void Begin() override;
 		virtual void End()   override;
 		virtual void Flush() override;
-		virtual void SubmitRenderContext(SharedPtr<IRenderContext> renderContext) override;
 
-		// Renderer2D
-		virtual void Renderer2D_Begin_Impl() override;
-		virtual void Renderer2D_End_Impl()   override;
 	protected:
 		virtual SharedPtr<IRenderContext> CreateRenderContext(const RenderContextSettings& settings) override;
-		virtual SharedPtr<IVertexBuffer>  CreateVertexBuffer(String name, void* datas, u64 elementSize, u64 elementCount) override;
-		virtual SharedPtr<IIndexBuffer>   CreateIndexBuffer(String name, u32* datas, u32 count) override;
-		virtual SharedPtr<IShader>        CreateShader(const String& sourceCode, ShaderFlags flags, const String& error) override;
-	private:
-		bool ReadyRenderer2D();
+		virtual SharedPtr<IVertexBuffer>  CreateVertexBuffer(const String& name, void* datas, u64 elementSize, u64 elementCount) override;
+		virtual SharedPtr<IIndexBuffer>   CreateIndexBuffer(const String& name, u32* datas, u64 count) override;
+		virtual SharedPtr<IShader>        CreateShader(const String& sourceCode, EShaderFlags flags, const String& error) override;
 	};
 
 
