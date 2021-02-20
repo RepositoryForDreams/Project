@@ -10,9 +10,12 @@ struct ID3D12Resource;
 
 namespace JG
 {
-	class IRenderContext;
+	class  IRenderContext;
 	class  CommandQueue;
-	class DescriptorAllocation;
+	class  DescriptorAllocation;
+	class GraphicsCommandList;
+	class ComputeCommandList;
+	class CopyCommandList;
 	// Rendering Flow
 	//
 	// ¸Ç Ã³À½
@@ -62,6 +65,10 @@ namespace JG
 		static DescriptorAllocation RTVAllocate();
 		static DescriptorAllocation DSVAllocate();
 		static DescriptorAllocation CSUAllocate();
+
+		static GraphicsCommandList* GetGraphicsCommandList(i32 priority = 0);
+		static ComputeCommandList*  GetComputeCommandList(i32 priority = 0);
+		static CopyCommandList*     GetCopyCommandList(i32 priority = 0);
 	protected:
 		// Application
 		virtual bool Create() override;

@@ -42,7 +42,14 @@ namespace JG
 		u32 Width = 0;
 		u32 Height = 0;
 		ETextureFormat Format = ETextureFormat::None;
-		ETextureFlags Flags   = ETextureFlags::None;
+		ETextureFlags  Flags   = ETextureFlags::None;
+		u16 MipLevel  = 0;
+		u16 ArraySize = 1;
+
+
+		Color ClearColor;
+		f32   ClearDepth   = 1.0f;
+		u8    ClearStencil = 0;
 	};
 
 

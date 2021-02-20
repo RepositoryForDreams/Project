@@ -31,13 +31,13 @@ namespace JG
 		};
 	private:
 		ComPtr<ID3D12RootSignature>			    mD3DRootSig;
-		std::vector<CD3DX12_ROOT_PARAMETER>     mRootParams;
-		std::vector<D3D12_STATIC_SAMPLER_DESC>  mSamplerState;
+		List<CD3DX12_ROOT_PARAMETER>     mRootParams;
+		List<D3D12_STATIC_SAMPLER_DESC>  mSamplerState;
 
 
-		std::vector<i32> mRootSigInitType;
-		std::map<u32, DescriptorTableInfo> mDescriptorTableInfoByRootParam;
-		std::vector<UniquePtr<D3D12_DESCRIPTOR_RANGE>> mDescriptorRanges;
+		List<i32> mRootSigInitType;
+		SortedDictionary<u32, DescriptorTableInfo> mDescriptorTableInfoByRootParam;
+		List<UniquePtr<D3D12_DESCRIPTOR_RANGE>> mDescriptorRanges;
 
 	public: 
 		void InitAsDescriptorTable(D3D12_DESCRIPTOR_RANGE_TYPE type, u32 numDescriptor, u32 register_num,

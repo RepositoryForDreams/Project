@@ -7,8 +7,8 @@ namespace JG
 	class DirectX12RenderContext : public IRenderContext
 	{
 	private:
-		std::vector<ComPtr<ID3D12Resource>> mBackBuffers;
-		std::vector<DescriptorAllocation>   mRTVs;
+		List<ComPtr<ID3D12Resource>> mBackBuffers;
+		List<DescriptorAllocation>   mRTVs;
 		ComPtr<IDXGISwapChain4>				mSwapChain;
 		RenderContextSettings mSettings;
 	public:

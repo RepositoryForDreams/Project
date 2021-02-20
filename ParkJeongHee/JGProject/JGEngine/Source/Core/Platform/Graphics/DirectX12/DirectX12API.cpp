@@ -9,6 +9,7 @@
 #include "Utill/CommandQueue.h"
 #include "Utill/RootSignature.h"
 #include "Utill/PipelineState.h"
+#include "Utill/CommandList.h"
 
 namespace JG
 {
@@ -23,10 +24,21 @@ namespace JG
 	static UniquePtr<CommandQueue> gComputeCommandQueue;
 	static UniquePtr<CommandQueue> gCopyCommandQueue;
 
-	static std::vector<UniquePtr<DirectX12FrameBuffer>> gFrameBuffers;
-	static std::unordered_map<ptraddr, SharedPtr<IRenderContext>> gRenderContexts;
+
+
+	static Dictionary<ptraddr, SharedPtr<IRenderContext>> gRenderContexts;
 	static const u64 gFrameBufferCount = 3;
-	static u64 gFrameBufferIndex = 0;
+	static u64       gFrameBufferIndex = 0;
+
+
+	static Dictionary<std::thread::id, List<GraphicsCommandList*>> gGraphicsCommandLists;
+	static Dictionary<std::thread::id, List<ComputeCommandList*>>  gComputeCommandLists;
+	static Dictionary<std::thread::id, List<CopyCommandList*>>     gCopyCommandLists;
+
+	static std::shared_mutex gGraphicsCommandListMutex;
+	static std::shared_mutex gComputeCommandListMutex;
+	static std::shared_mutex gCopyCommandListMutex;
+
 
 	// thread id = rendererID, commandList 획득  =  FrameBufferf
 	// mutex = 
@@ -90,6 +102,122 @@ namespace JG
 	{
 		return gCSUAllocator->Allocate();
 	}
+	// TODO
+	// Priority -> RendererID
+	// Renderer Begin 호출시 RendererID를 발급 받고
+	// Bind로 넘길시 RendererID 로
+	// RendererID 별 thread 별 commandList 생성
+	GraphicsCommandList* DirectX12API::GetGraphicsCommandList(i32 priority)
+	{
+		List<GraphicsCommandList*>* pCmdLists = nullptr;
+		GraphicsCommandList* result = nullptr;
+		u64 bufferIndex = GetFrameBufferIndex();
+		auto threadID = std::this_thread::get_id();
+		bool isFind = false;
+		{
+			std::shared_lock<std::shared_mutex> lock(gGraphicsCommandListMutex);
+			isFind = gGraphicsCommandLists.find(threadID) != gGraphicsCommandLists.end();
+			if (isFind)
+			{
+				pCmdLists = &gGraphicsCommandLists[threadID];
+			}
+		}
+
+		if (isFind == false)
+		{
+			std::lock_guard<std::shared_mutex> lock(gGraphicsCommandListMutex);
+			gGraphicsCommandLists[threadID].resize(GetFrameBufferCount(), nullptr);
+			pCmdLists = &gGraphicsCommandLists[threadID];
+		}
+
+		if (pCmdLists != nullptr)
+		{
+			if ((*pCmdLists)[bufferIndex] == nullptr)
+			{
+				std::lock_guard<std::shared_mutex> lock(gGraphicsCommandListMutex);
+				(*pCmdLists)[bufferIndex] = static_cast<GraphicsCommandList*>(gGraphicsCommandQueue->RequestCommandList(priority));
+			}
+
+			result = (*pCmdLists)[bufferIndex];
+			return result;
+		}
+		return nullptr;
+	}
+	ComputeCommandList* DirectX12API::GetComputeCommandList(i32 priority)
+	{
+		List<ComputeCommandList*>* pCmdLists = nullptr;
+		ComputeCommandList* result = nullptr;
+		u64 bufferIndex = GetFrameBufferIndex();
+		auto threadID = std::this_thread::get_id();
+		bool isFind = false;
+		{
+			std::shared_lock<std::shared_mutex> lock(gComputeCommandListMutex);
+			isFind = gComputeCommandLists.find(threadID) != gComputeCommandLists.end();
+			if (isFind)
+			{
+				pCmdLists = &gComputeCommandLists[threadID];
+			}
+		}
+
+		if (isFind == false)
+		{
+			std::lock_guard<std::shared_mutex> lock(gComputeCommandListMutex);
+			gComputeCommandLists[threadID].resize(GetFrameBufferCount(), nullptr);
+			pCmdLists = &gComputeCommandLists[threadID];
+		}
+
+		if (pCmdLists != nullptr)
+		{
+			if ((*pCmdLists)[bufferIndex] == nullptr)
+			{
+				std::lock_guard<std::shared_mutex> lock(gComputeCommandListMutex);
+				(*pCmdLists)[bufferIndex] = static_cast<ComputeCommandList*>(gComputeCommandQueue->RequestCommandList(priority));
+			}
+
+			result = (*pCmdLists)[bufferIndex];
+			return result;
+		}
+		return nullptr;
+	}
+	CopyCommandList* DirectX12API::GetCopyCommandList(i32 priority)
+	{
+		List<CopyCommandList*>* pCmdLists = nullptr;
+		CopyCommandList* result = nullptr;
+		u64 bufferIndex = GetFrameBufferIndex();
+		auto threadID = std::this_thread::get_id();
+		bool isFind = false;
+		{
+			std::shared_lock<std::shared_mutex> lock(gCopyCommandListMutex);
+			isFind = gCopyCommandLists.find(threadID) != gCopyCommandLists.end();
+			if (isFind)
+			{
+				pCmdLists = &gCopyCommandLists[threadID];
+			}
+		}
+
+		if (isFind == false)
+		{
+			std::lock_guard<std::shared_mutex> lock(gCopyCommandListMutex);
+			gCopyCommandLists[threadID].resize(GetFrameBufferCount(), nullptr);
+			pCmdLists = &gCopyCommandLists[threadID];
+		}
+
+		if (pCmdLists != nullptr)
+		{
+			if ((*pCmdLists)[bufferIndex] == nullptr)
+			{
+				std::lock_guard<std::shared_mutex> lock(gCopyCommandListMutex);
+				(*pCmdLists)[bufferIndex] = static_cast<CopyCommandList*>(gCopyCommandQueue->RequestCommandList(priority));
+			}
+
+			result = (*pCmdLists)[bufferIndex];
+			return result;
+		}
+		return nullptr;
+	}
+
+
+
 	bool DirectX12API::Create()
 	{
 		JG_CORE_INFO("DirectX12 Init Start");
@@ -133,6 +261,13 @@ namespace JG
 		gComputeCommandQueue  = CreateUniquePtr<CommandQueue>(gFrameBufferCount, D3D12_COMMAND_LIST_TYPE_COMPUTE);
 		gCopyCommandQueue     = CreateUniquePtr<CommandQueue>(gFrameBufferCount, D3D12_COMMAND_LIST_TYPE_COPY);
 
+
+
+
+		
+
+
+
 		JG_CORE_INFO("DirectX12 Init End");
 		return true;
 	}
@@ -154,7 +289,6 @@ namespace JG
 		gComputeCommandQueue.reset();
 		gCopyCommandQueue.reset();
 
-		gFrameBuffers.clear();
 
 		gDevice.Reset();
 		gFactory.Reset();

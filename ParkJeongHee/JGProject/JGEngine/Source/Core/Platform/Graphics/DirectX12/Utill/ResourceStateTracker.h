@@ -7,7 +7,7 @@ namespace JG
 	class ResourceState
 	{
 	public:
-		std::map<u32, D3D12_RESOURCE_STATES> StateMap;
+		SortedDictionary<u32, D3D12_RESOURCE_STATES> StateMap;
 		D3D12_RESOURCE_STATES State;
 	public:
 		D3D12_RESOURCE_STATES Get(uint32_t subresource) const {
@@ -56,9 +56,9 @@ namespace JG
 	class ResourceStateTracker
 	{
 	private:
-		std::vector<D3D12_RESOURCE_BARRIER> mResourceBarriers;
-		std::vector<D3D12_RESOURCE_BARRIER> mPendingResourceBarriers;
-		std::unordered_map<ID3D12Resource*, ResourceState> mResourceStates;
+		List<D3D12_RESOURCE_BARRIER> mResourceBarriers;
+		List<D3D12_RESOURCE_BARRIER> mPendingResourceBarriers;
+		Dictionary<ID3D12Resource*, ResourceState> mResourceStates;
 	public:
 		void TransitionBarrier(ComPtr<ID3D12Resource> d3dResource, D3D12_RESOURCE_STATES state, uint32_t subResource);
 

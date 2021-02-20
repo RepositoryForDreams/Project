@@ -37,7 +37,7 @@ namespace JG
 		mDesc.pRootSignature = rootSig.Get();
 	}
 
-	void GraphicsPipelineState::BindRenderTarget(const std::vector<DXGI_FORMAT>& rtFormats, DXGI_FORMAT dvFormat)
+	void GraphicsPipelineState::BindRenderTarget(const List<DXGI_FORMAT>& rtFormats, DXGI_FORMAT dvFormat)
 	{
 		u64 cnt = rtFormats.size();
 		if (cnt >= MAX_RENDERTARGET)

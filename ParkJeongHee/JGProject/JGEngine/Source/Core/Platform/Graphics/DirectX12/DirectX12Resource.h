@@ -11,6 +11,7 @@
 
 namespace JG
 {
+	class DescriptorAllocation;
 	class DirectX12VertexBuffer : public IVertexBuffer
 	{
 		u64   mElementSize  = 0;
@@ -21,8 +22,11 @@ namespace JG
 		virtual ~DirectX12VertexBuffer();
 	public:
 		virtual bool  CreateBuffer(void* datas, u64 elementSize, u64 elementCount) override;
+		virtual bool IsValid() const override;
+
 	protected:
 		virtual void Bind() override;
+
 	public:
 		void* GetData() const
 		{
@@ -42,7 +46,6 @@ namespace JG
 	class DirectX12IndexBuffer : public IIndexBuffer
 	{
 	private:
-		ComPtr<ID3D12Resource> mD3DResource;
 		u32* mCPUData    = nullptr;
 		u64  mIndexCount = 0;
 	public:
@@ -50,6 +53,7 @@ namespace JG
 		virtual ~DirectX12IndexBuffer();
 	public:
 		virtual bool  CreateBuffer(u32* datas, u64 count) override;
+		virtual bool IsValid() const override;
 	protected:
 		virtual void Bind() override;
 	public:
@@ -67,16 +71,47 @@ namespace JG
 	{
 	private:
 		ComPtr<ID3D12Resource> mD3DResource;
+		TextureInfo mTextureInfo;
+
+		mutable Dictionary<u64, DescriptorAllocation> mRTVs;
+		mutable Dictionary<u64, DescriptorAllocation> mDSVs;
+		mutable Dictionary<u64, DescriptorAllocation> mSRVs;
+		mutable Dictionary<u64, DescriptorAllocation> mUAVs;
+
+		mutable std::shared_mutex mRTVMutex;
+		mutable std::shared_mutex mDSVMutex;
+		mutable std::shared_mutex mSRVMutex;
+		mutable std::shared_mutex mUAVMutex;
+
 	public:
 		DirectX12Texture() = default;
 		virtual ~DirectX12Texture();
 	public:
-		virtual TextureID GetTextureID() const override;
+		virtual void SetName(const String& name) override;
+		virtual TextureID          GetTextureID() const override;
+		virtual const TextureInfo& GetTextureInfo() const override;
+		virtual bool IsValid() const override;
 	protected:
 		virtual void Bind() override;
 	public:
 		void Create(const String& name, const TextureInfo& info);
 		void Reset();
+
+
+		D3D12_CPU_DESCRIPTOR_HANDLE GetRTV() const;
+		D3D12_CPU_DESCRIPTOR_HANDLE GetDSV() const;
+		D3D12_CPU_DESCRIPTOR_HANDLE GetSRV() const;
+		D3D12_CPU_DESCRIPTOR_HANDLE GetUAV() const;
+
+
+		ID3D12Resource* Get() const {
+			return mD3DResource.Get();
+		}
+		ID3D12Resource** GetAddress() {
+			return mD3DResource.GetAddressOf();
+		}
+	private:
+		void SetTextureInfo(const TextureInfo& info);
 	private:
 		DirectX12Texture(const DirectX12Texture& texture) = delete;
 		const DirectX12Texture& operator=(const DirectX12Texture& texture) = delete;

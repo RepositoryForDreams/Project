@@ -45,7 +45,7 @@ namespace JG
 	class ShaderLibrary : GlobalSingleton<ShaderLibrary>
 	{
 	private:
-		std::unordered_map<String, SharedPtr<IShader>> mShaders;
+		Dictionary<String, SharedPtr<IShader>> mShaders;
 		std::shared_mutex mMutex;
 	public:
 		static void RegisterShader(const String& name, SharedPtr<IShader> shader);

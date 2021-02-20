@@ -18,8 +18,8 @@ namespace JG
 		public:
 			ComPtr<ID3D12DescriptorHeap>			D3DDescriptorHeap;
 			D3D12_DESCRIPTOR_HEAP_TYPE              D3DType;
-			std::queue<D3D12_CPU_DESCRIPTOR_HANDLE> AbandonedHandles;
-			std::map<u64, std::queue<D3D12_CPU_DESCRIPTOR_HANDLE>> PendingHandles;
+			Queue<D3D12_CPU_DESCRIPTOR_HANDLE> AbandonedHandles;
+			SortedDictionary<u64, Queue<D3D12_CPU_DESCRIPTOR_HANDLE>> PendingHandles;
 			u64 HeapSize = 0;
 			u64 Offset   = 0;
 			std::mutex FreeMutex;
@@ -38,7 +38,7 @@ namespace JG
 	private:
 		u64							   mSizePerHep = 1024;
 		D3D12_DESCRIPTOR_HEAP_TYPE     mD3DType;
-		std::vector<UniquePtr<DescriptorAllocator::CPUDescriptorPage>> mPages;
+		List<UniquePtr<DescriptorAllocator::CPUDescriptorPage>> mPages;
 		std::mutex                     mAllocateMutex;
 	};
 

@@ -11,7 +11,7 @@ namespace JG
 	class LayerStack
 	{
 	private:
-		std::vector<SharedPtr<ILayer>> mLayers;
+		List<SharedPtr<ILayer>> mLayers;
 		u32 mLayerInsertIndex = 0;
 	public:
 		LayerStack() = default;

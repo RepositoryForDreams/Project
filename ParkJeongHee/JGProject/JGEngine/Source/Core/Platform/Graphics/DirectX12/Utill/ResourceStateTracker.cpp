@@ -5,7 +5,7 @@
 
 namespace JG
 {
-	static std::unordered_map<ID3D12Resource*, ResourceInfo> gResourceRefMap;
+	static Dictionary<ID3D12Resource*, ResourceInfo> gResourceRefMap;
 	static std::shared_mutex gResourceMutex;
 	static bool gResourceLock = false;
 
@@ -94,7 +94,7 @@ namespace JG
 	{
 		if (mPendingResourceBarriers.empty()) return false;
 
-		std::vector<D3D12_RESOURCE_BARRIER> pendingBarriers;
+		List<D3D12_RESOURCE_BARRIER> pendingBarriers;
 		for (auto& pending_barrier : mPendingResourceBarriers)
 		{
 			auto d3d_pResource = pending_barrier.Transition.pResource;

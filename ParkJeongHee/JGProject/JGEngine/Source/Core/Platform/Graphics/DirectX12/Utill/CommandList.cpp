@@ -132,9 +132,9 @@ namespace JG
 		
 	}
 
-	void GraphicsCommandList::SetViewports(const std::vector<Viewport>& viewports)
+	void GraphicsCommandList::SetViewports(const List<Viewport>& viewports)
 	{
-		std::vector<D3D12_VIEWPORT> d3dViewports(viewports.size());
+		List<D3D12_VIEWPORT> d3dViewports(viewports.size());
 		for(i32 i = 0; i<(i32)d3dViewports.size(); ++i)
 		{
 			d3dViewports[i] = CD3DX12_VIEWPORT(
@@ -150,14 +150,59 @@ namespace JG
 		mD3DCommandList->RSSetScissorRects(1, &CD3DX12_RECT(rect.Left, rect.Top, rect.Right, rect.Bottom));
 	}
 
-	void GraphicsCommandList::SetScissorRects(const std::vector<ScissorRect>& rects)
+	void GraphicsCommandList::SetScissorRects(const List<ScissorRect>& rects)
 	{
-		std::vector<D3D12_RECT> d3dRects(rects.size());
+		List<D3D12_RECT> d3dRects(rects.size());
 		for (i32 i = 0; i < (i32)d3dRects.size(); ++i)
 		{
 			d3dRects[i] = CD3DX12_RECT(rects[i].Left, rects[i].Top, rects[i].Right, rects[i].Bottom);
 		}
 		mD3DCommandList->RSSetScissorRects((u32)d3dRects.size(), d3dRects.data());
+	}
+
+	void GraphicsCommandList::ClearRenderTargetTexture(ID3D12Resource* resource, D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle, const Color& clearColor)
+	{
+		if (resource == nullptr || rtvHandle.ptr == 0) return;
+
+		TransitionBarrier(resource, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		FlushResourceBarrier();
+
+
+		FLOAT color[4] = { clearColor.R, clearColor.G, clearColor.B, clearColor.A };
+		mD3DCommandList->ClearRenderTargetView(rtvHandle, color, 0, nullptr);
+
+	}
+
+	void GraphicsCommandList::ClearDepthTexture(ID3D12Resource* resource, D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle, f32 clearDepth, u8 clearStencil, D3D12_CLEAR_FLAGS clearFlags)
+	{
+		if (resource == nullptr || dsvHandle.ptr == 0) return;
+
+
+		TransitionBarrier(resource, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+		FlushResourceBarrier();
+
+
+
+		mD3DCommandList->ClearDepthStencilView(dsvHandle, clearFlags, clearDepth, clearStencil, 0, nullptr);
+	}
+
+	void GraphicsCommandList::SetRenderTarget(
+		ID3D12Resource** rtTextures, D3D12_CPU_DESCRIPTOR_HANDLE* rtvHandles, u64 rtTextureCount,
+		ID3D12Resource* depthTexture, D3D12_CPU_DESCRIPTOR_HANDLE* dsvHandle)
+	{
+		for (u64 i = 0; i < rtTextureCount; ++i)
+		{
+			if (rtTextures[i] == nullptr) continue;
+			TransitionBarrier(rtTextures[i], D3D12_RESOURCE_STATE_RENDER_TARGET);
+		}
+		if (depthTexture != nullptr)
+		{
+			TransitionBarrier(depthTexture, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+		}
+		FlushResourceBarrier();
+
+
+		mD3DCommandList->OMSetRenderTargets(rtTextureCount, rtvHandles, false, dsvHandle);
 	}
 
 	void GraphicsCommandList::BindRootSignature(RootSignature& rootSig)
@@ -276,20 +321,19 @@ namespace JG
 		mD3DCommandList->IASetVertexBuffers(0, 1, &bufferView);
 	}
 
-	void GraphicsCommandList::BindDynamicIndexBuffer(const std::vector<u32>& indices)
+	void GraphicsCommandList::BindDynamicIndexBuffer(u32* datas, u64 count)
 	{
-		u64 btSize = indices.size() * sizeof(u32);
-
+		u64 btSize = count * sizeof(u32);
+		
 		auto alloc = mUploadAllocator->Allocate(btSize, sizeof(u32));
-		memcpy(alloc.CPU, indices.data(), btSize);
+		memcpy(alloc.CPU, datas, btSize);
 
 		D3D12_INDEX_BUFFER_VIEW bufferView;
 		bufferView.BufferLocation = alloc.GPU;
 		bufferView.Format = DXGI_FORMAT_R32_UINT;
-		bufferView.SizeInBytes = (u32)indices.size();
+		bufferView.SizeInBytes = (u32)count;
 
 		mD3DCommandList->IASetIndexBuffer(&bufferView);
-		
 	}
 	void GraphicsCommandList::SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY topology)
 	{

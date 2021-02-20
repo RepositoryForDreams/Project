@@ -35,7 +35,7 @@ namespace JG
 
 	void CommandQueue::End()
 	{
-		std::vector<ID3D12CommandList*>   d3dCmdLists;
+		List<ID3D12CommandList*>   d3dCmdLists;
 		ResourceStateTracker::Lock();
 		for (auto& cmdLists : mExpectExcuteCmdLists)
 		{
@@ -91,7 +91,19 @@ namespace JG
 		}
 		else
 		{
-			cmdList = CreateUniquePtr<CommandList>(mD3DType);
+			switch (mD3DType)
+			{
+			case D3D12_COMMAND_LIST_TYPE_DIRECT:
+				cmdList = CreateUniquePtr<GraphicsCommandList>(mD3DType);
+				break;
+			case D3D12_COMMAND_LIST_TYPE_COMPUTE:
+				cmdList = CreateUniquePtr<ComputeCommandList>(mD3DType);
+				break;
+			default:
+				cmdList = CreateUniquePtr<CommandList>(mD3DType);
+				break;
+			}
+		
 			result = cmdList.get();
 			mCmdLists[cmdList.get()] = std::move(cmdList);
 		}

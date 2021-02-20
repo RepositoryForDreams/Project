@@ -3,6 +3,7 @@
 #include "JGCore.h"
 #include "Graphics/GraphicsDefine.h"
 #include "DirectX12Helper.h"
+#include <Platform/Graphics/DirectX12/DirectX12Resource.h>
 
 
 namespace JG
@@ -11,6 +12,7 @@ namespace JG
 	class UploadAllocator;
 	class DynamicDescriptorAllocator;
 	class RootSignature;
+	class DirectX12Texture;
 	class CommandList
 	{
 	protected:
@@ -25,7 +27,7 @@ namespace JG
 		ComPtr<ID3D12GraphicsCommandList> mD3DCommandList;
 		ComPtr<ID3D12CommandAllocator>    mD3DAllocator;
 
-		std::vector<ComPtr<ID3D12Object>> mTempObjectList;
+		List<ComPtr<ID3D12Object>> mTempObjectList;
 
 		UniquePtr<UploadAllocator>		mUploadAllocator;
 		UniquePtr<ResourceStateTracker> mResourceStateTracker;
@@ -54,13 +56,21 @@ namespace JG
 	class GraphicsCommandList : public CommandList
 	{
 	public:
+		GraphicsCommandList(D3D12_COMMAND_LIST_TYPE d3dType) : CommandList(d3dType) {};
 		virtual ~GraphicsCommandList() = default;
 	public:
 		void SetViewport(const Viewport& viewport);
-		void SetViewports(const std::vector<Viewport>& viewports);
+		void SetViewports(const List<Viewport>& viewports);
 		void SetScissorRect(const ScissorRect& rect);
-		void SetScissorRects(const std::vector<ScissorRect>& rects);
-		//void ClearRenderTarget(GraphicsCommandKeyPtr cmdKey, RenderTarget& renderTarget, D3D12_CLEAR_FLAGS clearFlags = D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL);
+		void SetScissorRects(const List<ScissorRect>& rects);
+		void ClearRenderTargetTexture(ID3D12Resource* resource, D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle, const Color& clearColor);
+		void ClearDepthTexture(ID3D12Resource* resource, D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle, 
+			f32 clearDepth = 1.0f, u8 clearStencil = 0, D3D12_CLEAR_FLAGS clearFlags = D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL);
+
+		void SetRenderTarget(
+			ID3D12Resource** rtTextures, D3D12_CPU_DESCRIPTOR_HANDLE* rtvHandles, u64 rtTextureCount,
+			ID3D12Resource* depthTexture, D3D12_CPU_DESCRIPTOR_HANDLE* dsvHandle);
+		//void ClearRenderTarget(GraphicsCommandKeyPtr cmdKey, RenderTarget& renderTarget, );
 		//void SetRenderTarget(GraphicsCommandKeyPtr cmdKey, RenderTarget& renderTarget);
 		void BindRootSignature(RootSignature& rootSig);
 		//void BindPipelineState(GraphicsCommandKeyPtr cmdKey, GraphicsPipelineState& pso);
@@ -84,13 +94,26 @@ namespace JG
 
 
 		// void BindIndexBuffer(IndexBuffer& iBuffer);
-		void BindDynamicIndexBuffer(const std::vector<u32>& indices);
+		void BindDynamicIndexBuffer(u32* datas, u64 count);
 		void SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY topology);
 
 
 		void DrawIndexed(u32 indexCount, u32 instancedCount = 1, u32 startIndexLocation = 0, u32 startVertexLocation = 0, u32 startInstanceLocation = 0);
 	};
 
+	class ComputeCommandList : public CommandList
+	{
+	public:
+		ComputeCommandList(D3D12_COMMAND_LIST_TYPE d3dType) : CommandList(d3dType) {};
+		virtual ~ComputeCommandList() = default;
+	};
+
+	class CopyCommandList : public CommandList
+	{
+	public:
+		CopyCommandList(D3D12_COMMAND_LIST_TYPE d3dType) : CommandList(d3dType) {};
+		virtual ~CopyCommandList() = default;
+	};
 	
 }
 

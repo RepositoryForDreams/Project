@@ -7,7 +7,7 @@
 
 namespace JG
 {
-	static std::unordered_map<JG::u64, ComPtr<ID3D12RootSignature>> gRootSigCahce;
+	static Dictionary<JG::u64, ComPtr<ID3D12RootSignature>> gRootSigCahce;
 
 
 	void RootSignature::InitAsDescriptorTable(D3D12_DESCRIPTOR_RANGE_TYPE type, u32 numDescriptor, u32 register_num, u32 register_space, D3D12_SHADER_VISIBILITY visibility)

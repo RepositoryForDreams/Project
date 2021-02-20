@@ -19,8 +19,11 @@ namespace JG
 		{
 			return mName;
 		}
+	public:
+		virtual bool IsValid() const = 0;
 	protected:
-		virtual void Bind() = 0;
+		virtual void Bind()    = 0;
+
 	private:
 		IResource(const IResource&) = delete;
 		const IResource& operator=(const IResource&) = delete;
@@ -57,7 +60,8 @@ namespace JG
 	public:
 		virtual ~ITexture() = default;
 	public:
-		virtual TextureID GetTextureID() const = 0;
+		virtual TextureID    GetTextureID()   const = 0;
+		virtual const TextureInfo& GetTextureInfo() const = 0;
 	private:
 		ITexture(const ITexture& texture) = delete;
 		const ITexture& operator=(const ITexture& texture) = delete;

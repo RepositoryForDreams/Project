@@ -668,7 +668,7 @@ CODE
  Q: How can I have multiple widgets with the same label?
  Q: How can I display an image? What is ImTextureID, how does it works?
  Q: How can I use my own math types instead of ImVec2/ImVec4?
- Q: How can I interact with standard C++ types (such as String and std::vector)?
+ Q: How can I interact with standard C++ types (such as String and List)?
  Q: How can I display custom shapes? (using low-level ImDrawList API)
  >> See https://www.dearimgui.org/faq
 

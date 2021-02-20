@@ -72,10 +72,6 @@ namespace JG
 	const static u32 JG_U32_MAX = 0xffffffff;
 	const static u64 JG_U64_MAX = 0xffffffffffffffff;
 
-
-	
-
-
 	// Container
 	template<class T>
 	using List  = std::vector<T>;
@@ -121,6 +117,8 @@ namespace JG
 	// String
 	using String = std::wstring;
 	using wchar  = wchar_t;
+
+	
 }
 
 

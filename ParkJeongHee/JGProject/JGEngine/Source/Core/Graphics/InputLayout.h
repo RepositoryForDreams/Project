@@ -19,7 +19,7 @@ namespace JG
 	class InputLayout
 	{
 	private:
-		std::vector<InputElement> mInputElements;
+		List<InputElement> mInputElements;
 	public:
 		void Add(EShaderDataType type, const char* sementicName, u32 sementicSlot)
 		{

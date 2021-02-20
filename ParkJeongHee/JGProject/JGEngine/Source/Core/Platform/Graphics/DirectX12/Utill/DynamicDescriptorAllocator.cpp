@@ -32,7 +32,7 @@ namespace JG
 			mCPUCache[rootParam].NumDescriptor = numDescriptor;
 		}
 	}
-	void DynamicDescriptorAllocator::CommitDescriptorTable(u32 rootParam, const std::vector<D3D12_CPU_DESCRIPTOR_HANDLE>& handles)
+	void DynamicDescriptorAllocator::CommitDescriptorTable(u32 rootParam, const List<D3D12_CPU_DESCRIPTOR_HANDLE>& handles)
 	{
 		auto& cpuHandles = mCPUCache[rootParam].CPUHandles;
 		cpuHandles.insert(cpuHandles.end(), handles.begin(), handles.end());
@@ -56,7 +56,7 @@ namespace JG
 		}
 		if (!mCPUCache.empty())
 		{
-			std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> cpu_Handles;
+			List<D3D12_CPU_DESCRIPTOR_HANDLE> cpu_Handles;
 			CD3DX12_CPU_DESCRIPTOR_HANDLE startCPU(mD3DHeap->GetCPUDescriptorHandleForHeapStart());
 			CD3DX12_GPU_DESCRIPTOR_HANDLE startGPU(mD3DHeap->GetGPUDescriptorHandleForHeapStart());
 			for (auto& cache_pair : mCPUCache)
@@ -78,7 +78,7 @@ namespace JG
 					JG_CORE_CRITICAL("Need Add DynamicDescriptorAllocator Size  {0} => {1} ", mNumDescriptor, mNumDescriptor * 2);
 				}
 
-				std::vector<u32> srcDescriptorRangeSize(handleCount, 1);
+				List<u32> srcDescriptorRangeSize(handleCount, 1);
 
 				DirectX12API::GetD3DDevice()->CopyDescriptors(
 					1, &cpu, &handleCount,

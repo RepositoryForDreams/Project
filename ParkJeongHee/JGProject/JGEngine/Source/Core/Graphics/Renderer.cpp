@@ -5,7 +5,7 @@
 
 namespace JG
 {
-	static std::unordered_map<std::thread::id, bool> gRendererTriggerMap;
+	static Dictionary<std::thread::id, bool> gRendererTriggerMap;
 	static std::shared_mutex gMutex;
 
 	void RegisterThreadID();
@@ -23,6 +23,10 @@ namespace JG
 			return;
 		}
 		gRendererTriggerMap[threadID] = true;
+
+
+
+
 
 		// Renderer
 		// CommandList 준비
