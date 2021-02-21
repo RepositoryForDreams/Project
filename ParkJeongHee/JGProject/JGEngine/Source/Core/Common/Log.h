@@ -41,7 +41,7 @@ namespace JG
 #define JG_CORE_ERROR(...)    ::JG::Log::GetCoreLogger()->error(__VA_ARGS__)
 #define JG_CORE_CRITICAL(...) ::JG::Log::GetCoreLogger()->critical(__VA_ARGS__)
 #elif _RELEASE
-#define JG_CORE_TRANCE(...)   
+#define JG_CORE_TRACE(...)   
 #define JG_CORE_INFO(...)     
 #define JG_CORE_WARN(...)     
 #define JG_CORE_ERROR(...)    
@@ -55,7 +55,7 @@ namespace JG
 #define JG_ERROR(...)    ::JG::Log::GetClientLogger()->error(__VA_ARGS__)
 #define JG_CRITICAL(...) ::JG::Log::GetClientLogger()->critical(__VA_ARGS__)
 #elif _RELEASE
-#define JG_TRANCE(...)   
+#define JG_TRACE(...)   
 #define JG_INFO(...)     
 #define JG_WARN(...)     
 #define JG_ERROR(...)    

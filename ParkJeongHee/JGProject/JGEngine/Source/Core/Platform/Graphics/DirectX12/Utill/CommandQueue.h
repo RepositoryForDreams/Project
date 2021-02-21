@@ -19,6 +19,7 @@ namespace JG
 		Dictionary<CommandList*, UniquePtr<CommandList>>   mCmdLists;
 		SortedDictionary<i32, List<CommandList*>> mExpectExcuteCmdLists;
 		SortedDictionary<u64, Queue<UniquePtr<CommandList>>>     mPendingCmdLists;
+		Queue<UniquePtr<CommandList>> mCurrentPendingCmdLists;
 		UniquePtr<Fence> mFence;
 		List<u64> mFenceValue;
 	public:

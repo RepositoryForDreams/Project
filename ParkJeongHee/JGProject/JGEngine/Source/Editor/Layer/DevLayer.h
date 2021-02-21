@@ -5,11 +5,13 @@
 
 namespace JG
 {
-	class IRenderContext;
+	class IFrameBuffer;
 	class DevLayer : public ILayer
 	{
 	private:
-		SharedPtr<IRenderContext> mRenderContext;
+		SharedPtr<IFrameBuffer> mFrameBuffer;
+	public:
+		virtual ~DevLayer() = default;
 	public:
 		virtual void OnAttach() override;
 		virtual void OnDetach()  override;

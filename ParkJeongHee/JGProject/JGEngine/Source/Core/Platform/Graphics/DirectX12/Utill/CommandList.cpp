@@ -35,11 +35,11 @@ namespace JG
 		mUploadAllocator->Reset();
 		mResourceStateTracker->Reset();
 		mDynamicDescriptorAllocator->Reset();
-	
+		mTempObjectList.clear();
 
 		mD3DAllocator->Reset();
 		mD3DCommandList->Reset(mD3DAllocator.Get(), nullptr);
-		mTempObjectList.clear();
+	
 		mBindedDescriptorHeap  = nullptr;
 		mBindedGraphicsPSO     = nullptr;
 		mBindedComputePSO	   = nullptr;
@@ -58,7 +58,7 @@ namespace JG
 		Close();
 		bool isExistBarrier = mResourceStateTracker->FlushPendingResourceBarrier(commandList->Get());
 		mResourceStateTracker->CommitResourceState();
-		return false;
+		return isExistBarrier;
 	}
 
 	void CommandList::TransitionBarrier(ID3D12Resource* d3dResource, D3D12_RESOURCE_STATES state, u32 subResource, bool flush)

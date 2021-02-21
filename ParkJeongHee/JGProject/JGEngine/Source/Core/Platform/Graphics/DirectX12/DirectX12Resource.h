@@ -90,6 +90,7 @@ namespace JG
 		virtual void SetName(const String& name) override;
 		virtual TextureID          GetTextureID() const override;
 		virtual const TextureInfo& GetTextureInfo() const override;
+		virtual void SetTextureInfo(const TextureInfo& info) override;
 		virtual bool IsValid() const override;
 	protected:
 		virtual void Bind() override;
@@ -111,10 +112,10 @@ namespace JG
 			return mD3DResource.GetAddressOf();
 		}
 	private:
-		void SetTextureInfo(const TextureInfo& info);
-	private:
-		DirectX12Texture(const DirectX12Texture& texture) = delete;
-		const DirectX12Texture& operator=(const DirectX12Texture& texture) = delete;
+		SharedPtr<D3D12_RENDER_TARGET_VIEW_DESC> CreateRTVDesc(ETextureFlags flag) const;
+		SharedPtr<D3D12_DEPTH_STENCIL_VIEW_DESC> CreateDSVDesc(ETextureFlags flag) const;
+		SharedPtr<D3D12_SHADER_RESOURCE_VIEW_DESC>  CreateSRVDesc(ETextureFlags flag) const;
+		SharedPtr<D3D12_UNORDERED_ACCESS_VIEW_DESC> CreateUAVDesc(ETextureFlags flag) const;
 	};
 }
 

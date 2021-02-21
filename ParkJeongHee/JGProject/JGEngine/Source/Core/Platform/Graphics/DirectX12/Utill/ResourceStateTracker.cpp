@@ -113,6 +113,7 @@ namespace JG
 						{
 							pending_barrier.Transition.Subresource = subresourceState.first;
 							pending_barrier.Transition.StateBefore = prevState;
+							pending_barrier.Transition.StateAfter = nextState;
 							pendingBarriers.push_back(pending_barrier);
 						}
 					}
@@ -125,6 +126,7 @@ namespace JG
 					{
 						pending_barrier.Transition.Subresource = subresource;
 						pending_barrier.Transition.StateBefore = prevState;
+						pending_barrier.Transition.StateAfter  = nextState;
 						pendingBarriers.push_back(pending_barrier);
 					}
 				}
@@ -192,8 +194,9 @@ namespace JG
 		else
 		{
 			(*iter).second.RefCount += 1;
+		
 		}
-		JG_CORE_TRACE("Add Counting Resource : {0}   Ref : {1}", ws2s((*iter).second.Name), (*iter).second.RefCount);
+		JG_CORE_TRACE("Add Counting Resource : {0}   Ref : {1}", ws2s(gResourceRefMap[d3dResource].Name), gResourceRefMap[d3dResource].RefCount);
 	}
 	void ResourceStateTracker::SetResourceName(ID3D12Resource* d3dResource, const String& name)
 	{
@@ -234,5 +237,9 @@ namespace JG
 				gResourceRefMap.erase(iter);
 			}
 		}
+	}
+	void ResourceStateTracker::ClearCache()
+	{
+		gResourceRefMap.clear();
 	}
 }

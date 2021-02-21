@@ -72,9 +72,9 @@ namespace JG
 	{
 		return EWindowPlatform::Windows;
 	}
-	ptraddr WindowsWindow::GetHandle() const
+	handle WindowsWindow::GetHandle() const
 	{
-		return (ptraddr)mHandle;
+		return (handle)mHandle;
 	}
 
 

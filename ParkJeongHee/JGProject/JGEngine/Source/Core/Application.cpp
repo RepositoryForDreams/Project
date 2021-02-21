@@ -64,7 +64,7 @@ namespace JG
 		{
 			JG_CORE_INFO("Successed Create Window");
 			mGraphcisAPI->Create();
-
+			Renderer2D::Create();
 
 			
 			mIsRunning = true;
@@ -105,8 +105,10 @@ namespace JG
 	void Application::Destroy()
 	{
 		mLayerStack.reset();
+		Renderer2D::Destroy();
 		mGraphcisAPI->Destroy();
 		mGraphcisAPI.reset();
+		mWindow->Destroy();
 		mWindow.reset();
 		Log::Destroy();
 	}

@@ -50,7 +50,7 @@ namespace JG
 
 
 		virtual EWindowPlatform GetPlatform() const = 0;
-		virtual ptraddr GetHandle() const   = 0;
+		virtual handle GetHandle() const   = 0;
 
 		static void BindCallBackEventFn(const EventCallBackFn& eventCallBackFn)
 		{

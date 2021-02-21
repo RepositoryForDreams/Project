@@ -54,7 +54,7 @@ namespace JG
 	using f64 = double;
 	using jbyte = char;
 	using ptraddr = unsigned long long;
-	
+	using handle  = unsigned long long;
 	
 
 

@@ -10,7 +10,7 @@ struct ImVec4;
 namespace ImGui
 {
 
-	void ExternalImpl_Init(JG::EWindowPlatform platform, JG::EGraphicsAPI API, JG::ptraddr handle);
+	void ExternalImpl_Init(JG::EWindowPlatform platform, JG::EGraphicsAPI API, JG::handle handle);
 
 	void ExternalImpl_Resize(JG::u32 width, JG::u32 height);
 	void ExternalImpl_BeginFrame();

@@ -10,7 +10,8 @@ struct ID3D12Resource;
 
 namespace JG
 {
-	class  IRenderContext;
+	class ITexture;
+	class  IFrameBuffer;
 	class  CommandQueue;
 	class  DescriptorAllocation;
 	class GraphicsCommandList;
@@ -51,7 +52,6 @@ namespace JG
 	{
 	public:
 		virtual EGraphicsAPI GetAPI()const override;
-		virtual void SubmitRenderContext(SharedPtr<IRenderContext> renderContext) override;
 	public:
 		static IDXGIFactory4* GetDXGIFactory();
 		static ID3D12Device*  GetD3DDevice();
@@ -79,10 +79,15 @@ namespace JG
 		virtual void Flush() override;
 
 	protected:
-		virtual SharedPtr<IRenderContext> CreateRenderContext(const RenderContextSettings& settings) override;
+		virtual void ClearRenderTarget(const List<SharedPtr<ITexture>>& rtTextures, SharedPtr<ITexture> depthTexture) override;
+		virtual void SetRenderTarget(const List<SharedPtr<ITexture>>& rtTextures, SharedPtr<ITexture> depthTexture) override;
+	protected:
+		virtual SharedPtr<IFrameBuffer>   CreateFrameBuffer(const FrameBufferInfo& info) override;
 		virtual SharedPtr<IVertexBuffer>  CreateVertexBuffer(const String& name, void* datas, u64 elementSize, u64 elementCount) override;
 		virtual SharedPtr<IIndexBuffer>   CreateIndexBuffer(const String& name, u32* datas, u64 count) override;
 		virtual SharedPtr<IShader>        CreateShader(const String& sourceCode, EShaderFlags flags, const String& error) override;
+		virtual SharedPtr<ITexture>       CreateTexture(const String& name, const TextureInfo& info) override;
+		virtual SharedPtr<ITexture>       CreateTextureFromFile(const String& path) override;
 	};
 
 

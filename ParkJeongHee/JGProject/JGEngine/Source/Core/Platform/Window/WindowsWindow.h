@@ -21,7 +21,7 @@ namespace JG
 
 
 		virtual EWindowPlatform GetPlatform() const override;
-		virtual ptraddr GetHandle() const override;
+		virtual handle GetHandle() const override;
 	};
 
 

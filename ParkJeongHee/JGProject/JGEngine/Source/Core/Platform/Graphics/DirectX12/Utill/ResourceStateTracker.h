@@ -78,5 +78,7 @@ namespace JG
 		static void SetResourceName(ID3D12Resource* d3dResource, const String& name);
 		static bool GetResourceName(ID3D12Resource* d3dResource, String* out_name);
 		static void UnRegisterResource(ID3D12Resource* d3dResource);
+	public:
+		static void ClearCache();
 	};
 }

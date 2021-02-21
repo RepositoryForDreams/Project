@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "DirectX12API.h"
 #include "DirectX12FrameBuffer.h"
-#include "DirectX12RenderContext.h"
 #include "DirectX12Resource.h"
 #include "DirectX12Shader.h"
 #include "Utill/DirectX12Helper.h"
@@ -10,6 +9,7 @@
 #include "Utill/RootSignature.h"
 #include "Utill/PipelineState.h"
 #include "Utill/CommandList.h"
+#include "Utill/ResourceStateTracker.h"
 
 namespace JG
 {
@@ -26,7 +26,7 @@ namespace JG
 
 
 
-	static Dictionary<ptraddr, SharedPtr<IRenderContext>> gRenderContexts;
+	static Dictionary<handle, SharedPtr<DirectX12FrameBuffer>> gFrameBuffers;
 	static const u64 gFrameBufferCount = 3;
 	static u64       gFrameBufferIndex = 0;
 
@@ -45,20 +45,6 @@ namespace JG
 	EGraphicsAPI DirectX12API::GetAPI() const
 	{
 		return EGraphicsAPI::DirectX12;
-	}
-	void DirectX12API::SubmitRenderContext(SharedPtr<IRenderContext> renderContext)
-	{
-		if (renderContext == nullptr)
-		{
-			return;
-		}
-		auto settings = renderContext->GetSettings();
-		auto iter = gRenderContexts.find(settings.Handle);
-		if (iter != gRenderContexts.end())
-		{
-			return;
-		}
-		gRenderContexts.emplace(settings.Handle, renderContext);
 	}
 	IDXGIFactory4* DirectX12API::GetDXGIFactory()
 	{
@@ -262,12 +248,6 @@ namespace JG
 		gCopyCommandQueue     = CreateUniquePtr<CommandQueue>(gFrameBufferCount, D3D12_COMMAND_LIST_TYPE_COPY);
 
 
-
-
-		
-
-
-
 		JG_CORE_INFO("DirectX12 Init End");
 		return true;
 	}
@@ -278,9 +258,13 @@ namespace JG
 		Flush();
 
 		RootSignature::ClearCache();
-		gRenderContexts.clear();
+		ResourceStateTracker::ClearCache();
+		gFrameBuffers.clear();
+		gGraphicsCommandLists.clear();
+		gComputeCommandLists.clear();
+		gCopyCommandLists.clear();
 
-
+		
 		gCSUAllocator.reset();
 		gRTVAllocator.reset();
 		gDSVAllocator.reset();
@@ -300,12 +284,34 @@ namespace JG
 		gGraphicsCommandQueue->Begin();
 		gComputeCommandQueue->Begin();
 		gCopyCommandQueue->Begin();
+
+		for (auto& cmdLists : gGraphicsCommandLists)
+		{
+			for (auto& cmdList : cmdLists.second)
+			{
+				cmdList = nullptr;
+			}
+		}
+		for (auto& cmdLists : gComputeCommandLists)
+		{
+			for (auto& cmdList : cmdLists.second)
+			{
+				cmdList = nullptr;
+			}
+		}
+		for (auto& cmdLists : gCopyCommandLists)
+		{
+			for (auto& cmdList : cmdLists.second)
+			{
+				cmdList = nullptr;
+			}
+		}
 	}
 	void DirectX12API::End()
 	{
 		// TODO
 		// FrameBuffer Update
-		for (auto& iter : gRenderContexts)
+		for (auto& iter : gFrameBuffers)
 		{
 			iter.second->Update();
 		}
@@ -317,7 +323,7 @@ namespace JG
 
 		// TODO
 		// SwapBuffer
-		for (auto& iter : gRenderContexts)
+		for (auto& iter : gFrameBuffers)
 		{
 			iter.second->Present();
 		}
@@ -335,15 +341,88 @@ namespace JG
 		gCopyCommandQueue->Flush();
 	}
 
-	SharedPtr<IRenderContext> DirectX12API::CreateRenderContext(const RenderContextSettings& settings)
+	void DirectX12API::ClearRenderTarget(const List<SharedPtr<ITexture>>& rtTextures, SharedPtr<ITexture> depthTexture)
 	{
-		auto context = CreateSharedPtr<DirectX12RenderContext>();
-		if (!context->Init(settings))
+		auto commandList = GetGraphicsCommandList();
+
+		for (auto& texture : rtTextures)
+		{
+			if (texture && texture->IsValid() == false) continue;
+			auto handle = static_cast<DirectX12Texture*>(texture.get())->GetRTV();
+			if (handle.ptr == 0) continue;
+
+
+			auto info = texture->GetTextureInfo();
+
+			commandList->ClearRenderTargetTexture(static_cast<DirectX12Texture*>(texture.get())->Get(), handle, info.ClearColor);
+		}
+		if (depthTexture && depthTexture->IsValid())
+		{
+			auto handle = static_cast<DirectX12Texture*>(depthTexture.get())->GetDSV();
+
+			if (handle.ptr != 0)
+			{
+				auto info = depthTexture->GetTextureInfo();
+
+				commandList->ClearDepthTexture(static_cast<DirectX12Texture*>(depthTexture.get())->Get(),
+					handle, info.ClearDepth, info.ClearStencil);
+			}
+		}
+	}
+
+	void DirectX12API::SetRenderTarget(const List<SharedPtr<ITexture>>& rtTextures, SharedPtr<ITexture> depthTexture)
+	{
+		auto commandList = GetGraphicsCommandList();
+
+		List<ID3D12Resource*> d3dRTResources;
+		List<D3D12_CPU_DESCRIPTOR_HANDLE> rtvHandles;
+
+		ID3D12Resource* d3dDSResource = nullptr;
+		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = { 0 };
+
+		for (auto& texture : rtTextures)
+		{
+			if (texture && texture->IsValid() == false) continue;
+			auto handle = static_cast<DirectX12Texture*>(texture.get())->GetRTV();
+			if (handle.ptr == 0) continue;
+
+
+			d3dRTResources.push_back(static_cast<DirectX12Texture*>(texture.get())->Get());
+			rtvHandles.push_back(handle);
+
+
+		}
+		if (depthTexture->IsValid())
+		{
+			auto handle = static_cast<DirectX12Texture*>(depthTexture.get())->GetDSV();
+			if (handle.ptr != 0)
+			{
+				d3dDSResource = static_cast<DirectX12Texture*>(depthTexture.get())->Get();
+			}
+		}
+
+
+
+		commandList->SetRenderTarget(d3dRTResources.data(), rtvHandles.data(), d3dRTResources.size(), d3dDSResource, &dsvHandle);
+	}
+
+	SharedPtr<IFrameBuffer> DirectX12API::CreateFrameBuffer(const FrameBufferInfo& info)
+	{
+		if (info.Handle == 0) return nullptr;
+		auto iter = gFrameBuffers.find(info.Handle);
+		if (iter != gFrameBuffers.end())
+		{
+			return gFrameBuffers[info.Handle];
+		}
+
+		auto buffer = CreateSharedPtr<DirectX12FrameBuffer>();
+		if (!buffer->Init(info))
 		{
 			JG_CORE_ERROR("Failed Create DirectX12RenderContext");
 			return nullptr;
 		}
-		return context;
+		gFrameBuffers.emplace(info.Handle, buffer);
+		return buffer;
 	}
 	SharedPtr<IVertexBuffer> DirectX12API::CreateVertexBuffer(const String& name, void* datas, u64 elementSize, u64 elementCount)
 	{
@@ -377,6 +456,18 @@ namespace JG
 		}
 		return shader;
 	}
+	SharedPtr<ITexture> DirectX12API::CreateTexture(const String& name, const TextureInfo& info)
+	{
+
+		auto texture = CreateSharedPtr<DirectX12Texture>();
+		texture->Create(name, info);
+
+		return texture;
+	}
+	SharedPtr<ITexture> DirectX12API::CreateTextureFromFile(const String& path)
+	{
+		return nullptr;
+	}
 	DXGI_FORMAT ConvertDirectX12TextureFormat(ETextureFormat format)
 	{
 
@@ -388,13 +479,4 @@ namespace JG
 			return DXGI_FORMAT_UNKNOWN;
 		}
 	}
-
-
-
-
-
-	// DirectX 12 Renderer2D API
-
-
-
 }

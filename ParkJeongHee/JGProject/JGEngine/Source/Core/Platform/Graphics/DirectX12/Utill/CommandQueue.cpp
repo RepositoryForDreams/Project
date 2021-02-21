@@ -30,7 +30,11 @@ namespace JG
 		uint64_t value = mFenceValue[DirectX12API::GetFrameBufferIndex()];
 		mFence->WaitForFenceValue(value);
 
-		
+		while (mPendingCmdLists[DirectX12API::GetFrameBufferIndex()].empty() == false)
+		{
+			mCurrentPendingCmdLists.push(std::move(mPendingCmdLists[DirectX12API::GetFrameBufferIndex()].front()));
+			mPendingCmdLists[DirectX12API::GetFrameBufferIndex()].pop();
+		}
 	}
 
 	void CommandQueue::End()
@@ -79,12 +83,11 @@ namespace JG
 
 	CommandList* CommandQueue::RequestCommandList()
 	{
-		auto& pendingQueue = mPendingCmdLists[DirectX12API::GetFrameBufferIndex()];
 		UniquePtr<CommandList> cmdList = nullptr;
 		CommandList* result = nullptr;
-		if (!pendingQueue.empty())
+		if (!mCurrentPendingCmdLists.empty())
 		{
-			cmdList = std::move(pendingQueue.front()); pendingQueue.pop();
+			cmdList = std::move(mCurrentPendingCmdLists.front()); mCurrentPendingCmdLists.pop();
 			cmdList->Reset();
 			result = cmdList.get();
 			mCmdLists[cmdList.get()] = std::move(cmdList);

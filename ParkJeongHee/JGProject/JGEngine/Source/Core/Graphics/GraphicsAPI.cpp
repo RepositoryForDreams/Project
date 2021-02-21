@@ -2,7 +2,7 @@
 #include "GraphicsAPI.h"
 #include "Application.h"
 #include "Platform/Graphics/DirectX12/DirectX12API.h"
-
+#include "Renderer.h"
 
 namespace JG
 {

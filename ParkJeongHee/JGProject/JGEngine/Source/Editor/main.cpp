@@ -6,15 +6,9 @@
 
 using namespace JG;
 
-void Leak()
-{
-	_CrtDumpMemoryLeaks();
-}
+
 int main(int argc, char** argv)
 {
-	
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	
 	ApplicaionProps props;
 	props.WindowPlatform = EWindowPlatform::Windows;
 	props.WindowProps.TitleName = L"JGEditor";
@@ -31,6 +25,6 @@ int main(int argc, char** argv)
 
 	delete app;
 	app = nullptr;
-	std::atexit(Leak);
+
 	return 0;
 }

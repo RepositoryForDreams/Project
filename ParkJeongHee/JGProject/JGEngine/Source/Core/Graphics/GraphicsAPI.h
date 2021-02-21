@@ -10,17 +10,17 @@ namespace JG
 	
 	*/
 	enum class EShaderFlags;
+	class ITexture;
 	class IVertexBuffer;
 	class IIndexBuffer;
 	class IShader;
-	class IRenderContext;
-	
-	struct RenderContextSettings;
+	class IFrameBuffer;
+	struct TextureInfo;
+	struct FrameBufferInfo;
 	class IGraphicsAPI 
 	{
 	public:
 		virtual EGraphicsAPI GetAPI() const = 0;
-		virtual void SubmitRenderContext(SharedPtr<IRenderContext> renderContext) = 0;
 	protected:
 		friend class Application;
 		virtual bool Create() = 0;
@@ -32,6 +32,11 @@ namespace JG
 		virtual void Begin() = 0;
 		virtual void End()	 = 0;
 		virtual void Flush() = 0;
+		//
+
+		virtual void ClearRenderTarget(const List<SharedPtr<ITexture>>& rtTextures, SharedPtr<ITexture> depthTexture) = 0;
+		virtual void SetRenderTarget(const List<SharedPtr<ITexture>>& rtTextures, SharedPtr<ITexture> depthTexture)   = 0;
+
 
 
 
@@ -39,11 +44,14 @@ namespace JG
 		friend IVertexBuffer;
 		friend IIndexBuffer;
 		friend IShader;
-		friend IRenderContext;
-		virtual SharedPtr<IRenderContext> CreateRenderContext(const RenderContextSettings& settings) = 0;
+		friend IFrameBuffer;
+		friend ITexture;
+		virtual SharedPtr<IFrameBuffer>   CreateFrameBuffer(const FrameBufferInfo& settings) = 0;
 		virtual SharedPtr<IVertexBuffer>  CreateVertexBuffer(const String& name, void* datas, u64 elementSize, u64 elementCount) = 0;
 		virtual SharedPtr<IIndexBuffer>   CreateIndexBuffer(const String& name, u32* datas, u64 count) = 0;
 		virtual SharedPtr<IShader>        CreateShader(const String& sourceCode, EShaderFlags flags, const String& error) = 0;
+		virtual SharedPtr<ITexture>       CreateTexture(const String& name, const TextureInfo& info) = 0;
+		virtual SharedPtr<ITexture>       CreateTextureFromFile(const String& path) = 0;
 	public:
 		static UniquePtr<IGraphicsAPI> Create(EGraphicsAPI api);
 	};

@@ -7,6 +7,7 @@ namespace JG
 	class InputLayout;
 	class IShader;
 	class ITexture;
+	class Application;
 	class Renderer3D
 	{
 	public:
@@ -19,11 +20,17 @@ namespace JG
 
 	class Renderer2D
 	{
+		friend Application;
+		static bool Create();
+		static void Destroy();
 	public:
 		// ClearColor, Camera정보, 
 		// RenderTarget Texture 생성
 		// 
-		static void Begin();
+
+		static bool Begin();
+	
+
 		//static void DrawQuad();//Vec, Rotation, Scale//, )
 
 

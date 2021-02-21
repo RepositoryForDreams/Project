@@ -1,75 +1,50 @@
 ﻿#include "pch.h"
 #include "Renderer.h"
 #include "Application.h"
-#include "Platform/Graphics/DirectX12/DirectX12API.h"
+#include "Graphics/Resource.h"
+#include "GraphicsAPI.h"
 
 namespace JG
 {
-	static Dictionary<std::thread::id, bool> gRendererTriggerMap;
-	static std::shared_mutex gMutex;
-
-	void RegisterThreadID();
-	
-
 
 	
-	void Renderer2D::Begin()
+
+
+	SharedPtr<ITexture> test;
+	bool Renderer2D::Create()
 	{
-		auto threadID = std::this_thread::get_id();
-		RegisterThreadID();
-		if(gRendererTriggerMap[threadID] == true)
-		{
-			JG_CORE_ERROR("{0} : Already Call Begin", std::hash<std::thread::id>()(threadID));
-			return;
-		}
-		gRendererTriggerMap[threadID] = true;
+		TextureInfo info;
+		info.ClearColor = Color::Blue();
+		info.Width = 1920;
+		info.Height = 1080;
+		info.MipLevel = 1;
+		info.Flags = ETextureFlags::Allow_RenderTarget;
+		info.Format = ETextureFormat::R8G8B8A8_Unorm;
+
+		test = ITexture::Create(TT("TestTexture"), info);
+		return true;
+	}
+	void Renderer2D::Destroy()
+	{
+		test.reset();
+		test = nullptr;
+	}
+	bool Renderer2D::Begin()
+	{
+		auto api = Application::GetInstance().GetGraphicsAPI();
+
+		api->ClearRenderTarget({ test }, nullptr);
 
 
-
-
-
-		// Renderer
-		// CommandList 준비
+		return true;
 	}
 
 	SharedPtr<ITexture> Renderer2D::End()
 	{
-		auto threadID = std::this_thread::get_id();
-		RegisterThreadID();
 
 
-		if(gRendererTriggerMap[threadID] == false)
-		{
-			JG_CORE_ERROR("{0} : Not Call Begin", std::hash<std::thread::id>()(threadID));
-			return nullptr;
-		}
-		gRendererTriggerMap[threadID] = false;
-
-		
-		
-
-		return nullptr;
+		return test;
 	}
 
 
-
-
-
-	void RegisterThreadID()
-	{
-		auto threadID = std::this_thread::get_id();
-		bool isFind = false;
-		{
-			std::shared_lock<std::shared_mutex> lock(gMutex);
-			isFind = gRendererTriggerMap.find(threadID) != gRendererTriggerMap.end();
-		}
-
-		if (isFind == false)
-		{
-			{
-				std::lock_guard<std::shared_mutex> lock(gMutex);
-				gRendererTriggerMap.emplace(threadID, false);
-			}
-		}
-	}
 }

@@ -15,7 +15,7 @@
 
 JG::EWindowPlatform g_Platform;
 JG::EGraphicsAPI    g_Api;
-JG::ptraddr         g_Handle;
+JG::handle         g_Handle;
 
 namespace DirectX12
 {
@@ -247,7 +247,7 @@ namespace DirectX12
 
 namespace ImGui
 {
-	void ExternalImpl_Init(JG::EWindowPlatform platform, JG::EGraphicsAPI API, JG::ptraddr handle)
+	void ExternalImpl_Init(JG::EWindowPlatform platform, JG::EGraphicsAPI API, JG::handle handle)
 	{
         g_Platform = platform;
 		g_Api = API;

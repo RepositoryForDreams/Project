@@ -29,13 +29,15 @@ namespace JG
 
 
 	ENUM_FLAG(ETextureFlags)
-		enum class ETextureFlags
+	enum class ETextureFlags
 	{
 		None			   = 0x00001,
 		Allow_RenderTarget = 0x00002,
 		Allow_DepthStencil = 0x00004,
-		
 	};
+
+
+
 
 	struct TextureInfo
 	{

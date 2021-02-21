@@ -53,15 +53,17 @@ namespace JG
 	};
 	
 
-
+	
 	
 	class ITexture : public IResource
 	{
 	public:
+		ITexture() = default;
 		virtual ~ITexture() = default;
 	public:
-		virtual TextureID    GetTextureID()   const = 0;
+		virtual TextureID          GetTextureID()   const = 0;
 		virtual const TextureInfo& GetTextureInfo() const = 0;
+		virtual void  SetTextureInfo(const TextureInfo& info) = 0;
 	private:
 		ITexture(const ITexture& texture) = delete;
 		const ITexture& operator=(const ITexture& texture) = delete;

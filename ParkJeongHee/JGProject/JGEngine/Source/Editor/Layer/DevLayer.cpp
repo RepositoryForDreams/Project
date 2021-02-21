@@ -2,7 +2,7 @@
 #include "Application.h"
 #include "Platform/Window/Window.h"
 #include "Graphics/GraphicsAPI.h"
-#include "Graphics/RenderContext.h"
+#include "Graphics/FrameBuffer.h"
 #include "Graphics/Renderer.h"
 using namespace std;
 namespace JG
@@ -17,6 +17,19 @@ namespace JG
 	}
 	void DevLayer::Update()
 	{
+		if (Renderer2D::Begin())
+		{
+
+
+
+
+
+			auto resultTexture = Renderer2D::End();
+
+			mFrameBuffer->SubmitTexture(resultTexture);
+		}
+
+
 
 	}
 	void DevLayer::LateUpdate()
@@ -25,15 +38,13 @@ namespace JG
 	}
 	void DevLayer::Begin()
 	{
-		RenderContextSettings settings = RenderContextSettings(
+		FrameBufferInfo info = FrameBufferInfo(
 			Application::GetInstance().GetWindow()->GetHandle(),
 			Color::Red(),
 			ETextureFormat::R8G8B8A8_Unorm,
 			1920, 1080);
 
-		mRenderContext = IRenderContext::Create(settings);
-
-		Application::GetInstance().GetGraphicsAPI()->SubmitRenderContext(mRenderContext);
+		mFrameBuffer = IFrameBuffer::Create(info);
 	}
 	void DevLayer::Destroy()
 	{
