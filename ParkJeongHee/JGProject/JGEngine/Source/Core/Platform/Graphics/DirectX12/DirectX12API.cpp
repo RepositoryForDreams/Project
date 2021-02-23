@@ -39,6 +39,10 @@ namespace JG
 	static std::shared_mutex gComputeCommandListMutex;
 	static std::shared_mutex gCopyCommandListMutex;
 
+	static SharedPtr<GraphicsPipelineState> gGracphisPSO;
+	static SharedPtr<ComputePipelineState>  gComputePSO;
+	static SharedPtr<RootSignature> gRootSignature;
+
 
 	// thread id = rendererID, commandList È¹µæ  =  FrameBufferf
 	// mutex = 
@@ -202,6 +206,21 @@ namespace JG
 		return nullptr;
 	}
 
+	SharedPtr<GraphicsPipelineState> DirectX12API::GetGraphicsPipelineState()
+	{
+		return gGracphisPSO;
+	}
+
+	SharedPtr<ComputePipelineState> DirectX12API::GetComputePipelineState()
+	{
+		return gComputePSO;
+	}
+
+	SharedPtr<RootSignature> DirectX12API::GetRootSignature()
+	{
+		return gRootSignature;
+	}
+
 
 
 	bool DirectX12API::Create()
@@ -248,6 +267,11 @@ namespace JG
 		gCopyCommandQueue     = CreateUniquePtr<CommandQueue>(gFrameBufferCount, D3D12_COMMAND_LIST_TYPE_COPY);
 
 
+		gGracphisPSO   = CreateSharedPtr<GraphicsPipelineState>();
+		gComputePSO    = CreateSharedPtr<ComputePipelineState>();
+		gRootSignature = CreateSharedPtr<RootSignature>();
+
+
 		JG_CORE_INFO("DirectX12 Init End");
 		return true;
 	}
@@ -256,7 +280,11 @@ namespace JG
 	void DirectX12API::Destroy()
 	{
 		Flush();
+		gGracphisPSO.reset(); gGracphisPSO = nullptr;
+		gComputePSO.reset(); gComputePSO = nullptr;
+		gRootSignature.reset(); gRootSignature = nullptr;
 
+		PipelineState::ClearCache();
 		RootSignature::ClearCache();
 		ResourceStateTracker::ClearCache();
 		gFrameBuffers.clear();
@@ -352,7 +380,7 @@ namespace JG
 			if (handle.ptr == 0) continue;
 
 
-			auto info = texture->GetTextureInfo();
+			TextureInfo info = texture->GetTextureInfo();
 
 			commandList->ClearRenderTargetTexture(static_cast<DirectX12Texture*>(texture.get())->Get(), handle, info.ClearColor);
 		}
@@ -362,7 +390,7 @@ namespace JG
 
 			if (handle.ptr != 0)
 			{
-				auto info = depthTexture->GetTextureInfo();
+				TextureInfo info = depthTexture->GetTextureInfo();
 
 				commandList->ClearDepthTexture(static_cast<DirectX12Texture*>(depthTexture.get())->Get(),
 					handle, info.ClearDepth, info.ClearStencil);

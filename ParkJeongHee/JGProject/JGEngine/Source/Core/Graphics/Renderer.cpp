@@ -34,8 +34,9 @@ namespace JG
 		auto api = Application::GetInstance().GetGraphicsAPI();
 
 		api->ClearRenderTarget({ test }, nullptr);
-
-
+		// PSO, 와 RootSignature 를 준비( 아직 만들지 않았다.)
+		// 크게 RootSignature 별,  PSO 별 오브젝트를 모아둔다. 특성별
+		// 
 		return true;
 	}
 

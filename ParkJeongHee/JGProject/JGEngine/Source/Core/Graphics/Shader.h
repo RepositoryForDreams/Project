@@ -36,7 +36,7 @@ namespace JG
 		virtual void SetFloat4x4(const String& name, const JMatrix& value)   = 0;
 	protected:
 		virtual bool Compile(const String& sourceCode, EShaderFlags flags, const String& error) = 0;
-		virtual void Bind() = 0;
+		virtual bool Bind() = 0;
 	public:
 		static SharedPtr<IShader> Create(const String& sourceCode, EShaderFlags flags, const String& error);
 	};

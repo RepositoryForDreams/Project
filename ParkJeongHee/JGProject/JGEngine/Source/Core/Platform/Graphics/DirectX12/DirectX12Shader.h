@@ -15,12 +15,18 @@ namespace JG
 	MaterialParam
 	블라 블라 
 	*/
+	class GraphicsPipelineState;
+	class RootSignature;
 	class DirectX12Shader : public IShader
 	{
+	
 		// 변수 이름, 변수 타입 , 변수 값
 		// 저장하고있다가 상수 버퍼
 	private:
-
+		SharedPtr<GraphicsPipelineState> mPSO;
+		SharedPtr<RootSignature>         mRootSig;
+		ComPtr<ID3DBlob> mData;
+		EShaderFlags     mFlags;
 	public:
 		virtual void SetFloat(const String& name, float value) override;
 		virtual void SetFloat2(const String& name, const JVector2& value) override;
@@ -37,7 +43,16 @@ namespace JG
 		virtual void SetFloat4x4(const String& name, const JMatrix& value)   override;
 	public:
 		virtual bool Compile(const String& sourceCode, EShaderFlags flags, const String& error) override;
-		virtual void Bind();
+		virtual bool Bind();
+
+	public:
+		ID3DBlob* GetData() const {
+			return mData.Get();
+		}
+		EShaderFlags GetFlags() const {
+			return mFlags;
+		}
+
 	};
 }
 

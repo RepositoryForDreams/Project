@@ -16,11 +16,9 @@ namespace JG
 	class CommandList
 	{
 	protected:
-		ComPtr<ID3D12PipelineState> mBindedGraphicsPSO = nullptr;
-		ComPtr<ID3D12PipelineState> mBindedComputePSO = nullptr;
+		ComPtr<ID3D12PipelineState> mBindedPipelineState = nullptr;
 		ComPtr<ID3D12RootSignature> mBindedGraphicsRootSig = nullptr;
 		ComPtr<ID3D12RootSignature> mBindedComputeRootSig = nullptr;
-
 		ComPtr<ID3D12DescriptorHeap> mBindedDescriptorHeap = nullptr;
 
 		D3D12_COMMAND_LIST_TYPE           mD3DType;
@@ -70,10 +68,8 @@ namespace JG
 		void SetRenderTarget(
 			ID3D12Resource** rtTextures, D3D12_CPU_DESCRIPTOR_HANDLE* rtvHandles, u64 rtTextureCount,
 			ID3D12Resource* depthTexture, D3D12_CPU_DESCRIPTOR_HANDLE* dsvHandle);
-		//void ClearRenderTarget(GraphicsCommandKeyPtr cmdKey, RenderTarget& renderTarget, );
-		//void SetRenderTarget(GraphicsCommandKeyPtr cmdKey, RenderTarget& renderTarget);
 		void BindRootSignature(RootSignature& rootSig);
-		//void BindPipelineState(GraphicsCommandKeyPtr cmdKey, GraphicsPipelineState& pso);
+		void BindPipelineState(SharedPtr<GraphicsPipelineState> pso);
 		
 		void BindTexture(u32 rootParam, ID3D12Resource* texture, void* desc = nullptr);
 		void BindTextures(u32 rootParam, ID3D12Resource** textures, void** desc, uint32_t textureCount);

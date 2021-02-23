@@ -17,6 +17,8 @@ namespace JG
 	class GraphicsCommandList;
 	class ComputeCommandList;
 	class CopyCommandList;
+	class GraphicsPipelineState;
+	class ComputePipelineState;
 	// Rendering Flow
 	//
 	// ¸Ç Ã³À½
@@ -69,6 +71,10 @@ namespace JG
 		static GraphicsCommandList* GetGraphicsCommandList(i32 priority = 0);
 		static ComputeCommandList*  GetComputeCommandList(i32 priority = 0);
 		static CopyCommandList*     GetCopyCommandList(i32 priority = 0);
+
+		static SharedPtr<GraphicsPipelineState> GetGraphicsPipelineState();
+		static SharedPtr<ComputePipelineState>  GetComputePipelineState();
+		static SharedPtr<RootSignature>			GetRootSignature();
 	protected:
 		// Application
 		virtual bool Create() override;

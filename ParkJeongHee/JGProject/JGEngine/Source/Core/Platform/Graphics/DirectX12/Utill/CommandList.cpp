@@ -6,7 +6,8 @@
 #include "ResourceStateTracker.h"
 #include "DynamicDescriptorAllocator.h"
 #include "RootSignature.h"
-#include "../DirectX12API.h"
+#include "PipelineState.h"
+#include "Platform/Graphics/DirectX12/DirectX12API.h"
 
 
 namespace JG
@@ -41,8 +42,7 @@ namespace JG
 		mD3DCommandList->Reset(mD3DAllocator.Get(), nullptr);
 	
 		mBindedDescriptorHeap  = nullptr;
-		mBindedGraphicsPSO     = nullptr;
-		mBindedComputePSO	   = nullptr;
+		mBindedPipelineState   = nullptr;
 		mBindedGraphicsRootSig = nullptr;
 		mBindedComputeRootSig  = nullptr;
 	}
@@ -214,6 +214,16 @@ namespace JG
 		mBindedGraphicsRootSig = rootSig.Get();
 		mD3DCommandList->SetGraphicsRootSignature(mBindedGraphicsRootSig.Get());
 		mDynamicDescriptorAllocator->CommitRootSignature(rootSig);
+	}
+
+	void GraphicsCommandList::BindPipelineState(SharedPtr<GraphicsPipelineState> pso)
+	{
+		if (mBindedPipelineState.Get() == pso->Get())
+		{
+			return;
+		}
+		mBindedPipelineState = pso->Get();
+		mD3DCommandList->SetPipelineState(mBindedPipelineState.Get());
 	}
 
 	void GraphicsCommandList::BindTexture(u32 rootParam, ID3D12Resource* texture, void* desc)

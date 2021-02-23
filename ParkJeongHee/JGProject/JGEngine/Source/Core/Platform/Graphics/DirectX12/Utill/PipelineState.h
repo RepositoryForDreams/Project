@@ -6,7 +6,7 @@
 namespace JG
 {
 	class RootSignature;
-	
+	class DirectX12Shader;
 	//class 
 	class PipelineState
 	{
@@ -17,16 +17,21 @@ namespace JG
 			return mD3DPSO.Get();
 		}
 		virtual bool Finalize() = 0;
+	public:
+		static void ClearCache();
 	};
 
 	class GraphicsPipelineState : public PipelineState
 	{
-
+	private:
+		D3D12_GRAPHICS_PIPELINE_STATE_DESC mDesc = {};
+		List<D3D12_INPUT_ELEMENT_DESC> mD3DInputLayoutDescs;
 	public:
+		GraphicsPipelineState();
 		void BindRootSignature(const RootSignature& rootSig);
 		void BindRenderTarget(const List< DXGI_FORMAT>& rtFormats, DXGI_FORMAT dvFormat = DXGI_FORMAT_UNKNOWN);
 		void BindInputLayout(SharedPtr<InputLayout> inputLayout);
-		//void BindShader(ShaderType type, const Shader& shader);
+		void BindShader(SharedPtr<DirectX12Shader> shader);
 		void SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE type);
 		void SetSampleMask(uint32_t sampleMask);
 		void SetRasterizerState(const D3D12_RASTERIZER_DESC& desc);
@@ -34,15 +39,19 @@ namespace JG
 		void SetDepthStencilState(const D3D12_DEPTH_STENCIL_DESC& desc);
 
 		virtual bool Finalize() override;
-	private:
-		D3D12_GRAPHICS_PIPELINE_STATE_DESC mDesc = {};
-		List<D3D12_INPUT_ELEMENT_DESC> mD3DInputLayoutDescs;
-		//InputLayout m_InputLayout;
 
 	};
 
-	class ComputePipelineState
+	class ComputePipelineState : public PipelineState
 	{
+	private:
+		D3D12_COMPUTE_PIPELINE_STATE_DESC mDesc = {};
+	public:
+		ComputePipelineState();
+		void BindRootSignature(const RootSignature& rootSig);
+		void BindShader(SharedPtr<DirectX12Shader> shader);
 
+
+		virtual bool Finalize() override;
 	};
 }
