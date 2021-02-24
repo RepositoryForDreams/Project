@@ -16,6 +16,16 @@ namespace JG
 		}
 	}
 
+	void DirectX12VertexBuffer::SetInputLayout(SharedPtr<InputLayout> inputLayout)
+	{
+		mInputLayout = inputLayout;
+	}
+
+	SharedPtr<InputLayout> DirectX12VertexBuffer::GetInputLayout() const
+	{
+		return mInputLayout;
+	}
+
 	bool DirectX12VertexBuffer::CreateBuffer(void* datas, u64 elementSize, u64 elementCount)
 	{
 		if(mCPUData)

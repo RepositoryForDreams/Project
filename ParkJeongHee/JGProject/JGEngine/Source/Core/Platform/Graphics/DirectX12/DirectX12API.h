@@ -12,6 +12,7 @@ namespace JG
 {
 	class ITexture;
 	class  IFrameBuffer;
+	class RootSignature;
 	class  CommandQueue;
 	class  DescriptorAllocation;
 	class GraphicsCommandList;

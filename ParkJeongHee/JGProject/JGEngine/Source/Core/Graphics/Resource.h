@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "JGCore.h"
 #include "GraphicsDefine.h"
-
+#include "InputLayout.h"
 namespace JG
 {
 	class IResource
@@ -36,6 +36,9 @@ namespace JG
 	{
 	public:
 		virtual ~IVertexBuffer() = default;
+	public:
+		virtual void SetInputLayout(SharedPtr<InputLayout> inputLayout) = 0;
+		virtual SharedPtr<InputLayout> GetInputLayout() const = 0;
 	protected:
 		virtual bool CreateBuffer(void* datas, u64 elementSize, u64 elementCount) = 0;
 	public:

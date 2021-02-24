@@ -2,7 +2,7 @@
 
 #include "JGCore.h"
 #include "GraphicsDefine.h"
-
+#include <shared_mutex>
 namespace JG
 {
 	/* Shader

@@ -65,8 +65,6 @@ namespace JG
 		Allow_GeometryShader = 0x004,
 		Allow_HullShader = 0x008,
 		Allow_DomainShader = 0x016,
-
-
 	};
 
 	
@@ -108,12 +106,12 @@ namespace JG
 	{
 		switch (type)
 		{
-		case EShaderDataType::_bool:		return TT("bool");
+		case EShaderDataType::_bool:	return TT("bool");
 		case EShaderDataType::_int:		return TT("int");
-		case EShaderDataType::_int2:		return TT("int2");
-		case EShaderDataType::_int3:		return TT("int3");
-		case EShaderDataType::_int4:		return TT("int4");
-		case EShaderDataType::_uint:		return TT("uint");
+		case EShaderDataType::_int2:	return TT("int2");
+		case EShaderDataType::_int3:	return TT("int3");
+		case EShaderDataType::_int4:	return TT("int4");
+		case EShaderDataType::_uint:	return TT("uint");
 		case EShaderDataType::_uint2:	return TT("uint2");
 		case EShaderDataType::_uint3:	return TT("uint3");
 		case EShaderDataType::_uint4:	return TT("uin4");
@@ -128,6 +126,7 @@ namespace JG
 			return TT("unknown");
 		}
 	}
+
 
 
 
@@ -181,6 +180,15 @@ namespace JG
 	{
 		namespace HLSL
 		{
+			constexpr wchar* CBDataToken   = L"cbuffer Data";
+
+
+
+
+
+
+
+
 			constexpr wchar* Common = LR"(
 struct SDObject
 {

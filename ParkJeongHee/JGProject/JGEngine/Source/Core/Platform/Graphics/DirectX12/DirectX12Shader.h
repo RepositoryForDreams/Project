@@ -17,9 +17,22 @@ namespace JG
 	*/
 	class GraphicsPipelineState;
 	class RootSignature;
+
+
+
+
 	class DirectX12Shader : public IShader
 	{
-	
+	public:
+		class UploadData
+		{
+		public:
+			String			Name;
+			EShaderDataType Type;
+			u64 DataSize = 0;
+			u64 DataPos  = 0;
+		};
+		List<byte> mUploadData;
 		// 변수 이름, 변수 타입 , 변수 값
 		// 저장하고있다가 상수 버퍼
 	private:

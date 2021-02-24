@@ -13,6 +13,7 @@ namespace JG
 	class DynamicDescriptorAllocator;
 	class RootSignature;
 	class DirectX12Texture;
+	class GraphicsPipelineState;
 	class CommandList
 	{
 	protected:

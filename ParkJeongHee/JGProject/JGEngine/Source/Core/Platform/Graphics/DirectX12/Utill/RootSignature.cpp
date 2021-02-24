@@ -133,6 +133,7 @@ namespace JG
 		}
 
 		mDescriptorRanges.clear();
+		mRootParams.clear();
 		return true;
 	}
 	void RootSignature::ClearCache()

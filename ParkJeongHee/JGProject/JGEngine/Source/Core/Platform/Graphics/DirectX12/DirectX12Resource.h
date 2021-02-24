@@ -17,12 +17,16 @@ namespace JG
 		u64   mElementSize  = 0;
 		u64   mElementCount = 0;
 		void* mCPUData  = nullptr;
+
+		SharedPtr<InputLayout> mInputLayout;
 	public:
 		DirectX12VertexBuffer() = default;
 		virtual ~DirectX12VertexBuffer();
 	public:
+		virtual void  SetInputLayout(SharedPtr<InputLayout> inputLayout) override;
+		virtual SharedPtr<InputLayout> GetInputLayout() const override;
 		virtual bool  CreateBuffer(void* datas, u64 elementSize, u64 elementCount) override;
-		virtual bool IsValid() const override;
+		virtual bool  IsValid() const override;
 
 	protected:
 		virtual void Bind() override;

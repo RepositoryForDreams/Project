@@ -4,6 +4,7 @@
 #include "Graphics/GraphicsAPI.h"
 #include "Graphics/FrameBuffer.h"
 #include "Graphics/Renderer.h"
+#include "Graphics/Shader.h"
 using namespace std;
 namespace JG
 {
@@ -45,6 +46,15 @@ namespace JG
 			1920, 1080);
 
 		mFrameBuffer = IFrameBuffer::Create(info);
+
+		IShader::Create(TT(R"(
+cbuffer Data
+{
+	float4x4 gViewProj;
+	float4x4 gWorld;
+    float testValue;
+};
+)"), EShaderFlags::Allow_PixelShader | EShaderFlags::Allow_VertexShader, TT("Test"));
 	}
 	void DevLayer::Destroy()
 	{
