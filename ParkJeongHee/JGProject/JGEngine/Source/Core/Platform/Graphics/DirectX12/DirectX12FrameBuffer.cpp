@@ -15,7 +15,7 @@ namespace JG
 			(HWND)mInfo.Handle,
 			DirectX12API::GetDXGIFactory(),
 			DirectX12API::GetGraphicsCommandQueue()->Get(),
-			ConvertDirectX12TextureFormat(mInfo.Format),
+			ConvertDXGIFormat(mInfo.Format),
 			mInfo.Width, mInfo.Height,
 			(u32)DirectX12API::GetFrameBufferCount());
 

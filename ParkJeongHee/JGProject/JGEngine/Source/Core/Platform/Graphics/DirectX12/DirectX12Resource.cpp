@@ -17,17 +17,8 @@ namespace JG
 		}
 	}
 
-	void DirectX12VertexBuffer::SetInputLayout(SharedPtr<InputLayout> inputLayout)
-	{
-		mInputLayout = inputLayout;
-	}
 
-	SharedPtr<InputLayout> DirectX12VertexBuffer::GetInputLayout() const
-	{
-		return mInputLayout;
-	}
-
-	bool DirectX12VertexBuffer::CreateBuffer(void* datas, u64 elementSize, u64 elementCount)
+	bool DirectX12VertexBuffer::Create(void* datas, u64 elementSize, u64 elementCount)
 	{
 		if(mCPUData)
 		{
@@ -59,7 +50,7 @@ namespace JG
 	void DirectX12VertexBuffer::Bind()
 	{
 		auto commandList = DirectX12API::GetGraphicsCommandList();
-		commandList->BindDynamicVertexBuffer(mCPUData, mElementSize, mElementCount);
+		commandList->BindDynamicVertexBuffer(mCPUData, mElementCount, mElementSize, false);
 	}
 
 
@@ -74,7 +65,7 @@ namespace JG
 		}
 	}
 
-	bool DirectX12IndexBuffer::CreateBuffer(u32* datas, u64 count)
+	bool DirectX12IndexBuffer::Create(u32* datas, u64 count)
 	{
 		if (mCPUData)
 		{
@@ -157,7 +148,7 @@ namespace JG
 
 
 		D3D12_RESOURCE_DESC rscDesc = CD3DX12_RESOURCE_DESC::Tex2D(
-			ConvertDirectX12TextureFormat(mTextureInfo.Format), mTextureInfo.Width, mTextureInfo.Height,
+			ConvertDXGIFormat(mTextureInfo.Format), mTextureInfo.Width, mTextureInfo.Height,
 			info.ArraySize, mTextureInfo.MipLevel, 1, 0,
 			d3dRscFlags, D3D12_TEXTURE_LAYOUT_UNKNOWN, 0);
 
@@ -175,7 +166,7 @@ namespace JG
 			clearValue.DepthStencil.Depth = info.ClearDepth;
 			clearValue.DepthStencil.Stencil = info.ClearStencil;
 		}
-		clearValue.Format = ConvertDirectX12TextureFormat(info.Format);
+		clearValue.Format = ConvertDXGIFormat(info.Format);
 
 		DirectX12API::GetD3DDevice()->CreateCommittedResource(
 			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT), D3D12_HEAP_FLAG_NONE,

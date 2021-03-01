@@ -8,22 +8,20 @@
 
 namespace JG
 {
-	SharedPtr<IVertexBuffer> IVertexBuffer::Create(String name, void* datas, u64 elementSize, u64 elementCount)
+	SharedPtr<IVertexBuffer> IVertexBuffer::Create(String name)
 	{
-		JGASSERT_IF(datas != nullptr, TT("Data is Null"));
 		auto api = Application::GetInstance().GetGraphicsAPI();
 		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
 
-		return api->CreateVertexBuffer(name, datas, elementSize, elementCount);
+		return api->CreateVertexBuffer(name);
 	}
 
-	SharedPtr<IIndexBuffer> IIndexBuffer::Create(String name, u32* datas, u64 count)
+	SharedPtr<IIndexBuffer> IIndexBuffer::Create(String name)
 	{
-		JGASSERT_IF(datas != nullptr, TT("Data is Null"));
 		auto api = Application::GetInstance().GetGraphicsAPI();
 		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
 
-		return api->CreateIndexBuffer(name, datas, count);
+		return api->CreateIndexBuffer(name);
 	}
 
 	SharedPtr<ITexture> ITexture::Create(const String& name, const TextureInfo& info)

@@ -17,6 +17,7 @@ namespace JG
 	class IFrameBuffer;
 	class IMaterial;
 	class IMaterialInstance;
+	class IMesh;
 	struct TextureInfo;
 	struct FrameBufferInfo;
 	class IGraphicsAPI 
@@ -38,7 +39,7 @@ namespace JG
 
 		virtual void ClearRenderTarget(const List<SharedPtr<ITexture>>& rtTextures, SharedPtr<ITexture> depthTexture) = 0;
 		virtual void SetRenderTarget(const List<SharedPtr<ITexture>>& rtTextures, SharedPtr<ITexture> depthTexture)   = 0;
-
+		virtual void DrawIndexed(u32 indexCount, u32 instancedCount = 1, u32 startIndexLocation = 0, u32 startVertexLocation = 0, u32 startInstanceLocation = 0) = 0;
 
 
 
@@ -48,17 +49,22 @@ namespace JG
 		friend IShader;
 		friend IFrameBuffer;
 		friend ITexture;
+		friend IMesh;
+
 		virtual SharedPtr<IFrameBuffer>   CreateFrameBuffer(const FrameBufferInfo& settings) = 0;
-		virtual SharedPtr<IVertexBuffer>  CreateVertexBuffer(const String& name, void* datas, u64 elementSize, u64 elementCount) = 0;
-		virtual SharedPtr<IIndexBuffer>   CreateIndexBuffer(const String& name, u32* datas, u64 count) = 0;
+		virtual SharedPtr<IVertexBuffer>  CreateVertexBuffer(const String& name) = 0;
+		virtual SharedPtr<IIndexBuffer>   CreateIndexBuffer(const String& name) = 0;
 		virtual SharedPtr<IShader>        CreateShader(const String& sourceCode, EShaderFlags flags) = 0;
 		virtual SharedPtr<IMaterial>	  CreateMaterial(SharedPtr<IShader> shader) = 0;
 		virtual SharedPtr<IMaterialInstance> CreateMaterialInstanced(SharedPtr<IMaterial> material) = 0;
+		virtual SharedPtr<IMesh>          CreateMesh(const String& name) = 0;
 		virtual SharedPtr<ITexture>       CreateTexture(const String& name, const TextureInfo& info) = 0;
 		virtual SharedPtr<ITexture>       CreateTextureFromFile(const String& path) = 0;
 	public:
 		static UniquePtr<IGraphicsAPI> Create(EGraphicsAPI api);
 	};
+
+
 }
 
 

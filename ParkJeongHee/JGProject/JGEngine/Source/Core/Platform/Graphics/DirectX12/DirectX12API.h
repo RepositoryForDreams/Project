@@ -88,17 +88,16 @@ namespace JG
 	protected:
 		virtual void ClearRenderTarget(const List<SharedPtr<ITexture>>& rtTextures, SharedPtr<ITexture> depthTexture) override;
 		virtual void SetRenderTarget(const List<SharedPtr<ITexture>>& rtTextures, SharedPtr<ITexture> depthTexture) override;
+		virtual void DrawIndexed(u32 indexCount, u32 instancedCount = 1, u32 startIndexLocation = 0, u32 startVertexLocation = 0, u32 startInstanceLocation = 0) override;
 	protected:
 		virtual SharedPtr<IFrameBuffer>   CreateFrameBuffer(const FrameBufferInfo& info) override;
-		virtual SharedPtr<IVertexBuffer>  CreateVertexBuffer(const String& name, void* datas, u64 elementSize, u64 elementCount) override;
-		virtual SharedPtr<IIndexBuffer>   CreateIndexBuffer(const String& name, u32* datas, u64 count) override;
+		virtual SharedPtr<IVertexBuffer>  CreateVertexBuffer(const String& name) override;
+		virtual SharedPtr<IIndexBuffer>   CreateIndexBuffer(const String& name) override;
 		virtual SharedPtr<IShader>        CreateShader(const String& sourceCode, EShaderFlags flags) override;
 		virtual SharedPtr<IMaterial>	  CreateMaterial(SharedPtr<IShader> shader) override;
 		virtual SharedPtr<IMaterialInstance> CreateMaterialInstanced(SharedPtr<IMaterial> material) override;
+		virtual SharedPtr<IMesh>		  CreateMesh(const String& name) override;
 		virtual SharedPtr<ITexture>       CreateTexture(const String& name, const TextureInfo& info) override;
 		virtual SharedPtr<ITexture>       CreateTextureFromFile(const String& path) override;
 	};
-
-
-	DXGI_FORMAT ConvertDirectX12TextureFormat(ETextureFormat format);
 }

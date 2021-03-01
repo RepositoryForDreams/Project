@@ -401,6 +401,10 @@ namespace JG
 	void DirectX12API::SetRenderTarget(const List<SharedPtr<ITexture>>& rtTextures, SharedPtr<ITexture> depthTexture)
 	{
 		auto commandList = GetGraphicsCommandList();
+		auto pso = GetGraphicsPipelineState();
+		List<DXGI_FORMAT> rtFormats(rtTextures.size());
+		DXGI_FORMAT dsFormat = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
+
 
 		List<ID3D12Resource*> d3dRTResources;
 		List<D3D12_CPU_DESCRIPTOR_HANDLE> rtvHandles;
@@ -415,6 +419,8 @@ namespace JG
 			if (handle.ptr == 0) continue;
 
 
+			rtFormats.push_back(ConvertDXGIFormat(texture->GetTextureInfo().Format));
+
 			d3dRTResources.push_back(static_cast<DirectX12Texture*>(texture.get())->Get());
 			rtvHandles.push_back(handle);
 
@@ -425,13 +431,27 @@ namespace JG
 			auto handle = static_cast<DirectX12Texture*>(depthTexture.get())->GetDSV();
 			if (handle.ptr != 0)
 			{
+				dsFormat = ConvertDXGIFormat(depthTexture->GetTextureInfo().Format);
 				d3dDSResource = static_cast<DirectX12Texture*>(depthTexture.get())->Get();
 			}
 		}
 
-
+		pso->BindRenderTarget(rtFormats, dsFormat);
 
 		commandList->SetRenderTarget(d3dRTResources.data(), rtvHandles.data(), d3dRTResources.size(), d3dDSResource, &dsvHandle);
+	}
+
+	void DirectX12API::DrawIndexed(u32 indexCount, u32 instancedCount, u32 startIndexLocation, u32 startVertexLocation, u32 startInstanceLocation)
+	{
+		auto commandList = GetGraphicsCommandList();
+
+		if (gGracphisPSO->Finalize() == false)
+		{
+			JG_CORE_ERROR("Failed Create Graphcis PipelineState");
+			return;
+		}
+		commandList->BindPipelineState(gGracphisPSO);
+		commandList->DrawIndexed(indexCount, instancedCount, startIndexLocation, startVertexLocation, startIndexLocation);
 	}
 
 	SharedPtr<IFrameBuffer> DirectX12API::CreateFrameBuffer(const FrameBufferInfo& info)
@@ -452,26 +472,16 @@ namespace JG
 		gFrameBuffers.emplace(info.Handle, buffer);
 		return buffer;
 	}
-	SharedPtr<IVertexBuffer> DirectX12API::CreateVertexBuffer(const String& name, void* datas, u64 elementSize, u64 elementCount)
+	SharedPtr<IVertexBuffer> DirectX12API::CreateVertexBuffer(const String& name)
 	{
 		auto vBuffer = CreateSharedPtr<DirectX12VertexBuffer>();
 		vBuffer->SetName(name);
-		if (!vBuffer->CreateBuffer(datas, elementSize, elementCount))
-		{
-			JG_CORE_ERROR("Failed Create VertexBuffer {0}", ws2s(name));
-			return nullptr;
-		}
 		return vBuffer;
 	}
-	SharedPtr<IIndexBuffer> DirectX12API::CreateIndexBuffer(const String& name, u32* datas, u64 count)
+	SharedPtr<IIndexBuffer> DirectX12API::CreateIndexBuffer(const String& name)
 	{
 		auto iBuffer = CreateSharedPtr<DirectX12IndexBuffer>();
 		iBuffer->SetName(name);
-		if (!iBuffer->CreateBuffer(datas, count))
-		{
-			JG_CORE_ERROR("Failed Create IndexBuffer {0}", ws2s(name));
-			return nullptr;
-		}
 		return iBuffer;
 	}
 	SharedPtr<IShader> DirectX12API::CreateShader(const String& sourceCode, EShaderFlags flags)
@@ -493,6 +503,10 @@ namespace JG
 	{
 		return SharedPtr<IMaterialInstance>();
 	}
+	SharedPtr<IMesh> DirectX12API::CreateMesh(const String& name)
+	{
+		return SharedPtr<IMesh>();
+	}
 	SharedPtr<ITexture> DirectX12API::CreateTexture(const String& name, const TextureInfo& info)
 	{
 
@@ -505,15 +519,6 @@ namespace JG
 	{
 		return nullptr;
 	}
-	DXGI_FORMAT ConvertDirectX12TextureFormat(ETextureFormat format)
-	{
 
-		switch (format)
-		{
-		case ETextureFormat::R8G8B8A8_Unorm: return DXGI_FORMAT_R8G8B8A8_UNORM;
-		default:
-			JG_CORE_ERROR("This {0} DirectX12 TextureFormat is not supported convert ETextureFormat", ws2s(TextureFormatToString(format)));
-			return DXGI_FORMAT_UNKNOWN;
-		}
-	}
+
 }

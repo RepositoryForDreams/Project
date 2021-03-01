@@ -1,6 +1,6 @@
 #pragma once
 #include "JGCore.h"
-
+#include <dxgi1_6.h>
 
 
 
@@ -16,16 +16,39 @@ namespace JG
 	{
 		None,
 		R8G8B8A8_Unorm,
-
+		R16G16B16A16_Unorm,
+		D24_Unorm_S8_Uint
 	};
 	inline String TextureFormatToString(ETextureFormat format)
 	{
+		//DXGI_FORMAT_D24_UNORM_S8_UINT
 		switch (format)
 		{
 		case ETextureFormat::R8G8B8A8_Unorm: return TT("R8G8B8A8_Unorm");
+		case ETextureFormat::R16G16B16A16_Unorm: return TT("R16G16B16A16_Unorm");
+		case ETextureFormat::D24_Unorm_S8_Uint: return TT("D24_Unorm_S8_Uint");
 		default: return TT("None");
 		}
 	}
+
+
+	inline DXGI_FORMAT ConvertDXGIFormat(ETextureFormat format)
+	{
+
+		switch (format)
+		{
+		case ETextureFormat::R8G8B8A8_Unorm:     return DXGI_FORMAT_R8G8B8A8_UNORM;
+		case ETextureFormat::R16G16B16A16_Unorm: return DXGI_FORMAT_R16G16B16A16_UNORM;
+		case ETextureFormat::D24_Unorm_S8_Uint:  return	DXGI_FORMAT_D24_UNORM_S8_UINT;
+		default:
+			JG_CORE_ERROR("This {0} DirectX12 TextureFormat is not supported convert ETextureFormat", ws2s(TextureFormatToString(format)));
+			return DXGI_FORMAT_UNKNOWN;
+		}
+	}
+
+
+
+
 
 
 	ENUM_FLAG(ETextureFlags)
@@ -191,7 +214,7 @@ namespace JG
 	
 	*/
 
-	
+
 	
 	
 

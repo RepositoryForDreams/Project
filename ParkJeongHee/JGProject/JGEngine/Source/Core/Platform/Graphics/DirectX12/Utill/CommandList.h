@@ -39,9 +39,9 @@ namespace JG
 			return mD3DCommandList.Get();
 		}
 		void BackupResource(ID3D12Object* d3dObj);
-		void Reset();
-		void Close();
-		bool Close(CommandList* commandList);
+		virtual void Reset();
+		virtual void Close();
+		virtual bool Close(CommandList* commandList);
 
 		void TransitionBarrier(ID3D12Resource* d3dResource, D3D12_RESOURCE_STATES state, u32 subResource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, bool flush = false);
 		void UAVBarrier(ID3D12Resource* d3dResource, bool flush = false);
@@ -54,9 +54,13 @@ namespace JG
 
 	class GraphicsCommandList : public CommandList
 	{
+	private:
+		List<D3D12_VERTEX_BUFFER_VIEW> mVertexViews;
 	public:
 		GraphicsCommandList(D3D12_COMMAND_LIST_TYPE d3dType) : CommandList(d3dType) {};
 		virtual ~GraphicsCommandList() = default;
+	public:
+		virtual void Reset() override;
 	public:
 		void SetViewport(const Viewport& viewport);
 		void SetViewports(const List<Viewport>& viewports);
@@ -86,7 +90,9 @@ namespace JG
 		void BindConstants(u32 rootparam, u32 btSize, void* data, u32 offset = 0);
 
 		// void BindVertexBuffer(VertexBuffer& vBuffer);
-		void BindDynamicVertexBuffer(void* data, u64 elementSize, u64 elementCount);
+		void BindDynamicVertexBuffer(void* data, u64 elementCount, u64 elementSize, bool isFlush = true);
+		void FlushVertexBuffer();
+
 
 
 

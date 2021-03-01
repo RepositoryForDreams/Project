@@ -14,22 +14,20 @@ namespace JG
 	class DescriptorAllocation;
 	class DirectX12VertexBuffer : public IVertexBuffer
 	{
+		friend class DirectX12Mesh;
+	private:
 		u64   mElementSize  = 0;
 		u64   mElementCount = 0;
 		void* mCPUData  = nullptr;
-
-		SharedPtr<InputLayout> mInputLayout;
 	public:
 		DirectX12VertexBuffer() = default;
 		virtual ~DirectX12VertexBuffer();
 	public:
-		virtual void  SetInputLayout(SharedPtr<InputLayout> inputLayout) override;
-		virtual SharedPtr<InputLayout> GetInputLayout() const override;
-		virtual bool  CreateBuffer(void* datas, u64 elementSize, u64 elementCount) override;
+		virtual bool  Create(void* datas, u64 elementSize, u64 elementCount) override;
 		virtual bool  IsValid() const override;
 
 	protected:
-		virtual void Bind() override;
+		virtual void Bind();
 
 	public:
 		void* GetData() const
@@ -49,6 +47,7 @@ namespace JG
 
 	class DirectX12IndexBuffer : public IIndexBuffer
 	{
+		friend class DirectX12Mesh;
 	private:
 		u32* mCPUData    = nullptr;
 		u64  mIndexCount = 0;
@@ -56,10 +55,10 @@ namespace JG
 		DirectX12IndexBuffer() = default;
 		virtual ~DirectX12IndexBuffer();
 	public:
-		virtual bool  CreateBuffer(u32* datas, u64 count) override;
+		virtual bool  Create(u32* datas, u64 count) override;
 		virtual bool IsValid() const override;
 	protected:
-		virtual void Bind() override;
+		virtual void Bind();
 	public:
 		u32* GetData() const
 		{

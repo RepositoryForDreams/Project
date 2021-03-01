@@ -123,6 +123,12 @@ namespace JG
 
 
 
+	void GraphicsCommandList::Reset()
+	{
+		CommandList::Reset();
+		mVertexViews.clear();
+	}
+
 	void GraphicsCommandList::SetViewport(const Viewport& viewport)
 	{
 		
@@ -316,7 +322,7 @@ namespace JG
 		}
 	}
 
-	void GraphicsCommandList::BindDynamicVertexBuffer(void* data, u64 elementSize, u64 elementCount)
+	void GraphicsCommandList::BindDynamicVertexBuffer(void* data, u64 elementCount, u64 elementSize, bool isFlush)
 	{
 		u64 btSize = elementSize * elementCount;
 		auto alloc = mUploadAllocator->Allocate(btSize, elementSize);
@@ -328,8 +334,19 @@ namespace JG
 		bufferView.SizeInBytes   = (u32)btSize;
 		bufferView.StrideInBytes = (u32)elementSize;
 
-		mD3DCommandList->IASetVertexBuffers(0, 1, &bufferView);
+		mVertexViews.push_back(bufferView);
+
+		if (isFlush == true)
+		{
+			FlushVertexBuffer();
+		}
 	}
+
+	void GraphicsCommandList::FlushVertexBuffer()
+	{
+		mD3DCommandList->IASetVertexBuffers(0, mVertexViews.size(), mVertexViews.data());
+	}
+
 
 	void GraphicsCommandList::BindDynamicIndexBuffer(u32* datas, u64 count)
 	{

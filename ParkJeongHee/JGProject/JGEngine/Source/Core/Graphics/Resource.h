@@ -21,9 +21,6 @@ namespace JG
 		}
 	public:
 		virtual bool IsValid() const = 0;
-	protected:
-		virtual void Bind()    = 0;
-
 	private:
 		IResource(const IResource&) = delete;
 		const IResource& operator=(const IResource&) = delete;
@@ -37,22 +34,19 @@ namespace JG
 	public:
 		virtual ~IVertexBuffer() = default;
 	public:
-		virtual void SetInputLayout(SharedPtr<InputLayout> inputLayout) = 0;
-		virtual SharedPtr<InputLayout> GetInputLayout() const = 0;
-	protected:
-		virtual bool CreateBuffer(void* datas, u64 elementSize, u64 elementCount) = 0;
-	public:
-		static SharedPtr<IVertexBuffer> Create(String name, void* datas, u64 elementSize,  u64 elementCount);
+		virtual bool Create(void* datas, u64 elementSize, u64 elementCount) = 0;
+
+
+		static SharedPtr<IVertexBuffer> Create(String name);
 	};
 
 	class IIndexBuffer : public Buffer
 	{
 	public:
 		virtual ~IIndexBuffer() = default;
-	protected:
-		virtual bool CreateBuffer(u32* datas, u64 count) = 0;
 	public:
-		static SharedPtr<IIndexBuffer> Create(String name, u32* datas, u64 count);
+		virtual bool Create(u32* datas, u64 count) = 0;
+		static SharedPtr<IIndexBuffer> Create(String name);
 	};
 	
 
@@ -67,6 +61,7 @@ namespace JG
 		virtual TextureID          GetTextureID()   const = 0;
 		virtual const TextureInfo& GetTextureInfo() const = 0;
 		virtual void  SetTextureInfo(const TextureInfo& info) = 0;
+		virtual void  Bind() = 0;
 	private:
 		ITexture(const ITexture& texture) = delete;
 		const ITexture& operator=(const ITexture& texture) = delete;
