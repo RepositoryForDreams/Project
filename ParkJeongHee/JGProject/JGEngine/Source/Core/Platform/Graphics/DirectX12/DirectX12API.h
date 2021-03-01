@@ -69,9 +69,9 @@ namespace JG
 		static DescriptorAllocation DSVAllocate();
 		static DescriptorAllocation CSUAllocate();
 
-		static GraphicsCommandList* GetGraphicsCommandList(i32 priority = 0);
-		static ComputeCommandList*  GetComputeCommandList(i32 priority = 0);
-		static CopyCommandList*     GetCopyCommandList(i32 priority = 0);
+		static GraphicsCommandList* GetGraphicsCommandList();
+		static ComputeCommandList*  GetComputeCommandList();
+		static CopyCommandList*     GetCopyCommandList();
 
 		static SharedPtr<GraphicsPipelineState> GetGraphicsPipelineState();
 		static SharedPtr<ComputePipelineState>  GetComputePipelineState();
@@ -92,7 +92,9 @@ namespace JG
 		virtual SharedPtr<IFrameBuffer>   CreateFrameBuffer(const FrameBufferInfo& info) override;
 		virtual SharedPtr<IVertexBuffer>  CreateVertexBuffer(const String& name, void* datas, u64 elementSize, u64 elementCount) override;
 		virtual SharedPtr<IIndexBuffer>   CreateIndexBuffer(const String& name, u32* datas, u64 count) override;
-		virtual SharedPtr<IShader>        CreateShader(const String& sourceCode, EShaderFlags flags, const String& error) override;
+		virtual SharedPtr<IShader>        CreateShader(const String& sourceCode, EShaderFlags flags) override;
+		virtual SharedPtr<IMaterial>	  CreateMaterial(SharedPtr<IShader> shader) override;
+		virtual SharedPtr<IMaterialInstance> CreateMaterialInstanced(SharedPtr<IMaterial> material) override;
 		virtual SharedPtr<ITexture>       CreateTexture(const String& name, const TextureInfo& info) override;
 		virtual SharedPtr<ITexture>       CreateTextureFromFile(const String& path) override;
 	};

@@ -55,13 +55,16 @@ namespace JG
 		mDesc.SampleDesc.Quality = 0;
 	}
 
-	void GraphicsPipelineState::BindRootSignature(const RootSignature& rootSig)
+	void GraphicsPipelineState::BindRootSignature(SharedPtr<RootSignature> rootSig)
 	{
-		mDesc.pRootSignature = rootSig.Get();
+		mIsDirty = true;
+		mDesc.pRootSignature = rootSig->Get();
 	}
 
 	void GraphicsPipelineState::BindRenderTarget(const List<DXGI_FORMAT>& rtFormats, DXGI_FORMAT dvFormat)
 	{
+		mIsDirty = true;
+
 		u64 cnt = rtFormats.size();
 		if (cnt >= MAX_RENDERTARGET)
 		{
@@ -79,6 +82,8 @@ namespace JG
 
 	void GraphicsPipelineState::BindInputLayout(SharedPtr<InputLayout> inputLayout)
 	{
+		mIsDirty = true;
+
 		u32 offset = 0;
 		inputLayout->ForEach([&](const InputElement& element)
 		{
@@ -101,77 +106,88 @@ namespace JG
 
 	void GraphicsPipelineState::BindShader(SharedPtr<DirectX12Shader> shader)
 	{
+		mIsDirty = true;
 		auto flags = shader->GetFlags();
 
 
-		if (flags & EShaderFlags::Allow_VertexShader)
+		if (shader->GetVSData() != nullptr)
 		{
 			mDesc.VS = {
-				reinterpret_cast<byte*>(shader->GetData()->GetBufferPointer()),
-				shader->GetData()->GetBufferSize()
+				reinterpret_cast<byte*>(shader->GetVSData()->GetBufferPointer()),
+				shader->GetVSData()->GetBufferSize()
 			};
 		}
 
-		if (flags & EShaderFlags::Allow_DomainShader)
+		if (shader->GetDSData() != nullptr)
 		{
 			mDesc.DS = {
-				reinterpret_cast<byte*>(shader->GetData()->GetBufferPointer()),
-				shader->GetData()->GetBufferSize()
+				reinterpret_cast<byte*>(shader->GetDSData()->GetBufferPointer()),
+				shader->GetDSData()->GetBufferSize()
 			};
 		}
 
-		if (flags & EShaderFlags::Allow_HullShader)
+		if (shader->GetHSData() != nullptr)
 		{
 			mDesc.HS = {
-				reinterpret_cast<byte*>(shader->GetData()->GetBufferPointer()),
-				shader->GetData()->GetBufferSize()
+				reinterpret_cast<byte*>(shader->GetHSData()->GetBufferPointer()),
+				shader->GetHSData()->GetBufferSize()
 			};
 		}
 
-		if (flags & EShaderFlags::Allow_GeometryShader)
+		if (shader->GetGSData() != nullptr)
 		{
 			mDesc.GS = {
-				reinterpret_cast<byte*>(shader->GetData()->GetBufferPointer()),
-				shader->GetData()->GetBufferSize()
+				reinterpret_cast<byte*>(shader->GetGSData()->GetBufferPointer()),
+				shader->GetGSData()->GetBufferSize()
 			};
 		}
 
-		if (flags & EShaderFlags::Allow_PixelShader)
+		if (shader->GetPSData() != nullptr)
 		{
 			mDesc.PS = {
-				reinterpret_cast<byte*>(shader->GetData()->GetBufferPointer()),
-				shader->GetData()->GetBufferSize()
+				reinterpret_cast<byte*>(shader->GetPSData()->GetBufferPointer()),
+				shader->GetPSData()->GetBufferSize()
 			};
 		}
 
 	}
 	void GraphicsPipelineState::SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE type)
 	{
+		mIsDirty = true;
 		mDesc.PrimitiveTopologyType = type;
 	}
 
 	void GraphicsPipelineState::SetSampleMask(uint32_t sampleMask)
 	{
+		mIsDirty = true;
 		mDesc.SampleMask = sampleMask;
 	}
 
 	void GraphicsPipelineState::SetRasterizerState(const D3D12_RASTERIZER_DESC& desc)
 	{
+		mIsDirty = true;
 		mDesc.RasterizerState = desc;
 	}
 
 	void GraphicsPipelineState::SetBlendState(const D3D12_BLEND_DESC& desc)
 	{
+		mIsDirty = true;
 		mDesc.BlendState = desc;
 	}
 
 	void GraphicsPipelineState::SetDepthStencilState(const D3D12_DEPTH_STENCIL_DESC& desc)
 	{
+		mIsDirty = true;
 		mDesc.DepthStencilState = desc;
 	}
 
 	bool GraphicsPipelineState::Finalize()
 	{
+		if (mIsDirty == false && mD3DPSO != nullptr)
+		{
+			return true;
+		}
+
 
 		mDesc.InputLayout.pInputElementDescs = nullptr;
 		u64 hash = HashState(&mDesc);
@@ -213,6 +229,7 @@ namespace JG
 			mD3DPSO = *PSORef;
 		}
 
+		mIsDirty = false;
 		return true;
 	}
 
@@ -229,14 +246,20 @@ namespace JG
 
 	void ComputePipelineState::BindShader(SharedPtr<DirectX12Shader> shader)
 	{
-		mDesc.CS = {
-				reinterpret_cast<byte*>(shader->GetData()->GetBufferPointer()),
-				shader->GetData()->GetBufferSize()
-		};
+		//mDesc.CS = {
+		//		reinterpret_cast<byte*>(shader->GetData()->GetBufferPointer()),
+		//		shader->GetData()->GetBufferSize()
+		//};
 	}
 
 	bool ComputePipelineState::Finalize()
 	{
+		if (mIsDirty == false && mD3DPSO != nullptr)
+		{
+			return true;
+		}
+
+
 		u64 hash = HashState(&mDesc);
 
 		ID3D12PipelineState** PSORef = nullptr;
@@ -271,6 +294,7 @@ namespace JG
 				std::this_thread::yield();
 			mD3DPSO = *PSORef;
 		}
+		mIsDirty = false;
 		return true;
 	}
 

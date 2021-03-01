@@ -205,15 +205,15 @@ namespace JG
 		mD3DCommandList->OMSetRenderTargets(rtTextureCount, rtvHandles, false, dsvHandle);
 	}
 
-	void GraphicsCommandList::BindRootSignature(RootSignature& rootSig)
+	void GraphicsCommandList::BindRootSignature(SharedPtr<RootSignature> rootSig)
 	{
-		if(mBindedGraphicsRootSig.Get() == rootSig.Get())
+		if(mBindedGraphicsRootSig.Get() == rootSig->Get())
 		{
 			return;
 		}
-		mBindedGraphicsRootSig = rootSig.Get();
+		mBindedGraphicsRootSig = rootSig->Get();
 		mD3DCommandList->SetGraphicsRootSignature(mBindedGraphicsRootSig.Get());
-		mDynamicDescriptorAllocator->CommitRootSignature(rootSig);
+		mDynamicDescriptorAllocator->CommitRootSignature(*rootSig);
 	}
 
 	void GraphicsCommandList::BindPipelineState(SharedPtr<GraphicsPipelineState> pso)

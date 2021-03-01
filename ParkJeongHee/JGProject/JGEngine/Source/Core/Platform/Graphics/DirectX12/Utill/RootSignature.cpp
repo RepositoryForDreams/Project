@@ -76,8 +76,23 @@ namespace JG
 
 		return mDescriptorTableInfoByRootParam.at(rootparam);
 	}
+	void RootSignature::Reset()
+	{
+		mD3DRootSig.Reset();
+		mRootParams.clear();
+		mSamplerState.clear();
+		mRootSigInitType.clear();
+		mDescriptorTableInfoByRootParam.clear();
+		mDescriptorRanges.clear();
+	}
 	bool RootSignature::Finalize()
 	{
+		if (mD3DRootSig != nullptr)
+		{
+			return false;
+		}
+
+
 		CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc((u32)mRootParams.size(),
 			mRootParams.data(), (u32)mSamplerState.size(), mSamplerState.data(),
 			D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);

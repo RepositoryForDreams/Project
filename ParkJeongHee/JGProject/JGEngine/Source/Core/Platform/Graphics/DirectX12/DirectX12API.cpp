@@ -97,7 +97,7 @@ namespace JG
 	// Renderer Begin 호출시 RendererID를 발급 받고
 	// Bind로 넘길시 RendererID 로
 	// RendererID 별 thread 별 commandList 생성
-	GraphicsCommandList* DirectX12API::GetGraphicsCommandList(i32 priority)
+	GraphicsCommandList* DirectX12API::GetGraphicsCommandList()
 	{
 		List<GraphicsCommandList*>* pCmdLists = nullptr;
 		GraphicsCommandList* result = nullptr;
@@ -125,7 +125,7 @@ namespace JG
 			if ((*pCmdLists)[bufferIndex] == nullptr)
 			{
 				std::lock_guard<std::shared_mutex> lock(gGraphicsCommandListMutex);
-				(*pCmdLists)[bufferIndex] = static_cast<GraphicsCommandList*>(gGraphicsCommandQueue->RequestCommandList(priority));
+				(*pCmdLists)[bufferIndex] = static_cast<GraphicsCommandList*>(gGraphicsCommandQueue->RequestCommandList(0));
 			}
 
 			result = (*pCmdLists)[bufferIndex];
@@ -133,7 +133,7 @@ namespace JG
 		}
 		return nullptr;
 	}
-	ComputeCommandList* DirectX12API::GetComputeCommandList(i32 priority)
+	ComputeCommandList* DirectX12API::GetComputeCommandList()
 	{
 		List<ComputeCommandList*>* pCmdLists = nullptr;
 		ComputeCommandList* result = nullptr;
@@ -161,7 +161,7 @@ namespace JG
 			if ((*pCmdLists)[bufferIndex] == nullptr)
 			{
 				std::lock_guard<std::shared_mutex> lock(gComputeCommandListMutex);
-				(*pCmdLists)[bufferIndex] = static_cast<ComputeCommandList*>(gComputeCommandQueue->RequestCommandList(priority));
+				(*pCmdLists)[bufferIndex] = static_cast<ComputeCommandList*>(gComputeCommandQueue->RequestCommandList(0));
 			}
 
 			result = (*pCmdLists)[bufferIndex];
@@ -169,7 +169,7 @@ namespace JG
 		}
 		return nullptr;
 	}
-	CopyCommandList* DirectX12API::GetCopyCommandList(i32 priority)
+	CopyCommandList* DirectX12API::GetCopyCommandList()
 	{
 		List<CopyCommandList*>* pCmdLists = nullptr;
 		CopyCommandList* result = nullptr;
@@ -197,7 +197,7 @@ namespace JG
 			if ((*pCmdLists)[bufferIndex] == nullptr)
 			{
 				std::lock_guard<std::shared_mutex> lock(gCopyCommandListMutex);
-				(*pCmdLists)[bufferIndex] = static_cast<CopyCommandList*>(gCopyCommandQueue->RequestCommandList(priority));
+				(*pCmdLists)[bufferIndex] = static_cast<CopyCommandList*>(gCopyCommandQueue->RequestCommandList(0));
 			}
 
 			result = (*pCmdLists)[bufferIndex];
@@ -474,15 +474,24 @@ namespace JG
 		}
 		return iBuffer;
 	}
-	SharedPtr<IShader> DirectX12API::CreateShader(const String& sourceCode, EShaderFlags flags, const String& error)
+	SharedPtr<IShader> DirectX12API::CreateShader(const String& sourceCode, EShaderFlags flags)
 	{
+		String errorCode;
 		auto shader = CreateSharedPtr<DirectX12Shader>();
-		if (!shader->Compile(sourceCode, flags, error))
+		if (!shader->Compile(sourceCode, flags, &errorCode))
 		{
-			JG_CORE_ERROR("Failed Compile Shader \n Error : {0}  \n SourceCode : \n {1} ", ws2s(error), ws2s(sourceCode));
+			JG_CORE_ERROR("Failed Compile Shader \n Error : {0}  \n SourceCode : \n {1} ", ws2s(errorCode), ws2s(sourceCode));
 			return nullptr;
 		}
 		return shader;
+	}
+	SharedPtr<IMaterial> DirectX12API::CreateMaterial(SharedPtr<IShader> shader)
+	{
+		return SharedPtr<IMaterial>();
+	}
+	SharedPtr<IMaterialInstance> DirectX12API::CreateMaterialInstanced(SharedPtr<IMaterial> material)
+	{
+		return SharedPtr<IMaterialInstance>();
 	}
 	SharedPtr<ITexture> DirectX12API::CreateTexture(const String& name, const TextureInfo& info)
 	{

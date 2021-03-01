@@ -12,6 +12,7 @@ namespace JG
 	{
 	protected:
 		ComPtr<ID3D12PipelineState> mD3DPSO;
+		bool mIsDirty = true;
 	public:
 		ID3D12PipelineState* Get() const {
 			return mD3DPSO.Get();
@@ -19,6 +20,7 @@ namespace JG
 		virtual bool Finalize() = 0;
 	public:
 		static void ClearCache();
+		
 	};
 
 	class GraphicsPipelineState : public PipelineState
@@ -28,7 +30,7 @@ namespace JG
 		List<D3D12_INPUT_ELEMENT_DESC> mD3DInputLayoutDescs;
 	public:
 		GraphicsPipelineState();
-		void BindRootSignature(const RootSignature& rootSig);
+		void BindRootSignature(SharedPtr<RootSignature> rootSig);
 		void BindRenderTarget(const List< DXGI_FORMAT>& rtFormats, DXGI_FORMAT dvFormat = DXGI_FORMAT_UNKNOWN);
 		void BindInputLayout(SharedPtr<InputLayout> inputLayout);
 		void BindShader(SharedPtr<DirectX12Shader> shader);

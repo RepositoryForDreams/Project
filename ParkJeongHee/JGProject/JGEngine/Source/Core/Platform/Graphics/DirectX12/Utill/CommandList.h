@@ -69,7 +69,7 @@ namespace JG
 		void SetRenderTarget(
 			ID3D12Resource** rtTextures, D3D12_CPU_DESCRIPTOR_HANDLE* rtvHandles, u64 rtTextureCount,
 			ID3D12Resource* depthTexture, D3D12_CPU_DESCRIPTOR_HANDLE* dsvHandle);
-		void BindRootSignature(RootSignature& rootSig);
+		void BindRootSignature(SharedPtr<RootSignature> rootSig);
 		void BindPipelineState(SharedPtr<GraphicsPipelineState> pso);
 		
 		void BindTexture(u32 rootParam, ID3D12Resource* texture, void* desc = nullptr);

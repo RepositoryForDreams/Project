@@ -5,6 +5,7 @@
 #include "Utill/CommandQueue.h"
 #include "Utill/DescriptorAllocator.h"
 #include "Utill/CommandList.h"
+#include "Utill/PipelineState.h"
 namespace JG
 {
 	DirectX12VertexBuffer::~DirectX12VertexBuffer()

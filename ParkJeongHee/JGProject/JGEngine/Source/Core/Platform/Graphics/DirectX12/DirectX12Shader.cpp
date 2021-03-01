@@ -2,50 +2,73 @@
 #include "DirectX12Shader.h"
 #include "Utill/PipelineState.h"
 #include "Utill/RootSignature.h"
+#include "Utill/CommandList.h"
 #include "Platform/Graphics/DirectX12/DirectX12API.h"
+
 namespace JG
 {
-	void DirectX12Shader::SetFloat(const String& name, float value)
+	bool DirectX12Shader::Compile(const String& sourceCode, EShaderFlags flags, String* error)
 	{
-	}
-	void DirectX12Shader::SetFloat2(const String& name, const JVector2& value)
-	{
-	}
-	void DirectX12Shader::SetFloat3(const String& name, const JVector3& value)
-	{
-	}
-	void DirectX12Shader::SetFloat4(const String& name, const JVector4& value)
-	{
-	}
-	void DirectX12Shader::SetInt(const String& name, i32 value)
-	{
-	}
-	void DirectX12Shader::SetInt2(const String& name, const JVector2Int& value)
-	{
-	}
-	void DirectX12Shader::SetInt3(const String& name, const JVector3Int& value)
-	{
-	}
-	void DirectX12Shader::SetInt4(const String& name, const JVector4Int& value)
-	{
-	}
-	void DirectX12Shader::SetUint(const String& name, u32 value)
-	{
-	}
-	void DirectX12Shader::SetUint2(const String& name, const JVector2Uint& value)
-	{
-	}
-	void DirectX12Shader::SetUint3(const String& name, const JVector3Uint& value)
-	{
-	}
-	void DirectX12Shader::SetUint4(const String& name, const JVector4Uint& value)
-	{
-	}
-	void DirectX12Shader::SetFloat4x4(const String& name, const JMatrix& value)
-	{
-	}
-	bool DirectX12Shader::Compile(const String& sourceCode, EShaderFlags flags, const String& error)
-	{
+
+		if (mShaderData == nullptr)
+		{
+			mShaderData = CreateUniquePtr<DirectX12ShaderData>();
+		}
+		else
+		{
+			mShaderData->Reset();
+		}
+
+		if (mShaderData->Set(sourceCode) == false)
+		{
+			return false;
+		}
+
+		
+		bool result = true;
+		if (flags & EShaderFlags::Allow_VertexShader)
+		{
+			if (Compile(mVSData, sourceCode, CompileConfig(ShaderCode::HLSL::VSEntry, ShaderCode::HLSL::VSTarget), error) == false)
+			{
+				return false;
+			}
+		}
+		if (flags & EShaderFlags::Allow_DomainShader)
+		{
+			if (Compile(mDSData, sourceCode, CompileConfig(ShaderCode::HLSL::DSEntry, ShaderCode::HLSL::DSTarget), error) == false)
+			{
+				return false;
+			}
+		}
+		if (flags & EShaderFlags::Allow_HullShader)
+		{
+			if (Compile(mHSData, sourceCode, CompileConfig(ShaderCode::HLSL::HSEntry, ShaderCode::HLSL::HSTarget), error) == false)
+			{
+				return false;
+			}
+		}
+		if (flags & EShaderFlags::Allow_GeometryShader)
+		{
+			if (Compile(mGSData, sourceCode, CompileConfig(ShaderCode::HLSL::GSEntry, ShaderCode::HLSL::GSTarget), error) == false)
+			{
+				return false;
+			}
+		}
+		if (flags & EShaderFlags::Allow_PixelShader)
+		{
+			if (Compile(mPSData, sourceCode, CompileConfig(ShaderCode::HLSL::PSEntry, ShaderCode::HLSL::PSTarget), error) == false)
+			{
+				return false;
+			}
+		}
+
+
+
+
+		// ShaderCompile
+
+
+
 		/*
 		2d에서는 머터리얼이 필요가 없다.
 
@@ -79,95 +102,267 @@ namespace JG
 
 
 
-		// RootSignature 정보
-		// InputLayout   정보
-		// dataToken   Param
-		// MaterialParam Param
-		// 
+
+		mIsCompileSuccess = true;
+		return true;
+	}
+
+	bool DirectX12Shader::Bind()
+	{
+		if (mIsCompileSuccess == false)
+		{
+			JG_CORE_ERROR("Failed Bind Shader : is not Compiled Shader ");
+			return false;
+		}
+		// RootSignature 수정
+
+		auto RootSig = DirectX12API::GetRootSignature();
+		RootSig->Reset();
+
+		for (auto& rpPair : mShaderData->RootParamMap)
+		{
+			u64 rootParam = rpPair.first;
+			auto element = rpPair.second;
+
+			switch (element->ElementType)
+			{
+			case DirectX12ShaderData::EShaderElementType::CBuffer:
+				RootSig->InitAsCBV(element->RegisterNum, element->RegisterSpace);
+				break;
+
+			case DirectX12ShaderData::EShaderElementType::Texture:
+				JGASSERT("IS NOT IMPL");
+				break;
+
+			case DirectX12ShaderData::EShaderElementType::SamplerState:
+				JGASSERT("IS NOT IMPL");
+				break;
+			}
+		}
+
+		if (RootSig->Finalize() == false)
+		{
+			JG_CORE_ERROR("Failed Bind Shader : Failed Create RootSignature");
+			return false;
+		}
 		
 
+		auto commandList = DirectX12API::GetGraphicsCommandList();
+		commandList->BindRootSignature(RootSig);
 
 
-		// Shader Param
 
-		Dictionary<String, UniquePtr<UploadData>> ShaderUploadDataMap;
+		auto PSO = DirectX12API::GetGraphicsPipelineState();
+		// PSO 수정
+		PSO->BindRootSignature(RootSig);
+		PSO->BindShader(SharedPtr<DirectX12Shader>(this));
+
+		// InputLayout -> VertexBuffer
+		// RootSig (o)
+		// Shader  (o)
+		// RenderTarget -> SetRenderTarget
+		// 
+		return false;
+
+	}
+
+	bool DirectX12Shader::Compile(ComPtr<ID3DBlob> blob, const String& sourceCode, const CompileConfig& config, String* error)
+	{
+		ComPtr<ID3DBlob> errorData;
+		HRESULT hr = D3DCompile2(
+			ws2s(sourceCode).data(),
+			sourceCode.size(),
+			nullptr,
+			nullptr,
+			nullptr,
+			ws2s(config.Entry).c_str(),
+			ws2s(config.Target).c_str(),
+			0, 0, 0, nullptr, 0,
+			blob.GetAddressOf(),
+			errorData.GetAddressOf()); 
+
+		if (FAILED(hr) && error != nullptr)
+		{
+			*error = s2ws((char*)errorData->GetBufferPointer());
+			return false;
+		}
+		return true;
+	}
 
 
-		u64 dataTokenStartPos = sourceCode.find_first_of(ShaderCode::HLSL::CBDataToken);
-		dataTokenStartPos     = sourceCode.find_first_of(TT("{"), dataTokenStartPos) + 1;
+
+	bool DirectX12ShaderData::Set(const String& code)
+	{
+		bool result = true;
+		Reset();
+
+		u64 pos = 0;
+		// Upload Data 추출
+		while (pos != String::npos)
+		{
+			pos = AnalysisCBuffer(code, pos, &result);
+		}
+
+
+
+
+		// Texture
+		pos = 0;
+
+
+
+		// StructuredBuffer
+
+		// Sampler는 이미 저
+
+		return result;
+	}
+	void DirectX12ShaderData::Reset()
+	{
+		RootParamOffset = 0;
+		RootParamMap.clear();
+		CBufferVarMap.clear();
+		CBufferDataMap.clear();
+		TextureDataMap.clear();
+		SamplerStateDataMap.clear();
+	}
+
+	u64 DirectX12ShaderData::AnalysisCBuffer(const String& code, u64 startPos, bool* result)
+	{
+		CBufferData* cBuffer = nullptr;
+		u64 uploadDataSize = 0;
+		u64 dataTokenStartPos = code.find(ShaderCode::HLSL::CBToken, startPos);
+
+
+		// 이름
 		if (dataTokenStartPos != String::npos)
 		{
-			u64 dataTokenEndPos = sourceCode.find_first_of(TT("}"), dataTokenStartPos);
-			String dataCode   = sourceCode.substr(dataTokenStartPos, dataTokenEndPos - dataTokenStartPos);
+			u64 startPos = dataTokenStartPos + wcslen(ShaderCode::HLSL::CBToken);
+			u64 endPos = code.find_first_of(TT("{"), startPos);
+			String cbName = code.substr(startPos, endPos - startPos);
+			cbName = ReplaceAll(cbName, TT("\n"), TT(""));
+			cbName = ReplaceAll(cbName, TT("\t"), TT(""));
+			cbName = ReplaceAll(cbName, TT(" "), TT(""));
+			if (RegisterCBuffer(cbName) == false)
+			{
+				if (result != nullptr)
+				{
+					*result = false;
+				}
+				// Error
+				//
+				return String::npos;
+			}
+			cBuffer = CBufferDataMap[cbName].get();
+		}
+		else
+		{
+			return String::npos;
+		}
+
+		// Var 처리
+		dataTokenStartPos = code.find_first_of(TT("{"), dataTokenStartPos) + 1;
+		if (dataTokenStartPos != String::npos)
+		{
+			u64 dataTokenEndPos = code.find_first_of(TT("}"), dataTokenStartPos);
+			String dataCode = code.substr(dataTokenStartPos, dataTokenEndPos - dataTokenStartPos);
 
 			u64 pos = 0;
 			while (pos != String::npos)
 			{
-				u64 startPos = dataCode.find_first_of(TT("\n"), pos) + 1;
+
+				u64 startPos = (pos == 0) ? 0 : dataCode.find_first_of(TT("\n"), pos) + 1;
 				if (startPos != String::npos)
 				{
 					u64 endPos = dataCode.find_first_of(TT(";"), startPos);
 					if (endPos != String::npos)
 					{
 						String varCode = dataCode.substr(startPos, endPos - startPos + 1);
+						varCode = ReplaceAll(varCode, TT("\n"), TT(""));
+						varCode = ReplaceAll(varCode, TT("\t"), TT(""));
+						if (RegisterCBufferVar(cBuffer, varCode, uploadDataSize) == false)
+						{
+							if (result != nullptr)
+							{
+								*result = false;
+							}
+							return String::npos;
+						}
 
-
-						u64 varStartPos = varCode.find_first_not_of(TT(" "), varCode.find_first_not_of(TT("\t")));
-						u64 varMidPos = varCode.find(TT(" "), varStartPos);
-						u64 varEndPos = varCode.find(TT(";"), varMidPos) - 1;
-
-
-
-
-
-						String typeCode = varCode.substr(varStartPos, varMidPos - varStartPos);
-						String nameCode = varCode.substr(varMidPos + 1, varEndPos - varMidPos);
-
-						UploadData upload;
-						upload.Name = nameCode;
-						//upload.Type = type;
-						//upload.DataSize = GetShaderDataTypeSize(type);
-						upload.DataPos = 0;
 						pos = endPos + 1;
 						continue;
 					}
 				}
 				break;
 			}
-		
 
+			startPos = dataTokenEndPos + 1;
+		}
+		else
+		{
+			return String::npos;
+		}
+		cBuffer->DataSize = uploadDataSize;
+		cBuffer->ElementType = EShaderElementType::CBuffer;
+		cBuffer->RootParm = RootParamOffset++;
+		cBuffer->RegisterNum = CBufferDataMap.size() - 1;
+		RootParamMap[cBuffer->RootParm] = cBuffer;
+		return startPos;
+	}
+	u64 DirectX12ShaderData::AnalysisTexture(const String& code, u64 pos, bool* result)
+	{
+		return String::npos;
+	}
+	bool DirectX12ShaderData::RegisterCBuffer(const String& name)
+	{
+
+		if (CBufferDataMap.find(name) != CBufferDataMap.end())
+		{
+			JG_CORE_ERROR("{0} CBuffer Already Exists.", ws2s(name));
+			return false;
 		}
 
-
-		// RootSignature 정보
-		// 
-		// PipelineState
-		// SetRenderTarget
-		//
-
-
-
-
-
-		return false;
+		CBufferDataMap[name] = CreateUniquePtr<CBufferData>();
+		return true;
 	}
 
-	bool DirectX12Shader::Bind()
+	bool DirectX12ShaderData::RegisterCBufferVar(CBufferData* cBuffer, const String& varCode, u64& uploadDataSize)
 	{
-		// RootSignature 수정
-
-		auto RootSig = DirectX12API::GetRootSignature();
-
-
-
-		auto PSO = DirectX12API::GetGraphicsPipelineState();
-		// PSO 수정
-		PSO->BindShader(SharedPtr<DirectX12Shader>(this));
+		u64 varStartPos = varCode.find_first_not_of(TT(" "), varCode.find_first_not_of(TT("\t")));
+		u64 varMidPos = varCode.find(TT(" "), varStartPos);
+		u64 varEndPos = varCode.find(TT(";"), varMidPos) - 1;
 
 
 
-		return false;
 
+		String typeCode = varCode.substr(varStartPos, varMidPos - varStartPos);
+		typeCode = ReplaceAll(typeCode, TT(" "), TT(""));
+		String nameCode = varCode.substr(varMidPos + 1, varEndPos - varMidPos);
+		nameCode = ReplaceAll(nameCode, TT(" "), TT(""));
+		nameCode = ReplaceAll(nameCode, TT(";"), TT(""));
+
+
+
+
+
+		cBuffer->DataMap[nameCode] = CreateUniquePtr<Data>();
+		Data& uploadData    = *(cBuffer->DataMap[nameCode]);
+		uploadData.Type     = StringToShaderDataType(typeCode);
+		uploadData.DataSize = GetShaderDataTypeSize(uploadData.Type);
+		uploadData.DataPos  = uploadDataSize;
+		uploadDataSize += uploadData.DataSize;
+
+
+		if (CBufferVarMap.find(nameCode) != CBufferVarMap.end())
+		{
+			JG_CORE_ERROR("{0} CBuffer Var Already Exists.", ws2s(nameCode));
+			return false;
+		}
+		CBufferVarMap[nameCode] = cBuffer->DataMap[nameCode].get();
+		return true;
 	}
+
+
+
 }
 

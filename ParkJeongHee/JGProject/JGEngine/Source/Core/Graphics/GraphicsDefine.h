@@ -11,12 +11,12 @@ namespace JG
 #define MAX_RENDERTARGET 8
 
 	using TextureID = u64;
-	
+
 	enum class ETextureFormat
 	{
 		None,
 		R8G8B8A8_Unorm,
-		
+
 	};
 	inline String TextureFormatToString(ETextureFormat format)
 	{
@@ -29,9 +29,9 @@ namespace JG
 
 
 	ENUM_FLAG(ETextureFlags)
-	enum class ETextureFlags
+		enum class ETextureFlags
 	{
-		None			   = 0x00001,
+		None = 0x00001,
 		Allow_RenderTarget = 0x00002,
 		Allow_DepthStencil = 0x00004,
 	};
@@ -44,13 +44,13 @@ namespace JG
 		u32 Width = 0;
 		u32 Height = 0;
 		ETextureFormat Format = ETextureFormat::None;
-		ETextureFlags  Flags   = ETextureFlags::None;
-		u16 MipLevel  = 0;
+		ETextureFlags  Flags = ETextureFlags::None;
+		u16 MipLevel = 0;
 		u16 ArraySize = 1;
 
 
 		Color ClearColor;
-		f32   ClearDepth   = 1.0f;
+		f32   ClearDepth = 1.0f;
 		u8    ClearStencil = 0;
 	};
 
@@ -64,17 +64,17 @@ namespace JG
 		Allow_PixelShader = 0x002,
 		Allow_GeometryShader = 0x004,
 		Allow_HullShader = 0x008,
-		Allow_DomainShader = 0x016,
+		Allow_DomainShader = 0x010,
 	};
 
-	
+
 	enum class EShaderDataType
 	{
 		unknown,
-		_bool, 
+		_bool,
 		_int, _int2, _int3, _int4,
 		_uint, _uint2, _uint3, _uint4,
-		_float, _float2, _float3, _float4, 
+		_float, _float2, _float3, _float4,
 		_float3x3, _float4x4,
 	};
 
@@ -126,7 +126,28 @@ namespace JG
 			return TT("unknown");
 		}
 	}
-
+	inline EShaderDataType  StringToShaderDataType(const String& type)
+	{
+		if (type == TT("bool")) return EShaderDataType::_bool;
+		else if (type == TT("int")) return EShaderDataType::_int;
+		else if (type == TT("int2")) return EShaderDataType::_int2;
+		else if (type == TT("int3")) return EShaderDataType::_int3;
+		else if (type == TT("int4")) return EShaderDataType::_int4;
+		else if (type == TT("uint")) return EShaderDataType::_uint;
+		else if (type == TT("uint2")) return EShaderDataType::_uint2;
+		else if (type == TT("uint3")) return EShaderDataType::_uint3;
+		else if (type == TT("uint4")) return EShaderDataType::_uint4;
+		else if (type == TT("float")) return EShaderDataType::_float;
+		else if (type == TT("float2")) return EShaderDataType::_float2;
+		else if (type == TT("float3")) return EShaderDataType::_float3;
+		else if (type == TT("float4")) return EShaderDataType::_float4;
+		else if (type == TT("float3x3")) return EShaderDataType::_float3x3;
+		else if (type == TT("float4x4")) return EShaderDataType::_float4x4;
+		else
+		{
+			return EShaderDataType::unknown;
+		}
+	}
 
 
 
@@ -180,14 +201,20 @@ namespace JG
 	{
 		namespace HLSL
 		{
-			constexpr wchar* CBDataToken   = L"cbuffer Data";
+			constexpr wchar* CBToken   = L"cbuffer ";
 
 
 
-
-
-
-
+			constexpr wchar* VSEntry = TT("vs_main");
+			constexpr wchar* DSEntry = TT("ds_main");
+			constexpr wchar* HSEntry = TT("hs_main");
+			constexpr wchar* GSEntry = TT("gs_main");
+			constexpr wchar* PSEntry = TT("ps_main");
+			constexpr wchar* VSTarget = TT("vs_5_0");
+			constexpr wchar* DSTarget = TT("ds_5_0");
+			constexpr wchar* HSTarget = TT("hs_5_0");
+			constexpr wchar* GSTarget = TT("gs_5_0");
+			constexpr wchar* PSTarget = TT("ps_5_0");
 
 			constexpr wchar* Common = LR"(
 struct SDObject
@@ -210,7 +237,7 @@ StructuredBuffer<SDObject>      gObjectInstances : register(t0, space0);
 struct VS_IN
 {
 	float3 posL : POSITION;
-	float3 tex  : TEXCOORD;
+	float2 tex  : TEXCOORD;
 }
 
 struct VS_OUT

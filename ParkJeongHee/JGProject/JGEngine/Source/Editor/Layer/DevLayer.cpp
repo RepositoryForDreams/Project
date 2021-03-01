@@ -47,14 +47,49 @@ namespace JG
 
 		mFrameBuffer = IFrameBuffer::Create(info);
 
+		String error;
 		IShader::Create(TT(R"(
-cbuffer Data
+cbuffer Camera
 {
 	float4x4 gViewProj;
-	float4x4 gWorld;
-    float testValue;
 };
-)"), EShaderFlags::Allow_PixelShader | EShaderFlags::Allow_VertexShader, TT("Test"));
+
+
+cbuffer Instance
+{
+	float4x4 gWorld;
+};
+
+
+struct VS_IN
+{
+	float3 posL : POSITION;
+	float2 tex  : TEXCOORD;
+};
+
+struct VS_OUT
+{
+	float4 posH : SV_POSITION;
+	float2 tex   : TEXCOORD;
+};
+
+VS_OUT vs_main(VS_IN vin)
+{
+	VS_OUT vout;
+	float4 posW = mul(float4(vin.posL, 1.0f), gWorld);
+
+
+	vout.posH = mul(posW, gViewProj);
+	vout.tex = vin.tex;
+	return vout;
+}
+
+float4 ps_main(VS_OUT pin) : SV_TARGET
+{
+
+	return float4(1.0f,1.0f,1.0f,1.0f);
+}
+)"), EShaderFlags::Allow_PixelShader | EShaderFlags::Allow_VertexShader);
 	}
 	void DevLayer::Destroy()
 	{

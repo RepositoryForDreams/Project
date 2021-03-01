@@ -17,54 +17,137 @@ namespace JG
 	*/
 	class GraphicsPipelineState;
 	class RootSignature;
+	class DirectX12ShaderData;
+
 
 
 
 
 	class DirectX12Shader : public IShader
 	{
-	public:
-		class UploadData
+		struct CompileConfig
 		{
-		public:
-			String			Name;
-			EShaderDataType Type;
-			u64 DataSize = 0;
-			u64 DataPos  = 0;
+			String Entry;
+			String Target;
+			CompileConfig(const String& entry, const String& target) : Entry(entry), Target(target) {}
 		};
-		List<byte> mUploadData;
-		// 변수 이름, 변수 타입 , 변수 값
-		// 저장하고있다가 상수 버퍼
 	private:
-		SharedPtr<GraphicsPipelineState> mPSO;
-		SharedPtr<RootSignature>         mRootSig;
-		ComPtr<ID3DBlob> mData;
+		UniquePtr<DirectX12ShaderData> mShaderData;
+		ComPtr<ID3DBlob> mVSData;
+		ComPtr<ID3DBlob> mDSData;
+		ComPtr<ID3DBlob> mHSData;
+		ComPtr<ID3DBlob> mGSData;
+		ComPtr<ID3DBlob> mPSData;
 		EShaderFlags     mFlags;
+		bool mIsCompileSuccess = false;
 	public:
-		virtual void SetFloat(const String& name, float value) override;
-		virtual void SetFloat2(const String& name, const JVector2& value) override;
-		virtual void SetFloat3(const String& name, const JVector3& value) override;
-		virtual void SetFloat4(const String& name, const JVector4& value) override;
-		virtual void SetInt(const String& name, i32 value) override;
-		virtual void SetInt2(const String& name, const JVector2Int& value) override;
-		virtual void SetInt3(const String& name, const JVector3Int& value) override;
-		virtual void SetInt4(const String& name, const JVector4Int& value) override;
-		virtual void SetUint(const String& name, u32 value) override;
-		virtual void SetUint2(const String& name, const JVector2Uint& value) override;
-		virtual void SetUint3(const String& name, const JVector3Uint& value) override;
-		virtual void SetUint4(const String& name, const JVector4Uint& value) override;
-		virtual void SetFloat4x4(const String& name, const JMatrix& value)   override;
-	public:
-		virtual bool Compile(const String& sourceCode, EShaderFlags flags, const String& error) override;
+		virtual bool Compile(const String& sourceCode, EShaderFlags flags, String* error) override;
 		virtual bool Bind();
 
 	public:
-		ID3DBlob* GetData() const {
-			return mData.Get();
+		ID3DBlob* GetVSData() const {
+			return mVSData.Get();
+		}
+		ID3DBlob* GetDSData() const {
+			return mDSData.Get();
+		}
+		ID3DBlob* GetHSData() const {
+			return mHSData.Get();
+		}
+		ID3DBlob* GetGSData() const {
+			return mGSData.Get();
+		}
+		ID3DBlob* GetPSData() const {
+			return mPSData.Get();
 		}
 		EShaderFlags GetFlags() const {
 			return mFlags;
 		}
+	private:
+		bool Compile(ComPtr<ID3DBlob> blob, const String& sourceCode, const CompileConfig& config, String* error);
+	};
+
+
+	class DirectX12ShaderData
+	{
+	
+	public:
+		class 	CBufferData;
+		enum class EShaderElementType
+		{
+			None,
+			CBuffer,
+			Texture,
+			SamplerState,
+		};
+		enum class ETextureType
+		{
+			_1D,
+			_2D,
+			_3D,
+			Cube,
+		};
+		class ShaderElement
+		{
+		public:
+			u64 RootParm = 0;
+			u32 RegisterNum   = 0;
+			u32 RegisterSpace = 0;
+			EShaderElementType ElementType = EShaderElementType::None;
+		public:
+			virtual ~ShaderElement() = default;
+		};
+		class Data
+		{
+		public:
+			EShaderDataType Type;
+			u64 DataSize = 0;
+			u64 DataPos  = 0;
+		};
+
+		class TextureData : public ShaderElement
+		{
+		public:
+			ETextureType Type = ETextureType::_2D;
+			u64 TextureCount = 0;
+		public:
+			virtual ~TextureData() = default;
+		};
+		class SamplerStateData : public ShaderElement
+		{
+		public:
+			virtual ~SamplerStateData() = default;
+		};
+		class CBufferData : public ShaderElement
+		{
+		public:
+			Dictionary<String, UniquePtr<Data>> DataMap;
+			u64 DataSize = 0;
+		public:
+			virtual ~CBufferData() = default;
+		};
+		class StructuredBufferData
+		{
+		public:
+
+		};
+	public:
+		SortedDictionary<u64, ShaderElement*>			RootParamMap;
+		Dictionary<String, UniquePtr<CBufferData>>		CBufferDataMap;
+		Dictionary<String, UniquePtr<TextureData>>		TextureDataMap;
+		Dictionary<String, UniquePtr<SamplerStateData>> SamplerStateDataMap;
+		Dictionary<String, Data*>		                CBufferVarMap;
+	private:
+		u64 RootParamOffset = 0;
+	public:
+		bool Set(const String& code);
+		void Reset();
+	private:
+		u64 AnalysisCBuffer(const String& code, u64 startPos, bool* result);
+		u64 AnalysisTexture(const String& code, u64 startPos, bool* result);
+	private:
+		bool RegisterCBuffer(const String& name);
+		bool RegisterCBufferVar(CBufferData* cBuffer, const String& varCode, u64& uploadDataSize);
 
 	};
 }

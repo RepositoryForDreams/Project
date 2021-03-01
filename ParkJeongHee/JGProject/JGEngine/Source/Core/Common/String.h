@@ -21,4 +21,18 @@ namespace JG
 
 		return converterX.to_bytes(wstr);
 	}
+
+	inline String ReplaceAll(const String& message, const String& pattern, const String& replace)
+	{
+		String result = message;
+		String::size_type pos = 0;
+		String::size_type offset = 0;
+
+		while ((pos = result.find(pattern, offset)) != String::npos)
+		{
+			result.replace(result.begin() + pos, result.begin() + pos + pattern.size(), replace);
+			offset = pos + replace.size();
+		}
+		return result;
+	}
 }

@@ -20,25 +20,11 @@ namespace JG
 	*/
 	class IShader
 	{
-	public:
-		virtual void SetFloat(const String& name, float value) = 0;
-		virtual void SetFloat2(const String& name, const JVector2& value) = 0;
-		virtual void SetFloat3(const String& name, const JVector3& value) = 0;
-		virtual void SetFloat4(const String& name, const JVector4& value) = 0;
-		virtual void SetInt(const String& name, i32 value) = 0;
-		virtual void SetInt2(const String& name, const JVector2Int& value) = 0;
-		virtual void SetInt3(const String& name, const JVector3Int& value) = 0;
-		virtual void SetInt4(const String& name, const JVector4Int& value) = 0;
-		virtual void SetUint(const String& name, u32 value) = 0;
-		virtual void SetUint2(const String& name, const JVector2Uint& value) = 0;
-		virtual void SetUint3(const String& name, const JVector3Uint& value) = 0;
-		virtual void SetUint4(const String& name, const JVector4Uint& value) = 0;
-		virtual void SetFloat4x4(const String& name, const JMatrix& value)   = 0;
 	protected:
-		virtual bool Compile(const String& sourceCode, EShaderFlags flags, const String& error) = 0;
+		virtual bool Compile(const String& sourceCode, EShaderFlags flags, String* error) = 0;
 		virtual bool Bind() = 0;
 	public:
-		static SharedPtr<IShader> Create(const String& sourceCode, EShaderFlags flags, const String& error);
+		static SharedPtr<IShader> Create(const String& sourceCode, EShaderFlags flags);
 	};
 
 

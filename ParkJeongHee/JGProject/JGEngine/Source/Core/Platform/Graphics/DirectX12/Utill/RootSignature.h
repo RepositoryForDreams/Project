@@ -30,7 +30,7 @@ namespace JG
 				Type(type), NumDescirptor(numDescriptor) {}
 		};
 	private:
-		ComPtr<ID3D12RootSignature>			    mD3DRootSig;
+		ComPtr<ID3D12RootSignature>		 mD3DRootSig;
 		List<CD3DX12_ROOT_PARAMETER>     mRootParams;
 		List<D3D12_STATIC_SAMPLER_DESC>  mSamplerState;
 
@@ -48,7 +48,9 @@ namespace JG
 		void InitAsConstant(u32 btSize, u32 register_num, u32 register_space, D3D12_SHADER_VISIBILITY visibility = D3D12_SHADER_VISIBILITY_ALL);
 		void AddStaticSamplerState(const CD3DX12_STATIC_SAMPLER_DESC& desc);
 		DescriptorTableInfo GetDescriptorTableRangeType(u32 rootparam) const;
+		void Reset();
 		bool Finalize();
+
 	public:
 		ID3D12RootSignature* Get() const {
 			return mD3DRootSig.Get();
