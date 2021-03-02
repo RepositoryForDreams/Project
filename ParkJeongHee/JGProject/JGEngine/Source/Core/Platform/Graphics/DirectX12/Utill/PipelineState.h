@@ -30,10 +30,10 @@ namespace JG
 		List<D3D12_INPUT_ELEMENT_DESC> mD3DInputLayoutDescs;
 	public:
 		GraphicsPipelineState();
-		void BindRootSignature(SharedPtr<RootSignature> rootSig);
+		void BindRootSignature(const RootSignature& rootSig);
 		void BindRenderTarget(const List< DXGI_FORMAT>& rtFormats, DXGI_FORMAT dvFormat = DXGI_FORMAT_UNKNOWN);
-		void BindInputLayout(SharedPtr<InputLayout> inputLayout);
-		void BindShader(SharedPtr<DirectX12Shader> shader);
+		void BindInputLayout(const InputLayout& inputLayout);
+		void BindShader(const DirectX12Shader& shader);
 		void SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE type);
 		void SetSampleMask(uint32_t sampleMask);
 		void SetRasterizerState(const D3D12_RASTERIZER_DESC& desc);
@@ -51,7 +51,7 @@ namespace JG
 	public:
 		ComputePipelineState();
 		void BindRootSignature(const RootSignature& rootSig);
-		void BindShader(SharedPtr<DirectX12Shader> shader);
+		void BindShader(const DirectX12Shader& shader);
 
 
 		virtual bool Finalize() override;

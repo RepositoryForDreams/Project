@@ -51,12 +51,13 @@ namespace JG
 
 		// inpuyLayout 설정
 		auto pso = DirectX12API::GetGraphicsPipelineState();
-		pso->BindInputLayout(mInputLayout);
-
+		pso->BindInputLayout(*mInputLayout);
+		pso->SetPrimitiveTopologyType(D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE);
 
 
 		// vertexBuffer, IndexBuffer 바인딩
 		auto commandList = DirectX12API::GetGraphicsCommandList();
+		commandList->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		for (auto& vBuffer : mVertexBufferList)
 		{
 			auto dx12VBuffer = static_cast<DirectX12VertexBuffer*>(vBuffer.get());

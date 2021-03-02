@@ -93,9 +93,8 @@ namespace JG
 		virtual SharedPtr<IFrameBuffer>   CreateFrameBuffer(const FrameBufferInfo& info) override;
 		virtual SharedPtr<IVertexBuffer>  CreateVertexBuffer(const String& name) override;
 		virtual SharedPtr<IIndexBuffer>   CreateIndexBuffer(const String& name) override;
-		virtual SharedPtr<IShader>        CreateShader(const String& sourceCode, EShaderFlags flags) override;
-		virtual SharedPtr<IMaterial>	  CreateMaterial(SharedPtr<IShader> shader) override;
-		virtual SharedPtr<IMaterialInstance> CreateMaterialInstanced(SharedPtr<IMaterial> material) override;
+		virtual SharedPtr<IShader>        CreateShader(const String& name, const String& sourceCode, EShaderFlags flags) override;
+		virtual SharedPtr<IMaterial>	  CreateMaterial(const String& name, SharedPtr<IShader> shader) override;
 		virtual SharedPtr<IMesh>		  CreateMesh(const String& name) override;
 		virtual SharedPtr<ITexture>       CreateTexture(const String& name, const TextureInfo& info) override;
 		virtual SharedPtr<ITexture>       CreateTextureFromFile(const String& path) override;

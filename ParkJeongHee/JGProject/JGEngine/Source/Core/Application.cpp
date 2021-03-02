@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "Platform/Window/WindowsWindow.h"
 #include "Graphics/Renderer.h"
+#include "Graphics/Shader.h"
 using namespace std;
 namespace JG
 {
@@ -18,14 +19,14 @@ namespace JG
 			JGASSERT("Already exist application instance");
 		}
 		smInstance = this;
-
+		mProps = prop;
 
 
 		
 		// TODO
 		// 필요한 전역 클래스 생성
 		Log::Create();
-		
+	
 
 
 
@@ -64,6 +65,7 @@ namespace JG
 		{
 			JG_CORE_INFO("Successed Create Window");
 			mGraphcisAPI->Create();
+			ShaderLibrary::Create();
 			Renderer2D::Create();
 
 			
@@ -106,6 +108,7 @@ namespace JG
 	{
 		mLayerStack.reset();
 		Renderer2D::Destroy();
+		ShaderLibrary::Destroy();
 		mGraphcisAPI->Destroy();
 		mGraphcisAPI.reset();
 		mWindow->Destroy();
@@ -175,5 +178,9 @@ namespace JG
 	IGraphicsAPI* Application::GetGraphicsAPI() const
 	{
 		return mGraphcisAPI.get();
+	}
+	JVector2Uint Application::GetSize() const
+	{
+		return JVector2Uint(mProps.WindowProps.Width, mProps.WindowProps.Height);
 	}
 }

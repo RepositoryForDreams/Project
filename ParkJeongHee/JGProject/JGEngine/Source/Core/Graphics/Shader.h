@@ -24,20 +24,21 @@ namespace JG
 		virtual bool Compile(const String& sourceCode, EShaderFlags flags, String* error) = 0;
 		virtual bool Bind() = 0;
 	public:
-		static SharedPtr<IShader> Create(const String& sourceCode, EShaderFlags flags);
+		virtual void SetName(const String& name) = 0;
+		virtual const String& GetName() const    = 0;
+	public:
+		static SharedPtr<IShader> Create(const String& name, const String& sourceCode, EShaderFlags flags);
 	};
 
 
-	class ShaderLibrary : GlobalSingleton<ShaderLibrary>
+	class ShaderLibrary : public GlobalSingleton<ShaderLibrary>
 	{
 	private:
 		Dictionary<String, SharedPtr<IShader>> mShaders;
 		std::shared_mutex mMutex;
 	public:
-		static void RegisterShader(const String& name, SharedPtr<IShader> shader);
+		static void RegisterShader(SharedPtr<IShader> shader);
 		static SharedPtr<IShader> Get(const String& name);
-
-
 	};
 
 

@@ -32,6 +32,7 @@ namespace JG
 			CompileConfig(const String& entry, const String& target) : Entry(entry), Target(target) {}
 		};
 	private:
+		String mName;
 		UniquePtr<DirectX12ShaderData> mShaderData;
 		ComPtr<ID3DBlob> mVSData;
 		ComPtr<ID3DBlob> mDSData;
@@ -42,8 +43,10 @@ namespace JG
 		bool mIsCompileSuccess = false;
 	public:
 		virtual bool Compile(const String& sourceCode, EShaderFlags flags, String* error) override;
-		virtual bool Bind();
-
+		virtual bool Bind() override;
+	public:
+		virtual void  SetName(const String& name) override;
+		virtual const String& GetName() const override;
 	public:
 		ID3DBlob* GetVSData() const {
 			return mVSData.Get();
@@ -63,8 +66,11 @@ namespace JG
 		EShaderFlags GetFlags() const {
 			return mFlags;
 		}
+		DirectX12ShaderData* GetShaderData() const {
+			return mShaderData.get();
+		}
 	private:
-		bool Compile(ComPtr<ID3DBlob> blob, const String& sourceCode, const CompileConfig& config, String* error);
+		bool Compile(ComPtr<ID3DBlob>& blob, const String& sourceCode, const CompileConfig& config, String* error);
 	};
 
 
@@ -90,6 +96,7 @@ namespace JG
 		class ShaderElement
 		{
 		public:
+			String Name;
 			u64 RootParm = 0;
 			u32 RegisterNum   = 0;
 			u32 RegisterSpace = 0;
@@ -103,6 +110,7 @@ namespace JG
 			EShaderDataType Type;
 			u64 DataSize = 0;
 			u64 DataPos  = 0;
+			CBufferData* Owner = nullptr;
 		};
 
 		class TextureData : public ShaderElement

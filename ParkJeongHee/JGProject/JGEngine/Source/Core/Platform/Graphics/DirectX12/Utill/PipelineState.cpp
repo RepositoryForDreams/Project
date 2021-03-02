@@ -55,10 +55,10 @@ namespace JG
 		mDesc.SampleDesc.Quality = 0;
 	}
 
-	void GraphicsPipelineState::BindRootSignature(SharedPtr<RootSignature> rootSig)
+	void GraphicsPipelineState::BindRootSignature(const RootSignature& rootSig)
 	{
 		mIsDirty = true;
-		mDesc.pRootSignature = rootSig->Get();
+		mDesc.pRootSignature = rootSig.Get();
 	}
 
 	void GraphicsPipelineState::BindRenderTarget(const List<DXGI_FORMAT>& rtFormats, DXGI_FORMAT dvFormat)
@@ -78,14 +78,15 @@ namespace JG
 		{
 			mDesc.RTVFormats[i] = rtFormats[i];
 		}
+		mDesc.DSVFormat = dvFormat;
 	}
 
-	void GraphicsPipelineState::BindInputLayout(SharedPtr<InputLayout> inputLayout)
+	void GraphicsPipelineState::BindInputLayout(const InputLayout& inputLayout)
 	{
 		mIsDirty = true;
-
+		mD3DInputLayoutDescs.clear();
 		u32 offset = 0;
-		inputLayout->ForEach([&](const InputElement& element)
+		inputLayout.ForEach([&](const InputElement& element)
 		{
 			D3D12_INPUT_ELEMENT_DESC Desc = {};
 			Desc.SemanticIndex = element.SementicSlot;
@@ -104,49 +105,49 @@ namespace JG
 
 	}
 
-	void GraphicsPipelineState::BindShader(SharedPtr<DirectX12Shader> shader)
+	void GraphicsPipelineState::BindShader(const DirectX12Shader& shader)
 	{
 		mIsDirty = true;
-		auto flags = shader->GetFlags();
+		auto flags = shader.GetFlags();
 
 
-		if (shader->GetVSData() != nullptr)
+		if (shader.GetVSData() != nullptr)
 		{
 			mDesc.VS = {
-				reinterpret_cast<byte*>(shader->GetVSData()->GetBufferPointer()),
-				shader->GetVSData()->GetBufferSize()
+				reinterpret_cast<byte*>(shader.GetVSData()->GetBufferPointer()),
+				shader.GetVSData()->GetBufferSize()
 			};
 		}
 
-		if (shader->GetDSData() != nullptr)
+		if (shader.GetDSData() != nullptr)
 		{
 			mDesc.DS = {
-				reinterpret_cast<byte*>(shader->GetDSData()->GetBufferPointer()),
-				shader->GetDSData()->GetBufferSize()
+				reinterpret_cast<byte*>(shader.GetDSData()->GetBufferPointer()),
+				shader.GetDSData()->GetBufferSize()
 			};
 		}
 
-		if (shader->GetHSData() != nullptr)
+		if (shader.GetHSData() != nullptr)
 		{
 			mDesc.HS = {
-				reinterpret_cast<byte*>(shader->GetHSData()->GetBufferPointer()),
-				shader->GetHSData()->GetBufferSize()
+				reinterpret_cast<byte*>(shader.GetHSData()->GetBufferPointer()),
+				shader.GetHSData()->GetBufferSize()
 			};
 		}
 
-		if (shader->GetGSData() != nullptr)
+		if (shader.GetGSData() != nullptr)
 		{
 			mDesc.GS = {
-				reinterpret_cast<byte*>(shader->GetGSData()->GetBufferPointer()),
-				shader->GetGSData()->GetBufferSize()
+				reinterpret_cast<byte*>(shader.GetGSData()->GetBufferPointer()),
+				shader.GetGSData()->GetBufferSize()
 			};
 		}
 
-		if (shader->GetPSData() != nullptr)
+		if (shader.GetPSData() != nullptr)
 		{
 			mDesc.PS = {
-				reinterpret_cast<byte*>(shader->GetPSData()->GetBufferPointer()),
-				shader->GetPSData()->GetBufferSize()
+				reinterpret_cast<byte*>(shader.GetPSData()->GetBufferPointer()),
+				shader.GetPSData()->GetBufferSize()
 			};
 		}
 
@@ -244,7 +245,7 @@ namespace JG
 		mDesc.pRootSignature = rootSig.Get();
 	}
 
-	void ComputePipelineState::BindShader(SharedPtr<DirectX12Shader> shader)
+	void ComputePipelineState::BindShader(const DirectX12Shader& shader)
 	{
 		//mDesc.CS = {
 		//		reinterpret_cast<byte*>(shader->GetData()->GetBufferPointer()),

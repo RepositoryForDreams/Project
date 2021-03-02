@@ -29,7 +29,7 @@ namespace JG
 		// 
 
 		static bool Begin();
-	
+		static void DrawQuad(const JVector2& Pos, const JVector2& Size, const Color& color =  Color::White());
 
 		//static void DrawQuad();//Vec, Rotation, Scale//, )
 

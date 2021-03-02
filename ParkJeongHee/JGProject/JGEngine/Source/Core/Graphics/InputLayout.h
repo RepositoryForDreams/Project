@@ -25,7 +25,7 @@ namespace JG
 		{
 			mInputElements.push_back(InputElement(type, sementicName, sementicSlot));
 		}
-		void ForEach(const std::function<void(const InputElement&)>& action)
+		void ForEach(const std::function<void(const InputElement&)>& action) const
 		{
 			for (auto& element : mInputElements)
 			{

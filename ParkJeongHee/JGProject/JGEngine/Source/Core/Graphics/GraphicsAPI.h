@@ -16,7 +16,6 @@ namespace JG
 	class IShader;
 	class IFrameBuffer;
 	class IMaterial;
-	class IMaterialInstance;
 	class IMesh;
 	struct TextureInfo;
 	struct FrameBufferInfo;
@@ -50,13 +49,13 @@ namespace JG
 		friend IFrameBuffer;
 		friend ITexture;
 		friend IMesh;
+		friend IMaterial;
 
 		virtual SharedPtr<IFrameBuffer>   CreateFrameBuffer(const FrameBufferInfo& settings) = 0;
 		virtual SharedPtr<IVertexBuffer>  CreateVertexBuffer(const String& name) = 0;
 		virtual SharedPtr<IIndexBuffer>   CreateIndexBuffer(const String& name) = 0;
-		virtual SharedPtr<IShader>        CreateShader(const String& sourceCode, EShaderFlags flags) = 0;
-		virtual SharedPtr<IMaterial>	  CreateMaterial(SharedPtr<IShader> shader) = 0;
-		virtual SharedPtr<IMaterialInstance> CreateMaterialInstanced(SharedPtr<IMaterial> material) = 0;
+		virtual SharedPtr<IShader>        CreateShader(const String& name, const String& sourceCode, EShaderFlags flags) = 0;
+		virtual SharedPtr<IMaterial>	  CreateMaterial(const String& name, SharedPtr<IShader> shader) = 0;
 		virtual SharedPtr<IMesh>          CreateMesh(const String& name) = 0;
 		virtual SharedPtr<ITexture>       CreateTexture(const String& name, const TextureInfo& info) = 0;
 		virtual SharedPtr<ITexture>       CreateTextureFromFile(const String& path) = 0;

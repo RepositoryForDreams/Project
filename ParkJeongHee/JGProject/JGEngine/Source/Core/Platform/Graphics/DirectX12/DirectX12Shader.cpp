@@ -154,19 +154,29 @@ namespace JG
 
 		auto PSO = DirectX12API::GetGraphicsPipelineState();
 		// PSO 수정
-		PSO->BindRootSignature(RootSig);
-		PSO->BindShader(SharedPtr<DirectX12Shader>(this));
+		PSO->BindRootSignature(*RootSig);
+		PSO->BindShader(*this);
 
 		// InputLayout -> VertexBuffer
 		// RootSig (o)
 		// Shader  (o)
 		// RenderTarget -> SetRenderTarget
 		// 
-		return false;
+		return true;
 
 	}
 
-	bool DirectX12Shader::Compile(ComPtr<ID3DBlob> blob, const String& sourceCode, const CompileConfig& config, String* error)
+	void DirectX12Shader::SetName(const String& name)
+	{
+		mName = name;
+	}
+
+	const String& DirectX12Shader::GetName() const
+	{
+		return mName;
+	}
+
+	bool DirectX12Shader::Compile(ComPtr<ID3DBlob>& blob, const String& sourceCode, const CompileConfig& config, String* error)
 	{
 		ComPtr<ID3DBlob> errorData;
 		HRESULT hr = D3DCompile2(
@@ -254,6 +264,7 @@ namespace JG
 				return String::npos;
 			}
 			cBuffer = CBufferDataMap[cbName].get();
+			cBuffer->Name = cbName;
 		}
 		else
 		{
@@ -302,6 +313,7 @@ namespace JG
 		{
 			return String::npos;
 		}
+
 		cBuffer->DataSize = uploadDataSize;
 		cBuffer->ElementType = EShaderElementType::CBuffer;
 		cBuffer->RootParm = RootParamOffset++;
@@ -350,6 +362,7 @@ namespace JG
 		uploadData.Type     = StringToShaderDataType(typeCode);
 		uploadData.DataSize = GetShaderDataTypeSize(uploadData.Type);
 		uploadData.DataPos  = uploadDataSize;
+		uploadData.Owner = cBuffer;
 		uploadDataSize += uploadData.DataSize;
 
 

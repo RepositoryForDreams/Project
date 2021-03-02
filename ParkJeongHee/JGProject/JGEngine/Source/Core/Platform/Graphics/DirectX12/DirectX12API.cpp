@@ -3,6 +3,8 @@
 #include "DirectX12FrameBuffer.h"
 #include "DirectX12Resource.h"
 #include "DirectX12Shader.h"
+#include "DirectX12Material.h"
+#include "DirectX12Mesh.h"
 #include "Utill/DirectX12Helper.h"
 #include "Utill/DescriptorAllocator.h"
 #include "Utill/CommandQueue.h"
@@ -92,11 +94,7 @@ namespace JG
 	{
 		return gCSUAllocator->Allocate();
 	}
-	// TODO
-	// Priority -> RendererID
-	// Renderer Begin 호출시 RendererID를 발급 받고
-	// Bind로 넘길시 RendererID 로
-	// RendererID 별 thread 별 commandList 생성
+
 	GraphicsCommandList* DirectX12API::GetGraphicsCommandList()
 	{
 		List<GraphicsCommandList*>* pCmdLists = nullptr;
@@ -402,7 +400,7 @@ namespace JG
 	{
 		auto commandList = GetGraphicsCommandList();
 		auto pso = GetGraphicsPipelineState();
-		List<DXGI_FORMAT> rtFormats(rtTextures.size());
+		List<DXGI_FORMAT> rtFormats;
 		DXGI_FORMAT dsFormat = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
 
 
@@ -410,7 +408,7 @@ namespace JG
 		List<D3D12_CPU_DESCRIPTOR_HANDLE> rtvHandles;
 
 		ID3D12Resource* d3dDSResource = nullptr;
-		D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = { 0 };
+		UniquePtr<D3D12_CPU_DESCRIPTOR_HANDLE> dsvHandle = nullptr;
 
 		for (auto& texture : rtTextures)
 		{
@@ -433,12 +431,15 @@ namespace JG
 			{
 				dsFormat = ConvertDXGIFormat(depthTexture->GetTextureInfo().Format);
 				d3dDSResource = static_cast<DirectX12Texture*>(depthTexture.get())->Get();
+				dsvHandle = CreateUniquePtr<D3D12_CPU_DESCRIPTOR_HANDLE>();
+				*dsvHandle = handle;
 			}
 		}
+		
 
 		pso->BindRenderTarget(rtFormats, dsFormat);
 
-		commandList->SetRenderTarget(d3dRTResources.data(), rtvHandles.data(), d3dRTResources.size(), d3dDSResource, &dsvHandle);
+		commandList->SetRenderTarget(d3dRTResources.data(), rtvHandles.data(), d3dRTResources.size(), d3dDSResource, dsvHandle.get());
 	}
 
 	void DirectX12API::DrawIndexed(u32 indexCount, u32 instancedCount, u32 startIndexLocation, u32 startVertexLocation, u32 startInstanceLocation)
@@ -484,28 +485,35 @@ namespace JG
 		iBuffer->SetName(name);
 		return iBuffer;
 	}
-	SharedPtr<IShader> DirectX12API::CreateShader(const String& sourceCode, EShaderFlags flags)
+	SharedPtr<IShader> DirectX12API::CreateShader(const String& name, const String& sourceCode, EShaderFlags flags)
 	{
 		String errorCode;
 		auto shader = CreateSharedPtr<DirectX12Shader>();
-		if (!shader->Compile(sourceCode, flags, &errorCode))
+		shader->SetName(name);
+		if (shader->Compile(sourceCode, flags, &errorCode) == false)
 		{
-			JG_CORE_ERROR("Failed Compile Shader \n Error : {0}  \n SourceCode : \n {1} ", ws2s(errorCode), ws2s(sourceCode));
+			JG_CORE_ERROR("Failed Compile Shader \n Name : {0} Error : {1}  \n SourceCode : \n {2} ", ws2s(name), ws2s(errorCode), ws2s(sourceCode));
 			return nullptr;
 		}
 		return shader;
 	}
-	SharedPtr<IMaterial> DirectX12API::CreateMaterial(SharedPtr<IShader> shader)
+	SharedPtr<IMaterial> DirectX12API::CreateMaterial(const String& name, SharedPtr<IShader> shader)
 	{
-		return SharedPtr<IMaterial>();
+		auto material = CreateSharedPtr<DirectX12Material>();
+		material->SetName(name);
+		material->Init(shader);
+
+
+
+
+		return material;
 	}
-	SharedPtr<IMaterialInstance> DirectX12API::CreateMaterialInstanced(SharedPtr<IMaterial> material)
-	{
-		return SharedPtr<IMaterialInstance>();
-	}
+
 	SharedPtr<IMesh> DirectX12API::CreateMesh(const String& name)
 	{
-		return SharedPtr<IMesh>();
+		auto mesh = CreateSharedPtr<DirectX12Mesh>();
+		mesh->SetName(name);
+		return mesh;
 	}
 	SharedPtr<ITexture> DirectX12API::CreateTexture(const String& name, const TextureInfo& info)
 	{

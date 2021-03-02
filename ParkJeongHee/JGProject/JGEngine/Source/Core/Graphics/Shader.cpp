@@ -5,28 +5,27 @@
 
 namespace JG
 {
-	SharedPtr<IShader> IShader::Create(const String& sourceCode, EShaderFlags flags)
+	SharedPtr<IShader> IShader::Create(const String& name, const String& sourceCode, EShaderFlags flags)
 	{
 		auto api = Application::GetInstance().GetGraphicsAPI();
 		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
 
-		return api->CreateShader(sourceCode, flags);
+		return api->CreateShader(name, sourceCode, flags);
 	}
 
 
-	void ShaderLibrary::RegisterShader(const String& name, SharedPtr<IShader> shader)
+	void ShaderLibrary::RegisterShader(SharedPtr<IShader> shader)
 	{
 		if (shader == nullptr)
 		{
 			return;
 		}
-		auto& _mutex = GetInstance().mMutex;
-		std::lock_guard<std::shared_mutex> lock(_mutex);
+		std::lock_guard<std::shared_mutex> lock(GetInstance().mMutex);
 
-		auto iter = GetInstance().mShaders.find(name);
+		auto iter = GetInstance().mShaders.find(shader->GetName());
 		if (iter == GetInstance().mShaders.end())
 		{
-			GetInstance().mShaders.emplace(name, shader);
+			GetInstance().mShaders.emplace(shader->GetName(), shader);
 		}
 	}
 	SharedPtr<IShader> ShaderLibrary::Get(const String& name)

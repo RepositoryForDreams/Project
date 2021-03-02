@@ -17,6 +17,7 @@ namespace JG
 	{
 		static Application* smInstance;
 	private:
+		ApplicaionProps         mProps;
 		UniquePtr<IWindow>		mWindow;
 		UniquePtr<LayerStack>	mLayerStack;
 		UniquePtr<IGraphicsAPI> mGraphcisAPI;
@@ -50,6 +51,9 @@ namespace JG
 	public:
 		IWindow*	  GetWindow() const;
 		IGraphicsAPI* GetGraphicsAPI() const;
+
+
+		JVector2Uint  GetSize() const;
 	private:
 		friend int ::main(int argc, char** argv);
 	};
