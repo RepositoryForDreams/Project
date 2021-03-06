@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "JGCore.h"
-
+#include "GraphicsDefine.h"
 
 namespace JG
 {
@@ -35,7 +35,8 @@ namespace JG
 		virtual void End()	 = 0;
 		virtual void Flush() = 0;
 		//
-
+		virtual void SetViewports(const List<Viewport>& viewPorts) = 0;
+		virtual void SetScissorRects(const List<ScissorRect>& scissorRects) = 0;
 		virtual void ClearRenderTarget(const List<SharedPtr<ITexture>>& rtTextures, SharedPtr<ITexture> depthTexture) = 0;
 		virtual void SetRenderTarget(const List<SharedPtr<ITexture>>& rtTextures, SharedPtr<ITexture> depthTexture)   = 0;
 		virtual void DrawIndexed(u32 indexCount, u32 instancedCount = 1, u32 startIndexLocation = 0, u32 startVertexLocation = 0, u32 startInstanceLocation = 0) = 0;

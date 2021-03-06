@@ -86,6 +86,8 @@ namespace JG
 		virtual void Flush() override;
 
 	protected:
+		virtual void SetViewports(const List<Viewport>& viewPorts) override;
+		virtual void SetScissorRects(const List<ScissorRect>& scissorRects) override;
 		virtual void ClearRenderTarget(const List<SharedPtr<ITexture>>& rtTextures, SharedPtr<ITexture> depthTexture) override;
 		virtual void SetRenderTarget(const List<SharedPtr<ITexture>>& rtTextures, SharedPtr<ITexture> depthTexture) override;
 		virtual void DrawIndexed(u32 indexCount, u32 instancedCount = 1, u32 startIndexLocation = 0, u32 startVertexLocation = 0, u32 startInstanceLocation = 0) override;

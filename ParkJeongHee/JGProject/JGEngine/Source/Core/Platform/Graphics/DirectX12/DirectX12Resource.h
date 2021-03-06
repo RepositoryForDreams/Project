@@ -23,7 +23,7 @@ namespace JG
 		DirectX12VertexBuffer() = default;
 		virtual ~DirectX12VertexBuffer();
 	public:
-		virtual bool  Create(void* datas, u64 elementSize, u64 elementCount) override;
+		virtual bool  SetData(void* datas, u64 elementSize, u64 elementCount) override;
 		virtual bool  IsValid() const override;
 
 	protected:
@@ -55,7 +55,7 @@ namespace JG
 		DirectX12IndexBuffer() = default;
 		virtual ~DirectX12IndexBuffer();
 	public:
-		virtual bool  Create(u32* datas, u64 count) override;
+		virtual bool  SetData(u32* datas, u64 count) override;
 		virtual bool IsValid() const override;
 	protected:
 		virtual void Bind();

@@ -367,6 +367,18 @@ namespace JG
 		gCopyCommandQueue->Flush();
 	}
 
+	void DirectX12API::SetViewports(const List<Viewport>& viewPorts)
+	{
+		auto commandList = GetGraphicsCommandList();
+		commandList->SetViewports(viewPorts);
+	}
+
+	void DirectX12API::SetScissorRects(const List<ScissorRect>& scissorRects)
+	{
+		auto commandList = GetGraphicsCommandList();
+		commandList->SetScissorRects(scissorRects);
+	}
+
 	void DirectX12API::ClearRenderTarget(const List<SharedPtr<ITexture>>& rtTextures, SharedPtr<ITexture> depthTexture)
 	{
 		auto commandList = GetGraphicsCommandList();
@@ -424,7 +436,7 @@ namespace JG
 
 
 		}
-		if (depthTexture->IsValid())
+		if (depthTexture && depthTexture->IsValid())
 		{
 			auto handle = static_cast<DirectX12Texture*>(depthTexture.get())->GetDSV();
 			if (handle.ptr != 0)
@@ -435,7 +447,6 @@ namespace JG
 				*dsvHandle = handle;
 			}
 		}
-		
 
 		pso->BindRenderTarget(rtFormats, dsFormat);
 

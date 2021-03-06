@@ -224,8 +224,8 @@ namespace JG
 	{
 		namespace HLSL
 		{
-			constexpr wchar* CBToken   = L"cbuffer ";
-
+			constexpr wchar* CBToken   = TT("cbuffer ");
+			constexpr wchar* SBToken   = TT("StructuredBuffer<");
 
 
 			constexpr wchar* VSEntry = TT("vs_main");
@@ -233,11 +233,11 @@ namespace JG
 			constexpr wchar* HSEntry = TT("hs_main");
 			constexpr wchar* GSEntry = TT("gs_main");
 			constexpr wchar* PSEntry = TT("ps_main");
-			constexpr wchar* VSTarget = TT("vs_5_0");
-			constexpr wchar* DSTarget = TT("ds_5_0");
-			constexpr wchar* HSTarget = TT("hs_5_0");
-			constexpr wchar* GSTarget = TT("gs_5_0");
-			constexpr wchar* PSTarget = TT("ps_5_0");
+			constexpr wchar* VSTarget = TT("vs_5_1");
+			constexpr wchar* DSTarget = TT("ds_5_1");
+			constexpr wchar* HSTarget = TT("hs_5_1");
+			constexpr wchar* GSTarget = TT("gs_5_1");
+			constexpr wchar* PSTarget = TT("ps_5_1");
 
 			constexpr wchar* Common = LR"(
 struct SDObject

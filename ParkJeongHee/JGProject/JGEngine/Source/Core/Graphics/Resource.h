@@ -34,7 +34,7 @@ namespace JG
 	public:
 		virtual ~IVertexBuffer() = default;
 	public:
-		virtual bool Create(void* datas, u64 elementSize, u64 elementCount) = 0;
+		virtual bool SetData(void* datas, u64 elementSize, u64 elementCount) = 0;
 
 
 		static SharedPtr<IVertexBuffer> Create(String name);
@@ -45,7 +45,7 @@ namespace JG
 	public:
 		virtual ~IIndexBuffer() = default;
 	public:
-		virtual bool Create(u32* datas, u64 count) = 0;
+		virtual bool SetData(u32* datas, u64 count) = 0;
 		static SharedPtr<IIndexBuffer> Create(String name);
 	};
 	

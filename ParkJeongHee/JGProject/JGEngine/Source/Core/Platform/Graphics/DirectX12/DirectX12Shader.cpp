@@ -9,7 +9,7 @@ namespace JG
 {
 	bool DirectX12Shader::Compile(const String& sourceCode, EShaderFlags flags, String* error)
 	{
-
+		String code = sourceCode;
 		if (mShaderData == nullptr)
 		{
 			mShaderData = CreateUniquePtr<DirectX12ShaderData>();
@@ -19,7 +19,7 @@ namespace JG
 			mShaderData->Reset();
 		}
 
-		if (mShaderData->Set(sourceCode) == false)
+		if (mShaderData->Set(code) == false)
 		{
 			return false;
 		}
@@ -28,35 +28,35 @@ namespace JG
 		bool result = true;
 		if (flags & EShaderFlags::Allow_VertexShader)
 		{
-			if (Compile(mVSData, sourceCode, CompileConfig(ShaderCode::HLSL::VSEntry, ShaderCode::HLSL::VSTarget), error) == false)
+			if (Compile(mVSData, code, CompileConfig(ShaderCode::HLSL::VSEntry, ShaderCode::HLSL::VSTarget), error) == false)
 			{
 				return false;
 			}
 		}
 		if (flags & EShaderFlags::Allow_DomainShader)
 		{
-			if (Compile(mDSData, sourceCode, CompileConfig(ShaderCode::HLSL::DSEntry, ShaderCode::HLSL::DSTarget), error) == false)
+			if (Compile(mDSData, code, CompileConfig(ShaderCode::HLSL::DSEntry, ShaderCode::HLSL::DSTarget), error) == false)
 			{
 				return false;
 			}
 		}
 		if (flags & EShaderFlags::Allow_HullShader)
 		{
-			if (Compile(mHSData, sourceCode, CompileConfig(ShaderCode::HLSL::HSEntry, ShaderCode::HLSL::HSTarget), error) == false)
+			if (Compile(mHSData, code, CompileConfig(ShaderCode::HLSL::HSEntry, ShaderCode::HLSL::HSTarget), error) == false)
 			{
 				return false;
 			}
 		}
 		if (flags & EShaderFlags::Allow_GeometryShader)
 		{
-			if (Compile(mGSData, sourceCode, CompileConfig(ShaderCode::HLSL::GSEntry, ShaderCode::HLSL::GSTarget), error) == false)
+			if (Compile(mGSData, code, CompileConfig(ShaderCode::HLSL::GSEntry, ShaderCode::HLSL::GSTarget), error) == false)
 			{
 				return false;
 			}
 		}
 		if (flags & EShaderFlags::Allow_PixelShader)
 		{
-			if (Compile(mPSData, sourceCode, CompileConfig(ShaderCode::HLSL::PSEntry, ShaderCode::HLSL::PSTarget), error) == false)
+			if (Compile(mPSData, code, CompileConfig(ShaderCode::HLSL::PSEntry, ShaderCode::HLSL::PSTarget), error) == false)
 			{
 				return false;
 			}
@@ -124,7 +124,7 @@ namespace JG
 			u64 rootParam = rpPair.first;
 			auto element = rpPair.second;
 
-			switch (element->ElementType)
+			switch (element->ShaderElementType)
 			{
 			case DirectX12ShaderData::EShaderElementType::CBuffer:
 				RootSig->InitAsCBV(element->RegisterNum, element->RegisterSpace);
@@ -201,7 +201,7 @@ namespace JG
 
 
 
-	bool DirectX12ShaderData::Set(const String& code)
+	bool DirectX12ShaderData::Set(String& code)
 	{
 		bool result = true;
 		Reset();
@@ -213,7 +213,11 @@ namespace JG
 			pos = AnalysisCBuffer(code, pos, &result);
 		}
 
-
+		pos = 0;
+		while (pos != String::npos)
+		{
+			pos = AnalysisStructuredBuffer(code, pos, &result);
+		}
 
 
 		// Texture
@@ -229,7 +233,8 @@ namespace JG
 	}
 	void DirectX12ShaderData::Reset()
 	{
-		RootParamOffset = 0;
+		RootParamOffset = 0; 
+		SpaceOffset = 0;
 		RootParamMap.clear();
 		CBufferVarMap.clear();
 		CBufferDataMap.clear();
@@ -315,15 +320,87 @@ namespace JG
 		}
 
 		cBuffer->DataSize = uploadDataSize;
-		cBuffer->ElementType = EShaderElementType::CBuffer;
+		cBuffer->ShaderElementType = EShaderElementType::CBuffer;
 		cBuffer->RootParm = RootParamOffset++;
 		cBuffer->RegisterNum = CBufferDataMap.size() - 1;
 		RootParamMap[cBuffer->RootParm] = cBuffer;
 		return startPos;
 	}
+	u64 DirectX12ShaderData::AnalysisStructuredBuffer(String& code, u64 startPos, bool* result)
+	{
+
+		u64 dataTokenStartPos = code.find(ShaderCode::HLSL::SBToken, startPos);
+		if(dataTokenStartPos != String::npos)
+		{
+			u64 endPos = code.find(TT(";"), dataTokenStartPos);
+
+			String dataCode = code.substr(dataTokenStartPos, endPos - dataTokenStartPos);
+
+
+			// Type
+			u64 dataTypeStartPos = dataCode.find(TT("<")) + 1;
+			u64 dataTypeEndPos   = dataCode.find(TT(">"));
+
+
+
+			String typeCode = dataCode.substr(dataTypeStartPos, dataTypeEndPos - dataTypeStartPos);
+			ReplaceAll(typeCode, TT(" "), TT(""));
+
+
+
+			String nameCode = dataCode.substr(dataTypeEndPos + 1, dataCode.length() - dataTypeEndPos - 1);
+			ReplaceAll(nameCode, TT(" "), TT(""));
+
+			if (RegisterStructuredBuffer(nameCode) == false)
+			{
+				if (result != nullptr)
+				{
+					*result = false;
+				}
+				return String::npos;
+			}
+
+			auto structuredBufferData = StructuredBufferDataMap[nameCode].get();
+			structuredBufferData->Type = StringToShaderDataType(typeCode);
+			if (structuredBufferData->Type == EShaderDataType::unknown)
+			{
+				JGASSERT("Not Supported Custom Struct Data in StructuredBuffer");
+			}
+	
+			structuredBufferData->Name = nameCode;
+			structuredBufferData->RootParm = RootParamOffset++;
+			structuredBufferData->RegisterNum = 0;
+			structuredBufferData->RegisterSpace = DirectX12ShaderData::StructuredBufferStartSpace + SpaceOffset++;
+			structuredBufferData->ShaderElementType = EShaderElementType::StructuredBuffer;
+			structuredBufferData->ElementDataSize   = GetShaderDataTypeSize(structuredBufferData->Type);
+
+
+
+			
+			code.insert(endPos, TT(" : register(t0, space") + std::to_wstring(structuredBufferData->RegisterSpace) + TT(")"));
+			startPos = endPos + 1;
+		}
+		else
+		{
+			return String::npos;
+		}
+		return startPos;
+	}
 	u64 DirectX12ShaderData::AnalysisTexture(const String& code, u64 pos, bool* result)
 	{
 		return String::npos;
+	}
+	bool DirectX12ShaderData::RegisterStructuredBuffer(const String& name)
+	{
+
+		if (StructuredBufferDataMap.find(name) != StructuredBufferDataMap.end())
+		{
+			JG_CORE_ERROR("{0} StructuredBuffer Already Exists.", ws2s(name));
+			return false;
+		}
+		StructuredBufferDataMap[name] = CreateUniquePtr<StructuredBufferData>();
+
+		return true;
 	}
 	bool DirectX12ShaderData::RegisterCBuffer(const String& name)
 	{

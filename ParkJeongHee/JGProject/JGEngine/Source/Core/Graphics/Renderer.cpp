@@ -5,6 +5,7 @@
 #include "Graphics/Mesh.h"
 #include "Graphics/Shader.h"
 #include "Graphics/Material.h"
+#include "Graphics/Camera.h"
 #include "GraphicsAPI.h"
 
 namespace JG
@@ -13,13 +14,22 @@ namespace JG
 	{
 		JVector3 Pos;
 		JVector2 Tex;
-
+		QuadVertex() = default;
 		QuadVertex(const JVector3& pos, const JVector2& tex) : Pos(pos), Tex(tex) {}
 	};
 	struct Renderer2DItem
 	{
-		SharedPtr<ITexture> RenderTexture;
-		SharedPtr<ITexture> DepthTexture;
+		static const u32 MaxQuadCount    = 1200;
+		static const u32 MaxTextureCount = MaxQuadCount;
+		static const u32 MaxVertexCount  = MaxQuadCount * 4;
+		static const u32 MaxIndexCount   = MaxQuadCount * 6;
+
+
+		static const u32 QuadVertexCount = 4;
+		static const u32 QuadIndexCount = 6;
+
+		JVector3 StandardQuadPosition[4];
+		JVector2 StandardQuadTexcoord[4];
 
 
 		SharedPtr<IMesh> QuadMesh; // Bind
@@ -30,30 +40,18 @@ namespace JG
 		SharedPtr<IMaterial> Standard2DMaterial; // Bind
 		List<QuadVertex> Vertices;
 		List<u32>        Indices;
+
+
+		SharedPtr<ITexture> DepthTexture;
+
+
+		u32 QuadCount = 0;
 	};
 	UniquePtr<Renderer2DItem> gRenderer2DItem;
 
 	bool Renderer2D::Create()
 	{
 		gRenderer2DItem = CreateUniquePtr<Renderer2DItem>();
-
-		// RenderTexture
-		{
-			TextureInfo info;
-			info.Width  = 1920; info.Height = 1080; info.MipLevel = 1; info.ArraySize = 1;
-			info.Format = ETextureFormat::R8G8B8A8_Unorm;
-			info.Flags  = ETextureFlags::Allow_RenderTarget;
-			gRenderer2DItem->RenderTexture = ITexture::Create(TT("Renderer2D_RenderTexture"), info);
-		}
-		// DepthTexture
-		{
-			TextureInfo info;
-			info.Width = 1920; info.Height = 1080; info.MipLevel = 1; info.ArraySize = 1;
-			info.Format = ETextureFormat::D24_Unorm_S8_Uint;
-			info.Flags = ETextureFlags::Allow_DepthStencil;
-
-			gRenderer2DItem->DepthTexture = ITexture::Create(TT("Renderer2D_DepthTexture"), info);
-		}
 		gRenderer2DItem->QuadMesh    = IMesh::Create(TT("Renderer2D_QuadMesh"));
 
 		auto inputLayout = InputLayout::Create();
@@ -63,8 +61,6 @@ namespace JG
 		gRenderer2DItem->QuadMesh->SetInputLayout(inputLayout);
 
 
-
-
 		gRenderer2DItem->QuadVBuffer = IVertexBuffer::Create(TT("Renderer2D_VBuffer"));
 		gRenderer2DItem->QuadIBuffer = IIndexBuffer::Create(TT("Renderer2D_IBuffer"));
 		gRenderer2DItem->QuadMesh->AddVertexBuffer(gRenderer2DItem->QuadVBuffer);
@@ -72,14 +68,13 @@ namespace JG
 
 		gRenderer2DItem->Standard2DShader = IShader::Create(TT("Standard2DShader"),
 			TT(R"(
+StructuredBuffer<uint> gTextureIndexArray;
+
 cbuffer Camera
 {
 	float4x4 gViewProj;
 };
-cbuffer Instance
-{
-	float4x4 gWorld;
-};
+
 struct VS_IN
 {
 	float3 posL : POSITION;
@@ -94,10 +89,8 @@ struct VS_OUT
 VS_OUT vs_main(VS_IN vin)
 {
 	VS_OUT vout;
-	float4 posW = mul(float4(vin.posL, 1.0f), gWorld);
-
-
-	vout.posH = mul(posW, gViewProj);
+    
+	vout.posH = mul(float4(vin.posL, 1.0f), gViewProj);
 	vout.tex = vin.tex;
 	return vout;
 }
@@ -111,6 +104,46 @@ float4 ps_main(VS_OUT pin) : SV_TARGET
 
 		gRenderer2DItem->Standard2DMaterial = IMaterial::Create(TT("Standard2DMaterial"),gRenderer2DItem->Standard2DShader);
 
+
+		gRenderer2DItem->StandardQuadPosition[0] = JVector3(-0.5f, -0.5f, 0.0f);
+		gRenderer2DItem->StandardQuadPosition[1] = JVector3(-0.5f, +0.5f, 0.0f);
+		gRenderer2DItem->StandardQuadPosition[2] = JVector3(+0.5f, +0.5f, 0.0f);
+		gRenderer2DItem->StandardQuadPosition[3] = JVector3(+0.5f, -0.5f, 0.0f);
+
+		gRenderer2DItem->StandardQuadTexcoord[0] = JVector2(0.0f, 1.0f);
+		gRenderer2DItem->StandardQuadTexcoord[1] = JVector2(0.0f, 0.0f);
+		gRenderer2DItem->StandardQuadTexcoord[2] = JVector2(1.0f, 0.0f);
+		gRenderer2DItem->StandardQuadTexcoord[3] = JVector2(1.0f, 1.0f);
+
+
+
+		gRenderer2DItem->Vertices.resize(Renderer2DItem::MaxVertexCount, QuadVertex());
+		gRenderer2DItem->Indices.resize(Renderer2DItem::MaxIndexCount, 0);
+
+		u32 offset = 0;
+		for (u32 i = 0; i < Renderer2DItem::MaxIndexCount;)
+		{
+	
+			gRenderer2DItem->Indices[i++] = offset + 0;
+			gRenderer2DItem->Indices[i++] = offset + 1;
+			gRenderer2DItem->Indices[i++] = offset + 2;
+			gRenderer2DItem->Indices[i++] = offset + 0;
+			gRenderer2DItem->Indices[i++] = offset + 2;
+			gRenderer2DItem->Indices[i++] = offset + 3;
+			offset += Renderer2DItem::QuadVertexCount;
+		}
+
+
+
+		TextureInfo textureInfo;
+		textureInfo.Width = 1920;
+		textureInfo.Height = 1080;
+		textureInfo.Format = ETextureFormat::D24_Unorm_S8_Uint;
+		textureInfo.MipLevel = 1;
+		textureInfo.Flags = ETextureFlags::Allow_DepthStencil;
+		textureInfo.ArraySize = 1;
+
+		gRenderer2DItem->DepthTexture = ITexture::Create(TT("DepthTexture"), textureInfo);
 		return true;
 	}
 	void Renderer2D::Destroy()
@@ -118,75 +151,103 @@ float4 ps_main(VS_OUT pin) : SV_TARGET
 		gRenderer2DItem.reset();
 		gRenderer2DItem = nullptr;
 	}
-	bool Renderer2D::Begin()
+	bool Renderer2D::Begin(SharedPtr<Camera> camera, SharedPtr<ITexture> renderTexture)
 	{
 		auto api = Application::GetInstance().GetGraphicsAPI();
 		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
 
-
-		gRenderer2DItem->Vertices.clear();
-		gRenderer2DItem->Indices.clear();
-		api->ClearRenderTarget({ gRenderer2DItem->RenderTexture }, gRenderer2DItem->DepthTexture);
-		api->SetRenderTarget({ gRenderer2DItem->RenderTexture }, gRenderer2DItem->DepthTexture);
-
-
-		if (gRenderer2DItem->Standard2DMaterial->SetFloat4x4(TT("gWorld"), JMatrix::Identity()) == false)
+		if (renderTexture == nullptr || camera == nullptr)
 		{
-			JG_CORE_ERROR("Faeild Set WorldMatrix in Renderer2D");
 			return false;
 		}
-		auto view = JMatrix::LookAtLH(JVector3(0, 0, -10), JVector3(0, 0, 1), JVector3(0, 1, 0));
-		auto proj = JMatrix::OrthographicLH(1920, 1080, 0.1f, 1000.0f);
-		auto viewProj = JMatrix::Transpose(view * proj);
+		// TODO Camera 
+
+		auto resolution = camera->GetResolution();
+		api->SetViewports({ Viewport (resolution.x, resolution.y)});
+		api->SetScissorRects({ ScissorRect(0,0, resolution.x,resolution.y) });
+		api->ClearRenderTarget({ renderTexture }, gRenderer2DItem->DepthTexture);
+		api->SetRenderTarget({ renderTexture }, gRenderer2DItem->DepthTexture);
+
+
+
+		auto viewProj = JMatrix::Transpose(camera->GetViewProjMatrix());
 		if (gRenderer2DItem->Standard2DMaterial->SetFloat4x4(TT("gViewProj"), viewProj) == false)
 		{
-			JG_CORE_ERROR("Faeild Set ViewProjMatrix in Renderer2D");
+			JG_CORE_ERROR("Failed Set ViewProjMatrix in Renderer2D");
 			return false;
 		}
-		if (gRenderer2DItem->Standard2DMaterial->Bind() == false)
-		{
-			JG_CORE_ERROR("Faeild Bind StandardMaterial");
-			return false;
-		}
-		
 		return true;
 	}
 
-	void Renderer2D::DrawQuad(const JVector2& Pos, const JVector2& Size, const Color& color)
+	void Renderer2D::DrawCall(const JVector2& Pos, const JVector2& Size, float rotation, SharedPtr<ITexture> texture, const Color& color)
 	{
-		float hw  = Size.x * 0.5f;
-		float hh  = Size.y * 0.5f;
+		if (gRenderer2DItem->QuadCount >= Renderer2DItem::MaxQuadCount)
+		{
+			NextBatch();
+		}
 
-		gRenderer2DItem->Vertices.push_back(QuadVertex(JVector3(-hw, -hh, 0.0f), JVector2(0.0f, 1.0f)));
-		gRenderer2DItem->Vertices.push_back(QuadVertex(JVector3(-hw, +hh, 0.0f), JVector2(0.0f, 0.0f)));
-		gRenderer2DItem->Vertices.push_back(QuadVertex(JVector3(+hw, +hh, 0.0f), JVector2(1.0f, 0.0f)));
-		gRenderer2DItem->Vertices.push_back(QuadVertex(JVector3(+hw, -hh, 0.0f), JVector2(1.0f, 1.0f)));
 
-		gRenderer2DItem->Indices.push_back(0); gRenderer2DItem->Indices.push_back(1); gRenderer2DItem->Indices.push_back(2);
-		gRenderer2DItem->Indices.push_back(0); gRenderer2DItem->Indices.push_back(2); gRenderer2DItem->Indices.push_back(3);
+		JMatrix worldMatrix =
+			JMatrix::Scaling(JVector3(Size, 1.0f)) * JMatrix::Rotation(JVector3(0.0f, 0.0f, Math::ConvertToRadians(rotation))) * JMatrix::Translation(JVector3(Pos, 0.0f));
+
+		 
+		u32 offset = gRenderer2DItem->QuadCount * Renderer2DItem::QuadVertexCount;
+		for (u32 i = 0; i < Renderer2DItem::QuadVertexCount; ++i)
+		{
+			u32 index = offset + i;
+			gRenderer2DItem->Vertices[index].Pos = worldMatrix.TransformPoint(gRenderer2DItem->StandardQuadPosition[i]);
+			gRenderer2DItem->Vertices[index].Tex = gRenderer2DItem->StandardQuadTexcoord[i];
+		}
+		gRenderer2DItem->QuadCount++;
 	}
 
-	SharedPtr<ITexture> Renderer2D::End()
+	void Renderer2D::DrawCall(const JVector2& Pos, const JVector2& Size, float rotation, SharedPtr<IMaterial> material)
 	{
-		DrawQuad(JVector2(0, 0), JVector2(100, 100));
+		//
+
+	}
+
+	void Renderer2D::End()
+	{
+		NextBatch();
+	}
+
+	void Renderer2D::StartBatch()
+	{
+		gRenderer2DItem->QuadCount = 0;
+	}
+
+	void Renderer2D::NextBatch()
+	{
+		if (gRenderer2DItem->QuadCount == 0) return;
+
 		auto api = Application::GetInstance().GetGraphicsAPI();
 		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
 
 
-		gRenderer2DItem->QuadVBuffer->Create(gRenderer2DItem->Vertices.data(), sizeof(QuadVertex), gRenderer2DItem->Vertices.size());
-		gRenderer2DItem->QuadIBuffer->Create(gRenderer2DItem->Indices.data(), gRenderer2DItem->Indices.size());
+
+		if (gRenderer2DItem->Standard2DMaterial->Bind() == false)
+		{
+			JG_CORE_ERROR("Failed Bind StandardMaterial");
+			return;
+		}
+
+		u32 quadVertexCount = gRenderer2DItem->QuadCount * Renderer2DItem::QuadVertexCount;
+		u32 quadIndexCount = gRenderer2DItem->QuadCount * Renderer2DItem::QuadIndexCount;
 
 
-		
-		gRenderer2DItem->QuadMesh->Bind();
+		gRenderer2DItem->QuadVBuffer->SetData(gRenderer2DItem->Vertices.data(), sizeof(QuadVertex), quadVertexCount);
+		gRenderer2DItem->QuadIBuffer->SetData(gRenderer2DItem->Indices.data(), quadIndexCount);
+		if (gRenderer2DItem->QuadMesh->Bind() == false)
+		{
+			JG_CORE_ERROR("Failed Bind QuadMesh");
+			return;
+		}
 
 
-		api->DrawIndexed(gRenderer2DItem->Indices.size());
+		api->DrawIndexed(quadIndexCount);
 
-
-
-
-		return gRenderer2DItem->RenderTexture;
+		StartBatch();
 	}
 
 

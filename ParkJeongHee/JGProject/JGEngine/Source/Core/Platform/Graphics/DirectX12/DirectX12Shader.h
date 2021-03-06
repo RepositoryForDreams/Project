@@ -76,13 +76,15 @@ namespace JG
 
 	class DirectX12ShaderData
 	{
-	
+	public:
+		static const u64 StructuredBufferStartSpace = 1;
 	public:
 		class 	CBufferData;
 		enum class EShaderElementType
 		{
 			None,
 			CBuffer,
+			StructuredBuffer,
 			Texture,
 			SamplerState,
 		};
@@ -100,7 +102,7 @@ namespace JG
 			u64 RootParm = 0;
 			u32 RegisterNum   = 0;
 			u32 RegisterSpace = 0;
-			EShaderElementType ElementType = EShaderElementType::None;
+			EShaderElementType ShaderElementType = EShaderElementType::None;
 		public:
 			virtual ~ShaderElement() = default;
 		};
@@ -134,28 +136,34 @@ namespace JG
 		public:
 			virtual ~CBufferData() = default;
 		};
-		class StructuredBufferData
+		class StructuredBufferData : public ShaderElement
 		{
 		public:
-
+			EShaderDataType Type;
+			u64 ElementDataSize = 0;
 		};
 	public:
 		SortedDictionary<u64, ShaderElement*>			RootParamMap;
 		Dictionary<String, UniquePtr<CBufferData>>		CBufferDataMap;
+		Dictionary<String, UniquePtr<StructuredBufferData>> StructuredBufferDataMap;
 		Dictionary<String, UniquePtr<TextureData>>		TextureDataMap;
 		Dictionary<String, UniquePtr<SamplerStateData>> SamplerStateDataMap;
 		Dictionary<String, Data*>		                CBufferVarMap;
 	private:
 		u64 RootParamOffset = 0;
+		u64 SpaceOffset     = 0;
 	public:
-		bool Set(const String& code);
+		bool Set(String& code);
 		void Reset();
 	private:
 		u64 AnalysisCBuffer(const String& code, u64 startPos, bool* result);
+		u64 AnalysisStructuredBuffer(String& code, u64 startPos, bool* result);
 		u64 AnalysisTexture(const String& code, u64 startPos, bool* result);
 	private:
+		bool RegisterStructuredBuffer(const String& name);
 		bool RegisterCBuffer(const String& name);
 		bool RegisterCBufferVar(CBufferData* cBuffer, const String& varCode, u64& uploadDataSize);
+
 
 	};
 }

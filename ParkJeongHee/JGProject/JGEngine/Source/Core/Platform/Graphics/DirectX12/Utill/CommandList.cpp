@@ -358,7 +358,7 @@ namespace JG
 		D3D12_INDEX_BUFFER_VIEW bufferView;
 		bufferView.BufferLocation = alloc.GPU;
 		bufferView.Format = DXGI_FORMAT_R32_UINT;
-		bufferView.SizeInBytes = (u32)count;
+		bufferView.SizeInBytes = (u32)btSize;
 
 		mD3DCommandList->IASetIndexBuffer(&bufferView);
 	}

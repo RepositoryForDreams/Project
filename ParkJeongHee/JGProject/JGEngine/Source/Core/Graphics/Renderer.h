@@ -7,7 +7,9 @@ namespace JG
 	class InputLayout;
 	class IShader;
 	class ITexture;
+	class IMaterial;
 	class Application;
+	class Camera;
 	class Renderer3D
 	{
 	public:
@@ -24,31 +26,17 @@ namespace JG
 		static bool Create();
 		static void Destroy();
 	public:
-		// ClearColor, Camera정보, 
-		// RenderTarget Texture 생성
-		// 
+		// Begin에 카메라
+		static bool Begin(SharedPtr<Camera> camera, SharedPtr<ITexture> renderTexture);
+		// Standard Material
+		static void DrawCall(const JVector2& Pos, const JVector2& Size, float rotation = 0.0f, SharedPtr<ITexture> texture = nullptr, const Color& color = Color::White());
+		// Custom Material
+		static void DrawCall(const JVector2& Pos, const JVector2& Size, float rotation, SharedPtr<IMaterial> material);
 
-		static bool Begin();
-		static void DrawQuad(const JVector2& Pos, const JVector2& Size, const Color& color =  Color::White());
-
-		//static void DrawQuad();//Vec, Rotation, Scale//, )
-
-
-		// 박아야할 데이터
-		// InputLayout
-		// Shader
-		// 
-
-		// 가변 데이터
-		// Vertex, Index
-		// Material
-		// Texture
-
-
-
-		// 그린 텍스쳐 반환
-		static SharedPtr<ITexture> End();
-		
+		static void End();
+	private:
+		static void StartBatch();
+		static void NextBatch();
 	};
 }
 

@@ -18,7 +18,7 @@ namespace JG
 	}
 
 
-	bool DirectX12VertexBuffer::Create(void* datas, u64 elementSize, u64 elementCount)
+	bool DirectX12VertexBuffer::SetData(void* datas, u64 elementSize, u64 elementCount)
 	{
 		if(mCPUData)
 		{
@@ -40,7 +40,7 @@ namespace JG
 		
 		memcpy(mCPUData, datas, btSize);
 
-		JG_CORE_INFO("Successed Create VertexBuffer =>  Name : {0}  ElementSize = {1}   ElementCount = {2}", ws2s(GetName()), mElementSize, mElementCount);
+		//JG_CORE_INFO("Successed Create VertexBuffer =>  Name : {0}  ElementSize = {1}   ElementCount = {2}", ws2s(GetName()), mElementSize, mElementCount);
 		return true;
 	}
 	bool DirectX12VertexBuffer::IsValid() const
@@ -65,7 +65,7 @@ namespace JG
 		}
 	}
 
-	bool DirectX12IndexBuffer::Create(u32* datas, u64 count)
+	bool DirectX12IndexBuffer::SetData(u32* datas, u64 count)
 	{
 		if (mCPUData)
 		{
@@ -84,7 +84,7 @@ namespace JG
 		}
 		memcpy(mCPUData, datas, btSize);
 
-		JG_CORE_INFO("Successed Create IndexBuffer =>  Name : {0}  IndexCount = {1}", ws2s(GetName()),mIndexCount);
+		//JG_CORE_INFO("Successed Create IndexBuffer =>  Name : {0}  IndexCount = {1}", ws2s(GetName()),mIndexCount);
 		return true;
 	}
 	bool DirectX12IndexBuffer::IsValid() const

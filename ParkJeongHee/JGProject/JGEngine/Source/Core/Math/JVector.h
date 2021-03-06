@@ -253,6 +253,7 @@ namespace JG
 		JVector3(float init_value) : x(init_value), y(init_value), z(init_value) {}
 		JVector3(float x, float y, float z) : x(x), y(y), z(z) {}
 		JVector3(const JVector4& v) : x(v.x), y(v.y), z(v.z) {}
+		JVector3(const JVector2& v, float z) : x(v.x), y(v.y), z(z) {}
 		JVector3(const JVector3& v) = default;
 		JVector3(JVector3&& v) = default;
 	public: // ¿¬»êÀÚ
