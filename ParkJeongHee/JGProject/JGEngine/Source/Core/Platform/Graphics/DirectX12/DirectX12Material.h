@@ -10,7 +10,7 @@ namespace JG
 		//friend DirectX12API;
 	private:
 		Dictionary<String, List<byte>> mByteDatas;
-		
+		Dictionary<String, List<SharedPtr<ITexture>>> mTextureDatas;
 		WeakPtr<IShader> mOwnerShader;
 		String mName;
 	public:
@@ -27,7 +27,7 @@ namespace JG
 		virtual bool SetUint3(const String& name, const JVector3Uint& value) override;
 		virtual bool SetUint4(const String& name, const JVector4Uint& value) override;
 		virtual bool SetFloat4x4(const String& name, const JMatrix& value) override;
-		virtual bool SetTexture(const String& name, SharedPtr<ITexture> texture) override;
+		virtual bool SetTexture(const String& name, u32 textureSlot, SharedPtr<ITexture> texture) override;
 
 		virtual bool SetFloatArray(const String& name, const List<float>& value) override;
 		virtual bool SetFloat2Array(const String& name, const List<JVector2>& value) override;
@@ -43,7 +43,6 @@ namespace JG
 		virtual bool SetUint4Array(const String& name, const List<JVector4Uint>& value) override;
 		virtual bool SetFloat4x4Array(const String& name, const List<JMatrix>& value) override;
 		virtual bool SetStructDataArray(const String& name, void* datas, u64 elementCount, u64 elementSize) override;
-		virtual bool SetTextureArray(const String& name, u32 textureSlot, SharedPtr<ITexture> texture) override;
 
 
 		virtual bool GetFloat(const String& name, float* out_value) override;

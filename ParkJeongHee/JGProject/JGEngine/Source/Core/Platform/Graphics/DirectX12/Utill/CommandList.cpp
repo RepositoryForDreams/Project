@@ -232,14 +232,39 @@ namespace JG
 		mD3DCommandList->SetPipelineState(mBindedPipelineState.Get());
 	}
 
-	void GraphicsCommandList::BindTexture(u32 rootParam, ID3D12Resource* texture, void* desc)
-	{
 
-		
-	}
 
-	void GraphicsCommandList::BindTextures(u32 rootParam, ID3D12Resource** textures, void** desc, uint32_t textureCount)
+	void GraphicsCommandList::BindTextures(u32 rootParam, List<D3D12_CPU_DESCRIPTOR_HANDLE> handles)
 	{
+		i32 initType = mDynamicDescriptorAllocator->GetDescriptorInitAsType(rootParam);
+
+
+		switch (initType)
+		{
+		case RootSignature::__DescriptorTable__:
+		{
+			D3D12_DESCRIPTOR_RANGE_TYPE tableType = mDynamicDescriptorAllocator->GetDescriptorTableType(rootParam);
+			switch (tableType)
+			{
+			case D3D12_DESCRIPTOR_RANGE_TYPE_SRV:
+			case D3D12_DESCRIPTOR_RANGE_TYPE_UAV:
+				mDynamicDescriptorAllocator->CommitDescriptorTable(rootParam, handles);
+				break;
+			default:
+				JGASSERT("trying bind CBV or Sampler in BindTextures");
+				break;
+			}
+		}
+			break;
+		case RootSignature::__ShaderResourceView__:
+			break;
+		case RootSignature::__UnorderedAccessView__:
+			break;
+		default:
+			JGASSERT("BindTextures not support ConstantBufferView / Constant");
+			break;
+		}
+
 
 
 	}

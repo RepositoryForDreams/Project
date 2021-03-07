@@ -21,6 +21,10 @@ namespace JG
 
 		if (mShaderData->Set(code) == false)
 		{
+			if (error != nullptr)
+			{
+				*error = TT("Failed Analysis SourceCode");
+			}
 			return false;
 		}
 
@@ -129,11 +133,15 @@ namespace JG
 			case DirectX12ShaderData::EShaderElementType::CBuffer:
 				RootSig->InitAsCBV(element->RegisterNum, element->RegisterSpace);
 				break;
-
-			case DirectX12ShaderData::EShaderElementType::Texture:
-				JGASSERT("IS NOT IMPL");
+			case DirectX12ShaderData::EShaderElementType::StructuredBuffer:
+				RootSig->InitAsSRV(element->RegisterNum, element->RegisterSpace);
 				break;
-
+			case DirectX12ShaderData::EShaderElementType::Texture:
+				RootSig->InitAsDescriptorTable(
+					D3D12_DESCRIPTOR_RANGE_TYPE_SRV,
+					(static_cast<DirectX12ShaderData::TextureData*>(element))->TextureCount,
+					element->RegisterNum, element->RegisterSpace);
+				break;
 			case DirectX12ShaderData::EShaderElementType::SamplerState:
 				JGASSERT("IS NOT IMPL");
 				break;
@@ -212,7 +220,7 @@ namespace JG
 		{
 			pos = AnalysisCBuffer(code, pos, &result);
 		}
-
+		// StructuredBuffer
 		pos = 0;
 		while (pos != String::npos)
 		{
@@ -222,10 +230,19 @@ namespace JG
 
 		// Texture
 		pos = 0;
+		while (pos != String::npos)
+		{
+			pos = AnalysisTexture2D(code, pos, &result);
+		}
 
 
-
-		// StructuredBuffer
+		// SamplerState
+		pos = 0;
+		while (pos != String::npos)
+		{
+			pos = AnalysisSamplerState(code, pos, &result);
+		}
+		
 
 		// Sampler는 이미 저
 
@@ -235,6 +252,8 @@ namespace JG
 	{
 		RootParamOffset = 0; 
 		SpaceOffset = 0;
+		TextureRegisterNumberOffset = 0;
+		TextureCubeRegisterNumberOffset = 0;
 		RootParamMap.clear();
 		CBufferVarMap.clear();
 		CBufferDataMap.clear();
@@ -344,12 +363,12 @@ namespace JG
 
 
 			String typeCode = dataCode.substr(dataTypeStartPos, dataTypeEndPos - dataTypeStartPos);
-			ReplaceAll(typeCode, TT(" "), TT(""));
+			typeCode = ReplaceAll(typeCode, TT(" "), TT(""));
 
 
 
 			String nameCode = dataCode.substr(dataTypeEndPos + 1, dataCode.length() - dataTypeEndPos - 1);
-			ReplaceAll(nameCode, TT(" "), TT(""));
+			nameCode = ReplaceAll(nameCode, TT(" "), TT(""));
 
 			if (RegisterStructuredBuffer(nameCode) == false)
 			{
@@ -373,7 +392,7 @@ namespace JG
 			structuredBufferData->RegisterSpace = DirectX12ShaderData::StructuredBufferStartSpace + SpaceOffset++;
 			structuredBufferData->ShaderElementType = EShaderElementType::StructuredBuffer;
 			structuredBufferData->ElementDataSize   = GetShaderDataTypeSize(structuredBufferData->Type);
-
+			RootParamMap[structuredBufferData->RootParm] = structuredBufferData;
 
 
 			
@@ -386,9 +405,190 @@ namespace JG
 		}
 		return startPos;
 	}
-	u64 DirectX12ShaderData::AnalysisTexture(const String& code, u64 pos, bool* result)
+	u64 DirectX12ShaderData::AnalysisTexture2D(String& code, u64 startPos, bool* result)
 	{
-		return String::npos;
+
+		u64 dataTokenStartPos = code.find(ShaderCode::HLSL::Texture2DToken, startPos);
+		if (dataTokenStartPos != String::npos)
+		{
+			u64 endPos = code.find(TT(";"), dataTokenStartPos);
+
+			String dataCode = code.substr(dataTokenStartPos, endPos - dataTokenStartPos);
+
+
+			String nameCode = ReplaceAll(dataCode, ShaderCode::HLSL::Texture2DToken, TT(""));
+			nameCode = ReplaceAll(nameCode, TT(" "), TT(""));
+
+			u64 arraySize = 1;
+
+			u64 arrayStartPos = dataCode.find(TT("["));
+			if (arrayStartPos != String::npos)
+			{
+
+				nameCode = nameCode.substr(0, nameCode.find(TT("[")));
+
+
+
+				arrayStartPos += 1;
+				u64 arrayEndPos = dataCode.find(TT("]", arrayStartPos));
+
+
+				String arraySizeCode = dataCode.substr(arrayStartPos, arrayEndPos - arrayStartPos);
+				arraySizeCode = ReplaceAll(arraySizeCode, TT(" "), TT(""));
+
+				arraySize = _wtoi64(arraySizeCode.c_str());
+			}
+
+
+
+
+
+
+
+			if (RegisterTextureData(nameCode) == false)
+			{
+				if (result != nullptr)
+				{
+					*result = false;
+				}
+				return String::npos;
+			}
+
+			auto textureData = TextureDataMap[nameCode].get();
+			textureData->Name = nameCode;
+			textureData->RootParm = RootParamOffset++;
+			textureData->RegisterNum = TextureRegisterNumberOffset; TextureRegisterNumberOffset += arraySize;
+			textureData->RegisterSpace = DirectX12ShaderData::Texture2DStartSpace;
+			textureData->ShaderElementType = EShaderElementType::Texture;
+			textureData->Type = ETextureType::_2D;
+			textureData->TextureCount = arraySize;
+			RootParamMap[textureData->RootParm] = textureData;
+
+
+			code.insert(endPos,
+				TT(" : register(t") + std::to_wstring(TextureDataMap[nameCode]->RegisterNum) +
+				TT(", space") + std::to_wstring(TextureDataMap[nameCode]->RegisterSpace) + TT(")"));
+			startPos = endPos + 1;
+
+
+		}
+		else
+		{
+			return String::npos;
+		}
+
+
+
+
+		return startPos;
+	}
+	u64 DirectX12ShaderData::AnalysisSamplerState(String& code, u64 startPos, bool* result)
+	{
+		// TODO SamplerState 분석
+
+		u64 dataTokenStartPos = code.find(ShaderCode::HLSL::SamplerStateToken, startPos);
+
+		if (dataTokenStartPos != String::npos)
+		{
+			u64 endPos = code.find(TT(";"), dataTokenStartPos);
+			String dataCode = code.substr(dataTokenStartPos, endPos - dataTokenStartPos);
+
+
+
+
+			u64 samplerDataStartPos = dataCode.find(TT("{"));
+			if (samplerDataStartPos != String::npos)
+			{
+				samplerDataStartPos += 1;
+				u64 samplerDataEndPos = dataCode.find(TT("}"), samplerDataStartPos);
+			
+				String samplerData = dataCode.substr(samplerDataStartPos, samplerDataEndPos - samplerDataStartPos);
+
+
+			}
+			else
+			{
+				
+				if (result != nullptr)
+				{
+					*result = false;
+				}
+				return String::npos;
+			}
+
+
+
+
+		}
+		else
+		{
+			return String::npos;
+		}
+		return startPos;
+
+
+
+		/*
+Template : POINT_WRAP  POINT_CLAMP
+
+		*/
+
+	
+
+
+			// CD3DX12_STATIC_SAMPLER_DESC()
+
+			/* SamplerState 타입
+			* Point, Linear,
+			*/
+			/*
+			Min -> 미세화
+			Mag -> 확대
+			Mip -> mipLevel
+			AddressU = Wrap,
+			AddressV = Wrap,
+			AddressW = Wrap
+			ComparisonFunc = Never, Less, Equal, LessEqual, Greater, NotEqual, GreaterEqual, Always
+			BorderColor = TransparentBlack, OpaqueBlack, OpaqueWhite
+			MinLOD = 0,
+			MaxLOD = FLOAT32_MAX,
+			MaxAnisotropy = 16,
+			MipLODBias = 0
+			*/
+
+			// Reduction Type
+			// Min, Max, Comparison, Default
+
+			// AddressMode
+			// Wrap, Mirror, Clamp, Border, MirrorOnce
+
+
+
+				//D3D12_FILTER
+				/*
+
+				UINT shaderRegister,
+			 D3D12_FILTER filter = D3D12_FILTER_ANISOTROPIC,
+			 D3D12_TEXTURE_ADDRESS_MODE addressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP,
+			 D3D12_TEXTURE_ADDRESS_MODE addressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP,
+			 D3D12_TEXTURE_ADDRESS_MODE addressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP,
+			 FLOAT mipLODBias = 0,
+			 UINT maxAnisotropy = 16,
+			 D3D12_COMPARISON_FUNC comparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL,
+			 D3D12_STATIC_BORDER_COLOR borderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE,
+			 FLOAT minLOD = 0.f,
+			 FLOAT maxLOD = D3D12_FLOAT32_MAX,
+			 D3D12_SHADER_VISIBILITY shaderVisibility = D3D12_SHADER_VISIBILITY_ALL,
+			 UINT registerSpace = 0)
+				*/
+
+
+
+
+
+
+
+			return 0;
 	}
 	bool DirectX12ShaderData::RegisterStructuredBuffer(const String& name)
 	{
@@ -412,6 +612,19 @@ namespace JG
 		}
 
 		CBufferDataMap[name] = CreateUniquePtr<CBufferData>();
+		return true;
+	}
+
+	bool DirectX12ShaderData::RegisterTextureData(const String& name)
+	{
+		if (TextureDataMap.find(name) != TextureDataMap.end())
+		{
+			JG_CORE_ERROR("{0} TextureData Already Exists.", ws2s(name));
+			return false;
+		}
+
+		TextureDataMap[name] = CreateUniquePtr<TextureData>();
+
 		return true;
 	}
 

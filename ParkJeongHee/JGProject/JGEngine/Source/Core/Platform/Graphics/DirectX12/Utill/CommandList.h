@@ -75,9 +75,8 @@ namespace JG
 			ID3D12Resource* depthTexture, D3D12_CPU_DESCRIPTOR_HANDLE* dsvHandle);
 		void BindRootSignature(SharedPtr<RootSignature> rootSig);
 		void BindPipelineState(SharedPtr<GraphicsPipelineState> pso);
-		
-		void BindTexture(u32 rootParam, ID3D12Resource* texture, void* desc = nullptr);
-		void BindTextures(u32 rootParam, ID3D12Resource** textures, void** desc, uint32_t textureCount);
+
+		void BindTextures(u32 rootParam, List<D3D12_CPU_DESCRIPTOR_HANDLE> handles);
 
 
 		//void BindConstantBuffer(uint32_t rootparam, ConstantBuffer& buffer);

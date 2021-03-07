@@ -226,6 +226,9 @@ namespace JG
 		{
 			constexpr wchar* CBToken   = TT("cbuffer ");
 			constexpr wchar* SBToken   = TT("StructuredBuffer<");
+			constexpr wchar* Texture2DToken = TT("Texture2D ");
+			constexpr wchar* SamplerStateToken = TT("SamplerState");
+			constexpr wchar* SamplerComparisonStateToken(TT("SamplerComparisonState"));
 
 
 			constexpr wchar* VSEntry = TT("vs_main");

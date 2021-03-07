@@ -68,7 +68,27 @@ namespace JG
 
 		gRenderer2DItem->Standard2DShader = IShader::Create(TT("Standard2DShader"),
 			TT(R"(
-StructuredBuffer<uint> gTextureIndexArray;
+
+SamplerState gPointSampler
+{
+	Min = Point,
+	Mag = Point,
+	Mip = Point,
+	AddressU = Wrap,
+	AddressV = Wrap,
+	AddressW = Wrap,
+	ComparisonFunc = LessEqual,
+	BorderColor = TransparentBlack, 
+	MinLOD = 0,
+	MaxLOD = FLOAT32_MAX,
+	MaxAnisotropy = 16,
+	MipLODBias = 0
+};
+
+SamplerState gLinearSampler
+{
+	Template = Point_Wrap
+};
 
 cbuffer Camera
 {

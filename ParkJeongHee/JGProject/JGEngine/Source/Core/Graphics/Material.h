@@ -24,7 +24,7 @@ namespace JG
 		virtual bool SetUint3(const String& name, const JVector3Uint& value) = 0;
 		virtual bool SetUint4(const String& name, const JVector4Uint& value) = 0;
 		virtual bool SetFloat4x4(const String& name, const JMatrix& value) = 0;
-		virtual bool SetTexture(const String& name, SharedPtr<ITexture> texture) = 0;
+		virtual bool SetTexture(const String& name, u32 textureSlot, SharedPtr<ITexture> texture) = 0;
 
 
 
@@ -42,7 +42,6 @@ namespace JG
 		virtual bool SetUint4Array(const String& name, const List<JVector4Uint>& value) = 0;
 		virtual bool SetFloat4x4Array(const String& name, const List<JMatrix>& value) = 0;
 		virtual bool SetStructDataArray(const String& name, void* datas, u64 elementCount, u64 elementSize) = 0;
-		virtual bool SetTextureArray(const String& name, u32 textureSlot, SharedPtr<ITexture> texture) = 0;
 
 
 

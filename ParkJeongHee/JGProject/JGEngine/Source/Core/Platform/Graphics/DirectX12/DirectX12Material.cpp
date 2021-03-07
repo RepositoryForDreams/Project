@@ -58,10 +58,26 @@ namespace JG
 		return SetData<JMatrix, EShaderDataType::_float4x4> (name, &value);
 	}
 
-	bool DirectX12Material::SetTexture(const String& name, SharedPtr<ITexture> texture)
+	bool DirectX12Material::SetTexture(const String& name, u32 textureSlot, SharedPtr<ITexture> texture)
 	{
-		return false;
+		if (mTextureDatas.find(name) == mTextureDatas.end())
+		{
+			return false;
+		}
+
+		auto& textureList = mTextureDatas[name];
+		u64 textureCount = textureList.size();
+
+		if (textureCount <= textureSlot)
+		{
+			return false;
+		}
+
+		textureList[textureSlot] = texture;
+		return true;
 	}
+
+
 
 	bool DirectX12Material::SetFloatArray(const String& name, const List<float>& value)
 	{
@@ -134,10 +150,7 @@ namespace JG
 		return false;
 	}
 
-	bool DirectX12Material::SetTextureArray(const String& name, u32 textureSlot, SharedPtr<ITexture> texture)
-	{
-		return false;
-	}
+
 
 	bool DirectX12Material::GetFloat(const String& name, float* out_value)
 	{
@@ -242,6 +255,32 @@ namespace JG
 
 			// TODO
 			// Texture Bind
+			// Texture 가 nullptr 이면 invaildTexture로 대체
+
+			for (auto& _pair : shaderData->TextureDataMap)
+			{
+				auto textureData = _pair.second.get();
+				auto& textureList = mTextureDatas[_pair.first];
+				u64 textureCount = textureList.size();
+				List<D3D12_CPU_DESCRIPTOR_HANDLE> handles;
+
+				
+				for (u64 i = 0; i < textureCount; ++i)
+				{
+					if (textureList[i] != nullptr && textureList[i]->IsValid())
+					{
+						handles.push_back(static_cast<DirectX12Texture*>(textureList[i].get())->GetSRV());
+					}
+				}
+
+				if (handles.empty() == false)
+				{
+					commandList->BindTextures(textureData->RootParm, handles);
+				}
+		
+			}
+
+
 		}
 		else
 		{
@@ -271,6 +310,13 @@ namespace JG
 			{
 				mByteDatas[_pair.first].clear();
 			}
+
+			for (auto& _pair : shaderData->TextureDataMap)
+			{
+				mTextureDatas[_pair.first].resize(_pair.second->TextureCount, nullptr);
+			}
+
+
 		}
 	}
 
