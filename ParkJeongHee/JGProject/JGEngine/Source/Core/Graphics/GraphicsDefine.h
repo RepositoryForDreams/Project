@@ -172,6 +172,45 @@ namespace JG
 		}
 	}
 
+	enum class ESamplerStateTemplate
+	{
+		Unknown,
+		Point_Wrap,
+		Point_Clamp,
+		Point_Border,
+		Point_Mirror,
+		Point_MirrorOnce,
+		Linear_Wrap,
+		Linear_Clamp,
+		Linear_Border,
+		Linear_Mirror,
+		Linear_MirrorOnce,
+		Anisotropic_Wrap,
+		Anisotropic_Clamp,
+		Anisotropic_Border,
+		Anisotropic_Mirror,
+		Anisotropic_MirrorOnce,
+	};
+
+	inline ESamplerStateTemplate StringToSamplerStateTemplate(const String& _template)
+	{
+		if (_template == TT("Point_Wrap")) return ESamplerStateTemplate::Point_Wrap;
+		else if (_template == TT("Point_Clamp")) return ESamplerStateTemplate::Point_Clamp;
+		else if (_template == TT("Point_Border")) return ESamplerStateTemplate::Point_Border;
+		else if (_template == TT("Point_Mirror")) return ESamplerStateTemplate::Point_Mirror;
+		else if (_template == TT("Point_MirrorOnce")) return ESamplerStateTemplate::Point_MirrorOnce;
+		else if (_template == TT("Linear_Wrap")) return ESamplerStateTemplate::Linear_Wrap;
+		else if (_template == TT("Linear_Clamp")) return ESamplerStateTemplate::Linear_Clamp;
+		else if (_template == TT("Linear_Border")) return ESamplerStateTemplate::Linear_Border;
+		else if (_template == TT("Linear_Mirror")) return ESamplerStateTemplate::Linear_Mirror;
+		else if (_template == TT("Linear_MirrorOnce")) return ESamplerStateTemplate::Linear_MirrorOnce;
+		else if (_template == TT("Anisotropic_Wrap")) return ESamplerStateTemplate::Anisotropic_Wrap;
+		else if (_template == TT("Anisotropic_Clamp")) return ESamplerStateTemplate::Anisotropic_Clamp;
+		else if (_template == TT("Anisotropic_Border")) return ESamplerStateTemplate::Anisotropic_Border;
+		else if (_template == TT("Anisotropic_Mirror")) return ESamplerStateTemplate::Anisotropic_Mirror;
+		else if (_template == TT("Anisotropic_MirrorOnce")) return ESamplerStateTemplate::Anisotropic_MirrorOnce;
+		else return ESamplerStateTemplate::Unknown;
+	}
 
 
 

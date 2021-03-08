@@ -494,7 +494,20 @@ namespace JG
 			String dataCode = code.substr(dataTokenStartPos, endPos - dataTokenStartPos);
 
 
-
+			/*
+				Min = Point,
+	Mag = Point,
+	Mip = Point,
+	AddressU = Wrap,
+	AddressV = Wrap,
+	AddressW = Wrap,
+	ComparisonFunc = LessEqual,
+	BorderColor = TransparentBlack, 
+	MinLOD = 0,
+	MaxLOD = FLOAT32_MAX,
+	MaxAnisotropy = 16,
+	MipLODBias = 0
+			*/
 
 			u64 samplerDataStartPos = dataCode.find(TT("{"));
 			if (samplerDataStartPos != String::npos)
@@ -502,7 +515,34 @@ namespace JG
 				samplerDataStartPos += 1;
 				u64 samplerDataEndPos = dataCode.find(TT("}"), samplerDataStartPos);
 			
-				String samplerData = dataCode.substr(samplerDataStartPos, samplerDataEndPos - samplerDataStartPos);
+				String samplerDataCode = dataCode.substr(samplerDataStartPos, samplerDataEndPos - samplerDataStartPos) + TT(",");
+
+				if (samplerDataCode.find_last_of(TT(",")) != samplerDataCode.length() - 1)
+				{
+					samplerDataCode += TT(",");
+				}
+				Dictionary<String, String> SamplerDataMap;
+
+				u64 pos = 0;
+				while (pos != String::npos)
+				{
+					String key; String value;
+					pos = ExtractSamplerStateValue(samplerDataCode, pos, &key, &value);
+					if (pos != String::npos)
+					{
+						SamplerDataMap[key] = value;
+					}
+				}
+
+
+
+
+				auto desc = CreateSamplerStateDesc(SamplerDataMap);
+				// TODO
+				// SamplerState Data 생성
+
+
+
 
 
 			}
@@ -584,11 +624,280 @@ Template : POINT_WRAP  POINT_CLAMP
 
 
 
-
-
-
-
 			return 0;
+	}
+	u64 DirectX12ShaderData::ExtractSamplerStateValue(const String& samplerStateDataCode, u64 startPos, String* out_key, String* out_value)
+	{
+		auto endPos = samplerStateDataCode.find(TT(","), startPos);
+		if (endPos == String::npos)
+		{
+			return String::npos;
+		}
+
+		u64 result = endPos + 1;
+
+		String dataCode = samplerStateDataCode.substr(startPos, endPos - startPos);
+		dataCode = ReplaceAll(dataCode, TT("\t"), TT(""));
+		dataCode = ReplaceAll(dataCode, TT("\n"), TT(""));
+
+
+		startPos = 0;
+		u64 midPos = dataCode.find(TT("="));
+		endPos = dataCode.length();
+		
+		if (out_key != nullptr)
+		{
+			*out_key = dataCode.substr(startPos, midPos - startPos);
+			*out_key = ReplaceAll(*out_key, TT(" "), TT(""));
+		}
+
+		if (out_value != nullptr)
+		{
+			*out_value = dataCode.substr(midPos + 1, endPos - midPos - 1);
+			*out_value = ReplaceAll(*out_value, TT(" "), TT(""));
+		}
+
+
+		return result;
+	}
+	D3D12_STATIC_SAMPLER_DESC DirectX12ShaderData::CreateSamplerStateDesc(const Dictionary<String, String>& samplerDataMap)
+	{
+		D3D12_STATIC_SAMPLER_DESC desc = {};
+
+		//
+		if (samplerDataMap.find(TT("Template")) != samplerDataMap.end())
+		{
+			CreateSamplerStateByTemplate(StringToSamplerStateTemplate(samplerDataMap.at(TT("Template"))), &desc);
+		}
+		else
+		{
+			desc = CD3DX12_STATIC_SAMPLER_DESC(0);
+		}
+
+		String Min = TT("Point"); 		String Mag = TT("Point"); 		String Mip = TT("Point");
+
+		if (samplerDataMap.find(TT("Min")) != samplerDataMap.end())
+		{
+			Min = samplerDataMap.at(TT("Min"));
+		}
+		if (samplerDataMap.find(TT("Mag")) != samplerDataMap.end())
+		{
+			Mag = samplerDataMap.at(TT("Mag"));
+		}
+		if (samplerDataMap.find(TT("Mip")) != samplerDataMap.end())
+		{
+			Mip = samplerDataMap.at(TT("Mip"));
+		}
+		desc.Filter = GetSamplerStateFilter(Min, Mag, Mip);
+
+
+		String AddressU = TT("Wrap"); String AddressV = TT("Wrap"); String AddressW = TT("Wrap");
+		if (samplerDataMap.find(TT("AddressU")) != samplerDataMap.end())
+		{
+			AddressU = samplerDataMap.at(TT("AddressU"));
+		}
+		if (samplerDataMap.find(TT("AddressV")) != samplerDataMap.end())
+		{
+			AddressV = samplerDataMap.at(TT("AddressV"));
+		}
+		if (samplerDataMap.find(TT("AddressW")) != samplerDataMap.end())
+		{
+			AddressW = samplerDataMap.at(TT("AddressW"));
+		}
+		desc.AddressU = GetTextureAddressMode(AddressU);
+		desc.AddressV = GetTextureAddressMode(AddressV);
+		desc.AddressW = GetTextureAddressMode(AddressW);
+
+
+		String ComparisonFunc = TT("ComparisonFunc");
+		if (samplerDataMap.find(TT("AddressU")) != samplerDataMap.end())
+		{
+			ComparisonFunc = samplerDataMap.at(TT("ComparisonFunc"));
+		}
+		desc.ComparisonFunc = GetComparisonFunc(ComparisonFunc);
+
+
+		String BorderColor = TT("BorderColor");
+		if (samplerDataMap.find(TT("BorderColor")) != samplerDataMap.end())
+		{
+			BorderColor = samplerDataMap.at(TT("BorderColor"));
+		}
+		desc.BorderColor = GetBorderColor(BorderColor);
+
+
+		if (samplerDataMap.find(TT("MinLOD")) != samplerDataMap.end())
+		{
+			desc.MinLOD = _wtof(samplerDataMap.at(TT("MinLOD")).c_str());
+		}
+		if (samplerDataMap.find(TT("MaxLOD")) != samplerDataMap.end())
+		{
+			desc.MaxLOD = _wtof(samplerDataMap.at(TT("MaxLOD")).c_str());
+		}
+		if (samplerDataMap.find(TT("MaxAnisotropy")) != samplerDataMap.end())
+		{
+			desc.MaxAnisotropy = _wtoi(samplerDataMap.at(TT("MaxAnisotropy")).c_str());
+		}
+		if (samplerDataMap.find(TT("MipLODBias")) != samplerDataMap.end())
+		{
+			desc.MipLODBias = _wtof(samplerDataMap.at(TT("MipLODBias")).c_str());
+		}
+		return desc;
+	}
+	D3D12_FILTER DirectX12ShaderData::GetSamplerStateFilter(const String& Min, const String& Mag, const String& Mip)
+	{
+		enum
+		{
+			Point = 0,
+			Linear = 1,
+			Anisotropic = 2
+		};
+		i32 min = Point; i32 mag = Point; i32 mip = Point;
+
+
+		if (Min == TT("Point")) min = Point;
+		else if (Min == TT("Linear")) min = Linear;
+		else if (Min == TT("Anisotropic")) min = Anisotropic;
+
+		if (Mag == TT("Point")) mag = Point;
+		else if (Mag == TT("Linear")) mag = Linear;
+		else if (Mag == TT("Anisotropic")) mag = Anisotropic;
+
+		if (Mip == TT("Point")) mip = Point;
+		else if (Mip == TT("Linear")) mip = Linear;
+		else if (Mip == TT("Anisotropic")) mip = Anisotropic;
+
+
+
+
+
+		if (min == Point && mag == Point && mip == Point) return D3D12_FILTER::D3D12_FILTER_MIN_MAG_MIP_POINT;
+		else if (min == Point && mag == Point && mip == Linear) return D3D12_FILTER::D3D12_FILTER_MIN_MAG_POINT_MIP_LINEAR;
+		else if (min == Point && mag == Linear && mip == Point) return D3D12_FILTER::D3D12_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT;
+		else if (min == Linear && mag == Point && mip == Point) return D3D12_FILTER::D3D12_FILTER_MIN_LINEAR_MAG_MIP_POINT;
+		else if (min == Point && mag == Linear && mip == Linear) return D3D12_FILTER::D3D12_FILTER_MIN_POINT_MAG_MIP_LINEAR;
+		else if (min == Linear && mag == Point && mip == Linear) return D3D12_FILTER::D3D12_FILTER_MIN_LINEAR_MAG_POINT_MIP_LINEAR;
+		else if (min == Linear && mag == Linear && mip == Point) return D3D12_FILTER::D3D12_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+		else if (min == Linear && mag == Linear && mip == Linear) return D3D12_FILTER::D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+		else if (min == Anisotropic || mag == Anisotropic || mip == Anisotropic) return D3D12_FILTER::D3D12_FILTER_ANISOTROPIC;
+		else return D3D12_FILTER::D3D12_FILTER_MIN_MAG_MIP_POINT;
+	}
+	D3D12_TEXTURE_ADDRESS_MODE DirectX12ShaderData::GetTextureAddressMode(const String& addressMode)
+	{
+		if (addressMode == TT("Wrap")) return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+		else if (addressMode == TT("Mirror")) return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+		else if (addressMode == TT("Clamp")) return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+		else if (addressMode == TT("Border")) return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+		else if (addressMode == TT("MirrorOnce")) return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_MIRROR_ONCE;
+		else return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	}
+	D3D12_COMPARISON_FUNC DirectX12ShaderData::GetComparisonFunc(const String& comparisonFunc)
+	{
+		if (comparisonFunc == TT("Never")) return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_NEVER;
+		else if (comparisonFunc == TT("Less")) return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_LESS;
+		else if (comparisonFunc == TT("Equal")) return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_EQUAL;
+		else if (comparisonFunc == TT("LessEqual")) return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_LESS_EQUAL;
+		else if (comparisonFunc == TT("Greater")) return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_GREATER;
+		else if (comparisonFunc == TT("NotEqual")) return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_NOT_EQUAL;
+		else if (comparisonFunc == TT("GreaterEqual")) return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_GREATER_EQUAL;
+		else if (comparisonFunc == TT("Always")) return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_ALWAYS;
+		else return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	}
+	D3D12_STATIC_BORDER_COLOR DirectX12ShaderData::GetBorderColor(const String& borderColor)
+	{
+		// BorderColor = TransparentBlack, OpaqueBlack, OpaqueWhite
+		if (borderColor == TT("TransparentBlack")) return D3D12_STATIC_BORDER_COLOR::D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+		else if (borderColor == TT("OpaqueBlack")) return D3D12_STATIC_BORDER_COLOR::D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
+		else if (borderColor == TT("OpaqueWhite")) return D3D12_STATIC_BORDER_COLOR::D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
+		else return D3D12_STATIC_BORDER_COLOR::D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
+	}
+	void DirectX12ShaderData::CreateSamplerStateByTemplate(ESamplerStateTemplate _template, D3D12_STATIC_SAMPLER_DESC* out_desc)
+	{
+		if (out_desc == nullptr)
+		{
+			return;
+		}
+
+		switch (_template)
+		{
+		case ESamplerStateTemplate::Point_Wrap: 
+			*out_desc = CD3DX12_STATIC_SAMPLER_DESC(0,
+				D3D12_FILTER_MIN_MAG_MIP_POINT, 
+				D3D12_TEXTURE_ADDRESS_MODE_WRAP, D3D12_TEXTURE_ADDRESS_MODE_WRAP, D3D12_TEXTURE_ADDRESS_MODE_WRAP);
+			break;
+		case ESamplerStateTemplate::Point_Clamp:
+			*out_desc = CD3DX12_STATIC_SAMPLER_DESC(0,
+				D3D12_FILTER_MIN_MAG_MIP_POINT,
+				D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+			break;
+		case ESamplerStateTemplate::Point_Border:
+			*out_desc = CD3DX12_STATIC_SAMPLER_DESC(0,
+				D3D12_FILTER_MIN_MAG_MIP_POINT,
+				D3D12_TEXTURE_ADDRESS_MODE_BORDER, D3D12_TEXTURE_ADDRESS_MODE_BORDER, D3D12_TEXTURE_ADDRESS_MODE_BORDER);
+			break;
+		case ESamplerStateTemplate::Point_Mirror:
+			*out_desc = CD3DX12_STATIC_SAMPLER_DESC(0,
+				D3D12_FILTER_MIN_MAG_MIP_POINT,
+				D3D12_TEXTURE_ADDRESS_MODE_MIRROR, D3D12_TEXTURE_ADDRESS_MODE_MIRROR, D3D12_TEXTURE_ADDRESS_MODE_MIRROR);
+			break;
+		case ESamplerStateTemplate::Point_MirrorOnce:
+			*out_desc = CD3DX12_STATIC_SAMPLER_DESC(0,
+				D3D12_FILTER_MIN_MAG_MIP_POINT,
+				D3D12_TEXTURE_ADDRESS_MODE_MIRROR_ONCE, D3D12_TEXTURE_ADDRESS_MODE_MIRROR_ONCE, D3D12_TEXTURE_ADDRESS_MODE_MIRROR_ONCE);
+			break;
+		case ESamplerStateTemplate::Linear_Wrap:
+			*out_desc = CD3DX12_STATIC_SAMPLER_DESC(0,
+				D3D12_FILTER_MIN_MAG_MIP_LINEAR,
+				D3D12_TEXTURE_ADDRESS_MODE_WRAP, D3D12_TEXTURE_ADDRESS_MODE_WRAP, D3D12_TEXTURE_ADDRESS_MODE_WRAP);
+			break;
+		case ESamplerStateTemplate::Linear_Clamp:
+			*out_desc = CD3DX12_STATIC_SAMPLER_DESC(0,
+				D3D12_FILTER_MIN_MAG_MIP_LINEAR,
+				D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+			break;
+		case ESamplerStateTemplate::Linear_Border:
+			*out_desc = CD3DX12_STATIC_SAMPLER_DESC(0,
+				D3D12_FILTER_MIN_MAG_MIP_LINEAR,
+				D3D12_TEXTURE_ADDRESS_MODE_BORDER, D3D12_TEXTURE_ADDRESS_MODE_BORDER, D3D12_TEXTURE_ADDRESS_MODE_BORDER);
+			break;
+		case ESamplerStateTemplate::Linear_Mirror:
+			*out_desc = CD3DX12_STATIC_SAMPLER_DESC(0,
+				D3D12_FILTER_MIN_MAG_MIP_LINEAR,
+				D3D12_TEXTURE_ADDRESS_MODE_MIRROR, D3D12_TEXTURE_ADDRESS_MODE_MIRROR, D3D12_TEXTURE_ADDRESS_MODE_MIRROR);
+			break;
+		case ESamplerStateTemplate::Linear_MirrorOnce:
+			*out_desc = CD3DX12_STATIC_SAMPLER_DESC(0,
+				D3D12_FILTER_MIN_MAG_MIP_LINEAR,
+				D3D12_TEXTURE_ADDRESS_MODE_MIRROR_ONCE, D3D12_TEXTURE_ADDRESS_MODE_MIRROR_ONCE, D3D12_TEXTURE_ADDRESS_MODE_MIRROR_ONCE);
+			break;
+		case ESamplerStateTemplate::Anisotropic_Wrap:
+			*out_desc = CD3DX12_STATIC_SAMPLER_DESC(0,
+				D3D12_FILTER_ANISOTROPIC,
+				D3D12_TEXTURE_ADDRESS_MODE_WRAP, D3D12_TEXTURE_ADDRESS_MODE_WRAP, D3D12_TEXTURE_ADDRESS_MODE_WRAP);
+			break;
+		case ESamplerStateTemplate::Anisotropic_Clamp:
+			*out_desc = CD3DX12_STATIC_SAMPLER_DESC(0,
+				D3D12_FILTER_ANISOTROPIC,
+				D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+			break;
+		case ESamplerStateTemplate::Anisotropic_Border:
+			*out_desc = CD3DX12_STATIC_SAMPLER_DESC(0,
+				D3D12_FILTER_ANISOTROPIC,
+				D3D12_TEXTURE_ADDRESS_MODE_BORDER, D3D12_TEXTURE_ADDRESS_MODE_BORDER, D3D12_TEXTURE_ADDRESS_MODE_BORDER);
+			break;
+		case ESamplerStateTemplate::Anisotropic_Mirror:
+			*out_desc = CD3DX12_STATIC_SAMPLER_DESC(0,
+				D3D12_FILTER_ANISOTROPIC,
+				D3D12_TEXTURE_ADDRESS_MODE_MIRROR, D3D12_TEXTURE_ADDRESS_MODE_MIRROR, D3D12_TEXTURE_ADDRESS_MODE_MIRROR);
+			break;
+		case ESamplerStateTemplate::Anisotropic_MirrorOnce:
+			*out_desc = CD3DX12_STATIC_SAMPLER_DESC(0,
+				D3D12_FILTER_ANISOTROPIC,
+				D3D12_TEXTURE_ADDRESS_MODE_MIRROR_ONCE, D3D12_TEXTURE_ADDRESS_MODE_MIRROR_ONCE, D3D12_TEXTURE_ADDRESS_MODE_MIRROR_ONCE);
+			break;
+		default:
+			*out_desc = CD3DX12_STATIC_SAMPLER_DESC(0);
+			break;
+		}
 	}
 	bool DirectX12ShaderData::RegisterStructuredBuffer(const String& name)
 	{
