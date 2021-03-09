@@ -43,7 +43,7 @@ namespace JG
 
 
 		SharedPtr<ITexture> DepthTexture;
-
+		SharedPtr<ITexture> TestTexture;
 
 		u32 QuadCount = 0;
 	};
@@ -71,24 +71,15 @@ namespace JG
 
 SamplerState gPointSampler
 {
-	Min = Point,
-	Mag = Point,
-	Mip = Point,
-	AddressU = Wrap,
-	AddressV = Wrap,
-	AddressW = Wrap,
-	ComparisonFunc = LessEqual,
-	BorderColor = TransparentBlack, 
-	MinLOD = 0,
-	MaxLOD = FLOAT32_MAX,
-	MaxAnisotropy = 16,
-	MipLODBias = 0
+	Template = PASDFOIJSDF
 };
 
 SamplerState gLinearSampler
 {
 	Template = Point_Wrap
 };
+
+Texture2D gTestTexture;
 
 cbuffer Camera
 {
@@ -116,8 +107,7 @@ VS_OUT vs_main(VS_IN vin)
 }
 float4 ps_main(VS_OUT pin) : SV_TARGET
 {
-
-	return float4(1.0f,1.0f,1.0f,1.0f);
+	return gTestTexture.Sample(gLinearSampler, pin.tex);
 }
 )"), EShaderFlags::Allow_VertexShader | EShaderFlags::Allow_PixelShader);
 		ShaderLibrary::RegisterShader(gRenderer2DItem->Standard2DShader);
@@ -164,6 +154,20 @@ float4 ps_main(VS_OUT pin) : SV_TARGET
 		textureInfo.ArraySize = 1;
 
 		gRenderer2DItem->DepthTexture = ITexture::Create(TT("DepthTexture"), textureInfo);
+
+
+
+		//Test
+		//
+		textureInfo.Width = 1;
+		textureInfo.Height = 1;
+		textureInfo.ClearColor = Color::Red();
+		textureInfo.Format = ETextureFormat::R8G8B8A8_Unorm;
+		textureInfo.MipLevel = 1;
+		textureInfo.Flags = ETextureFlags::Allow_RenderTarget;
+		textureInfo.ArraySize = 1;
+		gRenderer2DItem->TestTexture = ITexture::Create(TT("TestTexture"), textureInfo);
+
 		return true;
 	}
 	void Renderer2D::Destroy()
@@ -187,13 +191,18 @@ float4 ps_main(VS_OUT pin) : SV_TARGET
 		api->SetScissorRects({ ScissorRect(0,0, resolution.x,resolution.y) });
 		api->ClearRenderTarget({ renderTexture }, gRenderer2DItem->DepthTexture);
 		api->SetRenderTarget({ renderTexture }, gRenderer2DItem->DepthTexture);
-
+		api->ClearRenderTarget({ gRenderer2DItem->TestTexture }, nullptr);
 
 
 		auto viewProj = JMatrix::Transpose(camera->GetViewProjMatrix());
 		if (gRenderer2DItem->Standard2DMaterial->SetFloat4x4(TT("gViewProj"), viewProj) == false)
 		{
 			JG_CORE_ERROR("Failed Set ViewProjMatrix in Renderer2D");
+			return false;
+		}
+		if (gRenderer2DItem->Standard2DMaterial->SetTexture(TT("gTestTexture"), 0, gRenderer2DItem->TestTexture) == false)
+		{
+			JG_CORE_ERROR("Failed Set Texture in Renderer2D");
 			return false;
 		}
 		return true;

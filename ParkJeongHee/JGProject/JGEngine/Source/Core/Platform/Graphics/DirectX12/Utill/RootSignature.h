@@ -46,7 +46,7 @@ namespace JG
 		void InitAsUAV(u32 register_num, u32 register_space, D3D12_SHADER_VISIBILITY visibility = D3D12_SHADER_VISIBILITY_ALL);
 		void InitAsCBV(u32 register_num, u32 register_space, D3D12_SHADER_VISIBILITY visibility = D3D12_SHADER_VISIBILITY_ALL);
 		void InitAsConstant(u32 btSize, u32 register_num, u32 register_space, D3D12_SHADER_VISIBILITY visibility = D3D12_SHADER_VISIBILITY_ALL);
-		void AddStaticSamplerState(const CD3DX12_STATIC_SAMPLER_DESC& desc);
+		void AddStaticSamplerState(const D3D12_STATIC_SAMPLER_DESC& desc);
 		DescriptorTableInfo GetDescriptorTableRangeType(u32 rootparam) const;
 		void Reset();
 		bool Finalize();

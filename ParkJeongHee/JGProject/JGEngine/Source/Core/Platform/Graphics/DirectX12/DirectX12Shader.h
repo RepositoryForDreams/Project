@@ -127,6 +127,7 @@ namespace JG
 		};
 		class SamplerStateData : public ShaderElement
 		{
+		public:
 			D3D12_STATIC_SAMPLER_DESC Desc;
 		public:
 			virtual ~SamplerStateData() = default;
@@ -158,6 +159,7 @@ namespace JG
 		u64 RootParamOffset = 0;
 		u64 TextureRegisterNumberOffset = 0;
 		u64 TextureCubeRegisterNumberOffset = 0;
+		u64 SamplerStateRegisterNumberOffset = 0;
 		u64 SpaceOffset     = 0;
 	public:
 		bool Set(String& code);
@@ -168,22 +170,23 @@ namespace JG
 		u64 AnalysisTexture2D(String& code, u64 startPos, bool* result);
 		u64 AnalysisSamplerState(String& code, u64 startPos, bool* result);
 	private:
+		u64 ExtractCBufferVar(const String& code, u64 pos, String* out_value);
 		u64 ExtractSamplerStateValue(const String& samplerStateDataCode, u64 startPos, String* out_key, String* out_value);
 	private:
 		D3D12_STATIC_SAMPLER_DESC CreateSamplerStateDesc(const Dictionary<String, String>& samplerDataMap);
+		void CreateSamplerStateByTemplate(ESamplerStateTemplate _template, D3D12_STATIC_SAMPLER_DESC* out_desc);
+
+
 		D3D12_FILTER GetSamplerStateFilter(const String& Min, const String& Mag, const String& Mip);
 		D3D12_TEXTURE_ADDRESS_MODE GetTextureAddressMode(const String& addressMode);
 		D3D12_COMPARISON_FUNC GetComparisonFunc(const String& comparisonFunc);
 		D3D12_STATIC_BORDER_COLOR GetBorderColor(const String& borderColor);
-		void CreateSamplerStateByTemplate(ESamplerStateTemplate _template, D3D12_STATIC_SAMPLER_DESC* out_desc);
-
 	private:
 		bool RegisterStructuredBuffer(const String& name);
 		bool RegisterCBuffer(const String& name);
 		bool RegisterTextureData(const String& name);
 		bool RegisterCBufferVar(CBufferData* cBuffer, const String& varCode, u64& uploadDataSize);
-
-
+		bool RegisterSamplerStateData(const String& name);
 	};
 }
 

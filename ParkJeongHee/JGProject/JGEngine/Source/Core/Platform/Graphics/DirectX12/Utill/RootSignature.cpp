@@ -65,7 +65,7 @@ namespace JG
 
 		mRootSigInitType.push_back(__Constant__);
 	}
-	void RootSignature::AddStaticSamplerState(const CD3DX12_STATIC_SAMPLER_DESC& desc)
+	void RootSignature::AddStaticSamplerState(const D3D12_STATIC_SAMPLER_DESC& desc)
 	{
 		mSamplerState.push_back(desc);
 	}
