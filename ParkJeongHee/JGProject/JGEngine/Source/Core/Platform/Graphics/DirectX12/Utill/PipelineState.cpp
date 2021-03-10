@@ -234,6 +234,11 @@ namespace JG
 		return true;
 	}
 
+	const D3D12_BLEND_DESC& GraphicsPipelineState::GetBlendDesc() const
+	{
+		return mDesc.BlendState;
+	}
+
 
 
 	ComputePipelineState::ComputePipelineState()

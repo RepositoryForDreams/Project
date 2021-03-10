@@ -40,7 +40,11 @@ namespace JG
 		virtual void ClearRenderTarget(const List<SharedPtr<ITexture>>& rtTextures, SharedPtr<ITexture> depthTexture) = 0;
 		virtual void SetRenderTarget(const List<SharedPtr<ITexture>>& rtTextures, SharedPtr<ITexture> depthTexture)   = 0;
 		virtual void DrawIndexed(u32 indexCount, u32 instancedCount = 1, u32 startIndexLocation = 0, u32 startVertexLocation = 0, u32 startInstanceLocation = 0) = 0;
+		// State
 
+		virtual void SetDepthStencilState(EDepthStencilStateTemplate _template) = 0;
+		virtual void SetBlendState(u32 renderTargetSlot, EBlendStateTemplate _template) = 0;
+		virtual void SetRasterizerState(ERasterizerStateTemplate _template) = 0;
 
 
 		// Create Resource

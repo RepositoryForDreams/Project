@@ -213,6 +213,35 @@ namespace JG
 	}
 
 
+	enum class EDepthStencilStateTemplate
+	{
+		Default = 0,
+		NoDepth = 1,
+	};
+
+	enum class EBlendStateTemplate
+	{
+		Default = 0,
+		Transparent_Default,
+	};
+	//D3D12_RASTERIZER_DESC
+	enum class ERasterizerStateTemplate
+	{
+		Default = 0,
+	};
+
+	class DepthStencilState
+	{
+
+	};
+	class BlendState
+	{
+
+	};
+	class RasterizerState
+	{
+
+	};
 
 
 	class ScissorRect
@@ -246,40 +275,154 @@ namespace JG
 
 
 
+	namespace HLSL
+	{
+		using token = wchar;
+		namespace Token
+		{
+			constexpr token* CBuffer = TT("cbuffer ");
+			constexpr token* StructuredBuffer = TT("StructuredBuffer<");
+			constexpr token* Texture2D = TT("Texture2D ");
+			constexpr token* SamplerState = TT("SamplerState");
+			constexpr token* SamplerComparisonState = TT("SamplerComparisonState");
+
+			namespace SamplerStateElement
+			{
+				constexpr token* Template = TT("Template");
+				constexpr token* Min = TT("Min");
+				constexpr token* Mag = TT("Mag");
+				constexpr token* Mip = TT("Mip");
+				constexpr token* AddressU = TT("AddressU");
+				constexpr token* AddressV = TT("AddressV");
+				constexpr token* AddressW = TT("AddressW");
+				constexpr token* ComparisonFunc = TT("ComparisonFunc");
+				constexpr token* BorderColor = TT("BorderColor");
+				constexpr token* MinLOD = TT("MinLOD");
+				constexpr token* MaxLOD = TT("MaxLOD");
+				constexpr token* MaxAnisotropy = TT("MaxAnisotropy");
+				constexpr token* MipLODBias = TT("MipLODBias");
+
+			}
+			namespace SamplerSatateFilter
+			{
+				constexpr token* Point = TT("Point");
+				constexpr token* Linear = TT("Linear");
+				constexpr token* Anisotropic = TT("Anisotropic");
+
+			}
+			namespace SamplerSatateAddressMode
+			{
+				constexpr token* Wrap = TT("Wrap");
+				constexpr token* Mirror = TT("Mirror");
+				constexpr token* Clamp = TT("Clamp");
+				constexpr token* Border = TT("Border");
+				constexpr token* MirrorOnce = TT("MirrorOnce");
+			}
+			namespace SamplerStateComparisonFunc
+			{
+				constexpr token* Never = TT("Never");
+				constexpr token* Less = TT("Less");
+				constexpr token* Equal = TT("Equal");
+				constexpr token* LessEqual = TT("LessEqual");
+				constexpr token* Greater = TT("Greater");
+				constexpr token* NotEqual = TT("NotEqual");
+				constexpr token* GreaterEqual = TT("GreaterEqual");
+				constexpr token* Always = TT("Always");
+			}
+			namespace SamplerStateBorderColor
+			{
+				constexpr token* TransparentBlack = TT("TransparentBlack");
+				constexpr token* OpaqueBlack = TT("OpaqueBlack");
+				constexpr token* OpaqueWhite = TT("OpaqueWhite");
+			}
 
 
-	/* InputLayout 
-	
-	
-	*/
+		}
 
 
-	
-	
 
 
+
+
+
+
+
+		constexpr wchar* VSEntry = TT("vs_main");
+		constexpr wchar* DSEntry = TT("ds_main");
+		constexpr wchar* HSEntry = TT("hs_main");
+		constexpr wchar* GSEntry = TT("gs_main");
+		constexpr wchar* PSEntry = TT("ps_main");
+		constexpr wchar* VSTarget = TT("vs_5_1");
+		constexpr wchar* DSTarget = TT("ds_5_1");
+		constexpr wchar* HSTarget = TT("hs_5_1");
+		constexpr wchar* GSTarget = TT("gs_5_1");
+		constexpr wchar* PSTarget = TT("ps_5_1");
+
+
+
+
+
+		enum class EHLSLElement
+		{
+			None,
+			CBuffer,
+			StructuredBuffer,
+			Texture,
+			SamplerState,
+		};
+
+		enum class EHLSLTextureType
+		{
+			_1D,
+			_2D,
+			_3D,
+			Cube,
+		};
+		inline String GetHLSLElementToken(EHLSLElement)
+		{
+			return TT("");
+		}
+
+		inline String ShaderDataTypeToHLSLCode(EShaderDataType type)
+		{
+			switch (type)
+			{
+			case EShaderDataType::_bool:	return TT("bool");
+			case EShaderDataType::_int:		return TT("int");
+			case EShaderDataType::_int2:	return TT("int2");
+			case EShaderDataType::_int3:	return TT("int3");
+			case EShaderDataType::_int4:	return TT("int4");
+			case EShaderDataType::_uint:	return TT("uint");
+			case EShaderDataType::_uint2:	return TT("uint2");
+			case EShaderDataType::_uint3:	return TT("uint3");
+			case EShaderDataType::_uint4:	return TT("uin4");
+			case EShaderDataType::_float:	return TT("float");
+			case EShaderDataType::_float2:	return TT("float2");
+			case EShaderDataType::_float3:	return TT("float3");
+			case EShaderDataType::_float4:   return TT("float4");
+			case EShaderDataType::_float3x3: return TT("float3x3");
+			case EShaderDataType::_float4x4: return TT("float4x4");
+			default:
+				JG_CORE_CRITICAL("not supported ShaderDataType");
+				return TT("unknown");
+			}
+		}
+
+
+
+	}
 
 	namespace ShaderCode
 	{
 		namespace HLSL
 		{
-			constexpr wchar* CBToken   = TT("cbuffer ");
-			constexpr wchar* SBToken   = TT("StructuredBuffer<");
-			constexpr wchar* Texture2DToken = TT("Texture2D ");
-			constexpr wchar* SamplerStateToken = TT("SamplerState");
-			constexpr wchar* SamplerComparisonStateToken(TT("SamplerComparisonState"));
 
 
-			constexpr wchar* VSEntry = TT("vs_main");
-			constexpr wchar* DSEntry = TT("ds_main");
-			constexpr wchar* HSEntry = TT("hs_main");
-			constexpr wchar* GSEntry = TT("gs_main");
-			constexpr wchar* PSEntry = TT("ps_main");
-			constexpr wchar* VSTarget = TT("vs_5_1");
-			constexpr wchar* DSTarget = TT("ds_5_1");
-			constexpr wchar* HSTarget = TT("hs_5_1");
-			constexpr wchar* GSTarget = TT("gs_5_1");
-			constexpr wchar* PSTarget = TT("ps_5_1");
+
+
+
+
+
 
 			constexpr wchar* Common = LR"(
 struct SDObject

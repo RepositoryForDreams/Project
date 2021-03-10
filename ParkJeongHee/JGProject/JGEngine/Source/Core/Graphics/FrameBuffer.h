@@ -35,7 +35,7 @@ namespace JG
 		virtual bool Init(const FrameBufferInfo& settings) = 0;
 		virtual void Update() = 0;
 		virtual bool Present() = 0;
-
+		
 
 	public:
 		virtual void SubmitTexture(SharedPtr<ITexture> texture) = 0;

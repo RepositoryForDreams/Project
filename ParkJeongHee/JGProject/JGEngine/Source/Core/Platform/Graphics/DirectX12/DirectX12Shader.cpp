@@ -28,82 +28,44 @@ namespace JG
 			}
 			return false;
 		}
-
+		
 		
 		bool result = true;
 		if (flags & EShaderFlags::Allow_VertexShader)
 		{
-			if (Compile(mVSData, code, CompileConfig(ShaderCode::HLSL::VSEntry, ShaderCode::HLSL::VSTarget), error) == false)
+			if (Compile(mVSData, code, CompileConfig(HLSL::VSEntry, HLSL::VSTarget), error) == false)
 			{
 				return false;
 			}
 		}
 		if (flags & EShaderFlags::Allow_DomainShader)
 		{
-			if (Compile(mDSData, code, CompileConfig(ShaderCode::HLSL::DSEntry, ShaderCode::HLSL::DSTarget), error) == false)
+			if (Compile(mDSData, code, CompileConfig(HLSL::DSEntry, HLSL::DSTarget), error) == false)
 			{
 				return false;
 			}
 		}
 		if (flags & EShaderFlags::Allow_HullShader)
 		{
-			if (Compile(mHSData, code, CompileConfig(ShaderCode::HLSL::HSEntry, ShaderCode::HLSL::HSTarget), error) == false)
+			if (Compile(mHSData, code, CompileConfig(HLSL::HSEntry, HLSL::HSTarget), error) == false)
 			{
 				return false;
 			}
 		}
 		if (flags & EShaderFlags::Allow_GeometryShader)
 		{
-			if (Compile(mGSData, code, CompileConfig(ShaderCode::HLSL::GSEntry, ShaderCode::HLSL::GSTarget), error) == false)
+			if (Compile(mGSData, code, CompileConfig(HLSL::GSEntry, HLSL::GSTarget), error) == false)
 			{
 				return false;
 			}
 		}
 		if (flags & EShaderFlags::Allow_PixelShader)
 		{
-			if (Compile(mPSData, code, CompileConfig(ShaderCode::HLSL::PSEntry, ShaderCode::HLSL::PSTarget), error) == false)
+			if (Compile(mPSData, code, CompileConfig(HLSL::PSEntry, HLSL::PSTarget), error) == false)
 			{
 				return false;
 			}
 		}
-
-
-
-
-		// ShaderCompile
-
-
-
-		/*
-		2d에서는 머터리얼이 필요가 없다.
-
-		Material::Create(Shader)    -> Material 생성 시 Shader Compile
-		MaterialInstance(Matedrial) -> Compile할 필요가 없다.
-		
-		
-		*/
-
-
-		/* 렌더링 절차
-		* 공통
-		* RootSignature 바인딩
-		* 
-		* 개인
-		* pso 바인딩
-		* Texture, CBuffer, Structured Buffer 각종 바인딩
-		* Vertex, IndexBuffer  바인딩 (Mesh 란 ? Material 여러개 붙일수 있다. SubMesh를 붙인다는 느낌으로 IndexBuffer 은 하나만 받는다.) -> Bind를 하게되면 VertexBuffer 를 모두 합친다.
-		* 
-		* 
-		* 2D로 가게되면
-		* Mesh 하나로 그린다.
-		* 그릴때 마다 Mesh에 추가 Index추가
-		* 텍스쳐는 하나의 배열로 올리고 상수값으로 textureIndex로 바인딩 한다.
-		* vertexbuffer->setdata로 올리기.
-		
-		
-		
-		*/
-
 
 
 
@@ -129,21 +91,21 @@ namespace JG
 			u64 rootParam = rpPair.first;
 			auto element = rpPair.second;
 
-			switch (element->ShaderElementType)
+			switch (element->ElementType)
 			{
-			case DirectX12ShaderData::EShaderElementType::CBuffer:
+			case HLSL::EHLSLElement::CBuffer:
 				RootSig->InitAsCBV(element->RegisterNum, element->RegisterSpace);
 				break;
-			case DirectX12ShaderData::EShaderElementType::StructuredBuffer:
+			case HLSL::EHLSLElement::StructuredBuffer:
 				RootSig->InitAsSRV(element->RegisterNum, element->RegisterSpace);
 				break;
-			case DirectX12ShaderData::EShaderElementType::Texture:
+			case HLSL::EHLSLElement::Texture:
 				RootSig->InitAsDescriptorTable(
 					D3D12_DESCRIPTOR_RANGE_TYPE_SRV,
 					(u32)(static_cast<DirectX12ShaderData::TextureData*>(element))->TextureCount,
 					element->RegisterNum, element->RegisterSpace);
 				break;
-			case DirectX12ShaderData::EShaderElementType::SamplerState:
+			case HLSL::EHLSLElement::SamplerState:
 				JGASSERT("IS NOT IMPL");
 				break;
 			}
@@ -274,24 +236,18 @@ namespace JG
 	{
 		CBufferData* cBuffer = nullptr;
 		u64 uploadDataSize = 0;
-		u64 dataTokenStartPos = code.find(ShaderCode::HLSL::CBToken, startPos);
+		u64 dataTokenStartPos = code.find(HLSL::Token::CBuffer, startPos);
 
 		if (dataTokenStartPos != String::npos)
 		{
-			u64 startPos = dataTokenStartPos + wcslen(ShaderCode::HLSL::CBToken);
-			u64 endPos = code.find_first_of(TT("{"), startPos);
-			String cbName = code.substr(startPos, endPos - startPos);
-			cbName = ReplaceAll(cbName, TT("\n"), TT(""));
-			cbName = ReplaceAll(cbName, TT("\t"), TT(""));
-			cbName = ReplaceAll(cbName, TT(" "), TT(""));
+			String cbName;
+			ExtractCBufferName(code, dataTokenStartPos, &cbName);
 			if (RegisterCBuffer(cbName) == false)
 			{
 				if (result != nullptr)
 				{
 					*result = false;
 				}
-				// Error
-				//
 				return String::npos;
 			}
 			cBuffer = CBufferDataMap[cbName].get();
@@ -333,9 +289,9 @@ namespace JG
 			return String::npos;
 		}
 
-		cBuffer->DataSize = uploadDataSize;
-		cBuffer->ShaderElementType = EShaderElementType::CBuffer;
-		cBuffer->RootParm = RootParamOffset++;
+		cBuffer->DataSize    = uploadDataSize;
+		cBuffer->ElementType = HLSL::EHLSLElement::CBuffer;
+		cBuffer->RootParm    = RootParamOffset++;
 		cBuffer->RegisterNum = (u32)CBufferDataMap.size() - 1;
 		RootParamMap[cBuffer->RootParm] = cBuffer;
 		return startPos;
@@ -343,7 +299,7 @@ namespace JG
 	u64 DirectX12ShaderData::AnalysisStructuredBuffer(String& code, u64 startPos, bool* result)
 	{
 
-		u64 dataTokenStartPos = code.find(ShaderCode::HLSL::SBToken, startPos);
+		u64 dataTokenStartPos = code.find(HLSL::Token::StructuredBuffer, startPos);
 		if(dataTokenStartPos != String::npos)
 		{
 			u64 endPos = code.find(TT(";"), dataTokenStartPos);
@@ -385,7 +341,7 @@ namespace JG
 			structuredBufferData->RootParm = RootParamOffset++;
 			structuredBufferData->RegisterNum = 0;
 			structuredBufferData->RegisterSpace = (u32)(DirectX12ShaderData::StructuredBufferStartSpace + SpaceOffset++);
-			structuredBufferData->ShaderElementType = EShaderElementType::StructuredBuffer;
+			structuredBufferData->ElementType = HLSL::EHLSLElement::StructuredBuffer;
 			structuredBufferData->ElementDataSize   = GetShaderDataTypeSize(structuredBufferData->Type);
 			RootParamMap[structuredBufferData->RootParm] = structuredBufferData;
 
@@ -403,7 +359,7 @@ namespace JG
 	u64 DirectX12ShaderData::AnalysisTexture2D(String& code, u64 startPos, bool* result)
 	{
 
-		u64 dataTokenStartPos = code.find(ShaderCode::HLSL::Texture2DToken, startPos);
+		u64 dataTokenStartPos = code.find(HLSL::Token::Texture2D, startPos);
 		if (dataTokenStartPos != String::npos)
 		{
 			u64 endPos = code.find(TT(";"), dataTokenStartPos);
@@ -411,7 +367,7 @@ namespace JG
 			String dataCode = code.substr(dataTokenStartPos, endPos - dataTokenStartPos);
 
 
-			String nameCode = ReplaceAll(dataCode, ShaderCode::HLSL::Texture2DToken, TT(""));
+			String nameCode = ReplaceAll(dataCode, HLSL::Token::Texture2D, TT(""));
 			nameCode = ReplaceAll(nameCode, TT(" "), TT(""));
 
 			u64 arraySize = 1;
@@ -448,8 +404,8 @@ namespace JG
 			textureData->RootParm = RootParamOffset++;
 			textureData->RegisterNum = TextureRegisterNumberOffset; TextureRegisterNumberOffset += arraySize;
 			textureData->RegisterSpace = DirectX12ShaderData::Texture2DStartSpace;
-			textureData->ShaderElementType = EShaderElementType::Texture;
-			textureData->Type = ETextureType::_2D;
+			textureData->ElementType = HLSL::EHLSLElement::Texture;
+			textureData->Type = HLSL::EHLSLTextureType::_2D;
 			textureData->TextureCount = arraySize;
 			RootParamMap[textureData->RootParm] = textureData;
 
@@ -469,7 +425,7 @@ namespace JG
 	{
 		// TODO SamplerState 분석
 
-		u64 dataTokenStartPos = code.find(ShaderCode::HLSL::SamplerStateToken, startPos);
+		u64 dataTokenStartPos = code.find(HLSL::Token::SamplerState, startPos);
 
 		if (dataTokenStartPos != String::npos)
 		{
@@ -478,7 +434,7 @@ namespace JG
 			u64 samplerDataStartPos = dataCode.find(TT("{"));
 
 			String nameCode = dataCode.substr(0, samplerDataStartPos);
-			nameCode = ReplaceAll(nameCode , ShaderCode::HLSL::SamplerStateToken, TT(""));
+			nameCode = ReplaceAll(nameCode , HLSL::Token::SamplerState, TT(""));
 			nameCode = ReplaceAll(nameCode, TT(" "), TT(""));
 			nameCode = ReplaceAll(nameCode, TT("\n"), TT(""));
 			nameCode = ReplaceAll(nameCode, TT("\t"), TT(""));
@@ -524,7 +480,7 @@ namespace JG
 				samplerStateData->RegisterNum = SamplerStateRegisterNumberOffset++;
 				samplerStateData->Desc.ShaderRegister = samplerStateData->RegisterNum;
 				samplerStateData->RegisterSpace = 0;
-				samplerStateData->ShaderElementType = EShaderElementType::SamplerState;
+				samplerStateData->ElementType = HLSL::EHLSLElement::SamplerState;
 
 				u64 replaceStartPos = code.find(TT("{"), dataTokenStartPos);
 				u64 replaceEndPos = code.find(TT(";"), replaceStartPos) + 1;
@@ -553,6 +509,21 @@ namespace JG
 			return String::npos;
 		}
 		return startPos;
+	}
+	void DirectX12ShaderData::ExtractCBufferName(const String& code, u64 pos, String* out_value)
+	{
+		u64 startPos  = pos + wcslen(HLSL::Token::CBuffer);
+		u64 endPos    = code.find_first_of(TT("{"), startPos);
+		String cbName = code.substr(startPos, endPos - startPos);
+		cbName = ReplaceAll(cbName, TT("\n"), TT(""));
+		cbName = ReplaceAll(cbName, TT("\t"), TT(""));
+		cbName = ReplaceAll(cbName, TT(" "), TT(""));
+
+		if (out_value != nullptr)
+		{
+			*out_value = cbName;
+		}
+		
 	}
 	u64 DirectX12ShaderData::ExtractCBufferVar(const String& code, u64 pos, String* out_value)
 	{
@@ -619,81 +590,85 @@ namespace JG
 		D3D12_STATIC_SAMPLER_DESC desc = {};
 
 		//
-		if (samplerDataMap.find(TT("Template")) != samplerDataMap.end())
+		if (samplerDataMap.find(HLSL::Token::SamplerStateElement::Template) != samplerDataMap.end())
 		{
-			CreateSamplerStateByTemplate(StringToSamplerStateTemplate(samplerDataMap.at(TT("Template"))), &desc);
+			CreateSamplerStateByTemplate(StringToSamplerStateTemplate(samplerDataMap.at(HLSL::Token::SamplerStateElement::Template)), &desc);
 		}
 		else
 		{
 			desc = CD3DX12_STATIC_SAMPLER_DESC(0);
 		}
 
-		String Min = TT("Point"); 		String Mag = TT("Point"); 		String Mip = TT("Point");
+		String Min = HLSL::Token::SamplerSatateFilter::Point;
+		String Mag = HLSL::Token::SamplerSatateFilter::Point;
+		String Mip = HLSL::Token::SamplerSatateFilter::Point;
 
-		if (samplerDataMap.find(TT("Min")) != samplerDataMap.end())
+		if (samplerDataMap.find(HLSL::Token::SamplerStateElement::Min) != samplerDataMap.end())
 		{
-			Min = samplerDataMap.at(TT("Min"));
+			Min = samplerDataMap.at(HLSL::Token::SamplerStateElement::Min);
 		}
-		if (samplerDataMap.find(TT("Mag")) != samplerDataMap.end())
+		if (samplerDataMap.find(HLSL::Token::SamplerStateElement::Mag) != samplerDataMap.end())
 		{
-			Mag = samplerDataMap.at(TT("Mag"));
+			Mag = samplerDataMap.at(HLSL::Token::SamplerStateElement::Mag);
 		}
-		if (samplerDataMap.find(TT("Mip")) != samplerDataMap.end())
+		if (samplerDataMap.find(HLSL::Token::SamplerStateElement::Mip) != samplerDataMap.end())
 		{
-			Mip = samplerDataMap.at(TT("Mip"));
+			Mip = samplerDataMap.at(HLSL::Token::SamplerStateElement::Mip);
 		}
 		desc.Filter = GetSamplerStateFilter(Min, Mag, Mip);
 
 
-		String AddressU = TT("Wrap"); String AddressV = TT("Wrap"); String AddressW = TT("Wrap");
-		if (samplerDataMap.find(TT("AddressU")) != samplerDataMap.end())
+		String AddressU = HLSL::Token::SamplerSatateAddressMode::Wrap;
+		String AddressV = HLSL::Token::SamplerSatateAddressMode::Wrap;
+		String AddressW = HLSL::Token::SamplerSatateAddressMode::Wrap;
+		if (samplerDataMap.find(HLSL::Token::SamplerStateElement::AddressU) != samplerDataMap.end())
 		{
-			AddressU = samplerDataMap.at(TT("AddressU"));
+			AddressU = samplerDataMap.at(HLSL::Token::SamplerStateElement::AddressU);
 		}
-		if (samplerDataMap.find(TT("AddressV")) != samplerDataMap.end())
+		if (samplerDataMap.find(HLSL::Token::SamplerStateElement::AddressV) != samplerDataMap.end())
 		{
-			AddressV = samplerDataMap.at(TT("AddressV"));
+			AddressV = samplerDataMap.at(HLSL::Token::SamplerStateElement::AddressV);
 		}
-		if (samplerDataMap.find(TT("AddressW")) != samplerDataMap.end())
+		if (samplerDataMap.find(HLSL::Token::SamplerStateElement::AddressW) != samplerDataMap.end())
 		{
-			AddressW = samplerDataMap.at(TT("AddressW"));
+			AddressW = samplerDataMap.at(HLSL::Token::SamplerStateElement::AddressW);
 		}
 		desc.AddressU = GetTextureAddressMode(AddressU);
 		desc.AddressV = GetTextureAddressMode(AddressV);
 		desc.AddressW = GetTextureAddressMode(AddressW);
 
 
-		String ComparisonFunc = TT("ComparisonFunc");
-		if (samplerDataMap.find(TT("AddressU")) != samplerDataMap.end())
+		String ComparisonFunc = HLSL::Token::SamplerStateComparisonFunc::LessEqual;
+		if (samplerDataMap.find(HLSL::Token::SamplerStateElement::ComparisonFunc) != samplerDataMap.end())
 		{
-			ComparisonFunc = samplerDataMap.at(TT("ComparisonFunc"));
+			ComparisonFunc = samplerDataMap.at(HLSL::Token::SamplerStateElement::ComparisonFunc);
 		}
 		desc.ComparisonFunc = GetComparisonFunc(ComparisonFunc);
 
 
-		String BorderColor = TT("BorderColor");
-		if (samplerDataMap.find(TT("BorderColor")) != samplerDataMap.end())
+		String BorderColor = HLSL::Token::SamplerStateBorderColor::OpaqueBlack;
+		if (samplerDataMap.find(HLSL::Token::SamplerStateElement::BorderColor) != samplerDataMap.end())
 		{
-			BorderColor = samplerDataMap.at(TT("BorderColor"));
+			BorderColor = samplerDataMap.at(HLSL::Token::SamplerStateElement::BorderColor);
 		}
 		desc.BorderColor = GetBorderColor(BorderColor);
 
 
-		if (samplerDataMap.find(TT("MinLOD")) != samplerDataMap.end())
+		if (samplerDataMap.find(HLSL::Token::SamplerStateElement::MinLOD) != samplerDataMap.end())
 		{
-			desc.MinLOD = _wtof(samplerDataMap.at(TT("MinLOD")).c_str());
+			desc.MinLOD = _wtof(samplerDataMap.at(HLSL::Token::SamplerStateElement::MinLOD).c_str());
 		}
-		if (samplerDataMap.find(TT("MaxLOD")) != samplerDataMap.end())
+		if (samplerDataMap.find(HLSL::Token::SamplerStateElement::MaxLOD) != samplerDataMap.end())
 		{
-			desc.MaxLOD = _wtof(samplerDataMap.at(TT("MaxLOD")).c_str());
+			desc.MaxLOD = _wtof(samplerDataMap.at(HLSL::Token::SamplerStateElement::MaxLOD).c_str());
 		}
-		if (samplerDataMap.find(TT("MaxAnisotropy")) != samplerDataMap.end())
+		if (samplerDataMap.find(HLSL::Token::SamplerStateElement::MaxAnisotropy) != samplerDataMap.end())
 		{
-			desc.MaxAnisotropy = _wtoi(samplerDataMap.at(TT("MaxAnisotropy")).c_str());
+			desc.MaxAnisotropy = _wtoi(samplerDataMap.at(HLSL::Token::SamplerStateElement::MaxAnisotropy).c_str());
 		}
-		if (samplerDataMap.find(TT("MipLODBias")) != samplerDataMap.end())
+		if (samplerDataMap.find(HLSL::Token::SamplerStateElement::MipLODBias) != samplerDataMap.end())
 		{
-			desc.MipLODBias = _wtof(samplerDataMap.at(TT("MipLODBias")).c_str());
+			desc.MipLODBias = _wtof(samplerDataMap.at(HLSL::Token::SamplerStateElement::MipLODBias).c_str());
 		}
 		return desc;
 	}
@@ -801,17 +776,17 @@ namespace JG
 		i32 min = Point; i32 mag = Point; i32 mip = Point;
 
 
-		if (Min == TT("Point")) min = Point;
-		else if (Min == TT("Linear")) min = Linear;
-		else if (Min == TT("Anisotropic")) min = Anisotropic;
+		if (Min == HLSL::Token::SamplerSatateFilter::Point) min = Point;
+		else if (Min == HLSL::Token::SamplerSatateFilter::Linear) min = Linear;
+		else if (Min == HLSL::Token::SamplerSatateFilter::Anisotropic) min = Anisotropic;
 
-		if (Mag == TT("Point")) mag = Point;
-		else if (Mag == TT("Linear")) mag = Linear;
-		else if (Mag == TT("Anisotropic")) mag = Anisotropic;
+		if (Mag == HLSL::Token::SamplerSatateFilter::Point) mag = Point;
+		else if (Mag == HLSL::Token::SamplerSatateFilter::Linear) mag = Linear;
+		else if (Mag == HLSL::Token::SamplerSatateFilter::Anisotropic) mag = Anisotropic;
 
-		if (Mip == TT("Point")) mip = Point;
-		else if (Mip == TT("Linear")) mip = Linear;
-		else if (Mip == TT("Anisotropic")) mip = Anisotropic;
+		if (Mip == HLSL::Token::SamplerSatateFilter::Point) mip = Point;
+		else if (Mip == HLSL::Token::SamplerSatateFilter::Linear) mip = Linear;
+		else if (Mip == HLSL::Token::SamplerSatateFilter::Anisotropic) mip = Anisotropic;
 
 
 
@@ -830,31 +805,31 @@ namespace JG
 	}
 	D3D12_TEXTURE_ADDRESS_MODE DirectX12ShaderData::GetTextureAddressMode(const String& addressMode)
 	{
-		if (addressMode == TT("Wrap")) return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		else if (addressMode == TT("Mirror")) return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
-		else if (addressMode == TT("Clamp")) return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
-		else if (addressMode == TT("Border")) return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_BORDER;
-		else if (addressMode == TT("MirrorOnce")) return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_MIRROR_ONCE;
+		if (addressMode == HLSL::Token::SamplerSatateAddressMode::Wrap) return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+		else if (addressMode == HLSL::Token::SamplerSatateAddressMode::Mirror) return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+		else if (addressMode == HLSL::Token::SamplerSatateAddressMode::Clamp) return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+		else if (addressMode == HLSL::Token::SamplerSatateAddressMode::Border) return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+		else if (addressMode == HLSL::Token::SamplerSatateAddressMode::MirrorOnce) return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_MIRROR_ONCE;
 		else return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	}
 	D3D12_COMPARISON_FUNC DirectX12ShaderData::GetComparisonFunc(const String& comparisonFunc)
 	{
-		if (comparisonFunc == TT("Never")) return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_NEVER;
-		else if (comparisonFunc == TT("Less")) return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_LESS;
-		else if (comparisonFunc == TT("Equal")) return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_EQUAL;
-		else if (comparisonFunc == TT("LessEqual")) return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_LESS_EQUAL;
-		else if (comparisonFunc == TT("Greater")) return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_GREATER;
-		else if (comparisonFunc == TT("NotEqual")) return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_NOT_EQUAL;
-		else if (comparisonFunc == TT("GreaterEqual")) return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_GREATER_EQUAL;
-		else if (comparisonFunc == TT("Always")) return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_ALWAYS;
+		if (comparisonFunc == HLSL::Token::SamplerStateComparisonFunc::Never) return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_NEVER;
+		else if (comparisonFunc == HLSL::Token::SamplerStateComparisonFunc::Less) return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_LESS;
+		else if (comparisonFunc == HLSL::Token::SamplerStateComparisonFunc::Equal) return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_EQUAL;
+		else if (comparisonFunc == HLSL::Token::SamplerStateComparisonFunc::LessEqual) return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_LESS_EQUAL;
+		else if (comparisonFunc == HLSL::Token::SamplerStateComparisonFunc::Greater) return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_GREATER;
+		else if (comparisonFunc == HLSL::Token::SamplerStateComparisonFunc::NotEqual) return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_NOT_EQUAL;
+		else if (comparisonFunc == HLSL::Token::SamplerStateComparisonFunc::GreaterEqual) return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_GREATER_EQUAL;
+		else if (comparisonFunc == HLSL::Token::SamplerStateComparisonFunc::Always) return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_ALWAYS;
 		else return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_LESS_EQUAL;
 	}
 	D3D12_STATIC_BORDER_COLOR DirectX12ShaderData::GetBorderColor(const String& borderColor)
 	{
 		// BorderColor = TransparentBlack, OpaqueBlack, OpaqueWhite
-		if (borderColor == TT("TransparentBlack")) return D3D12_STATIC_BORDER_COLOR::D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
-		else if (borderColor == TT("OpaqueBlack")) return D3D12_STATIC_BORDER_COLOR::D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
-		else if (borderColor == TT("OpaqueWhite")) return D3D12_STATIC_BORDER_COLOR::D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
+		if (borderColor == HLSL::Token::SamplerStateBorderColor::TransparentBlack) return D3D12_STATIC_BORDER_COLOR::D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+		else if (borderColor == HLSL::Token::SamplerStateBorderColor::OpaqueBlack) return D3D12_STATIC_BORDER_COLOR::D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
+		else if (borderColor == HLSL::Token::SamplerStateBorderColor::OpaqueWhite) return D3D12_STATIC_BORDER_COLOR::D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
 		else return D3D12_STATIC_BORDER_COLOR::D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
 	}
 

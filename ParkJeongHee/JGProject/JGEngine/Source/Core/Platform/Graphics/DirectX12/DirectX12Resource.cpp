@@ -118,8 +118,7 @@ namespace JG
 
 	TextureID DirectX12Texture::GetTextureID() const
 	{
-		// GetSRV
-		return 0;
+		return GetSRV().ptr;
 	}
 
 	const TextureInfo& DirectX12Texture::GetTextureInfo() const

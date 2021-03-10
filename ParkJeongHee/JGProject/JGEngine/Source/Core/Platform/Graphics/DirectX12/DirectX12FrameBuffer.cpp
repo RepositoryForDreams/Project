@@ -128,6 +128,14 @@ namespace JG
 		return mInfo;
 	}
 
+	void DirectX12FrameBuffer::Reset()
+	{
+		mBackBuffers.clear();
+		mRTVs.clear();
+		mSwapChain.Reset();
+		mSubmittedTexture.reset(); 
+	}
+
 
 
 

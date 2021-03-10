@@ -29,9 +29,14 @@ namespace JG
 		// Begin에 카메라
 		static bool Begin(SharedPtr<Camera> camera, SharedPtr<ITexture> renderTexture);
 		// Standard Material
-		static void DrawCall(const JVector2& Pos, const JVector2& Size, float rotation = 0.0f, SharedPtr<ITexture> texture = nullptr, const Color& color = Color::White());
+		static void DrawCall(const JMatrix& transform, SharedPtr<ITexture> texture, const Color& color);
+		static void DrawCall(const JVector2& Pos, const JVector2& Size, float rotation, SharedPtr<ITexture> texture , const Color& color);
+		static void DrawCall(const JVector2& Pos, const JVector2& Size, float rotation, const Color& color);
+		static void DrawCall(const JVector2& Pos, const JVector2& Size, float rotation, SharedPtr<ITexture> texture);
+		static void DrawCall(const JVector2& Pos, const JVector2& Size, const Color& color);
+		static void DrawCall(const JVector2& Pos, const JVector2& Size, SharedPtr<ITexture> texture);
 		// Custom Material
-		static void DrawCall(const JVector2& Pos, const JVector2& Size, float rotation, SharedPtr<IMaterial> material);
+		//static void DrawCall(const JVector2& Pos, const JVector2& Size, float rotation, SharedPtr<IMaterial> material);
 
 		static void End();
 	private:

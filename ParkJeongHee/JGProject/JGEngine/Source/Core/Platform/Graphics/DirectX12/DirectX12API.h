@@ -92,6 +92,10 @@ namespace JG
 		virtual void SetRenderTarget(const List<SharedPtr<ITexture>>& rtTextures, SharedPtr<ITexture> depthTexture) override;
 		virtual void DrawIndexed(u32 indexCount, u32 instancedCount = 1, u32 startIndexLocation = 0, u32 startVertexLocation = 0, u32 startInstanceLocation = 0) override;
 	protected:
+		virtual void SetDepthStencilState(EDepthStencilStateTemplate _template) override;
+		virtual void SetBlendState(u32 renderTargetSlot, EBlendStateTemplate _template) override;
+		virtual void SetRasterizerState(ERasterizerStateTemplate _template) override;
+	protected:
 		virtual SharedPtr<IFrameBuffer>   CreateFrameBuffer(const FrameBufferInfo& info) override;
 		virtual SharedPtr<IVertexBuffer>  CreateVertexBuffer(const String& name) override;
 		virtual SharedPtr<IIndexBuffer>   CreateIndexBuffer(const String& name) override;
@@ -102,3 +106,4 @@ namespace JG
 		virtual SharedPtr<ITexture>       CreateTextureFromFile(const String& path) override;
 	};
 }
+ 

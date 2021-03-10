@@ -282,10 +282,15 @@ namespace JG
 		gComputePSO.reset(); gComputePSO = nullptr;
 		gRootSignature.reset(); gRootSignature = nullptr;
 
+		for (auto& _pair : gFrameBuffers)
+		{
+			_pair.second->Reset();
+		}
+		gFrameBuffers.clear();
 		PipelineState::ClearCache();
 		RootSignature::ClearCache();
 		ResourceStateTracker::ClearCache();
-		gFrameBuffers.clear();
+
 		gGraphicsCommandLists.clear();
 		gComputeCommandLists.clear();
 		gCopyCommandLists.clear();
@@ -464,6 +469,56 @@ namespace JG
 		}
 		commandList->BindPipelineState(gGracphisPSO);
 		commandList->DrawIndexed(indexCount, instancedCount, startIndexLocation, startVertexLocation, startIndexLocation);
+	}
+
+	void DirectX12API::SetDepthStencilState(EDepthStencilStateTemplate _template)
+	{
+		auto pso = GetGraphicsPipelineState();
+		auto desc = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+		switch (_template)
+		{
+		case EDepthStencilStateTemplate::NoDepth:
+			desc.DepthEnable = false;
+			break;
+		default:
+			break;
+		}
+		pso->SetDepthStencilState(desc);
+	}
+
+	void DirectX12API::SetBlendState(u32 renderTargetSlot, EBlendStateTemplate _template)
+	{
+		if (renderTargetSlot >= MAX_RENDERTARGET)
+		{
+			return;
+		}
+		auto pso = GetGraphicsPipelineState();
+		auto desc = pso->GetBlendDesc();
+		
+
+		switch (_template)
+		{
+		case EBlendStateTemplate::Transparent_Default:
+			desc.RenderTarget[renderTargetSlot].BlendEnable = true;
+			desc.RenderTarget[renderTargetSlot].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+			desc.RenderTarget[renderTargetSlot].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+			desc.RenderTarget[renderTargetSlot].BlendOp = D3D12_BLEND_OP_ADD;
+			desc.RenderTarget[renderTargetSlot].SrcBlendAlpha = D3D12_BLEND_ONE;
+			desc.RenderTarget[renderTargetSlot].DestBlendAlpha = D3D12_BLEND_ZERO;
+			desc.RenderTarget[renderTargetSlot].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+			desc.RenderTarget[renderTargetSlot].RenderTargetWriteMask = 0x0f;
+			break;
+		}
+
+		pso->SetBlendState(desc);
+	}
+
+	void DirectX12API::SetRasterizerState(ERasterizerStateTemplate _template)
+	{
+		auto pso = GetGraphicsPipelineState();
+		auto desc = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+
+		pso->SetRasterizerState(desc);
 	}
 
 	SharedPtr<IFrameBuffer> DirectX12API::CreateFrameBuffer(const FrameBufferInfo& info)

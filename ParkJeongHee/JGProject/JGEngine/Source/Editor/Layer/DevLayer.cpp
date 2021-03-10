@@ -24,13 +24,13 @@ namespace JG
 		if (Renderer2D::Begin(mCamera, mRenderTexture))
 		{
 
-
+			auto r = Color::Red(); r.A = 0.8f;
 			Renderer2D::DrawCall(
-				JVector2(0,0), JVector2(200, 200)
+				JVector2(0,0), JVector2(200, 200), r
 			);
 
 			Renderer2D::DrawCall(
-				JVector2(400, 0), JVector2(200, 200)
+				JVector2(400, 0), JVector2(200, 200), Color::Blue()
 			);
 
 			Renderer2D::End();

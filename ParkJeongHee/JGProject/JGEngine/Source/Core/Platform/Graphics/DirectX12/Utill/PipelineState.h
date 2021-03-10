@@ -42,6 +42,7 @@ namespace JG
 
 		virtual bool Finalize() override;
 
+		const D3D12_BLEND_DESC& GetBlendDesc() const;
 	};
 
 	class ComputePipelineState : public PipelineState

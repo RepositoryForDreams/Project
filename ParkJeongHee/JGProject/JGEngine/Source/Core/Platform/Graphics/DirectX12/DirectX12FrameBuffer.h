@@ -22,6 +22,9 @@ namespace JG
 		virtual void SubmitTexture(SharedPtr<ITexture> texture) override;
 		virtual void Resize(u32 width, u32 height)		   override;
 		virtual const FrameBufferInfo& GetInfo() const override;
+	public:
+		void Reset();
+
 	};
 
 

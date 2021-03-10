@@ -82,21 +82,6 @@ namespace JG
 		static const u64 StructuredBufferStartSpace = 2;
 	public:
 		class 	CBufferData;
-		enum class EShaderElementType
-		{
-			None,
-			CBuffer,
-			StructuredBuffer,
-			Texture,
-			SamplerState,
-		};
-		enum class ETextureType
-		{
-			_1D,
-			_2D,
-			_3D,
-			Cube,
-		};
 		class ShaderElement
 		{
 		public:
@@ -104,7 +89,7 @@ namespace JG
 			u64 RootParm = 0;
 			u32 RegisterNum   = 0;
 			u32 RegisterSpace = 0;
-			EShaderElementType ShaderElementType = EShaderElementType::None;
+			HLSL::EHLSLElement ElementType = HLSL::EHLSLElement::None;
 		public:
 			virtual ~ShaderElement() = default;
 		};
@@ -120,7 +105,7 @@ namespace JG
 		class TextureData : public ShaderElement
 		{
 		public:
-			ETextureType Type = ETextureType::_2D;
+			HLSL::EHLSLTextureType Type = HLSL::EHLSLTextureType::_2D;
 			u64 TextureCount = 0;
 		public:
 			virtual ~TextureData() = default;
@@ -170,6 +155,7 @@ namespace JG
 		u64 AnalysisTexture2D(String& code, u64 startPos, bool* result);
 		u64 AnalysisSamplerState(String& code, u64 startPos, bool* result);
 	private:
+		void ExtractCBufferName(const String& code, u64 pos, String* out_value);
 		u64 ExtractCBufferVar(const String& code, u64 pos, String* out_value);
 		u64 ExtractSamplerStateValue(const String& samplerStateDataCode, u64 startPos, String* out_key, String* out_value);
 	private:
