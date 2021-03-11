@@ -10,47 +10,173 @@ namespace JG
 {
 	DirectX12VertexBuffer::~DirectX12VertexBuffer()
 	{
-		if (mCPUData)
+		switch (mBufferType)
 		{
-			free(mCPUData);
-			mCPUData = nullptr;
+		case EBufferType::CPULoad_Buffer:
+			if (mD3DResource)
+			{
+				mD3DResource->Unmap(0, nullptr);
+			}
+		case EBufferType::GPULoad_Buffer:
+			if (mD3DResource)
+			{
+				ResourceStateTracker::UnRegisterResource(mD3DResource.Get());
+				mD3DResource.Reset(); mD3DResource = nullptr;
+			}
+			break;
+		case EBufferType::DynamicUpload_Buffer:
+			if (mCPUData)
+			{
+				free(mCPUData);
+				mCPUData = nullptr;
+			}
+			break;
 		}
 	}
 
 
 	bool DirectX12VertexBuffer::SetData(void* datas, u64 elementSize, u64 elementCount)
 	{
-		if(mCPUData)
-		{
-			free(mCPUData);
-			mCPUData = nullptr;
-		}
-		mElementSize  = elementSize;
-		mElementCount = elementCount;
+		// Static_GPU, 는 한번 data
+		//Static_CPU
+		// 
 
-		
+		// Dynamic_CPU
+		// ElementSize, ElementCount
+		u64 originBtSize = mElementSize * mElementCount;
+		mElementSize = elementSize; mElementCount = elementCount;
 		u64 btSize = mElementSize * mElementCount;
-		
-		mCPUData = malloc(btSize);
-		if(mCPUData == nullptr)
+
+		// Reset Resource
+		switch (mBufferType)
 		{
-			JG_CORE_ERROR("Failed Malloc CPUData in VertexBuffer : {0}", ws2s(GetName()));
-			return false;
+		case EBufferType::CPULoad_Buffer:
+			if (originBtSize == btSize)
+			{
+				break;
+			}
+			else
+			{
+				if (mD3DResource)
+				{
+					mD3DResource->Unmap(0, nullptr);
+				}
+			}
+		case EBufferType::GPULoad_Buffer:
+			if (mD3DResource)
+			{
+				ResourceStateTracker::UnRegisterResource(mD3DResource.Get());
+				mD3DResource.Reset(); mD3DResource = nullptr;
+			}
+			break;
+		case EBufferType::DynamicUpload_Buffer:
+			if (mCPUData && originBtSize == btSize)
+			{
+				free(mCPUData);
+				mCPUData = nullptr;
+			}
+			break;
 		}
 		
-		memcpy(mCPUData, datas, btSize);
+		
 
-		//JG_CORE_INFO("Successed Create VertexBuffer =>  Name : {0}  ElementSize = {1}   ElementCount = {2}", ws2s(GetName()), mElementSize, mElementCount);
+
+		// Create
+		switch (mBufferType)
+		{
+		case EBufferType::GPULoad_Buffer:
+		{
+			auto d3dDevice = DirectX12API::GetD3DDevice();
+			HRESULT hResult = d3dDevice->CreateCommittedResource(
+				&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+				D3D12_HEAP_FLAG_NONE,
+				&CD3DX12_RESOURCE_DESC::Buffer(btSize),
+				D3D12_RESOURCE_STATE_COMMON,
+				nullptr,
+				IID_PPV_ARGS(mD3DResource.GetAddressOf()));
+			if (SUCCEEDED(hResult))
+			{
+				ResourceStateTracker::RegisterResource(GetName(), mD3DResource.Get(), D3D12_RESOURCE_STATE_COMMON);
+
+				auto commandList = DirectX12API::GetCopyCommandList();
+				commandList->CopyBuffer(mD3DResource.Get(), datas, elementSize, elementCount);
+			}
+		}
+		break;
+		case EBufferType::CPULoad_Buffer:
+			if (mD3DResource == nullptr)
+			{
+				auto d3dDevice = DirectX12API::GetD3DDevice();
+				HRESULT hResult = d3dDevice->CreateCommittedResource(
+					&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+					D3D12_HEAP_FLAG_NONE,
+					&CD3DX12_RESOURCE_DESC::Buffer(btSize),
+					D3D12_RESOURCE_STATE_GENERIC_READ,
+					nullptr,
+					IID_PPV_ARGS(mD3DResource.GetAddressOf()));
+				if (SUCCEEDED(hResult))
+				{
+					ResourceStateTracker::RegisterResource(GetName(), mD3DResource.Get(), D3D12_RESOURCE_STATE_GENERIC_READ);
+					mD3DResource->Map(0, nullptr, &mCPUData);
+				}
+			}
+			memcpy(mCPUData, datas, btSize);
+			break;
+		case EBufferType::DynamicUpload_Buffer:
+			mCPUData = malloc(btSize);
+			if (mCPUData == nullptr)
+			{
+				JG_CORE_ERROR("Failed Malloc CPUData in VertexBuffer : {0}", ws2s(GetName()));
+				return false;
+			}
+			memcpy(mCPUData, datas, btSize);
+			break;
+		}
+
+	
+
 		return true;
 	}
+
 	bool DirectX12VertexBuffer::IsValid() const
 	{
 		return mCPUData != nullptr;
 	}
+	EBufferType DirectX12VertexBuffer::GetBufferType() const
+	{
+		return mBufferType;
+	}
+	void DirectX12VertexBuffer::SetBufferType(EBufferType type)
+	{
+		mBufferType = type;
+	}
 	void DirectX12VertexBuffer::Bind()
 	{
 		auto commandList = DirectX12API::GetGraphicsCommandList();
-		commandList->BindDynamicVertexBuffer(mCPUData, mElementCount, mElementSize, false);
+
+		switch (mBufferType)
+		{
+		case EBufferType::GPULoad_Buffer:
+		case EBufferType::CPULoad_Buffer:
+		{
+			D3D12_VERTEX_BUFFER_VIEW View = {};
+			View.BufferLocation = mD3DResource->GetGPUVirtualAddress();
+			View.SizeInBytes = mElementSize * mElementCount;
+			View.StrideInBytes = mElementSize;
+			commandList->BindVertexBuffer(View, false);
+		}
+			break;
+		case EBufferType::DynamicUpload_Buffer:
+			commandList->BindDynamicVertexBuffer(mCPUData, mElementCount, mElementSize, false);
+			break;
+		}
+	}
+
+	void DirectX12VertexBuffer::Reset()
+	{
+
+
+
 	}
 
 
@@ -87,9 +213,18 @@ namespace JG
 		//JG_CORE_INFO("Successed Create IndexBuffer =>  Name : {0}  IndexCount = {1}", ws2s(GetName()),mIndexCount);
 		return true;
 	}
+
 	bool DirectX12IndexBuffer::IsValid() const
 	{
 		return mCPUData != nullptr;
+	}
+	EBufferType DirectX12IndexBuffer::GetBufferType() const
+	{
+		return mBufferType;
+	}
+	void DirectX12IndexBuffer::SetBufferType(EBufferType type)
+	{
+		mBufferType = type;
 	}
 
 	void DirectX12IndexBuffer::Bind()

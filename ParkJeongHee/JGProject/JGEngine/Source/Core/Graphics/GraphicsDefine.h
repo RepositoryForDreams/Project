@@ -244,6 +244,21 @@ namespace JG
 	};
 
 
+	enum class EBufferType
+	{
+		GPULoad_Buffer,
+		CPULoad_Buffer,
+		DynamicUpload_Buffer,   
+	};
+
+	
+
+
+
+
+
+
+
 	class ScissorRect
 	{
 	public:
@@ -340,13 +355,6 @@ namespace JG
 		}
 
 
-
-
-
-
-
-
-
 		constexpr wchar* VSEntry = TT("vs_main");
 		constexpr wchar* DSEntry = TT("ds_main");
 		constexpr wchar* HSEntry = TT("hs_main");
@@ -410,72 +418,5 @@ namespace JG
 
 
 
-	}
-
-	namespace ShaderCode
-	{
-		namespace HLSL
-		{
-
-
-
-
-
-
-
-
-			constexpr wchar* Common = LR"(
-struct SDObject
-{
-	float4x4 world;
-};
-
-cbuffer CBCamera : register(b0, space0)
-{
-	float4x4 gViewProj;
-};
-
-
-StructuredBuffer<SDObject>      gObjectInstances : register(t0, space0);
-)";
-
-
-
-			constexpr wchar* SpriteShader = LR"(
-struct VS_IN
-{
-	float3 posL : POSITION;
-	float2 tex  : TEXCOORD;
-}
-
-struct VS_OUT
-{
-	float4 posH : SV_POSITION;
-	float2 tex   : TEXCOORD;
-}
-
-VS_OUT vs(VS_IN vin, uint insID)
-{
-	VS_OUT vout;
-	float4x4 world = gObjectInstances[insID].world;
-	float4 posW = mul(float4(vin.posL, 1.0f), world);
-
-
-	vout.posH = mul(posW, g_viewProj);
-	vout.tex = vin.tex;
-	return vout;
-}
-
-float4 ps(VS_OUT pin) : SV_TARGET
-{
-
-	return float4(1.0f,1.0f,1.0f,1.0f);
-}
-
-)";
-
-			constexpr wchar* TextShader = LR"()";
-		}
-	
 	}
 }

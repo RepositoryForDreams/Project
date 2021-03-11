@@ -26,27 +26,33 @@ namespace JG
 		const IResource& operator=(const IResource&) = delete;
 	};
 
-	class Buffer : public IResource { };
-
+	class Buffer : public IResource {};
 
 	class IVertexBuffer : public Buffer
 	{
 	public:
 		virtual ~IVertexBuffer() = default;
+	protected:
+		virtual void SetBufferType(EBufferType type) = 0;
 	public:
 		virtual bool SetData(void* datas, u64 elementSize, u64 elementCount) = 0;
+		virtual EBufferType GetBufferType() const = 0;
 
-
-		static SharedPtr<IVertexBuffer> Create(String name);
+		static SharedPtr<IVertexBuffer> Create(String name, EBufferType type);
 	};
 
 	class IIndexBuffer : public Buffer
 	{
 	public:
 		virtual ~IIndexBuffer() = default;
+	protected:
+		virtual void SetBufferType(EBufferType type) = 0;
 	public:
 		virtual bool SetData(u32* datas, u64 count) = 0;
-		static SharedPtr<IIndexBuffer> Create(String name);
+		virtual EBufferType GetBufferType() const = 0;
+
+
+		static SharedPtr<IIndexBuffer> Create(String name, EBufferType type);
 	};
 	
 

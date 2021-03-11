@@ -8,20 +8,20 @@
 
 namespace JG
 {
-	SharedPtr<IVertexBuffer> IVertexBuffer::Create(String name)
+	SharedPtr<IVertexBuffer> IVertexBuffer::Create(String name, EBufferType type)
 	{
 		auto api = Application::GetInstance().GetGraphicsAPI();
 		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
 
-		return api->CreateVertexBuffer(name);
+		return api->CreateVertexBuffer(name, type);
 	}
 
-	SharedPtr<IIndexBuffer> IIndexBuffer::Create(String name)
+	SharedPtr<IIndexBuffer> IIndexBuffer::Create(String name, EBufferType type)
 	{
 		auto api = Application::GetInstance().GetGraphicsAPI();
 		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
 
-		return api->CreateIndexBuffer(name);
+		return api->CreateIndexBuffer(name, type);
 	}
 
 	SharedPtr<ITexture> ITexture::Create(const String& name, const TextureInfo& info)

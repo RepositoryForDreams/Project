@@ -97,8 +97,8 @@ namespace JG
 		virtual void SetRasterizerState(ERasterizerStateTemplate _template) override;
 	protected:
 		virtual SharedPtr<IFrameBuffer>   CreateFrameBuffer(const FrameBufferInfo& info) override;
-		virtual SharedPtr<IVertexBuffer>  CreateVertexBuffer(const String& name) override;
-		virtual SharedPtr<IIndexBuffer>   CreateIndexBuffer(const String& name) override;
+		virtual SharedPtr<IVertexBuffer>  CreateVertexBuffer(const String& name, EBufferType bufferType) override;
+		virtual SharedPtr<IIndexBuffer>   CreateIndexBuffer(const String& name, EBufferType bufferType) override;
 		virtual SharedPtr<IShader>        CreateShader(const String& name, const String& sourceCode, EShaderFlags flags) override;
 		virtual SharedPtr<IMaterial>	  CreateMaterial(const String& name, SharedPtr<IShader> shader) override;
 		virtual SharedPtr<IMesh>		  CreateMesh(const String& name) override;
