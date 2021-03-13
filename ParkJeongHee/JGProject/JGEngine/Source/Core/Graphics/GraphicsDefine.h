@@ -244,11 +244,10 @@ namespace JG
 	};
 
 
-	enum class EBufferType
+	enum class EBufferLoadMethod
 	{
-		GPULoad_Buffer,
-		CPULoad_Buffer,
-		DynamicUpload_Buffer,   
+		GPULoad,
+		CPULoad,
 	};
 
 	

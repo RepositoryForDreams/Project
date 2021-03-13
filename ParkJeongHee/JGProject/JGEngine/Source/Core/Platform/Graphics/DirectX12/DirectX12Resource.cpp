@@ -10,82 +10,22 @@ namespace JG
 {
 	DirectX12VertexBuffer::~DirectX12VertexBuffer()
 	{
-		switch (mBufferType)
-		{
-		case EBufferType::CPULoad_Buffer:
-			if (mD3DResource)
-			{
-				mD3DResource->Unmap(0, nullptr);
-			}
-		case EBufferType::GPULoad_Buffer:
-			if (mD3DResource)
-			{
-				ResourceStateTracker::UnRegisterResource(mD3DResource.Get());
-				mD3DResource.Reset(); mD3DResource = nullptr;
-			}
-			break;
-		case EBufferType::DynamicUpload_Buffer:
-			if (mCPUData)
-			{
-				free(mCPUData);
-				mCPUData = nullptr;
-			}
-			break;
-		}
+		Reset();
 	}
 
 
 	bool DirectX12VertexBuffer::SetData(void* datas, u64 elementSize, u64 elementCount)
 	{
-		// Static_GPU, 는 한번 data
-		//Static_CPU
-		// 
-
-		// Dynamic_CPU
-		// ElementSize, ElementCount
 		u64 originBtSize = mElementSize * mElementCount;
 		mElementSize = elementSize; mElementCount = elementCount;
 		u64 btSize = mElementSize * mElementCount;
 
-		// Reset Resource
-		switch (mBufferType)
-		{
-		case EBufferType::CPULoad_Buffer:
-			if (originBtSize == btSize)
-			{
-				break;
-			}
-			else
-			{
-				if (mD3DResource)
-				{
-					mD3DResource->Unmap(0, nullptr);
-				}
-			}
-		case EBufferType::GPULoad_Buffer:
-			if (mD3DResource)
-			{
-				ResourceStateTracker::UnRegisterResource(mD3DResource.Get());
-				mD3DResource.Reset(); mD3DResource = nullptr;
-			}
-			break;
-		case EBufferType::DynamicUpload_Buffer:
-			if (mCPUData && originBtSize == btSize)
-			{
-				free(mCPUData);
-				mCPUData = nullptr;
-			}
-			break;
-		}
-		
-		
-
-
 		// Create
-		switch (mBufferType)
+		switch (mLoadMethod)
 		{
-		case EBufferType::GPULoad_Buffer:
+		case EBufferLoadMethod::GPULoad:
 		{
+			Reset();
 			auto d3dDevice = DirectX12API::GetD3DDevice();
 			HRESULT hResult = d3dDevice->CreateCommittedResource(
 				&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
@@ -103,7 +43,11 @@ namespace JG
 			}
 		}
 		break;
-		case EBufferType::CPULoad_Buffer:
+		case EBufferLoadMethod::CPULoad:
+			if (mD3DResource && originBtSize != btSize)
+			{
+				Reset();
+			}
 			if (mD3DResource == nullptr)
 			{
 				auto d3dDevice = DirectX12API::GetD3DDevice();
@@ -122,15 +66,6 @@ namespace JG
 			}
 			memcpy(mCPUData, datas, btSize);
 			break;
-		case EBufferType::DynamicUpload_Buffer:
-			mCPUData = malloc(btSize);
-			if (mCPUData == nullptr)
-			{
-				JG_CORE_ERROR("Failed Malloc CPUData in VertexBuffer : {0}", ws2s(GetName()));
-				return false;
-			}
-			memcpy(mCPUData, datas, btSize);
-			break;
 		}
 
 	
@@ -142,41 +77,51 @@ namespace JG
 	{
 		return mCPUData != nullptr;
 	}
-	EBufferType DirectX12VertexBuffer::GetBufferType() const
+	EBufferLoadMethod DirectX12VertexBuffer::GetBufferLoadMethod() const
 	{
-		return mBufferType;
+		return mLoadMethod;
 	}
-	void DirectX12VertexBuffer::SetBufferType(EBufferType type)
+	void DirectX12VertexBuffer::SetBufferLoadMethod(EBufferLoadMethod method)
 	{
-		mBufferType = type;
+		 mLoadMethod = method;
 	}
 	void DirectX12VertexBuffer::Bind()
 	{
+		if (IsValid() == false)
+		{
+			return;
+		}
 		auto commandList = DirectX12API::GetGraphicsCommandList();
 
-		switch (mBufferType)
-		{
-		case EBufferType::GPULoad_Buffer:
-		case EBufferType::CPULoad_Buffer:
-		{
-			D3D12_VERTEX_BUFFER_VIEW View = {};
-			View.BufferLocation = mD3DResource->GetGPUVirtualAddress();
-			View.SizeInBytes = mElementSize * mElementCount;
-			View.StrideInBytes = mElementSize;
-			commandList->BindVertexBuffer(View, false);
-		}
-			break;
-		case EBufferType::DynamicUpload_Buffer:
-			commandList->BindDynamicVertexBuffer(mCPUData, mElementCount, mElementSize, false);
-			break;
-		}
+
+		D3D12_VERTEX_BUFFER_VIEW View = {};
+		View.BufferLocation = mD3DResource->GetGPUVirtualAddress();
+		View.SizeInBytes    = mElementSize * mElementCount;
+		View.StrideInBytes  = mElementSize;
+		commandList->BindVertexBuffer(View, false);
 	}
 
 	void DirectX12VertexBuffer::Reset()
 	{
-
-
-
+		switch (mLoadMethod)
+		{
+		case EBufferLoadMethod::CPULoad:
+			if (mD3DResource)
+			{
+				mD3DResource->Unmap(0, nullptr);
+				ResourceStateTracker::UnRegisterResource(mD3DResource.Get());
+				mD3DResource.Reset(); mD3DResource = nullptr;
+				mCPUData = nullptr;
+			}
+			break;
+		case EBufferLoadMethod::GPULoad:
+			if (mD3DResource)
+			{
+				ResourceStateTracker::UnRegisterResource(mD3DResource.Get());
+				mD3DResource.Reset(); mD3DResource = nullptr;
+			}
+			break;
+		}
 	}
 
 
@@ -184,33 +129,62 @@ namespace JG
 
 	DirectX12IndexBuffer::~DirectX12IndexBuffer()
 	{
-		if (mCPUData)
-		{
-			free(mCPUData);
-			mCPUData = nullptr;
-		}
+		Reset();
 	}
 
 	bool DirectX12IndexBuffer::SetData(u32* datas, u64 count)
 	{
-		if (mCPUData)
-		{
-			free(mCPUData);
-			mCPUData = nullptr;
-		}
+		u64 originBtSize = sizeof(u32) * mIndexCount;
 		mIndexCount = count;
+		u64 btSize = sizeof(u32) * mIndexCount;
 
-		u64 btSize = sizeof(u32) * count;
-
-		mCPUData = (u32*)malloc(btSize);
-		if (mCPUData == nullptr)
+		// Create
+		switch (mLoadMethod)
 		{
-			JG_CORE_ERROR("Failed Malloc CPUData in IndexBuffer : {0}", ws2s(GetName()));
-			return false;
-		}
-		memcpy(mCPUData, datas, btSize);
+		case EBufferLoadMethod::GPULoad:
+		{
+			Reset();
+			auto d3dDevice = DirectX12API::GetD3DDevice();
+			HRESULT hResult = d3dDevice->CreateCommittedResource(
+				&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+				D3D12_HEAP_FLAG_NONE,
+				&CD3DX12_RESOURCE_DESC::Buffer(btSize),
+				D3D12_RESOURCE_STATE_COMMON,
+				nullptr,
+				IID_PPV_ARGS(mD3DResource.GetAddressOf()));
+			if (SUCCEEDED(hResult))
+			{
+				ResourceStateTracker::RegisterResource(GetName(), mD3DResource.Get(), D3D12_RESOURCE_STATE_COMMON);
 
-		//JG_CORE_INFO("Successed Create IndexBuffer =>  Name : {0}  IndexCount = {1}", ws2s(GetName()),mIndexCount);
+				auto commandList = DirectX12API::GetCopyCommandList();
+				commandList->CopyBuffer(mD3DResource.Get(), datas, sizeof(u32), mIndexCount);
+			}
+		}
+		break;
+		case EBufferLoadMethod::CPULoad:
+			if (mD3DResource && originBtSize != btSize)
+			{
+				Reset();
+			}
+			if (mD3DResource == nullptr)
+			{
+				auto d3dDevice = DirectX12API::GetD3DDevice();
+				HRESULT hResult = d3dDevice->CreateCommittedResource(
+					&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+					D3D12_HEAP_FLAG_NONE,
+					&CD3DX12_RESOURCE_DESC::Buffer(btSize),
+					D3D12_RESOURCE_STATE_GENERIC_READ,
+					nullptr,
+					IID_PPV_ARGS(mD3DResource.GetAddressOf()));
+				if (SUCCEEDED(hResult))
+				{
+					ResourceStateTracker::RegisterResource(GetName(), mD3DResource.Get(), D3D12_RESOURCE_STATE_GENERIC_READ);
+					mD3DResource->Map(0, nullptr, (void**)&mCPUData);
+				}
+			}
+			memcpy(mCPUData, datas, btSize);
+			break;
+		}
 		return true;
 	}
 
@@ -218,20 +192,51 @@ namespace JG
 	{
 		return mCPUData != nullptr;
 	}
-	EBufferType DirectX12IndexBuffer::GetBufferType() const
+	EBufferLoadMethod DirectX12IndexBuffer::GetBufferLoadMethod() const
 	{
-		return mBufferType;
+		return mLoadMethod;
 	}
-	void DirectX12IndexBuffer::SetBufferType(EBufferType type)
+	void DirectX12IndexBuffer::SetBufferLoadMethod(EBufferLoadMethod method)
 	{
-		mBufferType = type;
+		mLoadMethod = method;
 	}
 
 	void DirectX12IndexBuffer::Bind()
 	{
+		if (IsValid() == false)
+		{
+			return;
+		}
 		auto commandList = DirectX12API::GetGraphicsCommandList();
-		commandList->BindDynamicIndexBuffer(mCPUData, mIndexCount);
-		
+		D3D12_INDEX_BUFFER_VIEW View;
+		View.BufferLocation = mD3DResource->GetGPUVirtualAddress();
+		View.Format = DXGI_FORMAT_R32_UINT;
+		View.SizeInBytes = sizeof(u32) * mIndexCount;
+
+		commandList->BindIndexBuffer(View);
+	}
+
+	void DirectX12IndexBuffer::Reset()
+	{
+		switch (mLoadMethod)
+		{
+		case EBufferLoadMethod::CPULoad:
+			if (mD3DResource)
+			{
+				mD3DResource->Unmap(0, nullptr);
+				ResourceStateTracker::UnRegisterResource(mD3DResource.Get());
+				mD3DResource.Reset(); mD3DResource = nullptr;
+				mCPUData = nullptr;
+			}
+			break;
+		case EBufferLoadMethod::GPULoad:
+			if (mD3DResource)
+			{
+				ResourceStateTracker::UnRegisterResource(mD3DResource.Get());
+				mD3DResource.Reset(); mD3DResource = nullptr;
+			}
+			break;
+		}
 	}
 
 

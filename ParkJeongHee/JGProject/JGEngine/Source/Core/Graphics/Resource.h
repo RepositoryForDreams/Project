@@ -33,12 +33,12 @@ namespace JG
 	public:
 		virtual ~IVertexBuffer() = default;
 	protected:
-		virtual void SetBufferType(EBufferType type) = 0;
+		virtual void SetBufferLoadMethod(EBufferLoadMethod method) = 0;
 	public:
 		virtual bool SetData(void* datas, u64 elementSize, u64 elementCount) = 0;
-		virtual EBufferType GetBufferType() const = 0;
+		virtual EBufferLoadMethod GetBufferLoadMethod() const = 0;
 
-		static SharedPtr<IVertexBuffer> Create(String name, EBufferType type);
+		static SharedPtr<IVertexBuffer> Create(String name, EBufferLoadMethod method);
 	};
 
 	class IIndexBuffer : public Buffer
@@ -46,13 +46,13 @@ namespace JG
 	public:
 		virtual ~IIndexBuffer() = default;
 	protected:
-		virtual void SetBufferType(EBufferType type) = 0;
+		virtual void SetBufferLoadMethod(EBufferLoadMethod method) = 0;
 	public:
 		virtual bool SetData(u32* datas, u64 count) = 0;
-		virtual EBufferType GetBufferType() const = 0;
+		virtual EBufferLoadMethod GetBufferLoadMethod() const = 0;
 
 
-		static SharedPtr<IIndexBuffer> Create(String name, EBufferType type);
+		static SharedPtr<IIndexBuffer> Create(String name, EBufferLoadMethod method);
 	};
 	
 

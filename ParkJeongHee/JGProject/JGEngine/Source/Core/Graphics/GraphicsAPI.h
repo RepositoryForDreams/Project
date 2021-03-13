@@ -57,8 +57,8 @@ namespace JG
 		friend IMaterial;
 
 		virtual SharedPtr<IFrameBuffer>   CreateFrameBuffer(const FrameBufferInfo& settings) = 0;
-		virtual SharedPtr<IVertexBuffer>  CreateVertexBuffer(const String& name, EBufferType bufferType) = 0;
-		virtual SharedPtr<IIndexBuffer>   CreateIndexBuffer(const String& name, EBufferType bufferType) = 0;
+		virtual SharedPtr<IVertexBuffer>  CreateVertexBuffer(const String& name, EBufferLoadMethod method) = 0;
+		virtual SharedPtr<IIndexBuffer>   CreateIndexBuffer(const String& name, EBufferLoadMethod method) = 0;
 		virtual SharedPtr<IShader>        CreateShader(const String& name, const String& sourceCode, EShaderFlags flags) = 0;
 		virtual SharedPtr<IMaterial>	  CreateMaterial(const String& name, SharedPtr<IShader> shader) = 0;
 		virtual SharedPtr<IMesh>          CreateMesh(const String& name) = 0;

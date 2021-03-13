@@ -539,17 +539,18 @@ namespace JG
 		gFrameBuffers.emplace(info.Handle, buffer);
 		return buffer;
 	}
-	SharedPtr<IVertexBuffer> DirectX12API::CreateVertexBuffer(const String& name, EBufferType bufferType)
+	SharedPtr<IVertexBuffer> DirectX12API::CreateVertexBuffer(const String& name, EBufferLoadMethod method)
 	{
 		auto vBuffer = CreateSharedPtr<DirectX12VertexBuffer>();
 		vBuffer->SetName(name);
-		vBuffer->SetBufferType(bufferType);
+		vBuffer->SetBufferLoadMethod(method);
 		return vBuffer;
 	}
-	SharedPtr<IIndexBuffer> DirectX12API::CreateIndexBuffer(const String& name, EBufferType bufferType)
+	SharedPtr<IIndexBuffer> DirectX12API::CreateIndexBuffer(const String& name, EBufferLoadMethod method)
 	{
 		auto iBuffer = CreateSharedPtr<DirectX12IndexBuffer>();
 		iBuffer->SetName(name);
+		iBuffer->SetBufferLoadMethod(method);
 		return iBuffer;
 	}
 	SharedPtr<IShader> DirectX12API::CreateShader(const String& name, const String& sourceCode, EShaderFlags flags)

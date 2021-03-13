@@ -19,7 +19,7 @@ namespace JG
 		u64   mElementSize  = 0;
 		u64   mElementCount = 0;
 		void* mCPUData  = nullptr;
-		EBufferType mBufferType;
+		EBufferLoadMethod mLoadMethod;
 		ComPtr<ID3D12Resource>  mD3DResource;
 	public:
 		DirectX12VertexBuffer() = default;
@@ -27,8 +27,8 @@ namespace JG
 	public:
 		virtual bool  SetData(void* datas, u64 elementSize, u64 elementCount) override;
 		virtual bool  IsValid() const override;
-		virtual void SetBufferType(EBufferType type) override;
-		virtual EBufferType GetBufferType() const override;
+		virtual void SetBufferLoadMethod(EBufferLoadMethod type) override;
+		virtual EBufferLoadMethod GetBufferLoadMethod() const override;
 	protected:
 		virtual void Bind();
 		void Reset();
@@ -54,7 +54,8 @@ namespace JG
 	private:
 		u32* mCPUData    = nullptr;
 		u64  mIndexCount = 0;
-		EBufferType mBufferType;
+		EBufferLoadMethod mLoadMethod;
+		ComPtr<ID3D12Resource>  mD3DResource;
 	public:
 		DirectX12IndexBuffer() = default;
 		virtual ~DirectX12IndexBuffer();
@@ -62,11 +63,12 @@ namespace JG
 		virtual bool SetData(u32* datas, u64 count) override;
 		virtual bool IsValid() const override;
 
-		virtual void SetBufferType(EBufferType type) override;
-		virtual EBufferType GetBufferType() const override;
+		virtual void SetBufferLoadMethod(EBufferLoadMethod method) override;
+		virtual EBufferLoadMethod GetBufferLoadMethod() const override;
 	protected:
 
 		virtual void Bind();
+		void Reset();
 	public:
 		u32* GetData() const
 		{

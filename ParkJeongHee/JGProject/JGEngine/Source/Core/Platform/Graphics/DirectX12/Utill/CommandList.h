@@ -96,7 +96,7 @@ namespace JG
 
 
 
-		// void BindIndexBuffer(IndexBuffer& iBuffer);
+		void BindIndexBuffer(const D3D12_INDEX_BUFFER_VIEW& view);
 		void BindDynamicIndexBuffer(u32* datas, u64 count);
 		void SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY topology);
 

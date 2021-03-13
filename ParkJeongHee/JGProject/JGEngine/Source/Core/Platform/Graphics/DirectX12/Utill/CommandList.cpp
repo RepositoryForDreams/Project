@@ -414,6 +414,11 @@ namespace JG
 	}
 
 
+	void GraphicsCommandList::BindIndexBuffer(const D3D12_INDEX_BUFFER_VIEW& view)
+	{
+		mD3DCommandList->IASetIndexBuffer(&view);
+	}
+
 	void GraphicsCommandList::BindDynamicIndexBuffer(u32* datas, u64 count)
 	{
 		u64 btSize = count * sizeof(u32);
