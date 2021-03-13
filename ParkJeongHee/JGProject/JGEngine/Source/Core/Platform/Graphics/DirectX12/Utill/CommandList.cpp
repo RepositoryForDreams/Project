@@ -121,6 +121,37 @@ namespace JG
 
 	}
 
+	void CommandList::CopyBuffer(ID3D12Resource* buffer, void* data, u64 elementSize, u64 elementCount)
+	{
+		if (buffer == nullptr)
+		{
+			return;
+		}
+		auto d3dDevice = DirectX12API::GetD3DDevice();
+		u64 btSize = elementSize * elementCount;
+
+		ComPtr<ID3D12Resource> uploadBuffer;
+		HRESULT hResult = d3dDevice->CreateCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+			D3D12_HEAP_FLAG_NONE,
+			&CD3DX12_RESOURCE_DESC::Buffer(btSize),
+			D3D12_RESOURCE_STATE_GENERIC_READ,
+			nullptr,
+			IID_PPV_ARGS(uploadBuffer.GetAddressOf()));
+		uploadBuffer->SetName(TT("UploadBuffer"));
+
+		D3D12_SUBRESOURCE_DATA subResourceData = {};
+		subResourceData.pData      = data;
+		subResourceData.RowPitch   = (uint32_t)btSize;
+		subResourceData.SlicePitch = subResourceData.RowPitch;
+
+		TransitionBarrier(buffer, D3D12_RESOURCE_STATE_COPY_DEST);
+		UpdateSubresources(mD3DCommandList.Get(), buffer, uploadBuffer.Get(), 0, 0, 1, &subResourceData);
+
+		BackupResource(buffer);
+		BackupResource(uploadBuffer.Get());
+	}
+
 
 
 	void GraphicsCommandList::Reset()
@@ -345,6 +376,16 @@ namespace JG
 			assert("BindConstants not support CBV / SRV / UAV /DescriptorTable");
 			break;
 		}
+	}
+
+	void GraphicsCommandList::BindVertexBuffer(const D3D12_VERTEX_BUFFER_VIEW& view, bool isFlush)
+	{
+		mVertexViews.push_back(view);
+		if (isFlush == true)
+		{
+			FlushVertexBuffer();
+		}
+
 	}
 
 	void GraphicsCommandList::BindDynamicVertexBuffer(void* data, u64 elementCount, u64 elementSize, bool isFlush)

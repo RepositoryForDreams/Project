@@ -49,7 +49,7 @@ namespace JG
 		void FlushResourceBarrier();
 
 		void CopyResource(ID3D12Resource* dest, ID3D12Resource* src);
-		//void CopyBuffer(ID3D12Resource* buffer, void* data, u64 elementSize, u64 elementCount);
+		void CopyBuffer(ID3D12Resource* buffer, void* data, u64 elementSize, u64 elementCount);
 	};
 
 	class GraphicsCommandList : public CommandList
@@ -89,6 +89,7 @@ namespace JG
 		void BindConstants(u32 rootparam, u32 btSize, void* data, u32 offset = 0);
 
 		// void BindVertexBuffer(VertexBuffer& vBuffer);
+		void BindVertexBuffer(const D3D12_VERTEX_BUFFER_VIEW& view, bool isFlush = true);
 		void BindDynamicVertexBuffer(void* data, u64 elementCount, u64 elementSize, bool isFlush = true);
 		void FlushVertexBuffer();
 

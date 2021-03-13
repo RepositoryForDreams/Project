@@ -64,8 +64,8 @@ namespace JG
 		gRenderer2DItem->QuadMesh->SetInputLayout(inputLayout);
 
 
-		gRenderer2DItem->QuadVBuffer = IVertexBuffer::Create(TT("Renderer2D_VBuffer"));
-		gRenderer2DItem->QuadIBuffer = IIndexBuffer::Create(TT("Renderer2D_IBuffer"));
+		gRenderer2DItem->QuadVBuffer = IVertexBuffer::Create(TT("Renderer2D_VBuffer"), EBufferType::CPULoad_Buffer);
+		gRenderer2DItem->QuadIBuffer = IIndexBuffer::Create(TT("Renderer2D_IBuffer"), EBufferType::DynamicUpload_Buffer);
 		gRenderer2DItem->QuadMesh->AddVertexBuffer(gRenderer2DItem->QuadVBuffer);
 		gRenderer2DItem->QuadMesh->SetIndexBuffer(gRenderer2DItem->QuadIBuffer);
 
