@@ -11,9 +11,9 @@ namespace JG
 	class DevLayer : public ILayer
 	{
 	private:
-		SharedPtr<IFrameBuffer> mFrameBuffer;
-		SharedPtr<Camera> mCamera;
-		SharedPtr<ITexture> mRenderTexture;
+		//SharedPtr<IFrameBuffer> mFrameBuffer;
+		SharedPtr<Camera>     mCamera;
+		SharedPtr<ITexture>   mRenderTexture;
 	public:
 		virtual ~DevLayer() = default;
 	public:
@@ -25,7 +25,6 @@ namespace JG
 		virtual void Destroy()  override;
 		virtual void OnEvent(IEvent& e)  override;
 		virtual String GetLayerName()  override;
-
 	private:
 		bool Resize(AppResizeEvent& e);
 	};

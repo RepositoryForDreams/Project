@@ -6,12 +6,15 @@
 
 namespace JG
 {
+	using WindowProcCallBack = std::function<LRESULT(HWND, u32, WPARAM wParam, LPARAM lParam)>;
 	class WindowsWindow : public IWindow
 	{
+		static List<WindowProcCallBack> smCallBackList;
 	private:
 		WindowProps mProps;
 		HWND mHandle = 0;
 		EventCallBackFn mEventFn;
+	
 	public:
 		virtual ~WindowsWindow() override {}
 	public:
@@ -22,6 +25,10 @@ namespace JG
 
 		virtual EWindowPlatform GetPlatform() const override;
 		virtual handle GetHandle() const override;
+
+		static void AddWindowProcCallBack(const WindowProcCallBack& callBack);
+	private:
+		friend 	LRESULT WndProc(HWND hWnd, uint32_t msg, WPARAM wParam, LPARAM lParam);
 	};
 
 

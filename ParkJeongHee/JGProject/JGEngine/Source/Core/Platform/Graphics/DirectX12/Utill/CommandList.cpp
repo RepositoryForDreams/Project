@@ -16,7 +16,7 @@ namespace JG
 	{
 		mD3DAllocator   = CreateD3DCommandAllocator(DirectX12API::GetD3DDevice(), mD3DType);
 		mD3DCommandList = CreateD3DCommandList(DirectX12API::GetD3DDevice(), mD3DAllocator.Get(), mD3DType);
-
+		
 		mUploadAllocator			= CreateUniquePtr<UploadAllocator>();
 		mResourceStateTracker	    = CreateUniquePtr<ResourceStateTracker>();
 		mDynamicDescriptorAllocator = CreateUniquePtr<DynamicDescriptorAllocator>();

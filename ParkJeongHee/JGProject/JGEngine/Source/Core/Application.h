@@ -37,6 +37,7 @@ namespace JG
 		bool Close(AppCloseEvent& e);
 
 	protected:
+		virtual void LoadImpl() {}
 		virtual void OpenImpl() {}
 		virtual void CloseImpl(){}
 

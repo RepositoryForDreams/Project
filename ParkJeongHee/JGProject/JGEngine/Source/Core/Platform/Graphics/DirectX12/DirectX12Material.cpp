@@ -217,6 +217,76 @@ namespace JG
 		return GetData<JMatrix, EShaderDataType::_float4x4>(name, outValue);
 	}
 
+	bool DirectX12Material::GetTexture(const String& name, u32 textureSlot, SharedPtr<ITexture>* out_value)
+	{
+		return false;
+	}
+
+	bool DirectX12Material::GetFloatArray(const String& name, List<float>* out_value)
+	{
+		return false;
+	}
+
+	bool DirectX12Material::GetFloat2Array(const String& name, List<JVector2>* out_value)
+	{
+		return false;
+	}
+
+	bool DirectX12Material::GetFloat3Array(const String& name, List<JVector3>* out_value)
+	{
+		return false;
+	}
+
+	bool DirectX12Material::GetFloat4Array(const String& name, List<JVector4>* out_value)
+	{
+		return false;
+	}
+
+	bool DirectX12Material::GetIntArray(const String& name, List<i32>* out_value)
+	{
+		return false;
+	}
+
+	bool DirectX12Material::GetInt2Array(const String& name, List<JVector2Int>* out_value)
+	{
+		return false;
+	}
+
+	bool DirectX12Material::GetInt3Array(const String& name, List<JVector3Int>* out_value)
+	{
+		return false;
+	}
+
+	bool DirectX12Material::GetInt4Array(const String& name, List<JVector4Int>* out_value)
+	{
+		return false;
+	}
+
+	bool DirectX12Material::GetUintArray(const String& name, List<u32>* out_value)
+	{
+		return false;
+	}
+
+	bool DirectX12Material::GetUint2Array(const String& name, List<JVector2Uint>* out_value)
+	{
+		return false;
+	}
+
+	bool DirectX12Material::GetUint3Array(const String& name, List<JVector3Uint>* out_value)
+	{
+		return false;
+	}
+
+	bool DirectX12Material::GetUint4Array(const String& name, List<JVector4Uint>* out_value)
+	{
+		return false;
+	}
+
+	bool DirectX12Material::GetFloat4x4Array(const String& name, List<JMatrix>* out_value)
+	{
+		return false;
+	}
+
 	void DirectX12Material::SetName(const String& name)
 	{
 		mName = name;
@@ -253,10 +323,6 @@ namespace JG
 				commandList->BindDynamicConstantBuffer(cBufferData->RootParm, byteData.data(), byteData.size());
 			}
 
-			// TODO
-			// Texture Bind
-			// Texture 가 nullptr 이면 invaildTexture로 대체
-
 			for (auto& _pair : shaderData->TextureDataMap)
 			{
 				auto textureData = _pair.second.get();
@@ -279,7 +345,6 @@ namespace JG
 				}
 		
 			}
-
 
 		}
 		else

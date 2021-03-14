@@ -12,7 +12,7 @@ namespace JG
 	protected:
 		virtual void OpenImpl() override;
 		virtual void CloseImpl() override;
-
+		virtual void LoadImpl() override;
 
 		
 	};

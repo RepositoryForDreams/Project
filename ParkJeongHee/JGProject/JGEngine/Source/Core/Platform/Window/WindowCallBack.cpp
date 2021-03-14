@@ -4,7 +4,7 @@
 
 namespace JG
 {
-	std::function<void(IEvent&)>									WindowCallBackFn::EventCallBack;
+	std::function<void(IEvent&)>									    WindowCallBackFn::EventCallBack;
 	std::function<EventResult()>										WindowCallBackFn::WindowOpenCallBack;
 	std::function<EventResult()>										WindowCallBackFn::WindowCloseCallBack;
 	std::function<EventResult(i32, i32)>								WindowCallBackFn::WindowResizeCallBack;

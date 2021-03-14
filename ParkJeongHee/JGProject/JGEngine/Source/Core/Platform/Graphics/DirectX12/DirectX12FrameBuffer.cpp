@@ -58,7 +58,7 @@ namespace JG
 
 
 
-
+		D3D12_RESOURCE_STATES state = D3D12_RESOURCE_STATE_RENDER_TARGET;
 		if (mSubmittedTexture.expired() == false)
 		{
 			auto submittedTexture = static_cast<DirectX12Texture*>(mSubmittedTexture.lock().get());
@@ -73,17 +73,17 @@ namespace JG
 
 
 				commandList->Get()->CopyResource(backBuffer.Get(), submittedTexture->Get());
-
-				commandList->Get()->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(
-					backBuffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PRESENT));
-
+				state = D3D12_RESOURCE_STATE_COPY_DEST;
 			}
 		}
-		else
+
+		for (auto& callBack : mUpdateCallBackList)
 		{
-			commandList->Get()->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(
-				backBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+			state = callBack(commandList->Get(), backBuffer.Get(), mRTVs[index].CPU(), state);
 		}
+
+		commandList->Get()->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(
+			backBuffer.Get(), state, D3D12_RESOURCE_STATE_PRESENT));
 	}
 
 	bool DirectX12FrameBuffer::Present()
@@ -98,8 +98,10 @@ namespace JG
 
 	void DirectX12FrameBuffer::Resize(u32 width, u32 height)
 	{
-		if (mInfo.Width == width && mInfo.Height == height) return;
+		
 
+		if (mInfo.Width == width && mInfo.Height == height) return;
+		DirectX12API::GetGraphicsCommandQueue()->Flush();
 
 		for (u64 i = 0; i < DirectX12API::GetFrameBufferCount(); ++i)
 		{
@@ -126,6 +128,11 @@ namespace JG
 	const FrameBufferInfo& DirectX12FrameBuffer::GetInfo() const
 	{
 		return mInfo;
+	}
+
+	void DirectX12FrameBuffer::AddUpdateCallBack(const DirectX12FrameBufferUpdateCallBack& callBack)
+	{
+		mUpdateCallBackList.push_back(callBack);
 	}
 
 	void DirectX12FrameBuffer::Reset()

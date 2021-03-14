@@ -6,11 +6,15 @@ namespace JG
 {
 	void JGEditor::OpenImpl()
 	{
-		//PushLayer(CreateSharedPtr<EditorLayer>());
-		PushLayer(CreateSharedPtr<DevLayer>());
+
 	}
 
 	void JGEditor::CloseImpl()
 	{
+	}
+	void JGEditor::LoadImpl()
+	{
+		//PushLayer(CreateSharedPtr<EditorLayer>());
+		PushLayer(CreateSharedPtr<DevLayer>());
 	}
 }

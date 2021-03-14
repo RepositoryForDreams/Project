@@ -12,7 +12,10 @@ namespace JG
 
 		return api->CreateShader(name, sourceCode, flags);
 	}
-
+	SharedPtr<IComputeShader> IComputeShader::Create(const String& name, const String& sourceCode)
+	{
+		return SharedPtr<IComputeShader>();
+	}
 
 	void ShaderLibrary::RegisterShader(SharedPtr<IShader> shader)
 	{
@@ -38,5 +41,7 @@ namespace JG
 		}
 		return nullptr;
 	}
+
+
 
 }

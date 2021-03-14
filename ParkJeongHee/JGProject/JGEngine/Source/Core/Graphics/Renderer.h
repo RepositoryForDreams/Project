@@ -8,13 +8,15 @@ namespace JG
 	class IShader;
 	class ITexture;
 	class IMaterial;
+	class IMesh;
 	class Application;
 	class Camera;
 	class Renderer3D
 	{
 	public:
-
-
+		static bool Begin(SharedPtr<Camera> camera, SharedPtr<ITexture> renderTexture, SharedPtr<ITexture> depthTexture);
+		static void DrawCall(SharedPtr<IMesh> mesh, SharedPtr<IMaterial> material);
+		static void End();
 	};
 	// 같은 Shader 라면 
 	// 차피 VertexArray 다

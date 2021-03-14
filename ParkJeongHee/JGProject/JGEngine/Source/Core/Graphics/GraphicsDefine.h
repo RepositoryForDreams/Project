@@ -21,7 +21,6 @@ namespace JG
 	};
 	inline String TextureFormatToString(ETextureFormat format)
 	{
-		//DXGI_FORMAT_D24_UNORM_S8_UINT
 		switch (format)
 		{
 		case ETextureFormat::R8G8B8A8_Unorm: return TT("R8G8B8A8_Unorm");
@@ -83,11 +82,11 @@ namespace JG
 		enum class EShaderFlags
 	{
 		None = 0x000,
-		Allow_VertexShader = 0x001,
-		Allow_PixelShader = 0x002,
+		Allow_VertexShader   = 0x001,
+		Allow_PixelShader    = 0x002,
 		Allow_GeometryShader = 0x004,
-		Allow_HullShader = 0x008,
-		Allow_DomainShader = 0x010,
+		Allow_HullShader     = 0x008,
+		Allow_DomainShader   = 0x010,
 	};
 
 
@@ -359,12 +358,13 @@ namespace JG
 		constexpr wchar* HSEntry = TT("hs_main");
 		constexpr wchar* GSEntry = TT("gs_main");
 		constexpr wchar* PSEntry = TT("ps_main");
+		constexpr wchar* CSEntry = TT("main");
 		constexpr wchar* VSTarget = TT("vs_5_1");
 		constexpr wchar* DSTarget = TT("ds_5_1");
 		constexpr wchar* HSTarget = TT("hs_5_1");
 		constexpr wchar* GSTarget = TT("gs_5_1");
 		constexpr wchar* PSTarget = TT("ps_5_1");
-
+		constexpr wchar* CSTarget = TT("cs_5_1");
 
 
 

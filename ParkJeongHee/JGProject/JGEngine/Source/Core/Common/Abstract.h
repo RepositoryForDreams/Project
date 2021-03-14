@@ -22,6 +22,10 @@ namespace JG
 			delete smInstance;
 			smInstance = nullptr;
 		}
+		static bool IsValid()
+		{
+			return smInstance != nullptr;
+		}
 		static T& GetInstance() {
 			return *smInstance;
 		}

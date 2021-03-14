@@ -129,19 +129,11 @@ namespace JG
 		commandList->BindRootSignature(RootSig);
 
 
-
 		auto PSO = DirectX12API::GetGraphicsPipelineState();
-		// PSO 수정
 		PSO->BindRootSignature(*RootSig);
 		PSO->BindShader(*this);
 
-		// InputLayout -> VertexBuffer
-		// RootSig (o)
-		// Shader  (o)
-		// RenderTarget -> SetRenderTarget
-		// 
 		return true;
-
 	}
 
 	void DirectX12Shader::SetName(const String& name)
@@ -177,7 +169,174 @@ namespace JG
 		return true;
 	}
 
+	bool DirectX12ComputeShader::Compile(const String& sourceCode, EShaderFlags flags, String* error)
+	{
+		return false;
+	}
 
+	bool DirectX12ComputeShader::Bind()
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetComputeBuffer(SharedPtr<IComputeBuffer> computeBuffer)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetFloat(const String& name, float value)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetFloat2(const String& name, const JVector2& value)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetFloat3(const String& name, const JVector3& value)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetFloat4(const String& name, const JVector4& value)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetInt(const String& name, i32 value)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetInt2(const String& name, const JVector2Int& value)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetInt3(const String& name, const JVector3Int& value)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetInt4(const String& name, const JVector4Int& value)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetUint(const String& name, u32 value)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetUint2(const String& name, const JVector2Uint& value)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetUint3(const String& name, const JVector3Uint& value)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetUint4(const String& name, const JVector4Uint& value)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetFloat4x4(const String& name, const JMatrix& value)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetTexture(const String& name, u32 textureSlot, SharedPtr<ITexture> texture)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetFloatArray(const String& name, const List<float>& value)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetFloat2Array(const String& name, const List<JVector2>& value)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetFloat3Array(const String& name, const List<JVector3>& value)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetFloat4Array(const String& name, const List<JVector4>& value)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetIntArray(const String& name, const List<i32>& value)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetInt2Array(const String& name, const List<JVector2Int>& value)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetInt3Array(const String& name, const List<JVector3Int>& value)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetInt4Array(const String& name, const List<JVector4Int>& value)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetUintArray(const String& name, const List<u32>& value)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetUint2Array(const String& name, const List<JVector2Uint>& value)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetUint3Array(const String& name, const List<JVector3Uint>& value)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetUint4Array(const String& name, const List<JVector4Uint>& value)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetFloat4x4Array(const String& name, const List<JMatrix>& value)
+	{
+		return false;
+	}
+
+	bool DirectX12ComputeShader::SetStructDataArray(const String& name, void* datas, u64 elementCount, u64 elementSize)
+	{
+		return false;
+	}
+
+	void DirectX12ComputeShader::Dispatch(u32 groupX, u32 groupY, u32 groupZ)
+	{
+	}
+
+	void DirectX12ComputeShader::SetName(const String& name)
+	{
+		mName = name;
+	}
+
+	const String& DirectX12ComputeShader::GetName() const
+	{
+		return mName;
+	}
 
 	bool DirectX12ShaderData::Set(String& code)
 	{
@@ -381,7 +540,7 @@ namespace JG
 
 
 				arrayStartPos += 1;
-				u64 arrayEndPos = dataCode.find(TT("]", arrayStartPos));
+				u64 arrayEndPos = dataCode.find(TT("]"), arrayStartPos);
 
 
 				String arraySizeCode = dataCode.substr(arrayStartPos, arrayEndPos - arrayStartPos);
@@ -402,7 +561,7 @@ namespace JG
 			auto textureData = TextureDataMap[nameCode].get();
 			textureData->Name = nameCode;
 			textureData->RootParm = RootParamOffset++;
-			textureData->RegisterNum = TextureRegisterNumberOffset; TextureRegisterNumberOffset += arraySize;
+			textureData->RegisterNum = (u32)TextureRegisterNumberOffset; TextureRegisterNumberOffset += arraySize;
 			textureData->RegisterSpace = DirectX12ShaderData::Texture2DStartSpace;
 			textureData->ElementType = HLSL::EHLSLElement::Texture;
 			textureData->Type = HLSL::EHLSLTextureType::_2D;
@@ -477,7 +636,7 @@ namespace JG
 
 
 				samplerStateData->Name = nameCode;
-				samplerStateData->RegisterNum = SamplerStateRegisterNumberOffset++;
+				samplerStateData->RegisterNum = (u32)SamplerStateRegisterNumberOffset++;
 				samplerStateData->Desc.ShaderRegister = samplerStateData->RegisterNum;
 				samplerStateData->RegisterSpace = 0;
 				samplerStateData->ElementType = HLSL::EHLSLElement::SamplerState;
@@ -656,19 +815,19 @@ namespace JG
 
 		if (samplerDataMap.find(HLSL::Token::SamplerStateElement::MinLOD) != samplerDataMap.end())
 		{
-			desc.MinLOD = _wtof(samplerDataMap.at(HLSL::Token::SamplerStateElement::MinLOD).c_str());
+			desc.MinLOD = (f32)_wtof(samplerDataMap.at(HLSL::Token::SamplerStateElement::MinLOD).c_str());
 		}
 		if (samplerDataMap.find(HLSL::Token::SamplerStateElement::MaxLOD) != samplerDataMap.end())
 		{
-			desc.MaxLOD = _wtof(samplerDataMap.at(HLSL::Token::SamplerStateElement::MaxLOD).c_str());
+			desc.MaxLOD = (f32)_wtof(samplerDataMap.at(HLSL::Token::SamplerStateElement::MaxLOD).c_str());
 		}
 		if (samplerDataMap.find(HLSL::Token::SamplerStateElement::MaxAnisotropy) != samplerDataMap.end())
 		{
-			desc.MaxAnisotropy = _wtoi(samplerDataMap.at(HLSL::Token::SamplerStateElement::MaxAnisotropy).c_str());
+			desc.MaxAnisotropy = (f32)_wtoi(samplerDataMap.at(HLSL::Token::SamplerStateElement::MaxAnisotropy).c_str());
 		}
 		if (samplerDataMap.find(HLSL::Token::SamplerStateElement::MipLODBias) != samplerDataMap.end())
 		{
-			desc.MipLODBias = _wtof(samplerDataMap.at(HLSL::Token::SamplerStateElement::MipLODBias).c_str());
+			desc.MipLODBias = (f32)_wtof(samplerDataMap.at(HLSL::Token::SamplerStateElement::MipLODBias).c_str());
 		}
 		return desc;
 	}
@@ -920,6 +1079,8 @@ namespace JG
 
 		return true;
 	}
+
+
 
 
 

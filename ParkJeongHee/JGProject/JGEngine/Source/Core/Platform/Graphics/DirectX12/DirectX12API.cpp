@@ -570,10 +570,6 @@ namespace JG
 		auto material = CreateSharedPtr<DirectX12Material>();
 		material->SetName(name);
 		material->Init(shader);
-
-
-
-
 		return material;
 	}
 

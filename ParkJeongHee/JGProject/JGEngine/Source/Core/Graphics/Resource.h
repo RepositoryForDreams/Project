@@ -55,7 +55,12 @@ namespace JG
 		static SharedPtr<IIndexBuffer> Create(String name, EBufferLoadMethod method);
 	};
 	
+	class IComputeBuffer : public Buffer
+	{
 
+	public:
+		virtual bool IsCompelete() const = 0;
+	};
 	
 	
 	class ITexture : public IResource

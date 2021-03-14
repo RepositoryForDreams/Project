@@ -77,6 +77,7 @@ namespace JG
 	}
 	void Application::Run()
 	{
+		LoadImpl();
 		mLayerStack->ForEach([&](ILayer* layer)
 		{
 			layer->Begin();
@@ -106,6 +107,7 @@ namespace JG
 
 	void Application::Destroy()
 	{
+		mGraphcisAPI->Flush();
 		mLayerStack.reset();
 		Renderer2D::Destroy();
 		ShaderLibrary::Destroy();

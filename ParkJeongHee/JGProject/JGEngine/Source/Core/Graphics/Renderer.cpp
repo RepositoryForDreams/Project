@@ -10,6 +10,55 @@
 
 namespace JG
 {
+	/* Renderer 3D Pipeline
+	
+	
+	
+	
+	
+	*/
+	bool Renderer3D::Begin(SharedPtr<Camera> camera, SharedPtr<ITexture> renderTexture, SharedPtr<ITexture> depthTexture)
+	{
+		return false;
+	}
+
+	void Renderer3D::DrawCall(SharedPtr<IMesh> mesh, SharedPtr<IMaterial> material)
+	{
+	}
+
+	void Renderer3D::End()
+	{
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/* Renderer 2D Pipeline
+
+
+
+
+
+*/
 	struct QuadVertex
 	{
 		JVector3 Pos;
@@ -321,6 +370,8 @@ float4 ps_main(VS_OUT pin) : SV_TARGET
 
 		StartBatch();
 	}
+
+
 
 
 }

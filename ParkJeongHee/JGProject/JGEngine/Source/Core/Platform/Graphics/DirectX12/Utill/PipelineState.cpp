@@ -247,15 +247,22 @@ namespace JG
 
 	void ComputePipelineState::BindRootSignature(const RootSignature& rootSig)
 	{
+		mIsDirty = true;
 		mDesc.pRootSignature = rootSig.Get();
+		
 	}
 
-	void ComputePipelineState::BindShader(const DirectX12Shader& shader)
+	void ComputePipelineState::BindShader(const DirectX12ComputeShader& shader)
 	{
-		//mDesc.CS = {
-		//		reinterpret_cast<byte*>(shader->GetData()->GetBufferPointer()),
-		//		shader->GetData()->GetBufferSize()
-		//};
+		mIsDirty = true;
+		if (shader.GetData() != nullptr)
+		{
+			mDesc.CS = {
+				reinterpret_cast<byte*>(shader.GetData()->GetBufferPointer()),
+				shader.GetData()->GetBufferSize()
+			};
+		}
+
 	}
 
 	bool ComputePipelineState::Finalize()

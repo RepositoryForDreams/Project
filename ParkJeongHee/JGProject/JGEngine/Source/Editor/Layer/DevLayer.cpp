@@ -1,5 +1,7 @@
 #include "DevLayer.h"
 #include "Application.h"
+#include "Imgui/imgui.h"
+#include "ExternalImpl/JGImGui.h"
 #include "Platform/Window/Window.h"
 #include "Graphics/GraphicsAPI.h"
 #include "Graphics/FrameBuffer.h"
@@ -12,14 +14,18 @@ namespace JG
 {
 	void DevLayer::OnAttach()
 	{
-
+		JGImGui::Create();
 	}
 	void DevLayer::OnDetach()
 	{
-
+		JGImGui::Destroy();
 	}
 	void DevLayer::Update()
 	{
+		JGImGui::GetInstance().NewFrame();
+		static  bool show_demo_window = true;
+		static    bool show_another_window = false;
+
 
 		if (Renderer2D::Begin(mCamera, mRenderTexture))
 		{
@@ -37,6 +43,42 @@ namespace JG
 
 		}
 
+		ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+		// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
+		{
+			static float f = 0.0f;
+			static int counter = 0;
+
+			ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+
+			ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+			ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
+			ImGui::Checkbox("Another Window", &show_another_window);
+
+			ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+
+			if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+				counter++;
+			ImGui::SameLine();
+			ImGui::Text("counter = %d", counter);
+
+			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			ImGui::Image((ImTextureID)JGImGui::GetInstance().ConvertImGuiTextureID(mRenderTexture->GetTextureID()), { 1920, 1080 });
+			ImGui::End();
+		}
+
+		// 3. Show another simple window.
+		if (show_another_window)
+		{
+			ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+			ImGui::Text("Hello from another window!");
+			if (ImGui::Button("Close Me"))
+				show_another_window = false;
+			ImGui::End();
+		}
+
+		
 
 
 	}
@@ -46,17 +88,8 @@ namespace JG
 	}
 	void DevLayer::Begin()
 	{
+
 		auto AppSize = Application::GetInstance().GetSize();
-		FrameBufferInfo info = FrameBufferInfo(
-			Application::GetInstance().GetWindow()->GetHandle(),
-			Color::Red(),
-			ETextureFormat::R8G8B8A8_Unorm,
-			AppSize.x, AppSize.y);
-
-		mFrameBuffer = IFrameBuffer::Create(info);
-
-
-
 		mCamera = Camera::Create(JVector2(1920, 1080), 60, 0.1f, 1000.0f, true);
 		mCamera->SetLocation(JVector3(0, 0, -10));
 		TextureInfo textureInfo;
@@ -69,15 +102,15 @@ namespace JG
 		textureInfo.Flags = ETextureFlags::Allow_RenderTarget;
 		textureInfo.ArraySize = 1;
 		mRenderTexture = ITexture::Create(TT("DevLayer_Texture"), textureInfo);
-		mFrameBuffer->SubmitTexture(mRenderTexture);
 	}
 	void DevLayer::Destroy()
 	{
-
+	
 	}
 	void DevLayer::OnEvent(IEvent& e)
 	{
-
+		EventDispatcher dispatcher(e);
+		dispatcher.Dispatch<AppResizeEvent>(EVENT_BIND_FN(&DevLayer::Resize));
 	}
 	String DevLayer::GetLayerName()
 	{
@@ -85,6 +118,10 @@ namespace JG
 	}
 	bool DevLayer::Resize(AppResizeEvent& e)
 	{
+		if (JGImGui::IsValid() == true)
+		{
+			JGImGui::GetInstance().Resize(e.Width, e.Height);
+		}
 		return true;
 	}
 }

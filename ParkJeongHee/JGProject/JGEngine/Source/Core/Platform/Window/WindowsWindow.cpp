@@ -9,6 +9,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 namespace JG
 {
+	List<WindowProcCallBack> WindowsWindow::smCallBackList;
 	LRESULT CALLBACK WndProc(HWND hWnd, uint32_t msg, WPARAM wParam, LPARAM lParam);
 
 
@@ -77,13 +78,22 @@ namespace JG
 		return (handle)mHandle;
 	}
 
+	void WindowsWindow::AddWindowProcCallBack(const WindowProcCallBack& callBack)
+	{
+		smCallBackList.push_back(callBack);
+	}
+
 
 
 	LRESULT WndProc(HWND hWnd, uint32_t msg, WPARAM wParam, LPARAM lParam)
 	{
-		if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
+		for (auto& callBack : WindowsWindow::smCallBackList)
 		{
-			return true;
+			LRESULT result = callBack(hWnd, msg, wParam, lParam);
+			if (result)
+			{
+				return result;
+			}
 		}
 		switch (msg)
 		{
@@ -124,7 +134,6 @@ namespace JG
 			return WindowCallBackFn::WindowKeyInputCallBack((EKeyCode)wParam, EInputAction::Released, EInputMode::Default);
 		case WM_CHAR:
 			return WindowCallBackFn::WindowCharCallBack(wParam);
-			return 0;
 		case WM_SIZE:
 			return WindowCallBackFn::WindowResizeCallBack(LOWORD(lParam), HIWORD(lParam));
 		//case WM_SETCURSOR:
