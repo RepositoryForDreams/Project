@@ -23,7 +23,10 @@ namespace JG
 
 		return api->CreateIndexBuffer(name, method);
 	}
-
+	SharedPtr<IComputeBuffer> IComputeBuffer::Create(const String& name, SharedPtr<IShader> shader)
+	{
+		return SharedPtr<IComputeBuffer>();
+	}
 	SharedPtr<ITexture> ITexture::Create(const String& name, const TextureInfo& info)
 	{
 		auto api = Application::GetInstance().GetGraphicsAPI();
@@ -37,4 +40,5 @@ namespace JG
 	{
 		return nullptr;
 	}
+
 }

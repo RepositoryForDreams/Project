@@ -312,18 +312,18 @@ namespace JG
 			}
 
 
-			auto shaderData = dx12Shader->GetShaderData();
+			auto shaderDataForm = dx12Shader->GetShaderDataForm();
 
 
-			for (auto& _pair : shaderData->CBufferDataMap)
+			for (auto& _pair : shaderDataForm->CBufferDataMap)
 			{
 				auto cBufferName = _pair.first;
 				auto cBufferData = _pair.second.get();
 				auto& byteData   = mByteDatas[cBufferName];
 				commandList->BindDynamicConstantBuffer(cBufferData->RootParm, byteData.data(), byteData.size());
 			}
-
-			for (auto& _pair : shaderData->TextureDataMap)
+		
+			for (auto& _pair : shaderDataForm->TextureDataMap)
 			{
 				auto textureData = _pair.second.get();
 				auto& textureList = mTextureDatas[_pair.first];
@@ -363,20 +363,20 @@ namespace JG
 
 		if (dx12Shader != nullptr)
 		{
-			auto shaderData = dx12Shader->GetShaderData();
+			auto shaderDataForm = dx12Shader->GetShaderDataForm();
 
 
-			for (auto& _pair : shaderData->CBufferDataMap)
+			for (auto& _pair : shaderDataForm->CBufferDataMap)
 			{
 				mByteDatas[_pair.first].resize(_pair.second->DataSize, 0);
 			}
 
-			for (auto& _pair : shaderData->StructuredBufferDataMap)
+			for (auto& _pair : shaderDataForm->StructuredBufferDataMap)
 			{
 				mByteDatas[_pair.first].clear();
 			}
 
-			for (auto& _pair : shaderData->TextureDataMap)
+			for (auto& _pair : shaderDataForm->TextureDataMap)
 			{
 				mTextureDatas[_pair.first].resize(_pair.second->TextureCount, nullptr);
 			}
@@ -385,14 +385,14 @@ namespace JG
 		}
 	}
 
-	DirectX12ShaderData::Data* DirectX12Material::GetAndCheckData(const String& name, EShaderDataType checkType)
+	ShaderDataForm::Data* DirectX12Material::GetAndCheckData(const String& name, EShaderDataType checkType)
 	{
 		auto loadedShader = mOwnerShader.lock();
 		auto dx12Shader = static_cast<DirectX12Shader*>(loadedShader.get());
 		if (dx12Shader != nullptr)
 		{
-			auto shaderData = dx12Shader->GetShaderData();
-			auto& CBufferVarMap = shaderData->CBufferVarMap;
+			auto shaderDataForm = dx12Shader->GetShaderDataForm();
+			auto& CBufferVarMap = shaderDataForm->CBufferVarMap;
 
 			auto iter = CBufferVarMap.find(name);
 			if (iter == CBufferVarMap.end())
@@ -417,9 +417,9 @@ namespace JG
 		auto dx12Shader = static_cast<DirectX12Shader*>(loadedShader.get());
 		if (dx12Shader != nullptr)
 		{
-			auto shaderData = dx12Shader->GetShaderData();
-			auto iter = shaderData->StructuredBufferDataMap.find(name);
-			if (iter == shaderData->StructuredBufferDataMap.end())
+			auto shaderDataForm = dx12Shader->GetShaderDataForm();
+			auto iter = shaderDataForm->StructuredBufferDataMap.find(name);
+			if (iter == shaderDataForm->StructuredBufferDataMap.end())
 			{
 				return false;
 			}

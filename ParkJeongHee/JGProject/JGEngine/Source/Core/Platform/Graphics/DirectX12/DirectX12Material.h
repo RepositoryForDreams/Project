@@ -140,7 +140,7 @@ namespace JG
 		}
 
 
-		DirectX12ShaderData::Data* GetAndCheckData(const String& name, EShaderDataType checkType);
+		ShaderDataForm::Data* GetAndCheckData(const String& name, EShaderDataType checkType);
 		bool CheckDataArray(const String& name, EShaderDataType checkType);
 	};
 

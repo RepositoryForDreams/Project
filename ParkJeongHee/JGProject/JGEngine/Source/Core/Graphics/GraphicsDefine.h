@@ -87,6 +87,7 @@ namespace JG
 		Allow_GeometryShader = 0x004,
 		Allow_HullShader     = 0x008,
 		Allow_DomainShader   = 0x010,
+		Allow_ComputeShader = 0x020,
 	};
 
 
@@ -293,11 +294,15 @@ namespace JG
 		using token = wchar;
 		namespace Token
 		{
-			constexpr token* CBuffer = TT("cbuffer ");
-			constexpr token* StructuredBuffer = TT("StructuredBuffer<");
-			constexpr token* Texture2D = TT("Texture2D ");
-			constexpr token* SamplerState = TT("SamplerState");
-			constexpr token* SamplerComparisonState = TT("SamplerComparisonState");
+			constexpr token* CBuffer                = TT("cbuffer ");
+			constexpr token* StructuredBuffer       = TT("StructuredBuffer<");
+			constexpr token* Texture2D              = TT("Texture2D ");
+			constexpr token* RWStructuredBuffer		= TT("RWStructuredBuffer<");
+			constexpr token* RWTexture2D			= TT("RWTexture2D ");
+			constexpr token* SamplerState           = TT("SamplerState ");
+			constexpr token* SamplerComparisonState = TT("SamplerComparisonState ");
+			
+
 
 			namespace SamplerStateElement
 			{
@@ -374,7 +379,9 @@ namespace JG
 			None,
 			CBuffer,
 			StructuredBuffer,
+			RWStructuredBuffer,
 			Texture,
+			RWTexture,
 			SamplerState,
 		};
 

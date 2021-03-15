@@ -107,6 +107,11 @@ namespace JG
 
 	void GraphicsPipelineState::BindShader(const DirectX12Shader& shader)
 	{
+		if ((shader.GetFlags() & EShaderFlags::Allow_ComputeShader) == true)
+		{
+			return;
+		}
+
 		mIsDirty = true;
 		auto flags = shader.GetFlags();
 
@@ -252,14 +257,18 @@ namespace JG
 		
 	}
 
-	void ComputePipelineState::BindShader(const DirectX12ComputeShader& shader)
+	void ComputePipelineState::BindShader(const DirectX12Shader& shader)
 	{
+		if ((shader.GetFlags() & EShaderFlags::Allow_ComputeShader) == false)
+		{
+			return;
+		}
 		mIsDirty = true;
-		if (shader.GetData() != nullptr)
+		if (shader.GetCSData() != nullptr)
 		{
 			mDesc.CS = {
-				reinterpret_cast<byte*>(shader.GetData()->GetBufferPointer()),
-				shader.GetData()->GetBufferSize()
+				reinterpret_cast<byte*>(shader.GetCSData()->GetBufferPointer()),
+				shader.GetCSData()->GetBufferSize()
 			};
 		}
 
