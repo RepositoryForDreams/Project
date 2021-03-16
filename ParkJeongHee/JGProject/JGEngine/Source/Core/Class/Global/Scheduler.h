@@ -5,7 +5,7 @@
 
 namespace JG
 {
-	class Scheduler : GlobalSingleton<Scheduler>
+	class Scheduler : public GlobalSingleton<Scheduler>
 	{
 
 

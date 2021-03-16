@@ -7,8 +7,8 @@ namespace JG
 {
 	class ComputeEngine
 	{
-
-
+	//public:
+	//	static 
 
 	};
 }

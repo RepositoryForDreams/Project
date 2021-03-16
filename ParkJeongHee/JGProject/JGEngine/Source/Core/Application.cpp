@@ -1,5 +1,8 @@
 ﻿#include "pch.h"
 #include "Application.h"
+
+
+
 #include "Platform/Window/WindowsWindow.h"
 #include "Graphics/Renderer.h"
 #include "Graphics/Shader.h"
@@ -26,8 +29,8 @@ namespace JG
 		// TODO
 		// 필요한 전역 클래스 생성
 		Log::Create();
-	
-
+		TimerManager::Create();
+		Scheduler::Create();
 
 
 		// TODO
@@ -36,11 +39,6 @@ namespace JG
 		mGraphcisAPI = IGraphicsAPI::Create(EGraphicsAPI::DirectX12);
 		
 
-
-
-
-
-		
 		// NOTE
 		// Window 생성
 		switch(prop.WindowPlatform)
@@ -115,6 +113,8 @@ namespace JG
 		mGraphcisAPI.reset();
 		mWindow->Destroy();
 		mWindow.reset();
+		Scheduler::Destroy();
+		TimerManager::Destroy();
 		Log::Destroy();
 	}
 

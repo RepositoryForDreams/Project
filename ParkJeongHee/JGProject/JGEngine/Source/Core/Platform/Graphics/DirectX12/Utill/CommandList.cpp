@@ -444,5 +444,133 @@ namespace JG
 		mDynamicDescriptorAllocator->PushDescriptorTable(mD3DCommandList, mBindedDescriptorHeap, true);
 		mD3DCommandList->DrawIndexedInstanced(indexCount, instancedCount, startIndexLocation, startVertexLocation, startInstanceLocation);
 	}
+	void ComputeCommandList::BindRootSignature(SharedPtr<RootSignature> rootSig)
+	{
+		if (mBindedComputeRootSig.Get() == rootSig->Get())
+		{
+			return;
+		}
+		mBindedComputeRootSig = rootSig->Get();
+		mD3DCommandList->SetComputeRootSignature(mBindedComputeRootSig.Get());
+		mDynamicDescriptorAllocator->CommitRootSignature(*rootSig);
+	}
+	void ComputeCommandList::BindPipelineState(SharedPtr<ComputePipelineState> pso)
+	{
+		if (mBindedPipelineState.Get() == pso->Get())
+		{
+			return;
+		}
+		mBindedPipelineState = pso->Get();
+		mD3DCommandList->SetPipelineState(mBindedPipelineState.Get());
+	}
+	void ComputeCommandList::BindTextures(u32 rootParam, List<D3D12_CPU_DESCRIPTOR_HANDLE> handles)
+	{
+		i32 initType = mDynamicDescriptorAllocator->GetDescriptorInitAsType(rootParam);
+
+
+		switch (initType)
+		{
+		case RootSignature::__DescriptorTable__:
+		{
+			D3D12_DESCRIPTOR_RANGE_TYPE tableType = mDynamicDescriptorAllocator->GetDescriptorTableType(rootParam);
+			switch (tableType)
+			{
+			case D3D12_DESCRIPTOR_RANGE_TYPE_SRV:
+			case D3D12_DESCRIPTOR_RANGE_TYPE_UAV:
+				mDynamicDescriptorAllocator->CommitDescriptorTable(rootParam, handles);
+				break;
+			default:
+				JGASSERT("trying bind CBV or Sampler in BindTextures");
+				break;
+			}
+		}
+		break;
+		case RootSignature::__ShaderResourceView__:
+			break;
+		case RootSignature::__UnorderedAccessView__:
+			break;
+		default:
+			JGASSERT("BindTextures not support ConstantBufferView / Constant");
+			break;
+		}
+	}
+	void ComputeCommandList::BindDynamicConstantBuffer(u32 rootParam, const void* data, u64 elementSize)
+	{
+		i32 initType = mDynamicDescriptorAllocator->GetDescriptorInitAsType(rootParam);
+		auto alloc = mUploadAllocator->Allocate(elementSize, 256);
+
+		memcpy(alloc.CPU, data, elementSize);
+
+
+		switch (initType)
+		{
+		case RootSignature::__DescriptorTable__:
+		{
+			D3D12_DESCRIPTOR_RANGE_TYPE tableType = mDynamicDescriptorAllocator->GetDescriptorTableType(rootParam);
+			switch (tableType)
+			{
+			case D3D12_DESCRIPTOR_RANGE_TYPE_CBV:
+			{
+				D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
+				cbvDesc.BufferLocation = alloc.GPU;
+				cbvDesc.SizeInBytes = (elementSize + 255) & ~255;
+				auto cbvHandle = DirectX12API::CSUAllocate();
+				DirectX12API::GetD3DDevice()->CreateConstantBufferView(&cbvDesc, cbvHandle.CPU());
+				mDynamicDescriptorAllocator->CommitDescriptorTable(rootParam, { cbvHandle.CPU() });
+			}
+			break;
+			default:
+				JGASSERT("trying bind SRV or UAV or Sampler in BindConstantBuffer");
+				break;
+			}
+		}
+		break;
+		case RootSignature::__ConstantBufferView__:
+			mD3DCommandList->SetComputeRootConstantBufferView(rootParam, alloc.GPU);
+			break;
+		default:
+			JGASSERT("BindDynamicConstantBuffer not support ShaderResourceView / UnorderedAccessView / Constant");
+			break;
+		}
+	}
+	void ComputeCommandList::BindDynamicStructuredBuffer(u32 rootParam, const void* data, u64 elementSize, u64 elementCount)
+	{
+		i32  initType = mDynamicDescriptorAllocator->GetDescriptorInitAsType(rootParam);
+
+		u64  btSize = elementSize * elementCount;
+		auto alloc = mUploadAllocator->Allocate(btSize, elementSize);
+
+		memcpy(alloc.CPU, data, btSize);
+		switch (initType)
+		{
+		case RootSignature::__ShaderResourceView__:
+			mD3DCommandList->SetComputeRootShaderResourceView(rootParam, alloc.GPU);
+			break;
+		case RootSignature::__UnorderedAccessView__:
+			mD3DCommandList->SetComputeRootUnorderedAccessView(rootParam, alloc.GPU);
+			break;
+		default:
+			assert("BindDynamicStructuredBuffer not support ConstantBufferView / Constant / DescriptorTable");
+			break;
+		}
+	}
+	void ComputeCommandList::BindConstants(u32 rootparam, u32 btSize, void* data, u32 offset)
+	{
+		int initType = mDynamicDescriptorAllocator->GetDescriptorInitAsType(rootparam);
+		switch (initType)
+		{
+		case RootSignature::__Constant__:
+			mD3DCommandList->SetComputeRoot32BitConstants(rootparam, btSize / 4, data, offset / 4);
+			break;
+		default:
+			assert("BindConstants not support CBV / SRV / UAV /DescriptorTable");
+			break;
+		}
+	}
+	void ComputeCommandList::Dispatch(u32 groupX, u32 groupY, u32 groupZ)
+	{
+		mDynamicDescriptorAllocator->PushDescriptorTable(mD3DCommandList, mBindedDescriptorHeap, false);
+		mD3DCommandList->Dispatch(groupX, groupY, groupZ);
+	}
 }
 

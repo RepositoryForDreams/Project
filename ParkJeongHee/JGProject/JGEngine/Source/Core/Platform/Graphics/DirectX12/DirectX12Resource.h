@@ -12,6 +12,7 @@
 namespace JG
 {
 	class DescriptorAllocation;
+	class ShaderData;
 	class DirectX12VertexBuffer : public IVertexBuffer
 	{
 		friend class DirectX12Mesh;
@@ -30,7 +31,7 @@ namespace JG
 		virtual void SetBufferLoadMethod(EBufferLoadMethod type) override;
 		virtual EBufferLoadMethod GetBufferLoadMethod() const override;
 	protected:
-		virtual void Bind();
+		virtual void Bind() override;
 		void Reset();
 	public:
 		void* GetData() const
@@ -46,7 +47,6 @@ namespace JG
 			return mElementCount;
 		}
 	};
-
 
 	class DirectX12IndexBuffer : public IIndexBuffer
 	{
@@ -66,8 +66,7 @@ namespace JG
 		virtual void SetBufferLoadMethod(EBufferLoadMethod method) override;
 		virtual EBufferLoadMethod GetBufferLoadMethod() const override;
 	protected:
-
-		virtual void Bind();
+		virtual void Bind() override;
 		void Reset();
 	public:
 		u32* GetData() const
@@ -79,6 +78,123 @@ namespace JG
 			return mIndexCount;
 		}
 	};
+
+	class DirectX12ComputeBuffer : public IComputeBuffer
+	{
+		UniquePtr<ShaderData> mShaderData;
+	public:
+		virtual bool SetFloat(const String& name, float value) override;
+		virtual bool SetFloat2(const String& name, const JVector2& value) override;
+		virtual bool SetFloat3(const String& name, const JVector3& value) override;
+		virtual bool SetFloat4(const String& name, const JVector4& value) override;
+		virtual bool SetInt(const String& name, i32 value) override;
+		virtual bool SetInt2(const String& name, const JVector2Int& value) override;
+		virtual bool SetInt3(const String& name, const JVector3Int& value) override;
+		virtual bool SetInt4(const String& name, const JVector4Int& value) override;
+		virtual bool SetUint(const String& name, u32 value) override;
+		virtual bool SetUint2(const String& name, const JVector2Uint& value) override;
+		virtual bool SetUint3(const String& name, const JVector3Uint& value) override;
+		virtual bool SetUint4(const String& name, const JVector4Uint& value) override;
+		virtual bool SetFloat4x4(const String& name, const JMatrix& value) override;
+		virtual bool SetTexture(const String& name, u32 textureSlot, SharedPtr<ITexture> texture) override;
+
+		virtual bool SetFloatArray(const String& name, const List<float>& value) override;
+		virtual bool SetFloat2Array(const String& name, const List<JVector2>& value) override;
+		virtual bool SetFloat3Array(const String& name, const List<JVector3>& value) override;
+		virtual bool SetFloat4Array(const String& name, const List<JVector4>& value) override;
+		virtual bool SetIntArray(const String& name, const List<i32>& value) override;
+		virtual bool SetInt2Array(const String& name, const List<JVector2Int>& value) override;
+		virtual bool SetInt3Array(const String& name, const List<JVector3Int>& value) override;
+		virtual bool SetInt4Array(const String& name, const List<JVector4Int>& value) override;
+		virtual bool SetUintArray(const String& name, const List<u32>& value) override;
+		virtual bool SetUint2Array(const String& name, const List<JVector2Uint>& value) override;
+		virtual bool SetUint3Array(const String& name, const List<JVector3Uint>& value) override;
+		virtual bool SetUint4Array(const String& name, const List<JVector4Uint>& value) override;
+		virtual bool SetFloat4x4Array(const String& name, const List<JMatrix>& value) override;
+		virtual bool SetStructDataArray(const String& name, void* datas, u64 elementCount, u64 elementSize) override;
+
+		virtual bool GetFloat(const String& name, float* out_value) override;
+		virtual bool GetFloat2(const String& name, JVector2* out_value) override;
+		virtual bool GetFloat3(const String& name, JVector3* out_value) override;
+		virtual bool GetFloat4(const String& name, JVector4* out_value) override;
+		virtual bool GetInt(const String& name, i32* out_value) override;
+		virtual bool GetInt2(const String& name, JVector2Int* value) override;
+		virtual bool GetInt3(const String& name, JVector3Int* value) override;
+		virtual bool GetInt4(const String& name, JVector4Int* value) override;
+		virtual bool GetUint(const String& name, u32* value) override;
+		virtual bool GetUint2(const String& name, JVector2Uint* value) override;
+		virtual bool GetUint3(const String& name, JVector3Uint* value) override;
+		virtual bool GetUint4(const String& name, JVector4Uint* value) override;
+		virtual bool GetFloat4x4(const String& name, JMatrix* out_value) override;
+		virtual bool GetTexture(const String& name, u32 textureSlot, SharedPtr<ITexture>* out_value) override;
+
+
+		virtual bool GetFloatArray(const String& name, List<float>* out_value) override;
+		virtual bool GetFloat2Array(const String& name, List<JVector2>* out_value) override;
+		virtual bool GetFloat3Array(const String& name, List<JVector3>* out_value) override;
+		virtual bool GetFloat4Array(const String& name, List<JVector4>* out_value) override;
+		virtual bool GetIntArray(const String& name, List<i32>* out_value) override;
+		virtual bool GetInt2Array(const String& name, List<JVector2Int>* out_value) override;
+		virtual bool GetInt3Array(const String& name, List<JVector3Int>* out_value) override;
+		virtual bool GetInt4Array(const String& name, List<JVector4Int>* out_value) override;
+		virtual bool GetUintArray(const String& name, List<u32>* out_value) override;
+		virtual bool GetUint2Array(const String& name, List<JVector2Uint>* out_value) override;
+		virtual bool GetUint3Array(const String& name, List<JVector3Uint>* out_value) override;
+		virtual bool GetUint4Array(const String& name, List<JVector4Uint>* out_value) override;
+		virtual bool GetFloat4x4Array(const String& name, List<JMatrix>* out_value) override;
+
+
+		virtual bool GetData(const String& name, void* data) override;
+	public:
+		virtual bool IsValid() const override;
+		virtual bool IsCompelete() const override;
+		virtual bool Dispatch(u32 groupX, u32 groupY, u32 groupZ) override;
+	private:
+		virtual bool Bind() const;
+	};
+
+	class DirectX12ConstantBuffer : public IBuffer
+	{
+		u64   mElementSize = 0;
+		void* mCPUData     = nullptr;
+		EBufferLoadMethod mLoadMethod;
+		ComPtr<ID3D12Resource>  mD3DResource;
+	public:
+		DirectX12ConstantBuffer() = default;
+		virtual ~DirectX12ConstantBuffer();
+	public:
+		virtual bool SetData(void* datas, u64 elementSize);
+	public:
+		virtual bool IsValid() const override;
+		void SetBufferLoadMethod(EBufferLoadMethod method);
+		EBufferLoadMethod GetBufferLoadMethod() const;
+	protected:
+		virtual void Bind();
+		void Reset();
+	};
+
+	class DirectX12StructuredBuffer : public IBuffer
+	{
+		u64   mElementSize = 0;
+		u64   mElementCount = 0;
+		void* mCPUData = nullptr;
+		EBufferLoadMethod mLoadMethod;
+		ComPtr<ID3D12Resource>  mD3DResource;
+	public:
+		DirectX12StructuredBuffer() = default;
+		virtual ~DirectX12StructuredBuffer();
+	public:
+		virtual bool SetData(void* datas, u64 elementSize, u64 elementCount);
+	public:
+		virtual bool IsValid() const override;
+		void SetBufferLoadMethod(EBufferLoadMethod method);
+		EBufferLoadMethod GetBufferLoadMethod() const;
+	protected:
+		virtual void Bind();
+		void Reset();
+	};
+
+
 
 	class DirectX12Texture : public ITexture
 	{

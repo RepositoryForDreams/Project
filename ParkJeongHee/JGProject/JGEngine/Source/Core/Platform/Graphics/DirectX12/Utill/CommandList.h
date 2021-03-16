@@ -14,6 +14,7 @@ namespace JG
 	class RootSignature;
 	class DirectX12Texture;
 	class GraphicsPipelineState;
+	class ComputePipelineState;
 	class CommandList
 	{
 	protected:
@@ -93,9 +94,6 @@ namespace JG
 		void BindDynamicVertexBuffer(void* data, u64 elementCount, u64 elementSize, bool isFlush = true);
 		void FlushVertexBuffer();
 
-
-
-
 		void BindIndexBuffer(const D3D12_INDEX_BUFFER_VIEW& view);
 		void BindDynamicIndexBuffer(u32* datas, u64 count);
 		void SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY topology);
@@ -109,6 +107,15 @@ namespace JG
 	public:
 		ComputeCommandList(D3D12_COMMAND_LIST_TYPE d3dType) : CommandList(d3dType) {};
 		virtual ~ComputeCommandList() = default;
+	public:
+		void BindRootSignature(SharedPtr<RootSignature> rootSig);
+		void BindPipelineState(SharedPtr<ComputePipelineState> pso);
+		void BindTextures(u32 rootParam, List<D3D12_CPU_DESCRIPTOR_HANDLE> handles);
+		void BindDynamicConstantBuffer(u32 rootParam, const void* data, u64 elementSize);
+		void BindDynamicStructuredBuffer(u32 rootParam, const  void* data, u64 elementSize, u64 elementCount);
+		void BindConstants(u32 rootparam, u32 btSize, void* data, u32 offset = 0);
+
+		void Dispatch(u32 groupX, u32 groupY, u32 groupZ);
 	};
 
 	class CopyCommandList : public CommandList

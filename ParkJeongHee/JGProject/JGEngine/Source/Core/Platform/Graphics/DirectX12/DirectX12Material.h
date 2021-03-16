@@ -5,14 +5,12 @@
 
 namespace JG
 {
+	class ShaderData;
 	class DirectX12Material : public IMaterial
 	{
-		//friend DirectX12API;
 	private:
-		Dictionary<String, List<byte>> mByteDatas;
-		Dictionary<String, List<SharedPtr<ITexture>>> mTextureDatas;
-		WeakPtr<IShader> mOwnerShader;
 		String mName;
+		UniquePtr<ShaderData> mShaderData;
 	public:
 		virtual bool SetFloat(const String& name, float value) override;
 		virtual bool SetFloat2(const String& name, const JVector2& value) override;
@@ -81,67 +79,6 @@ namespace JG
 	public:
 		virtual bool Bind() override;
 		virtual void Init(SharedPtr<IShader> shader) override;
-
-	private:
-		template<class T, EShaderDataType type>
-		bool SetData(const String& name, const T* value)
-		{
-			auto data = GetAndCheckData(name, type);
-			if (data == nullptr)
-			{
-				return false;
-			}
-
-			u64 dataSize = sizeof(T);
-			u64 dataPos = data->DataPos;
-			String& cbName = data->Owner->Name;
-			memcpy(&mByteDatas[cbName][dataPos], value, dataSize);
-			return true;
-		}
-
-
-
-		template<class T, EShaderDataType type>
-		bool SetDataArray(const String& name, const List<T>& dataArray)
-		{
-			if (CheckDataArray(name, type) == false)
-			{
-				return false;
-			}
-			u64 btSize = sizeof(T) * dataArray.size();
-
-
-			memcpy(&mByteDatas[name][0], dataArray.data(), btSize);
-			return true;
-		}
-
-
-
-
-
-
-		template<class T, EShaderDataType type>
-		bool GetData(const String& name, T* value)
-		{
-			if (value == nullptr)
-			{
-				return false;
-			}
-			auto data = GetAndCheckData(name, type);
-			if (data == nullptr)
-			{
-				return false;
-			}
-			u64 dataSize = sizeof(T);
-			u64 dataPos = data->DataPos;
-			String& cbName = data->Owner->Name;
-			memcpy(value , &mByteDatas[cbName][dataPos], dataSize);
-			return true;
-		}
-
-
-		ShaderDataForm::Data* GetAndCheckData(const String& name, EShaderDataType checkType);
-		bool CheckDataArray(const String& name, EShaderDataType checkType);
 	};
 
 }

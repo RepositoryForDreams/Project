@@ -55,8 +55,6 @@ namespace JG
 			JG_CORE_ERROR("Failed Bind Shader : is not Compiled Shader ");
 			return false;
 		}
-		// RootSignature 수정
-
 		auto RootSig = DirectX12API::GetRootSignature();
 		RootSig->Reset();
 
@@ -190,7 +188,7 @@ namespace JG
 		// TODO 
 		// Bind
 		auto commandList = DirectX12API::GetComputeCommandList();
-		//commandList->BindRootSignature(RootSig);
+		commandList->BindRootSignature(RootSig);
 
 
 		auto PSO = DirectX12API::GetComputePipelineState();

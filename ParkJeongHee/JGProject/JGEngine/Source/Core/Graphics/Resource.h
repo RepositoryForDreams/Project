@@ -28,9 +28,9 @@ namespace JG
 		const IResource& operator=(const IResource&) = delete;
 	};
 
-	class Buffer : public IResource {};
+	class IBuffer : public IResource {};
 
-	class IVertexBuffer : public Buffer
+	class IVertexBuffer : public IBuffer
 	{
 	public:
 		virtual ~IVertexBuffer() = default;
@@ -39,11 +39,11 @@ namespace JG
 	public:
 		virtual bool SetData(void* datas, u64 elementSize, u64 elementCount) = 0;
 		virtual EBufferLoadMethod GetBufferLoadMethod() const = 0;
-
+		virtual void Bind() = 0;
 		static SharedPtr<IVertexBuffer> Create(String name, EBufferLoadMethod method);
 	};
 
-	class IIndexBuffer : public Buffer
+	class IIndexBuffer : public IBuffer
 	{
 	public:
 		virtual ~IIndexBuffer() = default;
@@ -52,14 +52,14 @@ namespace JG
 	public:
 		virtual bool SetData(u32* datas, u64 count) = 0;
 		virtual EBufferLoadMethod GetBufferLoadMethod() const = 0;
-
+		virtual void Bind() = 0;
 
 		static SharedPtr<IIndexBuffer> Create(String name, EBufferLoadMethod method);
 	};
 	
 
 
-	class IComputeBuffer : public Buffer
+	class IComputeBuffer : public IBuffer
 	{
 	public:
 		virtual bool SetFloat(const String& name, float value) = 0;
@@ -126,6 +126,7 @@ namespace JG
 		virtual bool GetData(const String& name, void* data) = 0;
 	public:
 		virtual bool IsCompelete() const = 0;
+		virtual bool Dispatch(u32 groupX, u32 groupY, u32 groupZ) = 0;
 	public:
 		static SharedPtr<IComputeBuffer> Create(const String& name, SharedPtr<IShader> shader);
 	};

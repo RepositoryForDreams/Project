@@ -4,6 +4,8 @@
 
 
 
+
+
 #include "Common/Define.h"
 #include "Common/Assert.h"
 #include "Common/Enum.h"
@@ -27,3 +29,6 @@
 #include "Event/ApplicationEvents.h"
 #include "Event/KeyEvents.h"
 #include "Event/MouseEvents.h"
+
+#include "Class/Global/TimerManager.h"
+#include "Class/Global/Scheduler.h"

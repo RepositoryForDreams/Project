@@ -88,8 +88,6 @@ namespace JG
 	}
 	void DevLayer::Begin()
 	{
-
-		auto AppSize = Application::GetInstance().GetSize();
 		mCamera = Camera::Create(JVector2(1920, 1080), 60, 0.1f, 1000.0f, true);
 		mCamera->SetLocation(JVector3(0, 0, -10));
 		TextureInfo textureInfo;

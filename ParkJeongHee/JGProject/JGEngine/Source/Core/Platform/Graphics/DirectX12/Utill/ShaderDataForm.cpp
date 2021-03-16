@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "ShaderDataForm.h"
+#include "Platform/Graphics/DirectX12/DirectX12Shader.h"
+
 
 namespace JG
 {
@@ -899,5 +901,372 @@ namespace JG
 		SamplerStateDataMap[name] = CreateUniquePtr<SamplerStateData>();
 
 		return true;
+	}
+
+
+
+
+
+	ShaderData::ShaderData(SharedPtr<IShader> shader)
+	{
+		OwnerShader = shader;
+
+		auto loadShader = OwnerShader.lock();
+		auto dx12Shader = static_cast<DirectX12Shader*>(loadShader.get());
+		if (dx12Shader != nullptr)
+		{
+			auto shaderDataForm = dx12Shader->GetShaderDataForm();
+
+
+			for (auto& _pair : shaderDataForm->CBufferDataMap)
+			{
+				ByteDatas[_pair.first].resize(_pair.second->DataSize, 0);
+			}
+
+			for (auto& _pair : shaderDataForm->StructuredBufferDataMap)
+			{
+				ByteDatas[_pair.first].clear();
+			}
+
+			for (auto& _pair : shaderDataForm->TextureDataMap)
+			{
+				TextureDatas[_pair.first].resize(_pair.second->TextureCount, nullptr);
+			}
+
+
+		}
+	}
+	bool ShaderData::SetFloat(const String& name, float value)
+	{
+		return SetData<float, EShaderDataType::_float>(name, &value);
+	}
+	bool ShaderData::SetFloat2(const String& name, const JVector2& value)
+	{
+		return SetData<JVector2, EShaderDataType::_float2>(name, &value);
+	}
+	bool ShaderData::SetFloat3(const String& name, const JVector3& value)
+	{
+		return SetData<JVector3, EShaderDataType::_float3>(name, &value);
+	}
+	bool ShaderData::SetFloat4(const String& name, const JVector4& value)
+	{
+		return SetData<JVector4, EShaderDataType::_float4>(name, &value);
+	}
+	bool ShaderData::SetInt(const String& name, i32 value)
+	{
+		return SetData<i32, EShaderDataType::_int>(name, &value);
+	}
+	bool ShaderData::SetInt2(const String& name, const JVector2Int& value)
+	{
+		return SetData<JVector2Int, EShaderDataType::_int2>(name, &value);
+	}
+	bool ShaderData::SetInt3(const String& name, const JVector3Int& value)
+	{
+		return SetData<JVector3Int, EShaderDataType::_int3>(name, &value);
+	}
+	bool ShaderData::SetInt4(const String& name, const JVector4Int& value)
+	{
+		return SetData<JVector4Int, EShaderDataType::_int4>(name, &value);
+	}
+	bool ShaderData::SetUint(const String& name, u32 value)
+	{
+		return SetData<u32, EShaderDataType::_uint>(name, &value);
+	}
+	bool ShaderData::SetUint2(const String& name, const JVector2Uint& value)
+	{
+		return SetData<JVector2Uint, EShaderDataType::_uint2>(name, &value);
+	}
+	bool ShaderData::SetUint3(const String& name, const JVector3Uint& value)
+	{
+		return SetData<JVector3Uint, EShaderDataType::_uint3>(name, &value);
+	}
+	bool ShaderData::SetUint4(const String& name, const JVector4Uint& value)
+	{
+		return SetData<JVector4Uint, EShaderDataType::_uint4>(name, &value);
+	}
+	bool ShaderData::SetFloat4x4(const String& name, const JMatrix& value)
+	{
+		return SetData<JMatrix, EShaderDataType::_float4x4>(name, &value);
+	}
+
+	bool ShaderData::SetTexture(const String& name, u32 textureSlot, SharedPtr<ITexture> texture)
+	{
+		if (TextureDatas.find(name) == TextureDatas.end())
+		{
+			return false;
+		}
+
+		auto& textureList = TextureDatas[name];
+		u64 textureCount = textureList.size();
+
+		if (textureCount <= textureSlot)
+		{
+			return false;
+		}
+
+		textureList[textureSlot] = texture;
+		return true;
+	}
+
+
+
+	bool ShaderData::SetFloatArray(const String& name, const List<float>& value)
+	{
+		return SetDataArray<float, EShaderDataType::_float>(name, value);
+	}
+
+	bool ShaderData::SetFloat2Array(const String& name, const List<JVector2>& value)
+	{
+		return SetDataArray<JVector2, EShaderDataType::_float2>(name, value);
+	}
+
+	bool ShaderData::SetFloat3Array(const String& name, const List<JVector3>& value)
+	{
+		return SetDataArray<JVector3, EShaderDataType::_float3>(name, value);
+	}
+
+	bool ShaderData::SetFloat4Array(const String& name, const List<JVector4>& value)
+	{
+		return SetDataArray<JVector4, EShaderDataType::_float4>(name, value);
+	}
+
+	bool ShaderData::SetIntArray(const String& name, const List<i32>& value)
+	{
+		return SetDataArray<i32, EShaderDataType::_int>(name, value);
+	}
+
+	bool ShaderData::SetInt2Array(const String& name, const List<JVector2Int>& value)
+	{
+		return SetDataArray<JVector2Int, EShaderDataType::_int2>(name, value);
+	}
+
+	bool ShaderData::SetInt3Array(const String& name, const List<JVector3Int>& value)
+	{
+		return SetDataArray<JVector3Int, EShaderDataType::_int3>(name, value);
+	}
+
+	bool ShaderData::SetInt4Array(const String& name, const List<JVector4Int>& value)
+	{
+		return SetDataArray<JVector4Int, EShaderDataType::_int4>(name, value);
+	}
+
+	bool ShaderData::SetUintArray(const String& name, const List<u32>& value)
+	{
+		return SetDataArray<u32, EShaderDataType::_uint>(name, value);
+	}
+
+	bool ShaderData::SetUint2Array(const String& name, const List<JVector2Uint>& value)
+	{
+		return SetDataArray<JVector2Uint, EShaderDataType::_uint2>(name, value);
+	}
+
+	bool ShaderData::SetUint3Array(const String& name, const List<JVector3Uint>& value)
+	{
+		return SetDataArray<JVector3Uint, EShaderDataType::_uint3>(name, value);
+	}
+
+	bool ShaderData::SetUint4Array(const String& name, const List<JVector4Uint>& value)
+	{
+		return SetDataArray<JVector4Uint, EShaderDataType::_uint4>(name, value);
+	}
+
+	bool ShaderData::SetFloat4x4Array(const String& name, const List<JMatrix>& value)
+	{
+		return SetDataArray<JMatrix, EShaderDataType::_float4x4>(name, value);
+	}
+
+	bool ShaderData::SetStructDataArray(const String& name, void* datas, u64 elementCount, u64 elementSize)
+	{
+		JGASSERT("NOT Supported SetStructDataArray");
+		return false;
+	}
+
+
+
+	bool ShaderData::GetFloat(const String& name, float* out_value)
+	{
+		return GetData<float, EShaderDataType::_float>(name, out_value);
+	}
+
+	bool ShaderData::GetFloat2(const String& name, JVector2* out_value)
+	{
+		return GetData<JVector2, EShaderDataType::_float2>(name, out_value);
+	}
+
+	bool ShaderData::GetFloat3(const String& name, JVector3* out_value)
+	{
+		return GetData<JVector3, EShaderDataType::_float3>(name, out_value);
+	}
+
+	bool ShaderData::GetFloat4(const String& name, JVector4* out_value)
+	{
+		return GetData<JVector4, EShaderDataType::_float4>(name, out_value);
+	}
+
+	bool ShaderData::GetInt(const String& name, i32* out_value)
+	{
+		return GetData<i32, EShaderDataType::_int>(name, out_value);
+	}
+
+	bool ShaderData::GetInt2(const String& name, JVector2Int* out_value)
+	{
+		return GetData<JVector2Int, EShaderDataType::_int2>(name, out_value);
+	}
+
+	bool ShaderData::GetInt3(const String& name, JVector3Int* out_value)
+	{
+		return GetData<JVector3Int, EShaderDataType::_int3>(name, out_value);
+	}
+
+	bool ShaderData::GetInt4(const String& name, JVector4Int* out_value)
+	{
+		return GetData<JVector4Int, EShaderDataType::_int4>(name, out_value);
+	}
+
+	bool ShaderData::GetUint(const String& name, u32* out_value)
+	{
+		return GetData<u32, EShaderDataType::_uint>(name, out_value);
+	}
+
+	bool ShaderData::GetUint2(const String& name, JVector2Uint* out_value)
+	{
+		return GetData<JVector2Uint, EShaderDataType::_uint2>(name, out_value);
+	}
+
+	bool ShaderData::GetUint3(const String& name, JVector3Uint* out_value)
+	{
+		return GetData<JVector3Uint, EShaderDataType::_uint3>(name, out_value);
+	}
+
+	bool ShaderData::GetUint4(const String& name, JVector4Uint* out_value)
+	{
+		return GetData<JVector4Uint, EShaderDataType::_uint4>(name, out_value);
+	}
+
+	bool ShaderData::GetFloat4x4(const String& name, JMatrix* outValue)
+	{
+		return GetData<JMatrix, EShaderDataType::_float4x4>(name, outValue);
+	}
+
+	bool ShaderData::GetTexture(const String& name, u32 textureSlot, SharedPtr<ITexture>* out_value)
+	{
+		return false;
+	}
+
+	bool ShaderData::GetFloatArray(const String& name, List<float>* out_value)
+	{
+		return false;
+	}
+
+	bool ShaderData::GetFloat2Array(const String& name, List<JVector2>* out_value)
+	{
+		return false;
+	}
+
+	bool ShaderData::GetFloat3Array(const String& name, List<JVector3>* out_value)
+	{
+		return false;
+	}
+
+	bool ShaderData::GetFloat4Array(const String& name, List<JVector4>* out_value)
+	{
+		return false;
+	}
+
+	bool ShaderData::GetIntArray(const String& name, List<i32>* out_value)
+	{
+		return false;
+	}
+
+	bool ShaderData::GetInt2Array(const String& name, List<JVector2Int>* out_value)
+	{
+		return false;
+	}
+
+	bool ShaderData::GetInt3Array(const String& name, List<JVector3Int>* out_value)
+	{
+		return false;
+	}
+
+	bool ShaderData::GetInt4Array(const String& name, List<JVector4Int>* out_value)
+	{
+		return false;
+	}
+
+	bool ShaderData::GetUintArray(const String& name, List<u32>* out_value)
+	{
+		return false;
+	}
+
+	bool ShaderData::GetUint2Array(const String& name, List<JVector2Uint>* out_value)
+	{
+		return false;
+	}
+
+	bool ShaderData::GetUint3Array(const String& name, List<JVector3Uint>* out_value)
+	{
+		return false;
+	}
+
+	bool ShaderData::GetUint4Array(const String& name, List<JVector4Uint>* out_value)
+	{
+		return false;
+	}
+
+	bool ShaderData::GetFloat4x4Array(const String& name, List<JMatrix>* out_value)
+	{
+		return false;
+	}
+	ShaderDataForm::Data* ShaderData::GetAndCheckData(const String& name, EShaderDataType checkType)
+	{
+		auto loadShader = OwnerShader.lock();
+		auto dx12Shader = static_cast<DirectX12Shader*>(loadShader.get());
+		if (dx12Shader != nullptr)
+		{
+			auto shaderDataForm = dx12Shader->GetShaderDataForm();
+			auto& CBufferVarMap = shaderDataForm->CBufferVarMap;
+
+			auto iter = CBufferVarMap.find(name);
+			if (iter == CBufferVarMap.end())
+			{
+				return nullptr;
+			}
+			auto data = iter->second;
+			if (data->Type != checkType)
+			{
+				return nullptr;
+			}
+			return data;
+		}
+		else
+		{
+			return nullptr;
+		}
+	}
+	bool ShaderData::CheckDataArray(const String& name, EShaderDataType checkType)
+	{
+		auto loadShader = OwnerShader.lock();
+		auto dx12Shader = static_cast<DirectX12Shader*>(loadShader.get());
+		if (dx12Shader != nullptr)
+		{
+			auto shaderDataForm = dx12Shader->GetShaderDataForm();
+			auto iter = shaderDataForm->StructuredBufferDataMap.find(name);
+			if (iter == shaderDataForm->StructuredBufferDataMap.end())
+			{
+				return false;
+			}
+
+			auto data = iter->second.get();
+			if (data->Type != checkType)
+			{
+				return false;
+			}
+
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 }
