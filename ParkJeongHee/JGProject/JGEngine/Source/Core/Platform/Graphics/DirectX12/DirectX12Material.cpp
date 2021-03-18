@@ -284,98 +284,99 @@ namespace JG
 
 	bool DirectX12Material::Bind()
 	{
-		auto commandList  = DirectX12API::GetGraphicsCommandList();
-		auto loadedShader = mShaderData->OwnerShader.lock();
-		auto dx12Shader   = static_cast<DirectX12Shader*>(loadedShader.get());
+		return mShaderData->Bind();
+		//auto commandList  = DirectX12API::GetGraphicsCommandList();
+		//auto loadedShader = mShaderData->OwnerShader.lock();
+		//auto dx12Shader   = static_cast<DirectX12Shader*>(loadedShader.get());
 
-		if (dx12Shader != nullptr)
-		{
-			if (dx12Shader->Bind() == false)
-			{
-				JG_CORE_ERROR("Failed Bind {0} Shader, in {1} Material", ws2s(dx12Shader->GetName()), ws2s(GetName()));
-				return false;
-			}
-
-
-			auto shaderDataForm = dx12Shader->GetShaderDataForm();
+		//if (dx12Shader != nullptr)
+		//{
+		//	if (dx12Shader->Bind() == false)
+		//	{
+		//		JG_CORE_ERROR("Failed Bind {0} Shader, in {1} Material", ws2s(dx12Shader->GetName()), ws2s(GetName()));
+		//		return false;
+		//	}
 
 
-			for (auto& _pair : shaderDataForm->CBufferDataMap)
-			{
-				auto cBufferName = _pair.first;
-				auto cBufferData = _pair.second.get();
-				auto& byteData   = mShaderData->ByteDatas[cBufferName];
-				commandList->BindDynamicConstantBuffer(cBufferData->RootParm, byteData.data(), byteData.size());
-			}
-		
-			for (auto& _pair : shaderDataForm->TextureDataMap)
-			{
-				auto textureData = _pair.second.get();
-				auto& textureList = mShaderData->TextureDatas[_pair.first];
-				u64 textureCount = textureList.size();
-				List<D3D12_CPU_DESCRIPTOR_HANDLE> handles;
+		//	auto shaderDataForm = dx12Shader->GetShaderDataForm();
 
-				
-				for (u64 i = 0; i < textureCount; ++i)
-				{
-					if (textureList[i] != nullptr && textureList[i]->IsValid())
-					{
-						handles.push_back(static_cast<DirectX12Texture*>(textureList[i].get())->GetSRV());
-					}
-				}
 
-				if (handles.empty() == false)
-				{
-					commandList->BindTextures(textureData->RootParm, handles);
-				}
-		
-			}
+		//	for (auto& _pair : shaderDataForm->CBufferDataMap)
+		//	{
+		//		auto cBufferName = _pair.first;
+		//		auto cBufferData = _pair.second.get();
+		//		auto& byteData   = mShaderData->ByteDatas[cBufferName];
+		//		commandList->BindDynamicConstantBuffer((u32)cBufferData->RootParm, byteData.data(), byteData.size());
+		//	}
+		//
+		//	for (auto& _pair : shaderDataForm->TextureDataMap)
+		//	{
+		//		auto textureData = _pair.second.get();
+		//		auto& textureList = mShaderData->TextureDatas[_pair.first];
+		//		u64 textureCount = textureList.size();
+		//		List<D3D12_CPU_DESCRIPTOR_HANDLE> handles;
 
-			// RWTexture
-			for (auto& _pair : shaderDataForm->RWTextureDataMap)
-			{
-				auto textureData = _pair.second.get();
-				auto& textureList = mShaderData->TextureDatas[_pair.first];
-				u64 textureCount = textureList.size();
-				List<D3D12_CPU_DESCRIPTOR_HANDLE> handles;
-				for (u64 i = 0; i < textureCount; ++i)
-				{
-					if (textureList[i] != nullptr && textureList[i]->IsValid())
-					{
-						handles.push_back(static_cast<DirectX12Texture*>(textureList[i].get())->GetUAV());
-					}
-				}
+		//		
+		//		for (u64 i = 0; i < textureCount; ++i)
+		//		{
+		//			if (textureList[i] != nullptr && textureList[i]->IsValid())
+		//			{
+		//				handles.push_back(static_cast<DirectX12Texture*>(textureList[i].get())->GetSRV());
+		//			}
+		//		}
 
-				if (handles.empty() == false)
-				{
-					commandList->BindTextures(textureData->RootParm, handles);
-				}
-			}
-			// structuredBuffer
-			for (auto& _pair : shaderDataForm->StructuredBufferDataMap)
-			{
-				auto structuredBufferName = _pair.first;
-				auto structuredBufferData = _pair.second.get();
-				auto& byteData = mShaderData->ByteDatas[structuredBufferName];
-				commandList->BindDynamicStructuredBuffer(
-					structuredBufferData->RootParm, byteData.data(), structuredBufferData->ElementDataSize, byteData.size());
-			}
+		//		if (handles.empty() == false)
+		//		{
+		//			commandList->BindTextures((u32)textureData->RootParm, handles);
+		//		}
+		//
+		//	}
 
-			// RWStructuredBuffer
-			for (auto& _pair : shaderDataForm->RWStructuredBufferDataMap)
-			{
-				auto structuredBufferName = _pair.first;
-				auto structuredBufferData = _pair.second.get();
-				auto& byteData = mShaderData->ByteDatas[structuredBufferName];
-				commandList->BindDynamicStructuredBuffer(
-					structuredBufferData->RootParm, byteData.data(), structuredBufferData->ElementDataSize, byteData.size());
-			}
-		}
-		else
-		{
-			return false;
-		}
-		return true;
+		//	// RWTexture
+		//	for (auto& _pair : shaderDataForm->RWTextureDataMap)
+		//	{
+		//		auto textureData = _pair.second.get();
+		//		auto& textureList = mShaderData->TextureDatas[_pair.first];
+		//		u64 textureCount = textureList.size();
+		//		List<D3D12_CPU_DESCRIPTOR_HANDLE> handles;
+		//		for (u64 i = 0; i < textureCount; ++i)
+		//		{
+		//			if (textureList[i] != nullptr && textureList[i]->IsValid())
+		//			{
+		//				handles.push_back(static_cast<DirectX12Texture*>(textureList[i].get())->GetUAV());
+		//			}
+		//		}
+
+		//		if (handles.empty() == false)
+		//		{
+		//			commandList->BindTextures((u32)textureData->RootParm, handles);
+		//		}
+		//	}
+		//	// structuredBuffer
+		//	for (auto& _pair : shaderDataForm->StructuredBufferDataMap)
+		//	{
+		//		auto structuredBufferName = _pair.first;
+		//		auto structuredBufferData = _pair.second.get();
+		//		auto& byteData = mShaderData->ByteDatas[structuredBufferName];
+		//		commandList->BindDynamicStructuredBuffer(
+		//			(u32)structuredBufferData->RootParm, byteData.data(), structuredBufferData->ElementDataSize, byteData.size());
+		//	}
+
+		//	// RWStructuredBuffer
+		//	for (auto& _pair : shaderDataForm->RWStructuredBufferDataMap)
+		//	{
+		//		auto structuredBufferName = _pair.first;
+		//		auto structuredBufferData = _pair.second.get();
+		//		auto& byteData = mShaderData->ByteDatas[structuredBufferName];
+		//		commandList->BindDynamicStructuredBuffer(
+		//			(u32)structuredBufferData->RootParm, byteData.data(), structuredBufferData->ElementDataSize, byteData.size());
+		//	}
+		//}
+		//else
+		//{
+		//	return false;
+		//}
+		//return true;
 	}
 
 	void DirectX12Material::Init(SharedPtr<IShader> shader)

@@ -23,7 +23,11 @@ namespace JG
 
 		return api->CreateIndexBuffer(name, method);
 	}
-	SharedPtr<IComputeBuffer> IComputeBuffer::Create(const String& name, SharedPtr<IShader> shader)
+	SharedPtr<IComputer> IComputer::Create(const String& name, SharedPtr<IShader> shader)
+	{
+		return SharedPtr<IComputer>();
+	}
+	SharedPtr<IComputeBuffer> IComputeBuffer::Create(const String& name)
 	{
 		return SharedPtr<IComputeBuffer>();
 	}
@@ -40,5 +44,7 @@ namespace JG
 	{
 		return nullptr;
 	}
+
+
 
 }

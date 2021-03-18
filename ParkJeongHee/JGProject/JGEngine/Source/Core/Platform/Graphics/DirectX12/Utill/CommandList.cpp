@@ -2,7 +2,6 @@
 #include "CommandList.h"
 
 #include "DescriptorAllocator.h"
-#include "UploadAllocator.h"
 #include "ResourceStateTracker.h"
 #include "DynamicDescriptorAllocator.h"
 #include "RootSignature.h"
@@ -17,7 +16,6 @@ namespace JG
 		mD3DAllocator   = CreateD3DCommandAllocator(DirectX12API::GetD3DDevice(), mD3DType);
 		mD3DCommandList = CreateD3DCommandList(DirectX12API::GetD3DDevice(), mD3DAllocator.Get(), mD3DType);
 		
-		mUploadAllocator			= CreateUniquePtr<UploadAllocator>();
 		mResourceStateTracker	    = CreateUniquePtr<ResourceStateTracker>();
 		mDynamicDescriptorAllocator = CreateUniquePtr<DynamicDescriptorAllocator>();
 	}
@@ -32,8 +30,6 @@ namespace JG
 
 	void CommandList::Reset()
 	{
-
-		mUploadAllocator->Reset();
 		mResourceStateTracker->Reset();
 		mDynamicDescriptorAllocator->Reset();
 		mTempObjectList.clear();
@@ -299,57 +295,23 @@ namespace JG
 
 
 	}
-
-	void GraphicsCommandList::BindDynamicConstantBuffer(u32 rootParam, const void* data, u64 elementSize)
+	void GraphicsCommandList::BindConstantBuffer(u32 rootParam, UploadAllocator::Allocation alloc)
 	{
-
 		i32 initType = mDynamicDescriptorAllocator->GetDescriptorInitAsType(rootParam);
-		auto alloc = mUploadAllocator->Allocate(elementSize, 256);
-
-		memcpy(alloc.CPU, data, elementSize);
-
-
-		switch(initType)
+		if (initType == RootSignature::__ConstantBufferView__)
 		{
-		case RootSignature::__DescriptorTable__:
-			{
-				D3D12_DESCRIPTOR_RANGE_TYPE tableType = mDynamicDescriptorAllocator->GetDescriptorTableType(rootParam);
-				switch (tableType)
-				{
-				case D3D12_DESCRIPTOR_RANGE_TYPE_CBV:
-				{
-					D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
-					cbvDesc.BufferLocation = alloc.GPU;
-					cbvDesc.SizeInBytes = (elementSize + 255) & ~255;
-					auto cbvHandle = DirectX12API::CSUAllocate();
-					DirectX12API::GetD3DDevice()->CreateConstantBufferView(&cbvDesc, cbvHandle.CPU());
-					mDynamicDescriptorAllocator->CommitDescriptorTable(rootParam, { cbvHandle.CPU() });
-				}
-				break;
-				default:
-					JGASSERT("trying bind SRV or UAV or Sampler in BindConstantBuffer");
-					break;
-				}
-			}
-			break;
-		case RootSignature::__ConstantBufferView__:
 			mD3DCommandList->SetGraphicsRootConstantBufferView(rootParam, alloc.GPU);
-			break;
-		default:
-			JGASSERT("BindDynamicConstantBuffer not support ShaderResourceView / UnorderedAccessView / Constant");
-			break;
+			BackupResource(alloc.OwnerPage->Get());
+		}
+		else
+		{
+			JGASSERT("BindConstantBuffer not support ShaderResourceView / UnorderedAccessView / Constant / DescriptorTable");
 		}
 	}
 
-	void GraphicsCommandList::BindDynamicStructuredBuffer(u32 rootParam, const void* data, u64 elementSize, u64 elementCount)
+	void GraphicsCommandList::BindStructuredBuffer(u32 rootParam, UploadAllocator::Allocation alloc)
 	{
-		
-		i32  initType = mDynamicDescriptorAllocator->GetDescriptorInitAsType(rootParam);
-
-		u64  btSize = elementSize * elementCount;
-		auto alloc = mUploadAllocator->Allocate(btSize, elementSize);
-
-		memcpy(alloc.CPU, data, btSize);
+		i32 initType = mDynamicDescriptorAllocator->GetDescriptorInitAsType(rootParam);
 		switch (initType)
 		{
 		case RootSignature::__ShaderResourceView__:
@@ -359,11 +321,11 @@ namespace JG
 			mD3DCommandList->SetGraphicsRootUnorderedAccessView(rootParam, alloc.GPU);
 			break;
 		default:
-			assert("BindDynamicStructuredBuffer not support ConstantBufferView / Constant / DescriptorTable");
+			assert("BindStructuredBuffer not support ConstantBufferView / Constant / DescriptorTable");
 			break;
 		}
+		BackupResource(alloc.OwnerPage->Get());
 	}
-
 	void GraphicsCommandList::BindConstants(u32 rootParam, u32 btSize, void* data, u32 offset)
 	{
 		int initType = mDynamicDescriptorAllocator->GetDescriptorInitAsType(rootParam);
@@ -388,26 +350,6 @@ namespace JG
 
 	}
 
-	void GraphicsCommandList::BindDynamicVertexBuffer(void* data, u64 elementCount, u64 elementSize, bool isFlush)
-	{
-		u64 btSize = elementSize * elementCount;
-		auto alloc = mUploadAllocator->Allocate(btSize, elementSize);
-
-		memcpy(alloc.CPU, data, btSize);
-
-		D3D12_VERTEX_BUFFER_VIEW bufferView;
-		bufferView.BufferLocation = alloc.GPU;
-		bufferView.SizeInBytes   = (u32)btSize;
-		bufferView.StrideInBytes = (u32)elementSize;
-
-		mVertexViews.push_back(bufferView);
-
-		if (isFlush == true)
-		{
-			FlushVertexBuffer();
-		}
-	}
-
 	void GraphicsCommandList::FlushVertexBuffer()
 	{
 		mD3DCommandList->IASetVertexBuffers(0, mVertexViews.size(), mVertexViews.data());
@@ -419,20 +361,6 @@ namespace JG
 		mD3DCommandList->IASetIndexBuffer(&view);
 	}
 
-	void GraphicsCommandList::BindDynamicIndexBuffer(u32* datas, u64 count)
-	{
-		u64 btSize = count * sizeof(u32);
-		
-		auto alloc = mUploadAllocator->Allocate(btSize, sizeof(u32));
-		memcpy(alloc.CPU, datas, btSize);
-
-		D3D12_INDEX_BUFFER_VIEW bufferView;
-		bufferView.BufferLocation = alloc.GPU;
-		bufferView.Format = DXGI_FORMAT_R32_UINT;
-		bufferView.SizeInBytes = (u32)btSize;
-
-		mD3DCommandList->IASetIndexBuffer(&bufferView);
-	}
 	void GraphicsCommandList::SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY topology)
 	{
 		mD3DCommandList->IASetPrimitiveTopology(topology);
@@ -494,53 +422,22 @@ namespace JG
 			break;
 		}
 	}
-	void ComputeCommandList::BindDynamicConstantBuffer(u32 rootParam, const void* data, u64 elementSize)
+	void ComputeCommandList::BindConstantBuffer(u32 rootParam, UploadAllocator::Allocation alloc)
 	{
 		i32 initType = mDynamicDescriptorAllocator->GetDescriptorInitAsType(rootParam);
-		auto alloc = mUploadAllocator->Allocate(elementSize, 256);
-
-		memcpy(alloc.CPU, data, elementSize);
-
-
-		switch (initType)
+		if (initType == RootSignature::__ConstantBufferView__)
 		{
-		case RootSignature::__DescriptorTable__:
-		{
-			D3D12_DESCRIPTOR_RANGE_TYPE tableType = mDynamicDescriptorAllocator->GetDescriptorTableType(rootParam);
-			switch (tableType)
-			{
-			case D3D12_DESCRIPTOR_RANGE_TYPE_CBV:
-			{
-				D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
-				cbvDesc.BufferLocation = alloc.GPU;
-				cbvDesc.SizeInBytes = (elementSize + 255) & ~255;
-				auto cbvHandle = DirectX12API::CSUAllocate();
-				DirectX12API::GetD3DDevice()->CreateConstantBufferView(&cbvDesc, cbvHandle.CPU());
-				mDynamicDescriptorAllocator->CommitDescriptorTable(rootParam, { cbvHandle.CPU() });
-			}
-			break;
-			default:
-				JGASSERT("trying bind SRV or UAV or Sampler in BindConstantBuffer");
-				break;
-			}
-		}
-		break;
-		case RootSignature::__ConstantBufferView__:
 			mD3DCommandList->SetComputeRootConstantBufferView(rootParam, alloc.GPU);
-			break;
-		default:
-			JGASSERT("BindDynamicConstantBuffer not support ShaderResourceView / UnorderedAccessView / Constant");
-			break;
+			BackupResource(alloc.OwnerPage->Get());
+		}
+		else
+		{
+			JGASSERT("BindConstantBuffer not support ShaderResourceView / UnorderedAccessView / Constant / DescriptorTable");
 		}
 	}
-	void ComputeCommandList::BindDynamicStructuredBuffer(u32 rootParam, const void* data, u64 elementSize, u64 elementCount)
+	void ComputeCommandList::BindStructuredBuffer(u32 rootParam, UploadAllocator::Allocation alloc)
 	{
-		i32  initType = mDynamicDescriptorAllocator->GetDescriptorInitAsType(rootParam);
-
-		u64  btSize = elementSize * elementCount;
-		auto alloc = mUploadAllocator->Allocate(btSize, elementSize);
-
-		memcpy(alloc.CPU, data, btSize);
+		i32 initType = mDynamicDescriptorAllocator->GetDescriptorInitAsType(rootParam);
 		switch (initType)
 		{
 		case RootSignature::__ShaderResourceView__:
@@ -550,9 +447,10 @@ namespace JG
 			mD3DCommandList->SetComputeRootUnorderedAccessView(rootParam, alloc.GPU);
 			break;
 		default:
-			assert("BindDynamicStructuredBuffer not support ConstantBufferView / Constant / DescriptorTable");
+			assert("BindStructuredBuffer not support ConstantBufferView / Constant / DescriptorTable");
 			break;
 		}
+		BackupResource(alloc.OwnerPage->Get());
 	}
 	void ComputeCommandList::BindConstants(u32 rootparam, u32 btSize, void* data, u32 offset)
 	{

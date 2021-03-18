@@ -11,6 +11,24 @@ namespace JG
 	bool DirectX12Shader::Compile(const String& sourceCode, EShaderFlags flags, String* error)
 	{
 		mFlags = flags;
+
+		if (mFlags & EShaderFlags::Allow_ComputeShader)
+		{
+			if (mFlags & EShaderFlags::Allow_VertexShader ||
+				mFlags & EShaderFlags::Allow_DomainShader ||
+				mFlags & EShaderFlags::Allow_HullShader ||
+				mFlags & EShaderFlags::Allow_GeometryShader ||
+				mFlags & EShaderFlags::Allow_PixelShader)
+			{
+				if (error)
+				{
+					*error = TT("ComputeShader cannot contain (Vertex, Domain, Hull, Geometry, Pixel) Shader.");
+				}
+				return false;
+			}
+		}
+
+
 		JG_CORE_INFO("{0} Compile Start", ws2s(GetName()));
 		String code = sourceCode;
 		if (mShaderDataForm == nullptr)

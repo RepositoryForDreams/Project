@@ -249,7 +249,13 @@ namespace JG
 		GPULoad,
 		CPULoad,
 	};
-
+	enum class EComputeBufferState
+	{
+		Wait,
+		Run,
+		Compelete,
+	};
+	using EComputerState = EComputeBufferState;
 	
 
 

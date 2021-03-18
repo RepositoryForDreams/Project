@@ -11,13 +11,15 @@ namespace JG
 {
 	class UploadAllocator
 	{
+		
 	public:
+		class Page;
 		struct Allocation
 		{
 			void* CPU;
 			D3D12_GPU_VIRTUAL_ADDRESS GPU;
+			Page* OwnerPage = nullptr;
 		};
-	private:
 		class Page
 		{
 			ComPtr<ID3D12Resource> mD3D12Resource;
@@ -36,7 +38,9 @@ namespace JG
 			UploadAllocator::Allocation Allocate(u64 sizeInBytes, u64 alignment);
 			
 			void Reset();
-
+			ID3D12Resource* Get() const {
+				return mD3D12Resource.Get();
+			}
 		};
 		using PagePool = std::deque<SharedPtr<UploadAllocator::Page>>;
 

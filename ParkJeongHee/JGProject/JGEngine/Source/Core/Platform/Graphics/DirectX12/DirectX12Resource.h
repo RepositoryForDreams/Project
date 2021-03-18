@@ -5,6 +5,7 @@
 
 #include "JGCore.h"
 #include "Utill/DirectX12Helper.h"
+#include "Utill/ShaderDataForm.h"
 #include "Graphics/Resource.h"
 
 
@@ -12,7 +13,6 @@
 namespace JG
 {
 	class DescriptorAllocation;
-	class ShaderData;
 	class DirectX12VertexBuffer : public IVertexBuffer
 	{
 		friend class DirectX12Mesh;
@@ -78,10 +78,21 @@ namespace JG
 			return mIndexCount;
 		}
 	};
-
 	class DirectX12ComputeBuffer : public IComputeBuffer
 	{
+		ComPtr<ID3D12Resource> mD3DResource;
+		EComputeBufferState mState = EComputeBufferState::Wait;
+	public:
+		virtual bool IsValid() const override;
+		virtual EComputeBufferState GetState() const override;
+	};
+	class DirectX12Computer : public IComputer
+	{
+	private:
+		String mName;
+		EComputerState mState = EComputerState::Wait;
 		UniquePtr<ShaderData> mShaderData;
+		//i32 mStartBufferIndex = 0;
 	public:
 		virtual bool SetFloat(const String& name, float value) override;
 		virtual bool SetFloat2(const String& name, const JVector2& value) override;
@@ -142,57 +153,15 @@ namespace JG
 		virtual bool GetUint3Array(const String& name, List<JVector3Uint>* out_value) override;
 		virtual bool GetUint4Array(const String& name, List<JVector4Uint>* out_value) override;
 		virtual bool GetFloat4x4Array(const String& name, List<JMatrix>* out_value) override;
-
-
-		virtual bool GetData(const String& name, void* data) override;
 	public:
-		virtual bool IsValid() const override;
-		virtual bool IsCompelete() const override;
+		virtual const String& GetName() const override;
+		virtual void  SetName(const String& name) override;
+		virtual EComputerState GetState() const override;
 		virtual bool Dispatch(u32 groupX, u32 groupY, u32 groupZ) override;
-	private:
-		virtual bool Bind() const;
 	};
 
-	class DirectX12ConstantBuffer : public IBuffer
-	{
-		u64   mElementSize = 0;
-		void* mCPUData     = nullptr;
-		EBufferLoadMethod mLoadMethod;
-		ComPtr<ID3D12Resource>  mD3DResource;
-	public:
-		DirectX12ConstantBuffer() = default;
-		virtual ~DirectX12ConstantBuffer();
-	public:
-		virtual bool SetData(void* datas, u64 elementSize);
-	public:
-		virtual bool IsValid() const override;
-		void SetBufferLoadMethod(EBufferLoadMethod method);
-		EBufferLoadMethod GetBufferLoadMethod() const;
-	protected:
-		virtual void Bind();
-		void Reset();
-	};
 
-	class DirectX12StructuredBuffer : public IBuffer
-	{
-		u64   mElementSize = 0;
-		u64   mElementCount = 0;
-		void* mCPUData = nullptr;
-		EBufferLoadMethod mLoadMethod;
-		ComPtr<ID3D12Resource>  mD3DResource;
-	public:
-		DirectX12StructuredBuffer() = default;
-		virtual ~DirectX12StructuredBuffer();
-	public:
-		virtual bool SetData(void* datas, u64 elementSize, u64 elementCount);
-	public:
-		virtual bool IsValid() const override;
-		void SetBufferLoadMethod(EBufferLoadMethod method);
-		EBufferLoadMethod GetBufferLoadMethod() const;
-	protected:
-		virtual void Bind();
-		void Reset();
-	};
+
 
 
 
@@ -221,8 +190,6 @@ namespace JG
 		virtual const TextureInfo& GetTextureInfo() const override;
 		virtual void SetTextureInfo(const TextureInfo& info) override;
 		virtual bool IsValid() const override;
-	protected:
-		virtual void Bind() override;
 	public:
 		void Create(const String& name, const TextureInfo& info);
 		void Reset();

@@ -56,10 +56,17 @@ namespace JG
 
 		static SharedPtr<IIndexBuffer> Create(String name, EBufferLoadMethod method);
 	};
-	
 
 
 	class IComputeBuffer : public IBuffer
+	{
+	public:
+		virtual EComputeBufferState GetState() const = 0;
+	public:
+		static SharedPtr<IComputeBuffer> Create(const String& name);
+	};
+
+	class IComputer
 	{
 	public:
 		virtual bool SetFloat(const String& name, float value) = 0;
@@ -120,16 +127,18 @@ namespace JG
 		virtual bool GetUint2Array(const String& name, List<JVector2Uint>* out_value) = 0;
 		virtual bool GetUint3Array(const String& name, List<JVector3Uint>* out_value) = 0;
 		virtual bool GetUint4Array(const String& name, List<JVector4Uint>* out_value) = 0;
-		virtual bool GetFloat4x4Array(const String& name, List<JMatrix>* out_value)   = 0;
-
-
-		virtual bool GetData(const String& name, void* data) = 0;
+		virtual bool GetFloat4x4Array(const String& name, List<JMatrix>* out_value) = 0;
 	public:
-		virtual bool IsCompelete() const = 0;
+		virtual const String& GetName() const = 0;
+		virtual void SetName(const String& name) = 0;
+		virtual EComputerState GetState() const = 0;
 		virtual bool Dispatch(u32 groupX, u32 groupY, u32 groupZ) = 0;
 	public:
-		static SharedPtr<IComputeBuffer> Create(const String& name, SharedPtr<IShader> shader);
+		static SharedPtr<IComputer> Create(const String& name, SharedPtr<IShader> shader);
 	};
+
+
+
 	
 	
 	class ITexture : public IResource
@@ -141,7 +150,6 @@ namespace JG
 		virtual TextureID          GetTextureID()   const = 0;
 		virtual const TextureInfo& GetTextureInfo() const = 0;
 		virtual void  SetTextureInfo(const TextureInfo& info) = 0;
-		virtual void  Bind() = 0;
 	private:
 		ITexture(const ITexture& texture) = delete;
 		const ITexture& operator=(const ITexture& texture) = delete;

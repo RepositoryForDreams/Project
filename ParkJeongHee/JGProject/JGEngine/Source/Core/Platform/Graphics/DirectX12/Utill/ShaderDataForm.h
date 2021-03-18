@@ -1,6 +1,7 @@
 #pragma once
 #include "JGCore.h"
 #include "DirectX12Helper.h"
+#include "UploadAllocator.h"
 #include "Graphics/GraphicsDefine.h"
 
 namespace JG
@@ -115,75 +116,84 @@ namespace JG
 	class DirectX12Shader;
 	class IShader;
 	class ITexture;
+
 	class ShaderData
 	{
 	public:
-		Dictionary<String, List<byte>>				  ByteDatas;
-		Dictionary<String, List<SharedPtr<ITexture>>> TextureDatas;
-		WeakPtr<IShader>					          OwnerShader;
+		const static u64 MaxElementCount = 10240;
+	private:
+		UniquePtr<UploadAllocator> mUploadAllocator;
+		Dictionary<String, UploadAllocator::Allocation> mReadDatas;
+		Dictionary<String, UploadAllocator::Allocation> mReadWriteDatas;
 
+		Dictionary<String, List<SharedPtr<ITexture>>> mTextureDatas;
+		Dictionary<String, List<SharedPtr<ITexture>>> mRWTextureDatas;
+		WeakPtr<IShader>					          mOwnerShader;
 	public:
 		ShaderData(SharedPtr<IShader> shader);
 	public:
-		bool SetFloat(const String& name, float value) ;
-		bool SetFloat2(const String& name, const JVector2& value) ;
-		bool SetFloat3(const String& name, const JVector3& value) ;
-		bool SetFloat4(const String& name, const JVector4& value) ;
-		bool SetInt(const String& name, i32 value) ;
-		bool SetInt2(const String& name, const JVector2Int& value) ;
-		bool SetInt3(const String& name, const JVector3Int& value) ;
-		bool SetInt4(const String& name, const JVector4Int& value) ;
-		bool SetUint(const String& name, u32 value) ;
-		bool SetUint2(const String& name, const JVector2Uint& value) ;
-		bool SetUint3(const String& name, const JVector3Uint& value) ;
-		bool SetUint4(const String& name, const JVector4Uint& value) ;
-		bool SetFloat4x4(const String& name, const JMatrix& value) ;
-		bool SetTexture(const String& name, u32 textureSlot, SharedPtr<ITexture> texture) ;
+		bool Bind();
+		void Reset();
+	public:
+		bool SetFloat(const String& name, float value);
+		bool SetFloat2(const String& name, const JVector2& value);
+		bool SetFloat3(const String& name, const JVector3& value);
+		bool SetFloat4(const String& name, const JVector4& value);
+		bool SetInt(const String& name, i32 value);
+		bool SetInt2(const String& name, const JVector2Int& value);
+		bool SetInt3(const String& name, const JVector3Int& value);
+		bool SetInt4(const String& name, const JVector4Int& value);
+		bool SetUint(const String& name, u32 value);
+		bool SetUint2(const String& name, const JVector2Uint& value);
+		bool SetUint3(const String& name, const JVector3Uint& value);
+		bool SetUint4(const String& name, const JVector4Uint& value);
+		bool SetFloat4x4(const String& name, const JMatrix& value);
+		bool SetTexture(const String& name, u32 textureSlot, SharedPtr<ITexture> texture);
 
-		bool SetFloatArray(const String& name, const List<float>& value) ;
-		bool SetFloat2Array(const String& name, const List<JVector2>& value) ;
-		bool SetFloat3Array(const String& name, const List<JVector3>& value) ;
-		bool SetFloat4Array(const String& name, const List<JVector4>& value) ;
-		bool SetIntArray(const String& name, const List<i32>& value) ;
-		bool SetInt2Array(const String& name, const List<JVector2Int>& value) ;
-		bool SetInt3Array(const String& name, const List<JVector3Int>& value) ;
-		bool SetInt4Array(const String& name, const List<JVector4Int>& value) ;
-		bool SetUintArray(const String& name, const List<u32>& value) ;
-		bool SetUint2Array(const String& name, const List<JVector2Uint>& value) ;
-		bool SetUint3Array(const String& name, const List<JVector3Uint>& value) ;
-		bool SetUint4Array(const String& name, const List<JVector4Uint>& value) ;
-		bool SetFloat4x4Array(const String& name, const List<JMatrix>& value) ;
-		bool SetStructDataArray(const String& name, void* datas, u64 elementCount, u64 elementSize) ;
+		bool SetFloatArray(const String& name, const List<float>& value);
+		bool SetFloat2Array(const String& name, const List<JVector2>& value);
+		bool SetFloat3Array(const String& name, const List<JVector3>& value);
+		bool SetFloat4Array(const String& name, const List<JVector4>& value);
+		bool SetIntArray(const String& name, const List<i32>& value);
+		bool SetInt2Array(const String& name, const List<JVector2Int>& value);
+		bool SetInt3Array(const String& name, const List<JVector3Int>& value);
+		bool SetInt4Array(const String& name, const List<JVector4Int>& value);
+		bool SetUintArray(const String& name, const List<u32>& value);
+		bool SetUint2Array(const String& name, const List<JVector2Uint>& value);
+		bool SetUint3Array(const String& name, const List<JVector3Uint>& value);
+		bool SetUint4Array(const String& name, const List<JVector4Uint>& value);
+		bool SetFloat4x4Array(const String& name, const List<JMatrix>& value);
+		bool SetStructDataArray(const String& name, void* datas, u64 elementCount, u64 elementSize);
 
 
-		bool GetFloat(const String& name, float* out_value) ;
-		bool GetFloat2(const String& name, JVector2* out_value) ;
-		bool GetFloat3(const String& name, JVector3* out_value) ;
-		bool GetFloat4(const String& name, JVector4* out_value) ;
-		bool GetInt(const String& name, i32* out_value) ;
-		bool GetInt2(const String& name, JVector2Int* out_value) ;
-		bool GetInt3(const String& name, JVector3Int* out_value) ;
-		bool GetInt4(const String& name, JVector4Int* out_value) ;
-		bool GetUint(const String& name, u32* out_value) ;
-		bool GetUint2(const String& name, JVector2Uint* out_value) ;
-		bool GetUint3(const String& name, JVector3Uint* out_value) ;
-		bool GetUint4(const String& name, JVector4Uint* out_value) ;
-		bool GetFloat4x4(const String& name, JMatrix* outValue) ;
-		bool GetTexture(const String& name, u32 textureSlot, SharedPtr<ITexture>* out_value) ;
+		bool GetFloat(const String& name, float* out_value);
+		bool GetFloat2(const String& name, JVector2* out_value);
+		bool GetFloat3(const String& name, JVector3* out_value);
+		bool GetFloat4(const String& name, JVector4* out_value);
+		bool GetInt(const String& name, i32* out_value);
+		bool GetInt2(const String& name, JVector2Int* out_value);
+		bool GetInt3(const String& name, JVector3Int* out_value);
+		bool GetInt4(const String& name, JVector4Int* out_value);
+		bool GetUint(const String& name, u32* out_value);
+		bool GetUint2(const String& name, JVector2Uint* out_value);
+		bool GetUint3(const String& name, JVector3Uint* out_value);
+		bool GetUint4(const String& name, JVector4Uint* out_value);
+		bool GetFloat4x4(const String& name, JMatrix* outValue);
+		bool GetTexture(const String& name, u32 textureSlot, SharedPtr<ITexture>* out_value);
 
-		bool GetFloatArray(const String& name, List<float>* out_value) ;
-		bool GetFloat2Array(const String& name, List<JVector2>* out_value) ;
-		bool GetFloat3Array(const String& name, List<JVector3>* out_value) ;
-		bool GetFloat4Array(const String& name, List<JVector4>* out_value) ;
-		bool GetIntArray(const String& name, List<i32>* out_value) ;
-		bool GetInt2Array(const String& name, List<JVector2Int>* out_value) ;
-		bool GetInt3Array(const String& name, List<JVector3Int>* out_value) ;
-		bool GetInt4Array(const String& name, List<JVector4Int>* out_value) ;
-		bool GetUintArray(const String& name, List<u32>* out_value) ;
-		bool GetUint2Array(const String& name, List<JVector2Uint>* out_value) ;
-		bool GetUint3Array(const String& name, List<JVector3Uint>* out_value) ;
-		bool GetUint4Array(const String& name, List<JVector4Uint>* out_value) ;
-		bool GetFloat4x4Array(const String& name, List<JMatrix>* out_value) ;
+		bool GetFloatArray(const String& name, List<float>* out_value);
+		bool GetFloat2Array(const String& name, List<JVector2>* out_value);
+		bool GetFloat3Array(const String& name, List<JVector3>* out_value);
+		bool GetFloat4Array(const String& name, List<JVector4>* out_value);
+		bool GetIntArray(const String& name, List<i32>* out_value);
+		bool GetInt2Array(const String& name, List<JVector2Int>* out_value);
+		bool GetInt3Array(const String& name, List<JVector3Int>* out_value);
+		bool GetInt4Array(const String& name, List<JVector4Int>* out_value);
+		bool GetUintArray(const String& name, List<u32>* out_value);
+		bool GetUint2Array(const String& name, List<JVector2Uint>* out_value);
+		bool GetUint3Array(const String& name, List<JVector3Uint>* out_value);
+		bool GetUint4Array(const String& name, List<JVector4Uint>* out_value);
+		bool GetFloat4x4Array(const String& name, List<JMatrix>* out_value);
 	public:
 		template<class T, EShaderDataType type>
 		bool SetData(const String& name, const T* value)
@@ -194,10 +204,14 @@ namespace JG
 				return false;
 			}
 
-			u64 dataSize = sizeof(T);
-			u64 dataPos = data->DataPos;
+			u64 dataSize   = sizeof(T);
+			u64 dataPos    = data->DataPos;
 			String& cbName = data->Owner->Name;
-			memcpy(&ByteDatas[cbName][dataPos], value, dataSize);
+
+			
+			auto& alloc = mReadDatas[cbName];
+			void* dest = (void*)((ptraddr)alloc.CPU + dataPos);
+			memcpy(dest, value, dataSize);
 			return true;
 		}
 
@@ -211,29 +225,34 @@ namespace JG
 				return false;
 			}
 			u64 btSize = sizeof(T) * dataArray.size();
-
-
-			memcpy(&ByteDatas[name][0], dataArray.data(), btSize);
+			if (MaxElementCount >= dataArray.size())
+			{
+				btSize = sizeof(T) * MaxElementCount;
+				JG_CORE_WARN("ShaderData have exceeded the StructuredBuffer's Maximum Range.");
+			}
+			auto& alloc = mReadDatas[name];
+			memcpy(alloc.CPU, dataArray.data(), btSize);
 			return true;
 		}
 
 		template<class T, EShaderDataType type>
 		bool GetData(const String& name, T* value)
 		{
-			if (value == nullptr)
-			{
-				return false;
-			}
-			auto data = GetAndCheckData(name, type);
-			if (data == nullptr)
-			{
-				return false;
-			}
-			u64 dataSize   = sizeof(T);
-			u64 dataPos    = data->DataPos;
-			String& cbName = data->Owner->Name;
-			memcpy(value, &ByteDatas[cbName][dataPos], dataSize);
-			return true;
+			return false;
+			//if (value == nullptr)
+			//{
+			//	return false;
+			//}
+			//auto data = GetAndCheckData(name, type);
+			//if (data == nullptr)
+			//{
+			//	return false;
+			//}
+			//u64 dataSize   = sizeof(T);
+			//u64 dataPos    = data->DataPos;
+			//String& cbName = data->Owner->Name;
+			//memcpy(value, &ByteDatas[cbName][dataPos], dataSize);
+			//return true;
 		}
 		ShaderDataForm::Data* GetAndCheckData(const String& name, EShaderDataType checkType);
 		bool CheckDataArray(const String& name, EShaderDataType checkType);

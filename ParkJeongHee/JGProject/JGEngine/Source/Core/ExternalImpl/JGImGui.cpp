@@ -28,10 +28,10 @@ namespace JG
 	namespace DirectX12
 	{
 		static ComPtr<ID3D12DescriptorHeap> gSrvDescriptorHeap;
-		static u32 gIncreaseSize = 0;
-		static u32 gCurrentSrvIndex     = 0;
-		static const u32 gSrvStartIndex = 1;
-		static const u32 gMaxSrvCount   = 1024;
+		static u64 gIncreaseSize = 0;
+		static u64 gCurrentSrvIndex     = 0;
+		static const u64 gSrvStartIndex = 1;
+		static const u64 gMaxSrvCount   = 1024;
 	}
 	JGImGui::JGImGui()
 	{
@@ -76,7 +76,7 @@ namespace JG
 			DirectX12::gSrvDescriptorHeap = CreateD3DDescriptorHeap(DirectX12API::GetD3DDevice(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
 				D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, DirectX12::gMaxSrvCount * bufferCount);
 
-			ImGui_ImplDX12_Init(DirectX12API::GetD3DDevice(), DirectX12API::GetFrameBufferCount(),
+			ImGui_ImplDX12_Init(DirectX12API::GetD3DDevice(), (i32)DirectX12API::GetFrameBufferCount(),
 				DXGI_FORMAT_R8G8B8A8_UNORM, DirectX12::gSrvDescriptorHeap.Get(),
 				DirectX12::gSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
 				DirectX12::gSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
@@ -144,8 +144,8 @@ namespace JG
 
 			CD3DX12_CPU_DESCRIPTOR_HANDLE cpu(DirectX12::gSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 			CD3DX12_GPU_DESCRIPTOR_HANDLE gpu(DirectX12::gSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-			cpu.Offset(DirectX12::gCurrentSrvIndex, DirectX12::gIncreaseSize);
-			gpu.Offset(DirectX12::gCurrentSrvIndex, DirectX12::gIncreaseSize);
+			cpu.Offset((i32)DirectX12::gCurrentSrvIndex, (u32)DirectX12::gIncreaseSize);
+			gpu.Offset((i32)DirectX12::gCurrentSrvIndex, (u32)DirectX12::gIncreaseSize);
 			DirectX12::gCurrentSrvIndex++;
 			DirectX12API::GetD3DDevice()->CopyDescriptorsSimple(1, cpu, { id }, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 			return gpu.ptr;

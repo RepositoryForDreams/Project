@@ -49,7 +49,7 @@ namespace JG
 		Allocation allocation;
 		allocation.CPU = static_cast<uint8_t*>(mCPUptr) + mOffset;
 		allocation.GPU = mGPUptr + mOffset;
-
+		allocation.OwnerPage = this;
 		mOffset += alignedSize;
 
 		return allocation;

@@ -32,21 +32,6 @@ namespace JG
 	public:
 		static SharedPtr<IShader> Create(const String& name, const String& sourceCode, EShaderFlags flags);
 	};
-
-	class IComputeShader
-	{
-	protected:
-		virtual bool Compile(const String& sourceCode, EShaderFlags flags, String* error) = 0;
-		virtual bool Bind() = 0;
-	public:
-		virtual void SetName(const String& name) = 0;
-		virtual const String& GetName() const = 0;
-	public:
-		static SharedPtr<IComputeShader> Create(const String& name, const String& sourceCode);
-	};
-
-
-
 	class ShaderLibrary : public GlobalSingleton<ShaderLibrary>
 	{
 	private:

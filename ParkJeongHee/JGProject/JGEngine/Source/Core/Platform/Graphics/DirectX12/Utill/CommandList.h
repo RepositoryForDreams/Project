@@ -3,6 +3,7 @@
 #include "JGCore.h"
 #include "Graphics/GraphicsDefine.h"
 #include "DirectX12Helper.h"
+#include "UploadAllocator.h"
 #include <Platform/Graphics/DirectX12/DirectX12Resource.h>
 
 
@@ -15,6 +16,8 @@ namespace JG
 	class DirectX12Texture;
 	class GraphicsPipelineState;
 	class ComputePipelineState;
+	//class DirectX12ConstantBuffer;
+	//class DirectX12StructuredBuffer;
 	class CommandList
 	{
 	protected:
@@ -28,8 +31,6 @@ namespace JG
 		ComPtr<ID3D12CommandAllocator>    mD3DAllocator;
 
 		List<ComPtr<ID3D12Object>> mTempObjectList;
-
-		UniquePtr<UploadAllocator>		mUploadAllocator;
 		UniquePtr<ResourceStateTracker> mResourceStateTracker;
 		UniquePtr<DynamicDescriptorAllocator> mDynamicDescriptorAllocator;
 	public:
@@ -78,24 +79,13 @@ namespace JG
 		void BindPipelineState(SharedPtr<GraphicsPipelineState> pso);
 
 		void BindTextures(u32 rootParam, List<D3D12_CPU_DESCRIPTOR_HANDLE> handles);
-
-
-		//void BindConstantBuffer(uint32_t rootparam, ConstantBuffer& buffer);
-		void BindDynamicConstantBuffer(u32 rootParam, const void* data, u64 elementSize);
-
-
-		// void BindStructuredBuffer(u32 rootparam, StructuredBuffer& buffer);
-		void BindDynamicStructuredBuffer(u32 rootParam, const  void* data, u64 elementSize, u64 elementCount);
-
+		void BindConstantBuffer(u32 rootParam, UploadAllocator::Allocation alloc);
+		void BindStructuredBuffer(u32 rootParam, UploadAllocator::Allocation alloc);
 		void BindConstants(u32 rootparam, u32 btSize, void* data, u32 offset = 0);
-
-		// void BindVertexBuffer(VertexBuffer& vBuffer);
 		void BindVertexBuffer(const D3D12_VERTEX_BUFFER_VIEW& view, bool isFlush = true);
-		void BindDynamicVertexBuffer(void* data, u64 elementCount, u64 elementSize, bool isFlush = true);
 		void FlushVertexBuffer();
 
 		void BindIndexBuffer(const D3D12_INDEX_BUFFER_VIEW& view);
-		void BindDynamicIndexBuffer(u32* datas, u64 count);
 		void SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY topology);
 
 
@@ -111,8 +101,8 @@ namespace JG
 		void BindRootSignature(SharedPtr<RootSignature> rootSig);
 		void BindPipelineState(SharedPtr<ComputePipelineState> pso);
 		void BindTextures(u32 rootParam, List<D3D12_CPU_DESCRIPTOR_HANDLE> handles);
-		void BindDynamicConstantBuffer(u32 rootParam, const void* data, u64 elementSize);
-		void BindDynamicStructuredBuffer(u32 rootParam, const  void* data, u64 elementSize, u64 elementCount);
+		void BindConstantBuffer(u32 rootParam, UploadAllocator::Allocation alloc);
+		void BindStructuredBuffer(u32 rootParam, UploadAllocator::Allocation alloc);
 		void BindConstants(u32 rootparam, u32 btSize, void* data, u32 offset = 0);
 
 		void Dispatch(u32 groupX, u32 groupY, u32 groupZ);
