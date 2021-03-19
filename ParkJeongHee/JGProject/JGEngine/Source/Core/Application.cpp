@@ -83,6 +83,10 @@ namespace JG
 		
 		while(mIsRunning)
 		{
+			if (TimerManager::IsValid())
+			{
+				TimerManager::GetInstance().Update();
+			}
 			mGraphcisAPI->Begin();
 			mWindow->Update();
 			mLayerStack->ForEach([&](ILayer * layer)
