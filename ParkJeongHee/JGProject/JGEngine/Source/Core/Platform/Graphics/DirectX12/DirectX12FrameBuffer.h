@@ -21,7 +21,6 @@ namespace JG
 		virtual void Update() override;
 		virtual bool Present() override;
 	public:
-		// 이것만 노출
 		virtual void SubmitTexture(SharedPtr<ITexture> texture) override;
 		virtual void Resize(u32 width, u32 height)		        override;
 		virtual const FrameBufferInfo& GetInfo() const          override;

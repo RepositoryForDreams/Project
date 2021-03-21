@@ -63,7 +63,7 @@ namespace JG
 	{
 		JVector3 Pos;
 		JVector2 Tex;
-		Color _Color      = Color::White();
+		Color _Color     = Color::White();
 		i32 TextureIndex = 0;
 		QuadVertex() = default;
 		QuadVertex(const JVector3& pos, const JVector2& tex) : Pos(pos), Tex(tex) {}

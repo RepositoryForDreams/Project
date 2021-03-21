@@ -89,6 +89,11 @@ namespace JG
 			}
 			mGraphcisAPI->Begin();
 			mWindow->Update();
+
+			if (Scheduler::IsValid())
+			{
+				Scheduler::GetInstance().Update();
+			}
 			mLayerStack->ForEach([&](ILayer * layer)
 			{
 				layer->Update();

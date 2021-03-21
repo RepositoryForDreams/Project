@@ -19,7 +19,6 @@ namespace JG
 		virtual void Update()     = 0;
 		virtual void LateUpdate() = 0;
 
-		
 		virtual void Begin()   = 0;
 		virtual void Destroy() = 0;
 

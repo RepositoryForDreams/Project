@@ -6,61 +6,7 @@ using jg_clock = std::chrono::steady_clock;
 namespace JG
 {
 
-    void TimerManager::Timer::Start()
-    {
-        mIsRun = true;
-    }
-    void TimerManager::Timer::Tick()
-    {
-        if (mIsFirst)
-        {
-            mTimePoint = jg_clock::now();
-            mIsFirst = false;
-            return;
-        }
-        if (!mIsRun)
-        {
-            mDeltaTime  = 0.0f;
-            mFrameCount = 0;
-            mTimePoint  = jg_clock::now();
-            return;
-        }
- 
 
-
-        duration<float> sec = jg_clock::now() - mTimePoint;
-        mDeltaTime = sec.count();
-        if (mDeltaTime >= 0.0f)
-        {
-            mTotalTime += mDeltaTime;
-
-            ++mFrameCount;
-            mTimeElapsed += mDeltaTime;
-            if (mTimeElapsed >= 1.0f)
-            {
-                mFPS = mFrameCount;
-                mFrameCount  = 0;
-                mTimeElapsed = 0.0f;
-            }
-        }
-        mTimePoint = jg_clock::now();
-    }
-    void TimerManager::Timer::Stop()
-    {
-        mIsRun = false;
-    }
-    f32 TimerManager::Timer::GetTotalTime(ETimeStepType stepType) const
-    {
-        return mTotalTime;
-    }
-    f32 TimerManager::Timer::GetTick(ETimeStepType stepType) const
-    {
-        return mDeltaTime;
-    }
-    u64 TimerManager::Timer::GetFPS() const
-    {
-        return mFPS;
-    }
 
 
     void TimerManager::Update()
@@ -74,65 +20,99 @@ namespace JG
         }
     }
 
-    TimerHandle TimerManager::CreateTimer()
+    SharedPtr<Timer> TimerManager::CreateTimer()
     {
-        std::lock_guard<std::mutex> lock(mTimerMutex);
+        std::lock_guard<std::mutex> lock(mMutex);
         u64 ID = 0;
-        if (mTimerIDQueue.empty())
+        if (mIDQueue.empty())
         {
-            ID = mTimerIDOffset++;
+            ID = mIDOffset++;
         }
         else
         {
-            ID = mTimerIDQueue.front(); mTimerIDQueue.pop();
+            ID = mIDQueue.front(); mIDQueue.pop();
         }
-        mTimers[ID] = CreateUniquePtr<Timer>();
-        TimerHandle handle;
-        handle.mOwnerTimer = mTimers[ID].get();
-        handle.mTimerID = ID;
+        
+        mTimers[ID] = CreateSharedPtr<Timer>();
+        mTimers[ID]->mID = ID;
 
-        return std::move(handle);
+        return mTimers[ID];
     }
     void TimerManager::DestroyTimer(u64 timerID)
     {
-        std::lock_guard<std::mutex> lock(mTimerMutex);
+        std::lock_guard<std::mutex> lock(mMutex);
         auto iter = mTimers.find(timerID);
         if (iter != mTimers.end())
         {
             mTimers.erase(timerID);
-            mTimerIDQueue.push(timerID);
+            mIDQueue.push(timerID);
         }
     }
-    TimerHandle::~TimerHandle()
+    
+
+    void Timer::Tick()
     {
-        if (TimerManager::IsValid() && mTimerID != TimerManager::TIMER_NULL_ID)
+        if (mIsFirst)
         {
-            TimerManager::GetInstance().DestroyTimer(mTimerID);
+            mTimePoint = jg_clock::now();
+            mIsFirst = false;
+            return;
         }
-    }
-    TimerHandle::TimerHandle(TimerHandle&& rhs) noexcept
-    {
-        mOwnerTimer = rhs.mOwnerTimer;
-        mTimerID = rhs.mTimerID;
+        if (mIsRun == false)
+        {
+            mDeltaTime  = 0.0f;
+            mFrameCount = 0;
+            mTimePoint  = jg_clock::now();
+            return;
+        }
+        duration<float> sec = jg_clock::now() - mTimePoint;
+        mDeltaTime = sec.count();
+        if (mDeltaTime >= 0.0f)
+        {
+            mTotalTime += mDeltaTime;
 
-        rhs.mOwnerTimer = nullptr;
-        rhs.mTimerID = TimerManager::TIMER_NULL_ID;
+            ++mFrameCount;
+            mTimeElapsed += mDeltaTime;
+            if (mTimeElapsed >= 1.0f)
+            {
+                mFPS = mFrameCount;
+                mFrameCount = 0;
+                mTimeElapsed = 0.0f;
+            }
+        }
+        mTimePoint = jg_clock::now();
     }
-    TimerHandle& TimerHandle::operator=(TimerHandle&& rhs) noexcept
-    {
-        mOwnerTimer = rhs.mOwnerTimer;
-        mTimerID = rhs.mTimerID;
 
-        rhs.mOwnerTimer = nullptr;
-        rhs.mTimerID = TimerManager::TIMER_NULL_ID;
-        return *this;
+    void Timer::Start()
+    {
+        mIsRun = true;
     }
-    TimerHandle Timer::Create()
+    void Timer::Stop()
+    {
+        mIsRun = false;
+    }
+    f32 Timer::GetTotalTime(ETimeStepType stepType) const
+    {
+        return mTotalTime;
+    }
+    f32 Timer::GetTick(ETimeStepType stepType) const
+    {
+        return mDeltaTime;
+    }
+    u64 Timer::GetFPS() const
+    {
+        return mFPS;
+    }
+    bool Timer::IsValid() const
+    {
+        return mID != TimerManager::TIMER_NULL_ID;
+    }
+    SharedPtr<Timer> Timer::Create()
     {
         if (TimerManager::IsValid())
         {
             return TimerManager::GetInstance().CreateTimer();
         }
-        return TimerHandle();
+        return nullptr;
     }
 }
