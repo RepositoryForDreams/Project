@@ -301,9 +301,9 @@ namespace JG
 		namespace Token
 		{
 			constexpr token* CBuffer                = TT("cbuffer ");
-			constexpr token* StructuredBuffer       = TT("StructuredBuffer<");
+			constexpr token* StructuredBuffer       = TT("StructuredBuffer");
 			constexpr token* Texture2D              = TT("Texture2D ");
-			constexpr token* RWStructuredBuffer		= TT("RWStructuredBuffer<");
+			constexpr token* RWStructuredBuffer		= TT("RWStructuredBuffer");
 			constexpr token* RWTexture2D			= TT("RWTexture2D ");
 			constexpr token* SamplerState           = TT("SamplerState ");
 			constexpr token* SamplerComparisonState = TT("SamplerComparisonState ");

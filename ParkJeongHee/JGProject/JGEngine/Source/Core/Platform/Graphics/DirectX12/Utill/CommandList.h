@@ -16,8 +16,6 @@ namespace JG
 	class DirectX12Texture;
 	class GraphicsPipelineState;
 	class ComputePipelineState;
-	//class DirectX12ConstantBuffer;
-	//class DirectX12StructuredBuffer;
 	class CommandList
 	{
 	protected:
@@ -52,6 +50,7 @@ namespace JG
 
 		void CopyResource(ID3D12Resource* dest, ID3D12Resource* src);
 		void CopyBuffer(ID3D12Resource* buffer, void* data, u64 elementSize, u64 elementCount);
+		void CopyBufferRegion(ID3D12Resource* dest, u64 destOffset,  ID3D12Resource* src, u64 srcOffset, u64 byteSize);
 	};
 
 	class GraphicsCommandList : public CommandList

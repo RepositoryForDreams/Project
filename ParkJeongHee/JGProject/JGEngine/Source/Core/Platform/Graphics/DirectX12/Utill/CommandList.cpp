@@ -148,6 +148,20 @@ namespace JG
 		BackupResource(uploadBuffer.Get());
 	}
 
+	void CommandList::CopyBufferRegion(ID3D12Resource* dest, u64 destOffset, ID3D12Resource* src, u64 srcOffset, u64 byteSize)
+	{
+		TransitionBarrier(dest, D3D12_RESOURCE_STATE_COPY_DEST);
+		TransitionBarrier(src, D3D12_RESOURCE_STATE_COPY_SOURCE);
+		FlushResourceBarrier();
+		
+		mD3DCommandList->CopyBufferRegion(dest, destOffset, src, srcOffset, byteSize);
+
+		BackupResource(dest);
+		BackupResource(src);
+	}
+
+
+
 
 
 	void GraphicsCommandList::Reset()

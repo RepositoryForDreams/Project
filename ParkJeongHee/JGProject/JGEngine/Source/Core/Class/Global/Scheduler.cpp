@@ -273,6 +273,10 @@ namespace JG
             mSyncTaskByFramePool.erase(handle.mID);
             break;
         case EScheduleType::Async:
+            if (mAsyncTaskPool[handle.mID]->Thread.joinable())
+            {
+                mAsyncTaskPool[handle.mID]->Thread.join();
+            }
             mAsyncTaskPool.erase(handle.mID);
             break;
         }

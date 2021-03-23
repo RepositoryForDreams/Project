@@ -195,6 +195,8 @@ namespace JG
 		bool GetUint4Array(const String& name, List<JVector4Uint>* out_value);
 		bool GetFloat4x4Array(const String& name, List<JMatrix>* out_value);
 	public:
+		UploadAllocator::Allocation GetRWData(const String& name);
+	public:
 		template<class T, EShaderDataType type>
 		bool SetData(const String& name, const T* value)
 		{
@@ -225,7 +227,7 @@ namespace JG
 				return false;
 			}
 			u64 btSize = sizeof(T) * dataArray.size();
-			if (MaxElementCount >= dataArray.size())
+			if (MaxElementCount <= dataArray.size())
 			{
 				btSize = sizeof(T) * MaxElementCount;
 				JG_CORE_WARN("ShaderData have exceeded the StructuredBuffer's Maximum Range.");

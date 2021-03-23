@@ -25,11 +25,16 @@ namespace JG
 	}
 	SharedPtr<IComputer> IComputer::Create(const String& name, SharedPtr<IShader> shader)
 	{
-		return SharedPtr<IComputer>();
+		auto api = Application::GetInstance().GetGraphicsAPI();
+		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
+
+		return api->CreateComputer(name, shader);
 	}
-	SharedPtr<IComputeBuffer> IComputeBuffer::Create(const String& name)
+	SharedPtr<IComputeBuffer> IComputeBuffer::Create(const String& name, u64 btSize)
 	{
-		return SharedPtr<IComputeBuffer>();
+		auto api = Application::GetInstance().GetGraphicsAPI();
+		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
+		return api->CreateComputeBuffer(name, btSize);
 	}
 	SharedPtr<ITexture> ITexture::Create(const String& name, const TextureInfo& info)
 	{
@@ -44,6 +49,8 @@ namespace JG
 	{
 		return nullptr;
 	}
+
+
 
 
 

@@ -70,7 +70,7 @@ namespace JG
 			break;
 		}
 
-	
+
 
 		return true;
 	}
@@ -85,7 +85,7 @@ namespace JG
 	}
 	void DirectX12VertexBuffer::SetBufferLoadMethod(EBufferLoadMethod method)
 	{
-		 mLoadMethod = method;
+		mLoadMethod = method;
 	}
 	void DirectX12VertexBuffer::Bind()
 	{
@@ -98,8 +98,8 @@ namespace JG
 
 		D3D12_VERTEX_BUFFER_VIEW View = {};
 		View.BufferLocation = mD3DResource->GetGPUVirtualAddress();
-		View.SizeInBytes    = (u32)mElementSize * (u32)mElementCount;
-		View.StrideInBytes  = (u32)mElementSize;
+		View.SizeInBytes = (u32)mElementSize * (u32)mElementCount;
+		View.StrideInBytes = (u32)mElementSize;
 		commandList->BindVertexBuffer(View, false);
 	}
 
@@ -241,6 +241,56 @@ namespace JG
 		}
 	}
 
+
+	void DirectX12ComputeBuffer::SetData(u64 btSize)
+	{
+		if (mD3DResource != nullptr && mBufferSize != btSize)
+		{
+			mD3DResource->Unmap(0, nullptr);
+			mCPU        = nullptr;
+			mBufferSize = 0;
+			mState = EComputeBufferState::Wait;
+			ResourceStateTracker::UnRegisterResource(mD3DResource.Get());
+			mD3DResource.Reset();
+			mD3DResource = nullptr;
+		}
+
+		mBufferSize = btSize;
+		if (mD3DResource == nullptr)
+		{
+			auto d3dDevice = DirectX12API::GetD3DDevice();
+			HRESULT hResult = d3dDevice->CreateCommittedResource(
+				&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_READBACK),
+				D3D12_HEAP_FLAG_NONE,
+				&CD3DX12_RESOURCE_DESC::Buffer(btSize),
+				D3D12_RESOURCE_STATE_COPY_DEST,
+				nullptr,
+				IID_PPV_ARGS(mD3DResource.GetAddressOf()));
+
+
+			if (SUCCEEDED(hResult))
+			{
+				ResourceStateTracker::RegisterResource(GetName(), mD3DResource.Get(), D3D12_RESOURCE_STATE_COPY_DEST);
+				mD3DResource->Map(0, nullptr, &mCPU);
+			}
+		}
+	}
+
+	bool DirectX12ComputeBuffer::GetData(void** out_data)
+	{
+		if (mState != EComputeBufferState::Compelete || mD3DResource == nullptr || mCPU == nullptr)
+		{
+			return false;
+		}
+		memcpy(*out_data, mCPU, mBufferSize);
+		return true;
+	}
+
+	u64 DirectX12ComputeBuffer::GetDataSize() const
+	{
+		return mBufferSize;
+	}
+
 	bool DirectX12ComputeBuffer::IsValid() const
 	{
 		return mD3DResource != nullptr;
@@ -249,6 +299,50 @@ namespace JG
 	EComputeBufferState DirectX12ComputeBuffer::GetState() const
 	{
 		return mState;
+	}
+	void DirectX12ComputeBuffer::ReserveCompletion()
+	{
+		if (mState != EComputeBufferState::Run)
+		{
+			return;
+		}
+
+		Scheduler::GetInstance().ScheduleByFrame(
+			DirectX12API::GetFrameBufferCount() + 1, 0, 1, 0,
+			[&]() -> EScheduleResult
+		{
+			mState = EComputeBufferState::Compelete;
+			return EScheduleResult::Break;
+		});
+	}
+	bool DirectX12Computer::SetComputeBuffer(SharedPtr<IComputeBuffer> computeBuffer)
+	{
+		if (mState != EComputerState::Compelete)
+		{
+			return false;
+		}
+		if (mComputeBuffers.find(computeBuffer->GetName()) != mComputeBuffers.end())
+		{
+			return false;
+		}
+	
+		auto alloc = mShaderData->GetRWData(computeBuffer->GetName());
+
+		if (alloc.CPU == nullptr || alloc.OwnerPage == nullptr)
+		{
+			return false;
+		}
+
+		DirectX12ComputeBuffer* dx12Buffer = static_cast<DirectX12ComputeBuffer*>(computeBuffer.get());
+
+		auto srcResource = alloc.OwnerPage->Get();
+		auto srcOffset = alloc.GPU - srcResource->GetGPUVirtualAddress();
+
+		auto commandList = DirectX12API::GetCopyCommandList();
+		dx12Buffer->mState = EComputeBufferState::Run;
+		commandList->CopyBufferRegion(dx12Buffer->Get(), 0, srcResource, srcOffset, computeBuffer->GetDataSize());
+		dx12Buffer->ReserveCompletion();
+		return true;
 	}
 	bool DirectX12Computer::SetFloat(const String& name, float value)
 	{
@@ -515,6 +609,10 @@ namespace JG
 	{
 		return mShaderData->GetFloat4x4Array(name, out_value);
 	}
+	void DirectX12Computer::Init(SharedPtr<IShader> shader)
+	{
+		mShaderData = CreateUniquePtr<ShaderData>(shader);
+	}
 	const String& DirectX12Computer::GetName() const
 	{
 		return mName;
@@ -531,14 +629,43 @@ namespace JG
 
 	bool DirectX12Computer::Dispatch(u32 groupX, u32 groupY, u32 groupZ)
 	{
-		if (mShaderData->Bind())
+		if (mState == EComputerState::Run)
 		{
 			return false;
 		}
-		auto commandList = DirectX12API::GetComputeCommandList();
-		commandList->Dispatch(groupX, groupY, groupZ);
+		if (mShaderData->Bind() == false)
+		{
+			return false;
+		}
+		auto PSO = DirectX12API::GetComputePipelineState();
+		if (PSO->Finalize() == false)
+		{
+			return false;
+		}
+
+
+
+
+
 		mState = EComputerState::Run;
-		return false;
+		auto commandList = DirectX12API::GetComputeCommandList();
+		commandList->BindPipelineState(PSO);
+		commandList->Dispatch(groupX, groupY, groupZ);
+
+
+		if (mScheduleHandle && mScheduleHandle->IsValid())
+		{
+			mScheduleHandle->Reset();
+		}
+		mScheduleHandle = Scheduler::GetInstance().ScheduleByFrame(
+			DirectX12API::GetFrameBufferCount() + 1, 0, 1, 0,
+			[&]() -> EScheduleResult
+		{
+			mState = EComputerState::Compelete;
+			return EScheduleResult::Break;
+		});
+
+		return true;
 	}
 
 

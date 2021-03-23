@@ -1,9 +1,13 @@
 #include "pch.h"
 #include "Camera.h"
-
+#include "Resource.h"
 
 namespace JG
 {
+	Camera::Camera()
+	{
+		mTargetTextures.resize(MAX_RENDERTARGET, nullptr);
+	}
 	void Camera::SetLocation(const JVector3& location)
 	{
 		mIsViewDirty = true;
@@ -48,7 +52,38 @@ namespace JG
 		mIsProjDirty = true;
 		mResolution = resolution;
 	}
-
+	bool Camera::SetTargetTexture(SharedPtr<ITexture> texture, u8 slot)
+	{
+		if (slot >= MAX_RENDERTARGET || texture == nullptr || texture->IsValid() == false)
+		{
+			return false;
+		}
+		if (slot != 0 && mTargetTextures[slot] == nullptr)
+		{
+			return false;
+		}
+		auto info = texture->GetTextureInfo();
+		if (info.Flags & ETextureFlags::Allow_RenderTarget)
+		{
+			mTargetTextures[slot] = texture;
+			return true;
+		}
+		return false;
+	}
+	bool Camera::SetTargetDepthTexture(SharedPtr<ITexture> texture)
+	{
+		if (texture == nullptr || texture->IsValid() == false)
+		{
+			return false;
+		}
+		auto info = texture->GetTextureInfo();
+		if (info.Flags & ETextureFlags::Allow_DepthStencil)
+		{
+			mTargetDepthTexture = texture;
+			return true;
+		}
+		return false;
+	}
 	const JVector3& Camera::GetLocation() const
 	{
 		return mLocation;
@@ -114,6 +149,11 @@ namespace JG
 		return JVector3::Normalize(JMatrix::Rotation(mRotation).TransformVector(JVector3(0, 1, 0)));
 	}
 
+	bool Camera::IsOrthographic() const
+	{
+		return mIsOrthographic;
+	}
+
 	float Camera::GetAspectRatio() const
 	{
 		return mResolution.x / mResolution.y;
@@ -123,7 +163,22 @@ namespace JG
 	{
 		return mResolution;
 	}
-
+	SharedPtr<ITexture> Camera::GetTargetTexture(u8 slot) const
+	{
+		if (slot >= MAX_RENDERTARGET)
+		{
+			return nullptr;
+		}
+		return mTargetTextures[slot];
+	}
+	const List<SharedPtr<ITexture>> Camera::GetTargetTextures() const
+	{
+		return mTargetTextures;
+	}
+	SharedPtr<ITexture> Camera::GetTargetDepthTexture() const
+	{
+		return mTargetDepthTexture;
+	}
 	bool Camera::UpdateProj() const
 	{
 		if (mIsProjDirty == false)

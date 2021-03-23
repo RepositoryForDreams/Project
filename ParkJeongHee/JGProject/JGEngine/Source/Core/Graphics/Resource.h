@@ -61,14 +61,18 @@ namespace JG
 	class IComputeBuffer : public IBuffer
 	{
 	public:
+		virtual void SetData(u64 btSize) = 0;
+		virtual bool GetData(void** out_data) = 0;
+		virtual u64  GetDataSize() const = 0;
 		virtual EComputeBufferState GetState() const = 0;
 	public:
-		static SharedPtr<IComputeBuffer> Create(const String& name);
+		static SharedPtr<IComputeBuffer> Create(const String& name, u64 btSize);
 	};
 
 	class IComputer
 	{
 	public:
+		virtual bool SetComputeBuffer(SharedPtr<IComputeBuffer> computeBuffer) = 0;
 		virtual bool SetFloat(const String& name, float value) = 0;
 		virtual bool SetFloat2(const String& name, const JVector2& value) = 0;
 		virtual bool SetFloat3(const String& name, const JVector3& value) = 0;

@@ -28,8 +28,17 @@ namespace JG
 		static bool Create();
 		static void Destroy();
 	public:
+		struct Statistics
+		{
+			u32 DrawCalls = 0;
+			u32 QuadCount = 0;
+
+			u32 GetTotalVertexCount() const { return QuadCount * 4; }
+			u32 GetTotalIndexCount() const { return QuadCount * 6; }
+		};
+	public:
 		// Begin에 카메라
-		static bool Begin(SharedPtr<Camera> camera, SharedPtr<ITexture> renderTexture);
+		static bool Begin(SharedPtr<Camera> camera);
 		// Standard Material
 		static void DrawCall(const JMatrix& transform, SharedPtr<ITexture> texture, const Color& color);
 		static void DrawCall(const JVector2& Pos, const JVector2& Size, float rotation, SharedPtr<ITexture> texture , const Color& color);
@@ -41,6 +50,7 @@ namespace JG
 		//static void DrawCall(const JVector2& Pos, const JVector2& Size, float rotation, SharedPtr<IMaterial> material);
 
 		static void End();
+		static const Statistics& GetStats();
 	private:
 		static void StartBatch();
 		static void NextBatch();

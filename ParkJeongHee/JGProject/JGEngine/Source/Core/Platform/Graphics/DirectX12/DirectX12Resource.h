@@ -82,18 +82,37 @@ namespace JG
 	{
 		ComPtr<ID3D12Resource> mD3DResource;
 		EComputeBufferState mState = EComputeBufferState::Wait;
+		void* mCPU      = nullptr;
+		u64 mBufferSize = 0;
+	public:
+		virtual ~DirectX12ComputeBuffer() = default;
+	public:
+		virtual void SetData(u64 btSize) override;
+		virtual bool GetData(void** out_data) override;
+		virtual u64  GetDataSize() const override;
 	public:
 		virtual bool IsValid() const override;
 		virtual EComputeBufferState GetState() const override;
+	public:
+		ID3D12Resource* Get() const {
+			return mD3DResource.Get();
+		}
+	private:
+		friend class DirectX12Computer;
+		void ReserveCompletion();
 	};
 	class DirectX12Computer : public IComputer
 	{
 	private:
-		String mName;
+		String         mName;
 		EComputerState mState = EComputerState::Wait;
-		UniquePtr<ShaderData> mShaderData;
-		//i32 mStartBufferIndex = 0;
+
+		UniquePtr<ShaderData>     mShaderData;
+		SharedPtr<ScheduleHandle> mScheduleHandle;
+
+		Dictionary<String, SharedPtr<IComputeBuffer>> mComputeBuffers;
 	public:
+		virtual bool SetComputeBuffer(SharedPtr<IComputeBuffer> computeBuffer) override;
 		virtual bool SetFloat(const String& name, float value) override;
 		virtual bool SetFloat2(const String& name, const JVector2& value) override;
 		virtual bool SetFloat3(const String& name, const JVector3& value) override;
@@ -154,6 +173,7 @@ namespace JG
 		virtual bool GetUint4Array(const String& name, List<JVector4Uint>* out_value) override;
 		virtual bool GetFloat4x4Array(const String& name, List<JMatrix>* out_value) override;
 	public:
+		void Init(SharedPtr<IShader> shader);
 		virtual const String& GetName() const override;
 		virtual void  SetName(const String& name) override;
 		virtual EComputerState GetState() const override;

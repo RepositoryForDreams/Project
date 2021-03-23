@@ -390,7 +390,7 @@ namespace JG
 
 		for (auto& texture : rtTextures)
 		{
-			if (texture && texture->IsValid() == false) continue;
+			if (texture == nullptr || texture->IsValid() == false) continue;
 			auto handle = static_cast<DirectX12Texture*>(texture.get())->GetRTV();
 			if (handle.ptr == 0) continue;
 
@@ -429,7 +429,7 @@ namespace JG
 
 		for (auto& texture : rtTextures)
 		{
-			if (texture && texture->IsValid() == false) continue;
+			if (texture == nullptr || texture->IsValid() == false) continue;
 			auto handle = static_cast<DirectX12Texture*>(texture.get())->GetRTV();
 			if (handle.ptr == 0) continue;
 
@@ -553,6 +553,24 @@ namespace JG
 		iBuffer->SetBufferLoadMethod(method);
 		return iBuffer;
 	}
+	SharedPtr<IComputeBuffer> DirectX12API::CreateComputeBuffer(const String& name, u64 btSize)
+	{
+		auto computeBuffer = CreateSharedPtr<DirectX12ComputeBuffer>();
+		computeBuffer->SetName(name);
+		computeBuffer->SetData(btSize);
+		return computeBuffer;
+	}
+	SharedPtr<IComputer> DirectX12API::CreateComputer(const String& name, SharedPtr<IShader> shader)
+	{
+		if (shader == nullptr)
+		{
+			return nullptr;
+		}
+		auto computer = CreateSharedPtr<DirectX12Computer>();
+		computer->SetName(name);
+		computer->Init(shader);
+		return computer;
+	}
 	SharedPtr<IShader> DirectX12API::CreateShader(const String& name, const String& sourceCode, EShaderFlags flags)
 	{
 		String errorCode;
@@ -567,6 +585,10 @@ namespace JG
 	}
 	SharedPtr<IMaterial> DirectX12API::CreateMaterial(const String& name, SharedPtr<IShader> shader)
 	{
+		if (shader == nullptr)
+		{
+			return nullptr;
+		}
 		auto material = CreateSharedPtr<DirectX12Material>();
 		material->SetName(name);
 		material->Init(shader);

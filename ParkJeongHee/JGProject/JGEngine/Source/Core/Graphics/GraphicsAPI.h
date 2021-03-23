@@ -17,6 +17,8 @@ namespace JG
 	class IFrameBuffer;
 	class IMaterial;
 	class IMesh;
+	class IComputeBuffer;
+	class IComputer;
 	struct TextureInfo;
 	struct FrameBufferInfo;
 	class IGraphicsAPI 
@@ -55,10 +57,14 @@ namespace JG
 		friend ITexture;
 		friend IMesh;
 		friend IMaterial;
+		friend IComputeBuffer;
+		friend IComputer;
 
 		virtual SharedPtr<IFrameBuffer>   CreateFrameBuffer(const FrameBufferInfo& settings) = 0;
 		virtual SharedPtr<IVertexBuffer>  CreateVertexBuffer(const String& name, EBufferLoadMethod method) = 0;
 		virtual SharedPtr<IIndexBuffer>   CreateIndexBuffer(const String& name, EBufferLoadMethod method) = 0;
+		virtual SharedPtr<IComputeBuffer> CreateComputeBuffer(const String& name, u64 btSize) = 0;
+		virtual SharedPtr<IComputer>      CreateComputer(const String& name, SharedPtr<IShader> shader) = 0;
 		virtual SharedPtr<IShader>        CreateShader(const String& name, const String& sourceCode, EShaderFlags flags) = 0;
 		virtual SharedPtr<IMaterial>	  CreateMaterial(const String& name, SharedPtr<IShader> shader) = 0;
 		virtual SharedPtr<IMesh>          CreateMesh(const String& name) = 0;

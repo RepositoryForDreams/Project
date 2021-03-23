@@ -83,7 +83,7 @@ namespace JG
 		JVector3 StandardQuadPosition[4];
 		JVector2 StandardQuadTexcoord[4];
 
-
+		Renderer2D::Statistics Statistics;
 		SharedPtr<IMesh> QuadMesh; // Bind
 		SharedPtr<IVertexBuffer> QuadVBuffer;
 		SharedPtr<IIndexBuffer>  QuadIBuffer;
@@ -95,8 +95,13 @@ namespace JG
 		List<SharedPtr<ITexture>> TextureArray;
 		SharedPtr<ITexture> WhiteTexture;
 
+
+
 		u32 TextureCount = 1;
 		u32 QuadCount = 0;
+
+		u32 TotalQuadCount = 0;
+		u32 DrawCall = 0;
 	};
 	UniquePtr<Renderer2DItem> gRenderer2DItem;
 
@@ -218,6 +223,18 @@ float4 ps_main(VS_OUT pin) : SV_TARGET
 			JG_CORE_ERROR("Failed Set Texture in WhiteTexture");
 			return false;
 		}
+		
+		Scheduler::GetInstance().ScheduleByFrame(0, 0, -1, 0,
+			[&]() -> EScheduleResult
+		{
+			gRenderer2DItem->Statistics.DrawCalls = gRenderer2DItem->DrawCall;
+			gRenderer2DItem->Statistics.QuadCount = gRenderer2DItem->TotalQuadCount;
+
+			gRenderer2DItem->DrawCall = 0;
+			gRenderer2DItem->TotalQuadCount = 0;
+			return EScheduleResult::Continue;
+		});
+
 		return true;
 	}
 	void Renderer2D::Destroy()
@@ -225,24 +242,26 @@ float4 ps_main(VS_OUT pin) : SV_TARGET
 		gRenderer2DItem.reset();
 		gRenderer2DItem = nullptr;
 	}
-	bool Renderer2D::Begin(SharedPtr<Camera> camera, SharedPtr<ITexture> renderTexture)
+	bool Renderer2D::Begin(SharedPtr<Camera> camera)
 	{
 		auto api = Application::GetInstance().GetGraphicsAPI();
 		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
 
-		if (renderTexture == nullptr || camera == nullptr)
+		if (camera == nullptr || camera->IsOrthographic() == false)
 		{
 			return false;
 		}
 		// TODO Camera 
+		List<SharedPtr<ITexture>> targetTextures = camera->GetTargetTextures();
+
 
 		auto resolution = camera->GetResolution();
 		api->SetDepthStencilState(EDepthStencilStateTemplate::NoDepth);
 		api->SetBlendState(0, EBlendStateTemplate::Transparent_Default);
 		api->SetViewports({ Viewport (resolution.x, resolution.y)});
 		api->SetScissorRects({ ScissorRect(0,0, resolution.x,resolution.y) });
-		api->ClearRenderTarget({ renderTexture }, nullptr);
-		api->SetRenderTarget({ renderTexture }, nullptr);
+		api->ClearRenderTarget(targetTextures, nullptr);
+		api->SetRenderTarget(targetTextures, nullptr);
 
 
 
@@ -332,6 +351,11 @@ float4 ps_main(VS_OUT pin) : SV_TARGET
 		NextBatch();
 	}
 
+	const Renderer2D::Statistics& Renderer2D::GetStats()
+	{
+		return gRenderer2DItem->Statistics;
+	}
+
 	void Renderer2D::StartBatch()
 	{
 		gRenderer2DItem->QuadCount = 0;
@@ -367,7 +391,8 @@ float4 ps_main(VS_OUT pin) : SV_TARGET
 
 
 		api->DrawIndexed(quadIndexCount);
-
+		gRenderer2DItem->DrawCall++;
+		gRenderer2DItem->TotalQuadCount += gRenderer2DItem->QuadCount;
 		StartBatch();
 	}
 

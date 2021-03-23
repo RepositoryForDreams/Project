@@ -62,7 +62,7 @@ namespace JG
 
 
 		JG_CORE_INFO("{0} Compile Success", ws2s(GetName()));
-		mIsCompileSuccess = true;
+	
 		return true;
 	}
 
@@ -89,9 +89,18 @@ namespace JG
 			case HLSL::EHLSLElement::StructuredBuffer:
 				RootSig->InitAsSRV(element->RegisterNum, element->RegisterSpace);
 				break;
+			case HLSL::EHLSLElement::RWStructuredBuffer:
+				RootSig->InitAsUAV(element->RegisterNum, element->RegisterSpace);
+				break;
 			case HLSL::EHLSLElement::Texture:
 				RootSig->InitAsDescriptorTable(
 					D3D12_DESCRIPTOR_RANGE_TYPE_SRV,
+					(u32)(static_cast<ShaderDataForm::TextureData*>(element))->TextureCount,
+					element->RegisterNum, element->RegisterSpace);
+				break;
+			case HLSL::EHLSLElement::RWTexture:
+				RootSig->InitAsDescriptorTable(
+					D3D12_DESCRIPTOR_RANGE_TYPE_UAV,
 					(u32)(static_cast<ShaderDataForm::TextureData*>(element))->TextureCount,
 					element->RegisterNum, element->RegisterSpace);
 				break;
@@ -234,6 +243,7 @@ namespace JG
 			*error = s2ws((char*)errorData->GetBufferPointer());
 			return false;
 		}
+		mIsCompileSuccess = true; 
 		return true;
 	}
 }

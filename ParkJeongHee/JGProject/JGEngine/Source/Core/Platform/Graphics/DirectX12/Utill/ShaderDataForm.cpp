@@ -135,8 +135,16 @@ namespace JG
 	}
 	u64 ShaderDataForm::AnalysisStructuredBuffer(String& code, u64 startPos, bool* result)
 	{
-
 		u64 dataTokenStartPos = code.find(HLSL::Token::StructuredBuffer, startPos);
+		if (dataTokenStartPos != String::npos && dataTokenStartPos >= 2)
+		{
+			String token = code.substr(dataTokenStartPos - 2, wcslen(HLSL::Token::RWStructuredBuffer));
+			if (token == HLSL::Token::RWStructuredBuffer)
+			{
+				return code.find(TT(";"), dataTokenStartPos) + 1;
+			}
+		}
+
 		if (dataTokenStartPos != String::npos)
 		{
 			u64 endPos = code.find(TT(";"), dataTokenStartPos);
@@ -197,6 +205,14 @@ namespace JG
 	{
 
 		u64 dataTokenStartPos = code.find(HLSL::Token::Texture2D, startPos);
+		if (dataTokenStartPos != String::npos && dataTokenStartPos >= 2)
+		{
+			String token = code.substr(dataTokenStartPos - 2, wcslen(HLSL::Token::RWTexture2D));
+			if (token == HLSL::Token::RWTexture2D)
+			{
+				return code.find(TT(";"), dataTokenStartPos) + 1;
+			}
+		}
 		if (dataTokenStartPos != String::npos)
 		{
 			u64 endPos = code.find(TT(";"), dataTokenStartPos);
@@ -973,8 +989,6 @@ namespace JG
 					auto cBufferName = _pair.first;
 					auto cBufferData = _pair.second.get();
 					commandList->BindConstantBuffer(cBufferData->RootParm, mReadDatas[cBufferName]);
-					//auto& byteData = mShaderData->ByteDatas[cBufferName];
-					//commandList->BindDynamicConstantBuffer((u32)cBufferData->RootParm, byteData.data(), byteData.size());
 				}
 				// structuredBuffer
 				for (auto& _pair : shaderDataForm->StructuredBufferDataMap)
@@ -982,9 +996,6 @@ namespace JG
 					auto structuredBufferName = _pair.first;
 					auto structuredBufferData = _pair.second.get();
 					commandList->BindStructuredBuffer(structuredBufferData->RootParm, mReadDatas[structuredBufferName]);
-					//auto& byteData = mShaderData->ByteDatas[structuredBufferName];
-					//commandList->BindDynamicStructuredBuffer(
-					//	(u32)structuredBufferData->RootParm, byteData.data(), structuredBufferData->ElementDataSize, byteData.size());
 				}
 
 				// RWStructuredBuffer
@@ -993,9 +1004,6 @@ namespace JG
 					auto structuredBufferName = _pair.first;
 					auto structuredBufferData = _pair.second.get();
 					commandList->BindStructuredBuffer(structuredBufferData->RootParm, mReadWriteDatas[structuredBufferName]);
-					//auto& byteData = mShaderData->ByteDatas[structuredBufferName];
-					//commandList->BindDynamicStructuredBuffer(
-					//	(u32)structuredBufferData->RootParm, byteData.data(), structuredBufferData->ElementDataSize, byteData.size());
 				}
 				for (auto& _pair : shaderDataForm->TextureDataMap)
 				{
@@ -1049,8 +1057,6 @@ namespace JG
 					auto cBufferName = _pair.first;
 					auto cBufferData = _pair.second.get();
 					commandList->BindConstantBuffer(cBufferData->RootParm, mReadDatas[cBufferName]);
-					//auto& byteData = mShaderData->ByteDatas[cBufferName];
-					//commandList->BindDynamicConstantBuffer((u32)cBufferData->RootParm, byteData.data(), byteData.size());
 				}
 				// structuredBuffer
 				for (auto& _pair : shaderDataForm->StructuredBufferDataMap)
@@ -1058,9 +1064,6 @@ namespace JG
 					auto structuredBufferName = _pair.first;
 					auto structuredBufferData = _pair.second.get();
 					commandList->BindStructuredBuffer(structuredBufferData->RootParm, mReadDatas[structuredBufferName]);
-					//auto& byteData = mShaderData->ByteDatas[structuredBufferName];
-					//commandList->BindDynamicStructuredBuffer(
-					//	(u32)structuredBufferData->RootParm, byteData.data(), structuredBufferData->ElementDataSize, byteData.size());
 				}
 
 				// RWStructuredBuffer
@@ -1069,9 +1072,6 @@ namespace JG
 					auto structuredBufferName = _pair.first;
 					auto structuredBufferData = _pair.second.get();
 					commandList->BindStructuredBuffer(structuredBufferData->RootParm, mReadWriteDatas[structuredBufferName]);
-					//auto& byteData = mShaderData->ByteDatas[structuredBufferName];
-					//commandList->BindDynamicStructuredBuffer(
-					//	(u32)structuredBufferData->RootParm, byteData.data(), structuredBufferData->ElementDataSize, byteData.size());
 				}
 				for (auto& _pair : shaderDataForm->TextureDataMap)
 				{
@@ -1117,12 +1117,6 @@ namespace JG
 					}
 				}
 			}
-
-
-
-
-			
-	
 		}
 		else
 		{
@@ -1419,6 +1413,14 @@ namespace JG
 	bool ShaderData::GetFloat4x4Array(const String& name, List<JMatrix>* out_value)
 	{
 		return false;
+	}
+	UploadAllocator::Allocation ShaderData::GetRWData(const String& name)
+	{
+		if (mReadWriteDatas.find(name) != mReadWriteDatas.end())
+		{
+			return mReadWriteDatas[name];
+		}
+		return UploadAllocator::Allocation();
 	}
 	ShaderDataForm::Data* ShaderData::GetAndCheckData(const String& name, EShaderDataType checkType)
 	{

@@ -50,7 +50,7 @@ namespace JG
 		void Reset();
 	};
 
-
+	// Worker 를 생성하여 스케쥴 작성
 	class Scheduler : public GlobalSingleton<Scheduler>
 	{
 		friend ScheduleHandle;
@@ -108,7 +108,7 @@ namespace JG
 		Dictionary<i32, List<WeakPtr<SyncTaskByFrame>>> mSortedSyncTaskByFrames;
 	public:
 		Scheduler();
-		~Scheduler();
+		virtual ~Scheduler();
 	public:
 		SharedPtr<ScheduleHandle> Schedule(f32 delay, f32 tickCycle, i32 repeat, i32 priority, const SyncTaskFunction& task);
 		SharedPtr<ScheduleHandle> ScheduleOnce(f32 delay, i32 priority, const SyncTaskFunction& task);

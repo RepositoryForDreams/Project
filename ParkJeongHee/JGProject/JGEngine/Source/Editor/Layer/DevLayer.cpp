@@ -27,7 +27,7 @@ namespace JG
 		static    bool show_another_window = false;
 
 
-		if (Renderer2D::Begin(mCamera, mRenderTexture))
+		if (Renderer2D::Begin(mCamera))
 		{
 
 			auto r = Color::Red(); r.A = 0.8f;
@@ -49,23 +49,26 @@ namespace JG
 			static float f = 0.0f;
 			static int counter = 0;
 
-			ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+			if (ImGui::Begin("Hello, world!"))
+			{
+				ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+				ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
+				ImGui::Checkbox("Another Window", &show_another_window);
 
-			ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-			ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-			ImGui::Checkbox("Another Window", &show_another_window);
+				ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+				ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
 
-			ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-			ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+				if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+					counter++;
+				ImGui::SameLine();
+				ImGui::Text("counter = %d", counter);
 
-			if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-				counter++;
-			ImGui::SameLine();
-			ImGui::Text("counter = %d", counter);
+				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+				ImGui::Image((ImTextureID)JGImGui::GetInstance().ConvertImGuiTextureID(mCamera->GetTargetTexture()->GetTextureID()), { 960, 540 });
+				ImGui::End();
+			}
 
-			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-			ImGui::Image((ImTextureID)JGImGui::GetInstance().ConvertImGuiTextureID(mRenderTexture->GetTextureID()), { 1920, 1080 });
-			ImGui::End();
+			
 		}
 
 		// 3. Show another simple window.
@@ -77,9 +80,38 @@ namespace JG
 				show_another_window = false;
 			ImGui::End();
 		}
+		static bool is_show = false;
+		if (is_show)
+		{
+			if (ImGui::Begin("Statistics"), &is_show)
+			{
+				auto stats = Renderer2D::GetStats();
+
+				std::string drawCall = "DrawCall : " + to_string(stats.DrawCalls);
+				std::string qaudCount = "QuadCount : " + to_string(stats.QuadCount);
+				std::string vertexCount = "VertexCount : " + to_string(stats.GetTotalVertexCount());
+				std::string indexCount = "IndexCount : " + to_string(stats.GetTotalIndexCount());
+				ImGui::Text(drawCall.c_str());
+				ImGui::Text(qaudCount.c_str());
+				ImGui::Text(vertexCount.c_str());
+				ImGui::Text(indexCount.c_str());
+				ImGui::End();
+			}
+		}
 
 		
-
+		if (ImGui::BeginMainMenuBar())
+		{
+			if (ImGui::BeginMenu("Debug"))
+			{
+				if (ImGui::MenuItem("Render Statistics"))
+				{
+					is_show = true;
+				}
+				ImGui::EndMenu();
+			}
+			ImGui::EndMainMenuBar();
+		}
 
 	}
 	void DevLayer::LateUpdate()
@@ -92,14 +124,15 @@ namespace JG
 		mCamera->SetLocation(JVector3(0, 0, -10));
 		TextureInfo textureInfo;
 
-		textureInfo.Width = 1920;
+		textureInfo.Width  = 1920;
 		textureInfo.Height = 1080;
 		textureInfo.ClearColor = Color::Green();
 		textureInfo.Format = ETextureFormat::R8G8B8A8_Unorm;
 		textureInfo.MipLevel = 1;
 		textureInfo.Flags = ETextureFlags::Allow_RenderTarget;
 		textureInfo.ArraySize = 1;
-		mRenderTexture = ITexture::Create(TT("DevLayer_Texture"), textureInfo);
+		auto texture = ITexture::Create(TT("DevLayer_Texture"), textureInfo);
+		mCamera->SetTargetTexture(texture);
 	}
 	void DevLayer::Destroy()
 	{
