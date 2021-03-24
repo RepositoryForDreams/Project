@@ -114,6 +114,7 @@ namespace JG
 
 	void Application::Destroy()
 	{
+		Scheduler::GetInstance().FlushAsyncTask(false);
 		mGraphcisAPI->Flush();
 		mLayerStack.reset();
 		Renderer2D::Destroy();

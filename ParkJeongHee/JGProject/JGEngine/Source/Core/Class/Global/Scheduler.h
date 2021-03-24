@@ -84,28 +84,35 @@ namespace JG
 		struct AsyncTask
 		{
 			SharedPtr<ScheduleHandle> Handle;
+			AsyncTaskFunction UserFunction;
 			AsyncTaskFunction Function;
-			std::thread Thread;
-
 			void SetState(EScheduleState State) {
 				Handle->mState = State;
 			}
 		};
-
 	private:
 		u64 mIDOffset = 0;
-		std::mutex mMutex;
 		Queue<u64> mIDQueue;
 		
 		SharedPtr<Timer> mScheduleTimer;
 		//
 		Dictionary<u64, SharedPtr<SyncTaskByTick>>  mSyncTaskByTickPool;
 		Dictionary<u64, SharedPtr<SyncTaskByFrame>> mSyncTaskByFramePool;
-		Dictionary<u64, SharedPtr<AsyncTask>> mAsyncTaskPool;
-
 		//
 		Dictionary<i32, List<WeakPtr<SyncTaskByTick>>>  mSortedSyncTaskByTicks;
 		Dictionary<i32, List<WeakPtr<SyncTaskByFrame>>> mSortedSyncTaskByFrames;
+		//
+		Queue<WeakPtr<SyncTaskByTick>> mReservedSyncTaskByTick;
+		Queue<WeakPtr<SyncTaskByFrame>> mReservedSyncTaskByFrame;
+
+		// Thread ฐüทร
+		Queue<SharedPtr<AsyncTask>> mAsyncTaskQueue;
+		List<std::thread>			mThreads;
+		i32		   mMaxThreadCount = 0;
+		std::mutex mMutex;
+		std::condition_variable mRunAsyncTaskConVar;
+		bool mIsRunAsyncTaskAll = true;
+		bool mIsRunSyncTaskAll  = false;
 	public:
 		Scheduler();
 		virtual ~Scheduler();
@@ -115,6 +122,9 @@ namespace JG
 		SharedPtr<ScheduleHandle> ScheduleByFrame(i32 delayFrame, i32 frameCycle, i32 repeat, i32 priority, const SyncTaskFunction& task);
 		SharedPtr<ScheduleHandle> ScheduleOnceByFrame(i32 delayFrame, i32 priority, const SyncTaskFunction& task);
 		SharedPtr<ScheduleHandle> ScheduleAsync(const AsyncTaskFunction& task);
+
+
+		void FlushAsyncTask(bool isRestart = true);
 	private:
 		void Update();
 		void Update(SharedPtr<SyncTaskByTick> task);

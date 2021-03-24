@@ -22,11 +22,49 @@ namespace JG
 
     Scheduler::Scheduler()
     {
+
+        mMaxThreadCount = std::thread::hardware_concurrency();
+
+        JG_CORE_INFO("Scheduler Prepared Thread Count :  {0} ", mMaxThreadCount);
+
+        mThreads.resize(mMaxThreadCount);
+        for (i32 i = 0; i < mMaxThreadCount; ++i)
+        {
+            mThreads[i] = std::thread([&]()
+            {
+                while (mIsRunAsyncTaskAll)
+                {
+                    std::unique_lock<std::mutex> lock(mMutex);
+                    mRunAsyncTaskConVar.wait(lock, [&]()->bool
+                    {
+                        return (mAsyncTaskQueue.empty() == false || mIsRunAsyncTaskAll == false);
+                    });
+
+                    SharedPtr<AsyncTask> task = nullptr;
+                    if (mIsRunAsyncTaskAll)
+                    {
+                        task = mAsyncTaskQueue.front(); mAsyncTaskQueue.pop();
+                    }
+                    lock.unlock();
+
+                    if (task != nullptr)
+                    {
+                        // Task 실행
+                        task->SetState(EScheduleState::Run);
+                        task->Function();
+                        task->SetState(EScheduleState::Compelete);
+                    }
+
+                }
+            });
+            
+        }
         mScheduleTimer = Timer::Create();
         mScheduleTimer->Start();
     }
     Scheduler::~Scheduler()
     {
+        FlushAsyncTask(false);
         for (auto& _pair : mSyncTaskByTickPool)
         {
             _pair.second->ID          = SCHEDULE_NULL_ID;
@@ -41,7 +79,7 @@ namespace JG
         mSortedSyncTaskByFrames.clear();
         mSyncTaskByTickPool.clear();
         mSyncTaskByFramePool.clear();
-
+        mThreads.clear();
     }
     SharedPtr<ScheduleHandle> Scheduler::Schedule(f32 delay, f32 tickCycle, i32 repeat, i32 priority, const SyncTaskFunction& task)
     {
@@ -53,14 +91,22 @@ namespace JG
         SyncTask->Repeat = repeat;
         SyncTask->Priority = priority;
         SyncTask->Function = task;
-        mSyncTaskByTickPool.emplace(ID, SyncTask);
-        mSortedSyncTaskByTicks[SyncTask->Priority].push_back(SyncTask);
-        
+
         auto handle = CreateSharedPtr<ScheduleHandle>();
         handle->mID = ID;
         handle->mState = EScheduleState::Wait;
         handle->mType  = EScheduleType::SyncByTick;
         SyncTask->Handle = handle;
+
+        mSyncTaskByTickPool.emplace(ID, SyncTask);
+        if (mIsRunSyncTaskAll)
+        {
+            mReservedSyncTaskByTick.push(SyncTask);
+        }
+        else
+        {
+            mSortedSyncTaskByTicks[SyncTask->Priority].push_back(SyncTask);
+        }
         return handle;
     }
     SharedPtr<ScheduleHandle> Scheduler::ScheduleOnce(f32 delay, i32 priority, const SyncTaskFunction& task)
@@ -77,14 +123,23 @@ namespace JG
         SyncTask->Repeat = repeat;
         SyncTask->Priority = priority;
         SyncTask->Function = task;
-        mSyncTaskByFramePool.emplace(ID, SyncTask);
-        mSortedSyncTaskByFrames[ID].push_back(SyncTask);
 
         auto handle = CreateSharedPtr<ScheduleHandle>();
         handle->mID = ID;
         handle->mState = EScheduleState::Wait;
         handle->mType = EScheduleType::SyncByFrame;
         SyncTask->Handle = handle;
+
+        mSyncTaskByFramePool.emplace(ID, SyncTask);
+        if (mIsRunSyncTaskAll)
+        {
+            mReservedSyncTaskByFrame.push(SyncTask);
+        }
+        else
+        {
+            mSortedSyncTaskByFrames[ID].push_back(SyncTask);
+        }
+
         return handle;
     }
     SharedPtr<ScheduleHandle> Scheduler::ScheduleOnceByFrame(i32 delayFrame, i32 priority, const SyncTaskFunction& task)
@@ -93,32 +148,48 @@ namespace JG
     }
     SharedPtr<ScheduleHandle> Scheduler::ScheduleAsync(const AsyncTaskFunction& task)
     {
-        u64 ID = ReceiveScheduleID();
-
-
         auto asyncTask = CreateSharedPtr<AsyncTask>();
         auto handle    = CreateSharedPtr<ScheduleHandle>();
-        handle->mID = ID;
-        handle->mState = EScheduleState::Wait;
-        handle->mType  = EScheduleType::Async;
-        asyncTask->Handle = handle;
-        asyncTask->Function = task;
-        mAsyncTaskPool.emplace(ID, asyncTask);
-
-        asyncTask->Thread = std::thread([&](SharedPtr<AsyncTask> task)
         {
-            task->SetState(EScheduleState::Run);
-            if (task->Function)
-            {
-                task->Function();
-            }
-            task->SetState(EScheduleState::Compelete);
-        }, asyncTask);
+            std::lock_guard<std::mutex> lock(mMutex);
+            u64 ID = ReceiveScheduleID();
+            handle->mID = ID;
+            handle->mState = EScheduleState::Wait;
+            handle->mType = EScheduleType::Async;
+            asyncTask->Handle = handle;
+            asyncTask->Function = task;
 
+
+            mAsyncTaskQueue.push(asyncTask);
+        }
+        mRunAsyncTaskConVar.notify_one();
         return handle;
+    }
+    void Scheduler::FlushAsyncTask(bool isRestart)
+    {
+        mIsRunAsyncTaskAll = false;
+        {
+            std::lock_guard<std::mutex> lock(mMutex);
+            mRunAsyncTaskConVar.notify_all();
+        }
+
+        for (auto& _thread : mThreads)
+        {
+            if (_thread.joinable())
+            {
+                _thread.join();
+            }
+        }
+
+        if (isRestart)
+        {
+            mIsRunAsyncTaskAll = true;
+        }
+
     }
     void Scheduler::Update()
     {
+        mIsRunSyncTaskAll = true;
         for (auto& _pair : mSortedSyncTaskByTicks)
         {
             auto& taskList = _pair.second;
@@ -158,6 +229,27 @@ namespace JG
                 }
             }
         }
+
+        // 추가 보충
+        while (!mReservedSyncTaskByTick.empty())
+        {
+            auto w_task = mReservedSyncTaskByTick.front(); mReservedSyncTaskByTick.pop();
+            auto task = w_task.lock();
+            if (task != nullptr)
+            {
+                mSortedSyncTaskByTicks[task->Priority].push_back(task);
+            }
+        }
+        while (!mReservedSyncTaskByFrame.empty())
+        {
+            auto w_task = mReservedSyncTaskByFrame.front(); mReservedSyncTaskByFrame.pop();
+            auto task = w_task.lock();
+            if (task != nullptr)
+            {
+                mSortedSyncTaskByFrames[task->Priority].push_back(task);
+            }
+        }
+        mIsRunSyncTaskAll = false;
     }
     void Scheduler::Update(SharedPtr<SyncTaskByTick> task)
     {
@@ -273,11 +365,6 @@ namespace JG
             mSyncTaskByFramePool.erase(handle.mID);
             break;
         case EScheduleType::Async:
-            if (mAsyncTaskPool[handle.mID]->Thread.joinable())
-            {
-                mAsyncTaskPool[handle.mID]->Thread.join();
-            }
-            mAsyncTaskPool.erase(handle.mID);
             break;
         }
     }
@@ -293,5 +380,4 @@ namespace JG
             return ID;
         }
     }
-
 }

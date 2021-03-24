@@ -133,6 +133,40 @@ namespace JG
 		textureInfo.ArraySize = 1;
 		auto texture = ITexture::Create(TT("DevLayer_Texture"), textureInfo);
 		mCamera->SetTargetTexture(texture);
+		static int test = 0;
+		Scheduler::GetInstance().ScheduleOnce(0, 0, [&]()->EScheduleResult
+		{
+			JG_CORE_INFO("Stack {0}", test++);
+			Scheduler::GetInstance().ScheduleOnce(0, 0, [&]()->EScheduleResult
+			{
+				JG_CORE_INFO("Stack {0}", test++);
+				Scheduler::GetInstance().ScheduleOnce(0, 0, [&]()->EScheduleResult
+				{
+					JG_CORE_INFO("Stack {0}", test++);
+					Scheduler::GetInstance().ScheduleOnce(0, 0, [&]()->EScheduleResult
+					{
+						JG_CORE_INFO("Stack {0}", test++);
+						Scheduler::GetInstance().ScheduleOnce(0, 0, [&]()->EScheduleResult
+						{
+							JG_CORE_INFO("Stack {0}", test++);
+							for (int i = 0; i < 10; ++i)
+							{
+								Scheduler::GetInstance().ScheduleAsync([&]()
+								{
+									std::hash<std::thread::id> hasher;
+									JG_CORE_INFO("Thread ID : {0} ", hasher(std::this_thread::get_id()));
+								});
+							}
+							return EScheduleResult::Continue;
+						});
+						return EScheduleResult::Continue;
+					});
+					return EScheduleResult::Continue;
+				});
+				return EScheduleResult::Continue;
+			});
+			return EScheduleResult::Continue;
+		});
 	}
 	void DevLayer::Destroy()
 	{
