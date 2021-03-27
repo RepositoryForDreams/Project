@@ -12,8 +12,15 @@ namespace JG
 		bool result = true;
 		Reset();
 
+
 		u64 pos = 0;
+		while (pos != String::npos)
+		{
+			pos = AnalysisStruct(code, pos, &result);
+		}
+
 		// Upload Data ÃßÃâ
+		pos = 0;
 		while (pos != String::npos)
 		{
 			pos = AnalysisCBuffer(code, pos, &result);
@@ -69,6 +76,65 @@ namespace JG
 		SamplerStateDataMap.clear();
 	}
 
+	u64 ShaderDataForm::AnalysisStruct(const String& code, u64 startPos, bool* result)
+	{
+		u64 dataTokenStartPos = code.find(HLSL::Token::Struct, startPos);
+		StructData* structData = nullptr;
+		if (dataTokenStartPos != String::npos)
+		{
+			String structName;
+			ExtractStructName(code, dataTokenStartPos, &structName);
+			if (RegisterStruct(structName) == false)
+			{
+				if (result != nullptr)
+				{
+					*result = false;
+				}
+				return String::npos;
+			}
+			structData = StructDataMap[structName].get();
+			structData->Name = structName;
+		}
+		else
+		{
+			return String::npos;
+		}
+
+
+		dataTokenStartPos = code.find_first_of(TT("{"), dataTokenStartPos) + 1;
+		if (dataTokenStartPos != String::npos)
+		{
+			u64 dataTokenEndPos = code.find_first_of(TT("}"), dataTokenStartPos);
+			String dataCode = code.substr(dataTokenStartPos, dataTokenEndPos - dataTokenStartPos);
+
+			u64 pos = 0;
+			while (pos != String::npos)
+			{
+				String varCode;
+				pos = ExtractVarCode(dataCode, pos, &varCode);
+				if (pos == String::npos)
+					break;
+				if (RegisterStructVar(structData, varCode) == false)
+				{
+					if (result != nullptr)
+					{
+						*result = false;
+					}
+					return String::npos;
+				}
+			}
+
+			startPos = dataTokenEndPos + 1;
+		}
+		else
+		{
+			return String::npos;
+		}
+
+
+		return startPos;
+	}
+
 	u64 ShaderDataForm::AnalysisCBuffer(const String& code, u64 startPos, bool* result)
 	{
 		CBufferData* cBuffer = nullptr;
@@ -106,7 +172,7 @@ namespace JG
 			while (pos != String::npos)
 			{
 				String varCode;
-				pos = ExtractCBufferVar(dataCode, pos, &varCode);
+				pos = ExtractVarCode(dataCode, pos, &varCode);
 				if (pos == String::npos)
 					break;
 				if (RegisterCBufferVar(cBuffer, varCode, uploadDataSize) == false)
@@ -161,6 +227,20 @@ namespace JG
 			String typeCode = dataCode.substr(dataTypeStartPos, dataTypeEndPos - dataTypeStartPos);
 			typeCode = ReplaceAll(typeCode, TT(" "), TT(""));
 
+		
+			String typeName;
+			u64 typeSize = 0;
+			if (FindTypeInfo(typeCode, &typeName, &typeSize) == false)
+			{
+				if (result != nullptr)
+				{
+					*result = false;
+				}
+				return String::npos;
+			}
+
+
+
 
 
 			String nameCode = dataCode.substr(dataTypeEndPos + 1, dataCode.length() - dataTypeEndPos - 1);
@@ -176,18 +256,13 @@ namespace JG
 			}
 
 			auto structuredBufferData = StructuredBufferDataMap[nameCode].get();
-			structuredBufferData->Type = StringToShaderDataType(typeCode);
-			if (structuredBufferData->Type == EShaderDataType::unknown)
-			{
-				JGASSERT("Not Supported Custom Struct Data in StructuredBuffer");
-			}
-
+			structuredBufferData->Type = typeName;
 			structuredBufferData->Name = nameCode;
 			structuredBufferData->RootParm = RootParamOffset++;
 			structuredBufferData->RegisterNum = 0;
 			structuredBufferData->RegisterSpace = (u32)(ShaderDataForm::StructuredBufferStartSpace + SpaceOffset++);
 			structuredBufferData->ElementType = HLSL::EHLSLElement::StructuredBuffer;
-			structuredBufferData->ElementDataSize = GetShaderDataTypeSize(structuredBufferData->Type);
+			structuredBufferData->ElementDataSize = typeSize;
 			RootParamMap[structuredBufferData->RootParm] = structuredBufferData;
 
 
@@ -382,7 +457,16 @@ namespace JG
 			String typeCode = dataCode.substr(dataTypeStartPos, dataTypeEndPos - dataTypeStartPos);
 			typeCode = ReplaceAll(typeCode, TT(" "), TT(""));
 
-
+			String typeName;
+			u64 typeSize = 0;
+			if (FindTypeInfo(typeCode, &typeName, &typeSize) == false)
+			{
+				if (result != nullptr)
+				{
+					*result = false;
+				}
+				return String::npos;
+			}
 
 			String nameCode = dataCode.substr(dataTypeEndPos + 1, dataCode.length() - dataTypeEndPos - 1);
 			nameCode = ReplaceAll(nameCode, TT(" "), TT(""));
@@ -397,18 +481,13 @@ namespace JG
 			}
 
 			auto structuredBufferData = RWStructuredBufferDataMap[nameCode].get();
-			structuredBufferData->Type = StringToShaderDataType(typeCode);
-			if (structuredBufferData->Type == EShaderDataType::unknown)
-			{
-				JGASSERT("Not Supported Custom Struct Data in StructuredBuffer");
-			}
-
+			structuredBufferData->Type = typeName;
 			structuredBufferData->Name = nameCode;
 			structuredBufferData->RootParm = RootParamOffset++;
 			structuredBufferData->RegisterNum = 0;
 			structuredBufferData->RegisterSpace = (u32)(ShaderDataForm::StructuredBufferStartSpace + SpaceOffset++);
 			structuredBufferData->ElementType = HLSL::EHLSLElement::RWStructuredBuffer;
-			structuredBufferData->ElementDataSize = GetShaderDataTypeSize(structuredBufferData->Type);
+			structuredBufferData->ElementDataSize = typeSize;
 			RootParamMap[structuredBufferData->RootParm] = structuredBufferData;
 
 
@@ -486,6 +565,55 @@ namespace JG
 		}
 		return startPos;
 	}
+	bool ShaderDataForm::FindTypeInfo(const String& typeCode, String* out_type, u64* out_typeSize)
+	{
+		auto type = StringToShaderDataType(typeCode);
+		if (type == EShaderDataType::unknown)
+		{
+			if (StructDataMap.find(typeCode) != StructDataMap.end())
+			{
+				if (out_type)
+				{
+					*out_type = typeCode;
+				}
+				if (out_typeSize)
+				{
+					*out_typeSize = StructDataMap[typeCode]->DataSize;
+				}
+			}
+			else
+			{
+				return false;
+			}
+		}
+		else
+		{
+			if (out_type)
+			{
+				*out_type = typeCode;
+			}
+			if (out_typeSize)
+			{
+				*out_typeSize = GetShaderDataTypeSize(type);
+			}
+		}
+
+		return true;
+	}
+	void ShaderDataForm::ExtractStructName(const String& code, u64 pos, String* out_value)
+	{
+		u64 startPos = pos + wcslen(HLSL::Token::Struct);
+		u64 endPos = code.find_first_of(TT("{"), startPos);
+		String structName = code.substr(startPos, endPos - startPos);
+		structName = ReplaceAll(structName, TT("\n"), TT(""));
+		structName = ReplaceAll(structName, TT("\t"), TT(""));
+		structName = ReplaceAll(structName, TT(" "), TT(""));
+
+		if (out_value != nullptr)
+		{
+			*out_value = structName;
+		}
+	}
 	void ShaderDataForm::ExtractCBufferName(const String& code, u64 pos, String* out_value)
 	{
 		u64 startPos = pos + wcslen(HLSL::Token::CBuffer);
@@ -501,7 +629,7 @@ namespace JG
 		}
 
 	}
-	u64 ShaderDataForm::ExtractCBufferVar(const String& code, u64 pos, String* out_value)
+	u64 ShaderDataForm::ExtractVarCode(const String& code, u64 pos, String* out_value)
 	{
 		u64 startPos = (pos == 0) ? 0 : code.find_first_of(TT("\n"), pos) + 1;
 		if (startPos != String::npos)
@@ -809,6 +937,44 @@ namespace JG
 		else return D3D12_STATIC_BORDER_COLOR::D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
 	}
 
+	bool ShaderDataForm::RegisterStruct(const String& name)
+	{
+		if (StructDataMap.find(name) != StructDataMap.end())
+		{
+			JG_CORE_ERROR("{0} Struct Already Exists.", ws2s(name));
+			return false;
+		}
+		StructDataMap[name] = CreateUniquePtr<StructData>();
+		return true;
+	}
+
+	bool ShaderDataForm::RegisterStructVar(StructData* structData, const String& varCode)
+	{
+		u64 varStartPos = varCode.find_first_not_of(TT(" "), varCode.find_first_not_of(TT("\t")));
+		u64 varMidPos = varCode.find(TT(" "), varStartPos);
+		u64 varEndPos = varCode.find(TT(";"), varMidPos) - 1;
+
+
+
+
+		String typeCode = varCode.substr(varStartPos, varMidPos - varStartPos);
+		typeCode = ReplaceAll(typeCode, TT(" "), TT(""));
+		String nameCode = varCode.substr(varMidPos + 1, varEndPos - varMidPos);
+		nameCode = ReplaceAll(nameCode, TT(" "), TT(""));
+		nameCode = ReplaceAll(nameCode, TT(";"), TT(""));
+
+		u64 varSize = 0;
+		if (FindTypeInfo(typeCode, nullptr, &varSize) == false)
+		{
+			return false;
+		}
+
+		structData->DataNameList.push_back(nameCode);
+		structData->DataTypeList.push_back(typeCode);
+		structData->DataSize += varSize;
+		return true;
+	}
+
 	bool ShaderDataForm::RegisterStructuredBuffer(const String& name)
 	{
 
@@ -925,10 +1091,9 @@ namespace JG
 
 	ShaderData::ShaderData(SharedPtr<IShader> shader)
 	{
+
 		mOwnerShader = shader;
 		mUploadAllocator = CreateUniquePtr<UploadAllocator>();
-
-
 		auto loadShader = mOwnerShader.lock();
 		auto dx12Shader = static_cast<DirectX12Shader*>(loadShader.get());
 		if (dx12Shader != nullptr)
@@ -1274,8 +1439,7 @@ namespace JG
 
 	bool ShaderData::SetStructDataArray(const String& name, void* datas, u64 elementCount, u64 elementSize)
 	{
-		JGASSERT("NOT Supported SetStructDataArray");
-		return false;
+		return SetDataArray(name, datas, elementCount, elementSize);
 	}
 
 
@@ -1349,71 +1513,6 @@ namespace JG
 	{
 		return false;
 	}
-
-	bool ShaderData::GetFloatArray(const String& name, List<float>* out_value)
-	{
-		return false;
-	}
-
-	bool ShaderData::GetFloat2Array(const String& name, List<JVector2>* out_value)
-	{
-		return false;
-	}
-
-	bool ShaderData::GetFloat3Array(const String& name, List<JVector3>* out_value)
-	{
-		return false;
-	}
-
-	bool ShaderData::GetFloat4Array(const String& name, List<JVector4>* out_value)
-	{
-		return false;
-	}
-
-	bool ShaderData::GetIntArray(const String& name, List<i32>* out_value)
-	{
-		return false;
-	}
-
-	bool ShaderData::GetInt2Array(const String& name, List<JVector2Int>* out_value)
-	{
-		return false;
-	}
-
-	bool ShaderData::GetInt3Array(const String& name, List<JVector3Int>* out_value)
-	{
-		return false;
-	}
-
-	bool ShaderData::GetInt4Array(const String& name, List<JVector4Int>* out_value)
-	{
-		return false;
-	}
-
-	bool ShaderData::GetUintArray(const String& name, List<u32>* out_value)
-	{
-		return false;
-	}
-
-	bool ShaderData::GetUint2Array(const String& name, List<JVector2Uint>* out_value)
-	{
-		return false;
-	}
-
-	bool ShaderData::GetUint3Array(const String& name, List<JVector3Uint>* out_value)
-	{
-		return false;
-	}
-
-	bool ShaderData::GetUint4Array(const String& name, List<JVector4Uint>* out_value)
-	{
-		return false;
-	}
-
-	bool ShaderData::GetFloat4x4Array(const String& name, List<JMatrix>* out_value)
-	{
-		return false;
-	}
 	UploadAllocator::Allocation ShaderData::GetRWData(const String& name)
 	{
 		if (mReadWriteDatas.find(name) != mReadWriteDatas.end())
@@ -1462,7 +1561,7 @@ namespace JG
 			}
 
 			auto data = iter->second.get();
-			if (data->Type != checkType)
+			if (data->Type != ShaderDataTypeToString(checkType))
 			{
 				return false;
 			}
@@ -1473,5 +1572,38 @@ namespace JG
 		{
 			return false;
 		}
+	}
+	bool ShaderData::CheckDataArray(const String& name, u64 elementSize)
+	{
+		auto loadShader = mOwnerShader.lock();
+		auto dx12Shader = static_cast<DirectX12Shader*>(loadShader.get());
+		if (dx12Shader != nullptr)
+		{
+			auto shaderDataForm = dx12Shader->GetShaderDataForm();
+			auto iter = shaderDataForm->StructuredBufferDataMap.find(name);
+			if (iter == shaderDataForm->StructuredBufferDataMap.end())
+			{
+				return false;
+			}
+			u64 typeSize = 0;
+			auto data = iter->second.get();
+			if (shaderDataForm->FindTypeInfo(data->Type, nullptr, &typeSize) == false)
+			{
+				return false;
+			}
+			if (elementSize != typeSize)
+			{
+				return false;
+			}
+
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+
+
+		return false;
 	}
 }

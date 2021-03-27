@@ -58,22 +58,6 @@ namespace JG
 		virtual bool GetFloat4x4(const String& name, JMatrix* outValue) override;
 		virtual bool GetTexture(const String& name, u32 textureSlot, SharedPtr<ITexture>* out_value) override;
 
-		virtual bool GetFloatArray(const String& name, List<float>* out_value) override;
-		virtual bool GetFloat2Array(const String& name, List<JVector2>* out_value) override;
-		virtual bool GetFloat3Array(const String& name, List<JVector3>* out_value) override;
-		virtual bool GetFloat4Array(const String& name, List<JVector4>* out_value) override;
-		virtual bool GetIntArray(const String& name,   List<i32>* out_value) override;
-		virtual bool GetInt2Array(const String& name,  List<JVector2Int>* out_value) override;
-		virtual bool GetInt3Array(const String& name,  List<JVector3Int>* out_value) override;
-		virtual bool GetInt4Array(const String& name,  List<JVector4Int>* out_value) override;
-		virtual bool GetUintArray(const String& name,  List<u32>* out_value) override;
-		virtual bool GetUint2Array(const String& name, List<JVector2Uint>* out_value) override;
-		virtual bool GetUint3Array(const String& name, List<JVector3Uint>* out_value) override;
-		virtual bool GetUint4Array(const String& name, List<JVector4Uint>* out_value) override;
-		virtual bool GetFloat4x4Array(const String& name,  List<JMatrix>* out_value) override;
-
-
-
 		virtual void  SetName(const String& name) override;
 		virtual const String& GetName() const override;
 	public:

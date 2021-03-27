@@ -61,23 +61,6 @@ namespace JG
 		virtual bool GetUint4(const String& name, JVector4Uint* value) = 0;
 		virtual bool GetFloat4x4(const String& name, JMatrix* out_value) = 0;
 		virtual bool GetTexture(const String& name, u32 textureSlot, SharedPtr<ITexture>* out_value) = 0;
-
-
-		virtual bool GetFloatArray(const String& name, List<float>* out_value) = 0;
-		virtual bool GetFloat2Array(const String& name, List<JVector2>* out_value) = 0;
-		virtual bool GetFloat3Array(const String& name, List<JVector3>* out_value) = 0;
-		virtual bool GetFloat4Array(const String& name, List<JVector4>* out_value) = 0;
-		virtual bool GetIntArray(const String& name, List<i32>* out_value) = 0;
-		virtual bool GetInt2Array(const String& name, List<JVector2Int>* out_value) = 0;
-		virtual bool GetInt3Array(const String& name, List<JVector3Int>* out_value) = 0;
-		virtual bool GetInt4Array(const String& name, List<JVector4Int>* out_value) = 0;
-		virtual bool GetUintArray(const String& name, List<u32>* out_value) = 0;
-		virtual bool GetUint2Array(const String& name, List<JVector2Uint>* out_value) = 0;
-		virtual bool GetUint3Array(const String& name, List<JVector3Uint>* out_value) = 0;
-		virtual bool GetUint4Array(const String& name, List<JVector4Uint>* out_value) = 0;
-		virtual bool GetFloat4x4Array(const String& name, List<JMatrix>* out_value) = 0;
-
-
 		virtual void  SetName(const String& name) = 0;
 		virtual const String& GetName() const = 0;
 	protected:

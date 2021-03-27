@@ -469,11 +469,8 @@ namespace JG
 
 	bool DirectX12Computer::SetStructDataArray(const String& name, void* datas, u64 elementCount, u64 elementSize)
 	{
-		JGASSERT("NOT Supported SetStructDataArray");
-		return false;
+		return mShaderData->SetStructDataArray(name, datas, elementCount, elementSize);
 	}
-
-
 
 	bool DirectX12Computer::GetFloat(const String& name, float* out_value)
 	{
@@ -545,70 +542,6 @@ namespace JG
 		return mShaderData->GetTexture(name, textureSlot, out_value);
 	}
 
-	bool DirectX12Computer::GetFloatArray(const String& name, List<float>* out_value)
-	{
-		return mShaderData->GetFloatArray(name, out_value);
-	}
-
-	bool DirectX12Computer::GetFloat2Array(const String& name, List<JVector2>* out_value)
-	{
-		return mShaderData->GetFloat2Array(name, out_value);
-	}
-
-	bool DirectX12Computer::GetFloat3Array(const String& name, List<JVector3>* out_value)
-	{
-		return mShaderData->GetFloat3Array(name, out_value);
-	}
-
-	bool DirectX12Computer::GetFloat4Array(const String& name, List<JVector4>* out_value)
-	{
-		return mShaderData->GetFloat4Array(name, out_value);
-	}
-
-	bool DirectX12Computer::GetIntArray(const String& name, List<i32>* out_value)
-	{
-		return mShaderData->GetIntArray(name, out_value);
-	}
-
-	bool DirectX12Computer::GetInt2Array(const String& name, List<JVector2Int>* out_value)
-	{
-		return mShaderData->GetInt2Array(name, out_value);
-	}
-
-	bool DirectX12Computer::GetInt3Array(const String& name, List<JVector3Int>* out_value)
-	{
-		return mShaderData->GetInt3Array(name, out_value);
-	}
-
-	bool DirectX12Computer::GetInt4Array(const String& name, List<JVector4Int>* out_value)
-	{
-		return mShaderData->GetInt4Array(name, out_value);
-	}
-
-	bool DirectX12Computer::GetUintArray(const String& name, List<u32>* out_value)
-	{
-		return mShaderData->GetUintArray(name, out_value);
-	}
-
-	bool DirectX12Computer::GetUint2Array(const String& name, List<JVector2Uint>* out_value)
-	{
-		return mShaderData->GetUint2Array(name, out_value);
-	}
-
-	bool DirectX12Computer::GetUint3Array(const String& name, List<JVector3Uint>* out_value)
-	{
-		return mShaderData->GetUint3Array(name, out_value);
-	}
-
-	bool DirectX12Computer::GetUint4Array(const String& name, List<JVector4Uint>* out_value)
-	{
-		return mShaderData->GetUint4Array(name, out_value);
-	}
-
-	bool DirectX12Computer::GetFloat4x4Array(const String& name, List<JMatrix>* out_value)
-	{
-		return mShaderData->GetFloat4x4Array(name, out_value);
-	}
 	void DirectX12Computer::Init(SharedPtr<IShader> shader)
 	{
 		mShaderData = CreateUniquePtr<ShaderData>(shader);

@@ -300,6 +300,7 @@ namespace JG
 		using token = wchar;
 		namespace Token
 		{
+			constexpr token* Struct                 = TT("struct ");
 			constexpr token* CBuffer                = TT("cbuffer ");
 			constexpr token* StructuredBuffer       = TT("StructuredBuffer");
 			constexpr token* Texture2D              = TT("Texture2D ");

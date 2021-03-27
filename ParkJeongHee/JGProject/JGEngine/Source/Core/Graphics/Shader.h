@@ -28,7 +28,7 @@ namespace JG
 	public:
 		virtual void SetName(const String& name) = 0;
 		virtual const String& GetName() const    = 0;
-		virtual EShaderFlags  GetFlags() const = 0;
+		virtual EShaderFlags  GetFlags() const   = 0;
 	public:
 		static SharedPtr<IShader> Create(const String& name, const String& sourceCode, EShaderFlags flags);
 	};

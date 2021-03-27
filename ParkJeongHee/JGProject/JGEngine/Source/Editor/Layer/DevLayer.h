@@ -12,10 +12,12 @@ namespace JG
 	class IComputer;
 	class IComputeBuffer;
 	class DevLayer : public ILayer
+
 	{
 	private:
 		//SharedPtr<IFrameBuffer> mFrameBuffer;
 		SharedPtr<Camera>     mCamera;
+		CommandProperty<u64> mTest;
 	public:
 		virtual ~DevLayer() = default;
 	public:

@@ -113,6 +113,7 @@ namespace JG
 			ImGui::EndMainMenuBar();
 		}
 
+
 	}
 	void DevLayer::LateUpdate()
 	{
@@ -120,6 +121,8 @@ namespace JG
 	}
 	void DevLayer::Begin()
 	{
+		List<int> s;
+		
 		mCamera = Camera::Create(JVector2(1920, 1080), 60, 0.1f, 1000.0f, true);
 		mCamera->SetLocation(JVector3(0, 0, -10));
 		TextureInfo textureInfo;
@@ -137,26 +140,33 @@ namespace JG
 		Scheduler::GetInstance().ScheduleOnce(0, 0, [&]()->EScheduleResult
 		{
 			JG_CORE_INFO("Stack {0}", test++);
+			mTest.SetValue(test);
 			Scheduler::GetInstance().ScheduleOnce(0, 0, [&]()->EScheduleResult
 			{
 				JG_CORE_INFO("Stack {0}", test++);
+				mTest.SetValue(test);
 				Scheduler::GetInstance().ScheduleOnce(0, 0, [&]()->EScheduleResult
 				{
 					JG_CORE_INFO("Stack {0}", test++);
+					mTest.SetValue(test);
 					Scheduler::GetInstance().ScheduleOnce(0, 0, [&]()->EScheduleResult
 					{
 						JG_CORE_INFO("Stack {0}", test++);
+						mTest.SetValue(test);
 						Scheduler::GetInstance().ScheduleOnce(0, 0, [&]()->EScheduleResult
 						{
 							JG_CORE_INFO("Stack {0}", test++);
+							mTest.SetValue(test);
 							for (int i = 0; i < 10; ++i)
 							{
 								Scheduler::GetInstance().ScheduleAsync([&]()
 								{
 									std::hash<std::thread::id> hasher;
 									JG_CORE_INFO("Thread ID : {0} ", hasher(std::this_thread::get_id()));
+									mTest.SetValue(hasher(std::this_thread::get_id()));
 								});
 							}
+					
 							return EScheduleResult::Continue;
 						});
 						return EScheduleResult::Continue;
@@ -167,10 +177,17 @@ namespace JG
 			});
 			return EScheduleResult::Continue;
 		});
+
+		mTest.Subscribe(this,
+			[&](u64 a)
+		{
+			JG_CORE_INFO("A {0}", a);
+
+		});
 	}
 	void DevLayer::Destroy()
 	{
-	
+		mTest.UnSubscribe(this);
 	}
 	void DevLayer::OnEvent(IEvent& e)
 	{

@@ -42,6 +42,8 @@ namespace JG
 		public:
 			virtual ~TextureData() = default;
 		};
+
+
 		class SamplerStateData : public ShaderElement
 		{
 		public:
@@ -49,6 +51,8 @@ namespace JG
 		public:
 			virtual ~SamplerStateData() = default;
 		};
+
+
 		class CBufferData : public ShaderElement
 		{
 		public:
@@ -57,11 +61,22 @@ namespace JG
 		public:
 			virtual ~CBufferData() = default;
 		};
+
+
 		class StructuredBufferData : public ShaderElement
 		{
 		public:
-			EShaderDataType Type;
+			String Type;
 			u64 ElementDataSize = 0;
+		};
+
+		class StructData
+		{
+		public:
+			String Name;
+			List<String> DataTypeList;
+			List<String> DataNameList;
+			u64 DataSize = 0;
 		};
 		
 	public:
@@ -73,6 +88,8 @@ namespace JG
 		Dictionary<String, UniquePtr<TextureData>>		RWTextureDataMap;
 		Dictionary<String, UniquePtr<SamplerStateData>> SamplerStateDataMap;
 		Dictionary<String, Data*>		                CBufferVarMap;
+
+		Dictionary<String, UniquePtr<StructData>> StructDataMap;
 	private:
 		u64 RootParamOffset = 0;
 		u64 TextureRegisterNumberOffset = 0;
@@ -83,15 +100,19 @@ namespace JG
 		bool Set(String& code);
 		void Reset();
 	private:
+		u64 AnalysisStruct(const String& code, u64 startPos, bool* result);
 		u64 AnalysisCBuffer(const String& code, u64 startPos, bool* result);
 		u64 AnalysisStructuredBuffer(String& code, u64 startPos, bool* result);
 		u64 AnalysisTexture2D(String& code, u64 startPos, bool* result);
 		u64 AnalysisSamplerState(String& code, u64 startPos, bool* result);
 		u64 AnalysisRWStructuredBuffer(String& code, u64 startPos, bool* result);
 		u64 AnalysisRWTexture2D(String& code, u64 startPos, bool* result);
+	public:
+		bool FindTypeInfo(const String& typeCode, String* out_type, u64* out_typeSize);
 	private:
+		void ExtractStructName(const String& code, u64 pos, String* out_value);
 		void ExtractCBufferName(const String& code, u64 pos, String* out_value);
-		u64 ExtractCBufferVar(const String& code, u64 pos, String* out_value);
+		u64 ExtractVarCode(const String& code, u64 pos, String* out_value);
 		u64 ExtractSamplerStateValue(const String& samplerStateDataCode, u64 startPos, String* out_key, String* out_value);
 	private:
 		D3D12_STATIC_SAMPLER_DESC CreateSamplerStateDesc(const Dictionary<String, String>& samplerDataMap);
@@ -103,6 +124,8 @@ namespace JG
 		D3D12_COMPARISON_FUNC GetComparisonFunc(const String& comparisonFunc);
 		D3D12_STATIC_BORDER_COLOR GetBorderColor(const String& borderColor);
 	private:
+		bool RegisterStruct(const String& name);
+		bool RegisterStructVar(StructData* structData, const String& varCode);
 		bool RegisterStructuredBuffer(const String& name);
 		bool RegisterRWStructuredBuffer(const String& name);
 		bool RegisterCBuffer(const String& name);
@@ -180,20 +203,6 @@ namespace JG
 		bool GetUint4(const String& name, JVector4Uint* out_value);
 		bool GetFloat4x4(const String& name, JMatrix* outValue);
 		bool GetTexture(const String& name, u32 textureSlot, SharedPtr<ITexture>* out_value);
-
-		bool GetFloatArray(const String& name, List<float>* out_value);
-		bool GetFloat2Array(const String& name, List<JVector2>* out_value);
-		bool GetFloat3Array(const String& name, List<JVector3>* out_value);
-		bool GetFloat4Array(const String& name, List<JVector4>* out_value);
-		bool GetIntArray(const String& name, List<i32>* out_value);
-		bool GetInt2Array(const String& name, List<JVector2Int>* out_value);
-		bool GetInt3Array(const String& name, List<JVector3Int>* out_value);
-		bool GetInt4Array(const String& name, List<JVector4Int>* out_value);
-		bool GetUintArray(const String& name, List<u32>* out_value);
-		bool GetUint2Array(const String& name, List<JVector2Uint>* out_value);
-		bool GetUint3Array(const String& name, List<JVector3Uint>* out_value);
-		bool GetUint4Array(const String& name, List<JVector4Uint>* out_value);
-		bool GetFloat4x4Array(const String& name, List<JMatrix>* out_value);
 	public:
 		UploadAllocator::Allocation GetRWData(const String& name);
 	public:
@@ -237,26 +246,49 @@ namespace JG
 			return true;
 		}
 
+		bool SetDataArray(const String& name, void* datas, u64 elementCount, u64 elementSize)
+		{
+			if (CheckDataArray(name, elementSize) == false)
+			{
+				return false;
+			}
+			u64 btSize = elementCount * elementSize;
+			if (MaxElementCount <= elementCount)
+			{
+				btSize = elementSize * MaxElementCount;
+				JG_CORE_WARN("ShaderData have exceeded the StructuredBuffer's Maximum Range.");
+			}
+
+			auto& alloc = mReadDatas[name];
+			memcpy(alloc.CPU, datas, btSize);
+			return true;
+		}
+
+
 		template<class T, EShaderDataType type>
 		bool GetData(const String& name, T* value)
 		{
-			return false;
-			//if (value == nullptr)
-			//{
-			//	return false;
-			//}
-			//auto data = GetAndCheckData(name, type);
-			//if (data == nullptr)
-			//{
-			//	return false;
-			//}
-			//u64 dataSize   = sizeof(T);
-			//u64 dataPos    = data->DataPos;
-			//String& cbName = data->Owner->Name;
-			//memcpy(value, &ByteDatas[cbName][dataPos], dataSize);
-			//return true;
+			if (value == nullptr)
+			{
+				return false;
+			}
+			auto data = GetAndCheckData(name, type);
+			if (data == nullptr)
+			{
+				return false;
+			}
+			u64 dataSize   = sizeof(T);
+			u64 dataPos    = data->DataPos;
+			String& cbName = data->Owner->Name;
+
+			
+
+			void* src = (void*)((ptraddr)(mReadDatas[cbName].CPU) + dataPos);
+			memcpy(value, src , dataSize);
+			return true;
 		}
 		ShaderDataForm::Data* GetAndCheckData(const String& name, EShaderDataType checkType);
 		bool CheckDataArray(const String& name, EShaderDataType checkType);
+		bool CheckDataArray(const String& name, u64 elementSize);
 	};
 }

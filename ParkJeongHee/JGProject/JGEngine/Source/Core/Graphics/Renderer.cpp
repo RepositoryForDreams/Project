@@ -234,7 +234,6 @@ float4 ps_main(VS_OUT pin) : SV_TARGET
 			gRenderer2DItem->TotalQuadCount = 0;
 			return EScheduleResult::Continue;
 		});
-
 		return true;
 	}
 	void Renderer2D::Destroy()
@@ -271,6 +270,7 @@ float4 ps_main(VS_OUT pin) : SV_TARGET
 			JG_CORE_ERROR("Failed Set ViewProjMatrix in Renderer2D");
 			return false;
 		}
+
 
 		return true;
 	}
@@ -374,6 +374,7 @@ float4 ps_main(VS_OUT pin) : SV_TARGET
 		if (gRenderer2DItem->Standard2DMaterial->Bind() == false)
 		{
 			JG_CORE_ERROR("Failed Bind StandardMaterial");
+			StartBatch();
 			return;
 		}
 
@@ -386,6 +387,7 @@ float4 ps_main(VS_OUT pin) : SV_TARGET
 		if (gRenderer2DItem->QuadMesh->Bind() == false)
 		{
 			JG_CORE_ERROR("Failed Bind QuadMesh");
+			StartBatch();
 			return;
 		}
 

@@ -2,12 +2,12 @@
 
 
 #include "Event/Events.h"
-
+#include "Command.h"
 
 
 namespace JG
 {
-	class ILayer
+	class ILayer : public ISubscriber
 	{
 	public:
 		virtual ~ILayer() {}
