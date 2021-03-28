@@ -1142,7 +1142,7 @@ namespace JG
 				JG_CORE_ERROR("Failed Bind {0} Shader", ws2s(dx12Shader->GetName()));
 				return false;
 			}
-
+	
 	
 			auto shaderDataForm = dx12Shader->GetShaderDataForm();
 

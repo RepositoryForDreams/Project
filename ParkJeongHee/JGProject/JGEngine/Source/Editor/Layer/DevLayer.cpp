@@ -9,20 +9,20 @@
 #include "Graphics/Shader.h"
 #include "Graphics/Camera.h"
 #include "Graphics/Resource.h"
+#include "Class/UI/UIView.h"
 using namespace std;
 namespace JG
 {
 	void DevLayer::OnAttach()
 	{
-		JGImGui::Create();
+
 	}
 	void DevLayer::OnDetach()
 	{
-		JGImGui::Destroy();
+
 	}
 	void DevLayer::Update()
 	{
-		JGImGui::GetInstance().NewFrame();
 		static  bool show_demo_window = true;
 		static    bool show_another_window = false;
 
@@ -42,15 +42,19 @@ namespace JG
 			Renderer2D::End();
 
 		}
+		
 
 		ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 		// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
 		{
+
 			static float f = 0.0f;
 			static int counter = 0;
 
 			if (ImGui::Begin("Hello, world!"))
 			{
+				ImGui::Begin("TestChile");
+				ImGui::End();
 				ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
 				ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
 				ImGui::Checkbox("Another Window", &show_another_window);
@@ -80,7 +84,7 @@ namespace JG
 				show_another_window = false;
 			ImGui::End();
 		}
-		static bool is_show = false;
+		static bool is_show = true;
 		if (is_show)
 		{
 			if (ImGui::Begin("Statistics"), &is_show)
@@ -98,22 +102,6 @@ namespace JG
 				ImGui::End();
 			}
 		}
-
-		
-		if (ImGui::BeginMainMenuBar())
-		{
-			if (ImGui::BeginMenu("Debug"))
-			{
-				if (ImGui::MenuItem("Render Statistics"))
-				{
-					is_show = true;
-				}
-				ImGui::EndMenu();
-			}
-			ImGui::EndMainMenuBar();
-		}
-
-
 	}
 	void DevLayer::LateUpdate()
 	{
@@ -191,19 +179,10 @@ namespace JG
 	}
 	void DevLayer::OnEvent(IEvent& e)
 	{
-		EventDispatcher dispatcher(e);
-		dispatcher.Dispatch<AppResizeEvent>(EVENT_BIND_FN(&DevLayer::Resize));
+
 	}
 	String DevLayer::GetLayerName()
 	{
 		return TT("DevLayer");
-	}
-	bool DevLayer::Resize(AppResizeEvent& e)
-	{
-		if (JGImGui::IsValid() == true)
-		{
-			JGImGui::GetInstance().Resize(e.Width, e.Height);
-		}
-		return true;
 	}
 }

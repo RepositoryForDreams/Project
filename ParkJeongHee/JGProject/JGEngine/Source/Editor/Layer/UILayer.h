@@ -3,13 +3,11 @@
 
 namespace JG
 {
-	// UIManager
-	// bool IsOpen
-	// bool Is
-	class MainMenuLayer : public ILayer
+
+	class UILayer : public ILayer
 	{
 	public:
-		virtual ~MainMenuLayer() {}
+		virtual ~UILayer() {}
 	public:
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;

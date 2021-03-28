@@ -18,7 +18,7 @@ namespace JG
 		{
 		public:
 			String Name;
-			u64 RootParm = 0;
+			u32 RootParm = 0;
 			u32 RegisterNum = 0;
 			u32 RegisterSpace = 0;
 			HLSL::EHLSLElement ElementType = HLSL::EHLSLElement::None;

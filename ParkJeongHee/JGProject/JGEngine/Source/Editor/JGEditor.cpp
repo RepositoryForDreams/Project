@@ -1,6 +1,8 @@
 #include "JGEditor.h"
-#include "Layer/EditorLayer.h"
 #include "Layer/DevLayer.h"
+#include "Layer/ImGuiLayer.h"
+#include "Layer/MainMenuLayer.h"
+#include "Layer/UILayer.h"
 
 namespace JG
 {
@@ -14,7 +16,9 @@ namespace JG
 	}
 	void JGEditor::LoadImpl()
 	{
-		//PushLayer(CreateSharedPtr<EditorLayer>());
+		PushLayer(CreateSharedPtr<ImGuiLayer>());
+		PushLayer(CreateSharedPtr<MainMenuLayer>());
+		PushLayer(CreateSharedPtr<UILayer>());
 		PushLayer(CreateSharedPtr<DevLayer>());
 	}
 }

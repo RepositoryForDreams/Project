@@ -11,9 +11,12 @@
 #include "Common/Enum.h"
 #include "Common/Abstract.h"
 #include "Common/GlobalConst.h"
+#include "Common/Type.h"
 #include "Common/String.h"
 #include "Common/Log.h"
 #include "Common/Color.h"
+
+
 
 #include"Math/Math.h"
 #include "Math/JVector.h"

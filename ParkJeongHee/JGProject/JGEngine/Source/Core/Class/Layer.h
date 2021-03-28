@@ -25,8 +25,6 @@ namespace JG
 		virtual void OnEvent(IEvent& e) = 0;
 
 		virtual String GetLayerName() = 0;
-
-		
 	};
 
 	

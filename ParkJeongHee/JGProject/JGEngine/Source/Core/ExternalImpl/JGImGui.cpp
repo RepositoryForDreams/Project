@@ -28,10 +28,10 @@ namespace JG
 	namespace DirectX12
 	{
 		static ComPtr<ID3D12DescriptorHeap> gSrvDescriptorHeap;
-		static u64 gIncreaseSize = 0;
-		static u64 gCurrentSrvIndex     = 0;
-		static const u64 gSrvStartIndex = 1;
-		static const u64 gMaxSrvCount   = 1024;
+		static u32 gIncreaseSize = 0;
+		static u32 gCurrentSrvIndex     = 0;
+		static const u32 gSrvStartIndex = 1;
+		static const u32 gMaxSrvCount   = 1024;
 	}
 	JGImGui::JGImGui()
 	{

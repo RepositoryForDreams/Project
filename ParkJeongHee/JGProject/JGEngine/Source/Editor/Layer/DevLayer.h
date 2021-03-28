@@ -29,7 +29,5 @@ namespace JG
 		virtual void Destroy()  override;
 		virtual void OnEvent(IEvent& e)  override;
 		virtual String GetLayerName()  override;
-	private:
-		bool Resize(AppResizeEvent& e);
 	};
 }
