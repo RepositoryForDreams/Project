@@ -5,6 +5,20 @@
 
 namespace JG
 {
+#define SCHEDULE_BIND_FN(func) std::bind(func, this)
+
+
+	class SchedulePriority
+	{
+	public:
+		enum
+		{
+			ImGuiLayer    = -100,
+			Default       = 0,
+			MainMenuLayer = 10,
+			OnGUI         = 100,
+		};
+	};
 	enum class EScheduleState
 	{
 		Wait,
@@ -99,8 +113,8 @@ namespace JG
 		Dictionary<u64, SharedPtr<SyncTaskByTick>>  mSyncTaskByTickPool;
 		Dictionary<u64, SharedPtr<SyncTaskByFrame>> mSyncTaskByFramePool;
 		//
-		Dictionary<i32, List<WeakPtr<SyncTaskByTick>>>  mSortedSyncTaskByTicks;
-		Dictionary<i32, List<WeakPtr<SyncTaskByFrame>>> mSortedSyncTaskByFrames;
+		SortedDictionary<i32, List<WeakPtr<SyncTaskByTick>>>  mSortedSyncTaskByTicks;
+		SortedDictionary<i32, List<WeakPtr<SyncTaskByFrame>>> mSortedSyncTaskByFrames;
 		//
 		Queue<WeakPtr<SyncTaskByTick>> mReservedSyncTaskByTick;
 		Queue<WeakPtr<SyncTaskByFrame>> mReservedSyncTaskByFrame;

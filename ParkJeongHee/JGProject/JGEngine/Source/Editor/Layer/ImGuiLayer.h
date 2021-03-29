@@ -16,16 +16,17 @@ namespace JG
 		virtual void OnDetach() override;
 
 
-		virtual void Update() override;
-		virtual void LateUpdate() override;
+
 
 		virtual void Begin() override;
-		virtual void Destroy() override;
+		virtual void Destroy() override {}
 
 		virtual void OnEvent(IEvent& e) override;
 
 		virtual String GetLayerName() override;
 
+
+		EScheduleResult Update();
 	private:
 		bool Resize(AppResizeEvent& e);
 	};

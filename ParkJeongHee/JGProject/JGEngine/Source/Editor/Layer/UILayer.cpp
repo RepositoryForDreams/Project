@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "UILayer.h"
-
+#include "UI/UIView/StatisticsView.h"
 
 namespace JG
 {
@@ -12,20 +12,19 @@ namespace JG
 	{
 
 	}
-	void UILayer::Update()
-	{
-	}
-	void UILayer::LateUpdate()
-	{
-	}
+
+
 	void UILayer::Begin()
 	{
+		UIManager::GetInstance().RegisterUIView<StatisticsView>();
 	}
 	void UILayer::Destroy()
 	{
+
 	}
 	void UILayer::OnEvent(IEvent& e)
 	{
+
 	}
 	String UILayer::GetLayerName()
 	{

@@ -12,18 +12,9 @@ namespace JG
 	{
 		JGImGui::Destroy();
 	}
-	void ImGuiLayer::Update()
+	void ImGuiLayer::Begin() 
 	{
-		JGImGui::GetInstance().NewFrame();
-	}
-	void ImGuiLayer::LateUpdate()
-	{
-	}
-	void ImGuiLayer::Begin()
-	{
-	}
-	void ImGuiLayer::Destroy()
-	{
+		Scheduler::GetInstance().ScheduleByFrame(0, 0, -1, SchedulePriority::ImGuiLayer, SCHEDULE_BIND_FN(&ImGuiLayer::Update));
 	}
 	void ImGuiLayer::OnEvent(IEvent& e)
 	{
@@ -34,6 +25,16 @@ namespace JG
 	{
 		return TT("ImGuiLayer");
 	}
+
+
+	EScheduleResult ImGuiLayer::Update()
+	{
+		JGImGui::GetInstance().NewFrame();
+
+		return EScheduleResult::Continue;
+	}
+
+
 	bool ImGuiLayer::Resize(AppResizeEvent& e)
 	{
 		if (JGImGui::IsValid() == true)

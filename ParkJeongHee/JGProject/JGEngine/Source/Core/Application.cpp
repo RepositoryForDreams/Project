@@ -31,7 +31,7 @@ namespace JG
 		Log::Create();
 		TimerManager::Create();
 		Scheduler::Create();
-
+		UIManager::Create();
 
 		// TODO
 		// 필요한 멤버 클래스 생성
@@ -94,14 +94,7 @@ namespace JG
 			{
 				Scheduler::GetInstance().Update();
 			}
-			mLayerStack->ForEach([&](ILayer * layer)
-			{
-				layer->Update();
-			});
-			mLayerStack->ForEach([&](ILayer* layer)
-			{
-				layer->LateUpdate();
-			});
+
 			mGraphcisAPI->End();
 		}
 
@@ -116,6 +109,7 @@ namespace JG
 	{
 		Scheduler::GetInstance().FlushAsyncTask(false);
 		mGraphcisAPI->Flush();
+		UIManager::Destroy();
 		mLayerStack.reset();
 		Renderer2D::Destroy();
 		ShaderLibrary::Destroy();

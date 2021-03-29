@@ -137,7 +137,7 @@ namespace JG
         }
         else
         {
-            mSortedSyncTaskByFrames[ID].push_back(SyncTask);
+            mSortedSyncTaskByFrames[SyncTask->Priority].push_back(SyncTask);
         }
 
         return handle;

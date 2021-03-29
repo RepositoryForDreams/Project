@@ -5,14 +5,22 @@
 
 namespace JG
 {
+	class IUIViewModel;
 	class UIViewModel;
 	// Param / Child
 
-	template<class ErrorDataType>
+	class IUIError
+	{
+	public:
+		virtual u64    GetID()    const = 0;
+		virtual String ToString() const = 0;
+	};
+
 	class IUIErrorReceiver
 	{
+		friend UIViewModel;
 	protected:
-		virtual void ReceiveError(const ErrorDataType& error) = 0;
+		virtual void ReceiveError(SharedPtr<IUIError> error) = 0;
 	};
 
 
@@ -35,7 +43,7 @@ namespace JG
 	// UIView 는 UIModel의  존재를 몰라야한다.
 	// UIViewModel 을 템플릿으로
 	template<class ViewModelType>
-	class UIView : public IUIView
+	class UIView : public IUIView, public IUIErrorReceiver
 	{
 	private:
 		UniquePtr<ViewModelType> mViewModel;
@@ -52,6 +60,11 @@ namespace JG
 			if (mIsOpen == false)
 			{
 				mIsOpen = true;
+				if (mViewModel == nullptr)
+				{
+					mViewModel = CreateUniquePtr<ViewModelType>();
+				}
+				static_cast<IUIViewModel*>(mViewModel.get())->Initialize();
 				Initialize();
 			}
 		}
@@ -60,8 +73,10 @@ namespace JG
 			if (mIsOpen == true)
 			{
 				mIsOpen = false;
+				static_cast<IUIViewModel*>(mViewModel.get())->Destroy();
 				Destroy();
 			}
 		}
+		virtual void ReceiveError(SharedPtr<IUIError> error) override {}
 	};
 }

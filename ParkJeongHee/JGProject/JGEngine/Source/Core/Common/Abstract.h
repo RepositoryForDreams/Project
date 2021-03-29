@@ -40,6 +40,57 @@ namespace JG
 
 
 
+	template<class T>
+	class CustomWeakPtr
+	{
+	protected:
+		T*            mPtr = nullptr;
+		WeakPtr<bool> mIsValid;
+	public:
+		CustomWeakPtr(T* ptr) : mPtr(ptr)
+		{
+			ConstructorImpl();
+		}
+		CustomWeakPtr(const CustomWeakPtr& copy)
+		{
+			mPtr = copy.mPtr;
+			mIsValid = copy.mIsValid;
+		}
+		CustomWeakPtr& operator=(const CustomWeakPtr& copy)
+		{
+			mPtr = copy.mPtr;
+			mIsValid = copy.mIsValid;
+			return *this;
+		}
+		T* operator->()
+		{
+			return mPtr;
+		}
+		~CustomWeakPtr()
+		{
+			DestructorImpl();
+		}
+		bool IsValid() const
+		{
+			auto _bool = mIsValid.lock();
+			if (_bool)
+			{
+				return *(_bool.get());
+			}
+			return false;
+		}
+	private:
+		CustomWeakPtr(CustomWeakPtr&& rhs) = delete;
+		CustomWeakPtr& operator=(CustomWeakPtr&& rhs) = delete;
+
+	protected:
+		//bool 
+		virtual void ConstructorImpl() = 0;
+		virtual void DestructorImpl() = 0;
+	};
+
+
+
 }
 
 

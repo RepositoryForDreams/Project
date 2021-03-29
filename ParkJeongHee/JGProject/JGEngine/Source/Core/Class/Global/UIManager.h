@@ -1,19 +1,19 @@
 #pragma once
 #include "JGCore.h"
+#include <Common/Type.h>
+#include <shared_mutex>
+
 namespace JG
 {
 	class IUIView;
 	class UIManager : public GlobalSingleton<UIManager>
 	{
 	private:
-		Dictionary<Type, SharedPtr<IUIView>> mUIViewPool;
-		std::shared_mutex mMutex;
+		Dictionary<JG::Type, UniquePtr<IUIView>> mUIViewPool;
+		mutable std::shared_mutex mMutex;
 	public:
 		UIManager();
 		~UIManager();
-	private:
-		friend class Application;
-		void Update();
 	public:
 		// 등록
 		template<class UIViewType>
@@ -27,12 +27,12 @@ namespace JG
 			{
 				return;
 			}
-			mUIViewPool[type] = CreateSharedPtr<UIViewType>();
+			mUIViewPool[type] = CreateUniquePtr<UIViewType>();
 		}
 
-
+		// UI용 WeakPtr 구현
 		template<class UIViewType>
-		WeakPtr<UIViewType> GetUIView() const
+		UIViewType* GetUIView() const
 		{
 			Type type = Type(TypeID<UIViewType>());
 
@@ -40,12 +40,14 @@ namespace JG
 			auto iter = mUIViewPool.find(type);
 			if (iter == mUIViewPool.end())
 			{
-				JG_CORE_ERROR("Not Find UIViewType : {0}", s2ws(type.GetName()));
+				JG_CORE_ERROR("Not Find UIViewType : {0}", ws2s(type.GetName()));
 				return nullptr;
 			}
-			return iter->second;
+			return static_cast<UIViewType*>(iter->second.get());
 		}
 
 		void ForEach(const std::function<void(IUIView*)> action);
+	private:
+		void OnGUI();
 	};
 }

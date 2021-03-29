@@ -23,8 +23,6 @@ namespace JG
 	public:
 		virtual void OnAttach() override;
 		virtual void OnDetach()  override;
-		virtual void Update() override;
-		virtual void LateUpdate() override;
 		virtual void Begin() override;
 		virtual void Destroy()  override;
 		virtual void OnEvent(IEvent& e)  override;

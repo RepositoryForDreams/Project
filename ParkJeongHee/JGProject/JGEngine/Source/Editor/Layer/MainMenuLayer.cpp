@@ -12,32 +12,10 @@ namespace JG
 	{
 
 	}
-	void MainMenuLayer::Update()
-	{
-		if (ImGui::BeginMainMenuBar())
-		{
-			// Menu 
-			if (ImGui::BeginMenu("Debug"))
-			{
 
-
-
-			}
-
-
-
-
-			ImGui::EndMainMenuBar();
-		}
-
-
-	}
-	void MainMenuLayer::LateUpdate()
-	{
-	}
 	void MainMenuLayer::Begin()
 	{
-
+		Scheduler::GetInstance().ScheduleByFrame(0, 0, -1, SchedulePriority::MainMenuLayer, SCHEDULE_BIND_FN(&MainMenuLayer::Update));
 	}
 	void MainMenuLayer::Destroy()
 	{
@@ -48,5 +26,25 @@ namespace JG
 	String MainMenuLayer::GetLayerName()
 	{
 		return TT("MainMenuLayer");
+	}
+	EScheduleResult MainMenuLayer::Update()
+	{
+		if (ImGui::BeginMainMenuBar())
+		{
+			// Menu 
+			if (ImGui::BeginMenu("Debug"))
+			{
+
+
+				ImGui::EndMenu();
+			}
+
+
+
+
+			ImGui::EndMainMenuBar();
+		}
+
+		return EScheduleResult::Continue;
 	}
 }

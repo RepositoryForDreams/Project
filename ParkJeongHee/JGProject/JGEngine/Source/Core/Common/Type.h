@@ -1,7 +1,7 @@
 #pragma once
-#include "JGCore.h"
+#include <Common/Define.h>
 #include <atomic>
-
+#include <typeinfo>
 
 
 
@@ -49,15 +49,16 @@ namespace JG
 		String mName;
 	public:
 		template<class T>
-		Type(const TypeID<T>& typeID)
+		constexpr Type(const TypeID<T>& typeID)
 		{
 			mID = typeID.ID;
-			mName = s2ws(std::type_info(typeid(T)).name());
+			mName = s2ws(typeid(T).name());
 		}
 		template<class T>
-		Type& operator=(const TypeID<T>& typeID)
+		constexpr Type& operator=(const TypeID<T>& typeID)
 		{
 			mID = typeID.ID;
+			mName = s2ws(typeid(T).name());
 			return *this;
 		}
 		Type& operator=(const Type& type)
@@ -65,7 +66,7 @@ namespace JG
 			mID = type.mID;
 			return *this;
 		}
-		bool operator=(const Type& type) const
+		bool operator==(const Type& type) const
 		{
 			return mID == type.mID;
 		}
@@ -81,8 +82,6 @@ namespace JG
 			return mName;
 		}
 	private:
-		Type(Type&& type) = delete;
-		Type& operator=(Type&& type) = delete;
 
 		friend std::hash<JG::Type>;
 	};
