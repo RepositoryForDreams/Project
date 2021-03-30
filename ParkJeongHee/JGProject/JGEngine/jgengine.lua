@@ -34,7 +34,8 @@ workspace "JGEngine"
         -- file
         files {
             path .. "**.h",
-            path .. "**.cpp"
+            path .. "**.cpp",
+            path .. "**.c",
         }
 
 
@@ -57,7 +58,8 @@ workspace "JGEngine"
         -- file
         files {
             path .. "**.h",
-            path .. "**.cpp"
+            path .. "**.cpp",
+            path .. "**.c",
         }
 
         filter "configurations:Debug"
@@ -108,7 +110,8 @@ workspace "JGEngine"
                     "ThirdParty/",
                 }
                 links {
-                    "Imgui"
+                    "Imgui",
+                    "stb",
                 }
                 pchheader "pch.h"
                 pchsource "Source/Core/pch.cpp"
@@ -127,6 +130,8 @@ workspace "JGEngine"
     group "ThirdParty"
         project "Imgui"
             SetStaticLibConfig("ThirdParty/Imgui/")
+        project "stb"
+            SetStaticLibConfig("ThirdParty/stb/")
 
 
         
