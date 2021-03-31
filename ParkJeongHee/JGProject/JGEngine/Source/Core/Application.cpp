@@ -81,6 +81,8 @@ namespace JG
 			layer->Begin();
 		});
 		
+
+
 		while(mIsRunning)
 		{
 			if (TimerManager::IsValid())
@@ -154,6 +156,8 @@ namespace JG
 		}
 		else
 		{
+			mDisplaySize = e.Width;
+			mDisplaySize = e.Height;
 			mMinimized = false;
 		}
 		
@@ -185,8 +189,8 @@ namespace JG
 	{
 		return mGraphcisAPI.get();
 	}
-	JVector2Uint Application::GetSize() const
+	JVector2Uint Application::GetDisplaySize() const
 	{
-		return JVector2Uint(mProps.WindowProps.Width, mProps.WindowProps.Height);
+		return mDisplaySize;
 	}
 }

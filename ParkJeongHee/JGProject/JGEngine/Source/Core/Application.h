@@ -22,7 +22,7 @@ namespace JG
 		UniquePtr<LayerStack>	mLayerStack;
 		UniquePtr<IGraphicsAPI> mGraphcisAPI;
 
-
+		JVector2Uint mDisplaySize;
 		bool mIsRunning = true;
 		bool mMinimized = false;
 	public:
@@ -54,7 +54,7 @@ namespace JG
 		IGraphicsAPI* GetGraphicsAPI() const;
 
 
-		JVector2Uint  GetSize() const;
+		JVector2Uint  GetDisplaySize() const;
 	private:
 		friend int ::main(int argc, char** argv);
 	};

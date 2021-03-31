@@ -6,11 +6,32 @@
 namespace JG
 {
 	class IUIView;
+	struct MainMenuItem
+	{
+		String ShortCut;
+		std::function<void()> Action;
+		std::function<bool()> EnableAction;
+	};
+	struct MainMenuItemNode
+	{
+		String Name;
+		u64 Priority = 0;
+		const MainMenuItemNode* Parent = nullptr;
+		UniquePtr<MainMenuItem> MenuItem;
+		mutable bool IsOpen = false;
+		bool IsRoot = false;
+	private:
+		friend class UIManager;
+		SortedDictionary<u64, List<UniquePtr<MainMenuItemNode>>> ChildNodes;
+	};
 	class UIManager : public GlobalSingleton<UIManager>
 	{
+	public:
+		static const u64 DEFAULT_PRIORITY = 100;
 	private:
-		Dictionary<JG::Type, UniquePtr<IUIView>> mUIViewPool;
-		mutable std::shared_mutex mMutex;
+		Dictionary<JG::Type, UniquePtr<IUIView>>       mUIViewPool;
+		UniquePtr<MainMenuItemNode> mMainMenuItemRootNode;
+		mutable std::shared_mutex   mMutex;
 	public:
 		UIManager();
 		~UIManager();
@@ -45,9 +66,18 @@ namespace JG
 			}
 			return static_cast<UIViewType*>(iter->second.get());
 		}
-
+		void RegisterMainMenuRootNode(const String& menuName, u64 priority);
+		void RegisterMainMenuItem(const String& menuPath, u64 priority,  const std::function<void()>& action, const std::function<bool()> enableAction);
 		void ForEach(const std::function<void(IUIView*)> action);
+		void ForEach(
+			const std::function<void(const MainMenuItemNode*)>& beginAction,
+			const std::function<void(const MainMenuItemNode*)>& endAction);
+		bool IsMainMenuRootNode(const MainMenuItemNode* node) const;
 	private:
 		void OnGUI();
+
+		MainMenuItemNode* FindMainMenuItemNode(MainMenuItemNode* parentNode, const String& menuName);
+		MainMenuItemNode* RegisterMainMenuNode(MainMenuItemNode* parentNode, const String& menuName, u64 priority);
+		void ExtractPathAndShortcut(const String& menuPath, String* out_path, String* out_shortCut);
 	};
 }

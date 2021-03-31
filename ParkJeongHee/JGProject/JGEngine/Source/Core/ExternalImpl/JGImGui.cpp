@@ -35,7 +35,7 @@ namespace JG
 	}
 	JGImGui::JGImGui()
 	{
-		auto size        = Application::GetInstance().GetSize();
+		auto size        = Application::GetInstance().GetDisplaySize();
 		auto window      = Application::GetInstance().GetWindow();
 		auto platform    = window->GetPlatform();
 		auto handle      = window->GetHandle();
