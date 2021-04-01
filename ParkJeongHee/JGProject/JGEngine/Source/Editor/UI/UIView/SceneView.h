@@ -1,22 +1,21 @@
 #pragma once
+#include "JGCore.h"
 #include "Class/UI/UIView.h"
-#include "UI/UIViewModel/StatisticsViewModel.h"
-
+#include "UI/UIViewModel/SceneViewModel.h"
 
 namespace JG
 {
-	class StatisticsViewModel;
-	class StatisticsView : public UIView<StatisticsViewModel>
+	class SceneView : public UIView<SceneViewModel>
 	{
 		bool mOpenGUI = true;
 	public:
-		StatisticsView();
+		SceneView();
 	protected:
 		virtual bool Initialize() override;
 		virtual void OnGUI() override;
 		virtual void Destroy() override;
 	public:
 		virtual Type GetType() const override;
-		virtual ~StatisticsView() = default;
+		virtual ~SceneView() = default;
 	};
 }

@@ -6,31 +6,45 @@
 namespace JG
 {
 	class IUIView;
-	struct MainMenuItem
+	struct MenuItem
 	{
 		String ShortCut;
 		std::function<void()> Action;
 		std::function<bool()> EnableAction;
 	};
-	struct MainMenuItemNode
+
+	struct MenuItemNode
 	{
-		String Name;
-		u64 Priority = 0;
-		const MainMenuItemNode* Parent = nullptr;
-		UniquePtr<MainMenuItem> MenuItem;
+		enum ENodeType
+		{
+			MainMenu,
+			Context,
+		};
+		String    Name;
+		u64       Priority = 0;
+		bool      IsSperator = false;
+		ENodeType NodeType = ENodeType::MainMenu;
+
+
+		const MenuItemNode* Parent = nullptr;
+		UniquePtr<MenuItem> MenuItem;
 		mutable bool IsOpen = false;
-		bool IsRoot = false;
+
 	private:
 		friend class UIManager;
-		SortedDictionary<u64, List<UniquePtr<MainMenuItemNode>>> ChildNodes;
+		SortedDictionary<u64, List<UniquePtr<MenuItemNode>>> ChildNodes;
 	};
 	class UIManager : public GlobalSingleton<UIManager>
 	{
 	public:
-		static const u64 DEFAULT_PRIORITY = 100;
+		static const u64 DEFAULT_PRIORITY = 1000;
+		static const u64 SPERATOR_PRIORITY_DELTA = 10;
+		static const wchar CTRL_SHORTCUT_TOKEN  = TT('%');
+		static const wchar SHIFT_SHORTCUT_TOKEN = TT('#');
+		static const wchar ALT_SHORTCUT_TOKEN   = TT('&');
 	private:
 		Dictionary<JG::Type, UniquePtr<IUIView>>       mUIViewPool;
-		UniquePtr<MainMenuItemNode> mMainMenuItemRootNode;
+		UniquePtr<MenuItemNode> mMainMenuItemRootNode;
 		mutable std::shared_mutex   mMutex;
 	public:
 		UIManager();
@@ -66,18 +80,22 @@ namespace JG
 			}
 			return static_cast<UIViewType*>(iter->second.get());
 		}
-		void RegisterMainMenuRootNode(const String& menuName, u64 priority);
-		void RegisterMainMenuItem(const String& menuPath, u64 priority,  const std::function<void()>& action, const std::function<bool()> enableAction);
+		void RegisterMenuItem(const String& menuPath, u64 priority,  const std::function<void()>& action, const std::function<bool()> enableAction);
 		void ForEach(const std::function<void(IUIView*)> action);
 		void ForEach(
-			const std::function<void(const MainMenuItemNode*)>& beginAction,
-			const std::function<void(const MainMenuItemNode*)>& endAction);
-		bool IsMainMenuRootNode(const MainMenuItemNode* node) const;
+			MenuItemNode::ENodeType nodeType,
+			const std::function<void(const MenuItemNode*)>& beginAction,
+			const std::function<void(const MenuItemNode*)>& endAction);
 	private:
 		void OnGUI();
+		void ForEach(
+			MenuItemNode* rootNode,
+			const std::function<void(const MenuItemNode*)>& beginAction,
+			const std::function<void(const MenuItemNode*)>& endAction);
 
-		MainMenuItemNode* FindMainMenuItemNode(MainMenuItemNode* parentNode, const String& menuName);
-		MainMenuItemNode* RegisterMainMenuNode(MainMenuItemNode* parentNode, const String& menuName, u64 priority);
+		void RegisterMenuItem(MenuItemNode* rootNode, const String& menuPath, u64 priority, const std::function<void()>& action, const std::function<bool()> enableAction);
+		MenuItemNode* FindMenuItemNode(MenuItemNode* parentNode, const String& menuName, u64 default_priority = DEFAULT_PRIORITY);
+		MenuItemNode* RegisterMenuNode(MenuItemNode* parentNode, const String& menuName, u64 priority);
 		void ExtractPathAndShortcut(const String& menuPath, String* out_path, String* out_shortCut);
 	};
 }

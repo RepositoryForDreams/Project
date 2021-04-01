@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "UILayer.h"
 #include "UI/UIView/StatisticsView.h"
-
+#include "UI/UIView/SceneView.h"
 namespace JG
 {
 	void UILayer::OnAttach()
@@ -16,6 +16,7 @@ namespace JG
 
 	void UILayer::Begin()
 	{
+		UIManager::GetInstance().RegisterUIView<SceneView>();
 		UIManager::GetInstance().RegisterUIView<StatisticsView>();
 	}
 	void UILayer::Destroy()

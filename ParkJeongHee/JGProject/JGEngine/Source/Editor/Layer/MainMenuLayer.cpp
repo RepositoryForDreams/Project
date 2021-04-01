@@ -16,21 +16,6 @@ namespace JG
 	void MainMenuLayer::Begin()
 	{
 		Scheduler::GetInstance().ScheduleByFrame(0, 0, -1, SchedulePriority::MainMenuLayer, SCHEDULE_BIND_FN(&MainMenuLayer::Update));
-
-
-		UIManager::GetInstance().RegisterMainMenuRootNode(TT("File"),  0);
-		UIManager::GetInstance().RegisterMainMenuRootNode(TT("Edit"),  0);
-		UIManager::GetInstance().RegisterMainMenuRootNode(TT("Asset"), 0);
-		UIManager::GetInstance().RegisterMainMenuRootNode(TT("Window"), UIManager::DEFAULT_PRIORITY + 1);
-		UIManager::GetInstance().RegisterMainMenuRootNode(TT("Help"), UIManager::DEFAULT_PRIORITY + 1);
-
-
-		UIManager::GetInstance().RegisterMainMenuItem(TT("File/Test/Copy"), 0, nullptr, nullptr);
-		UIManager::GetInstance().RegisterMainMenuItem(TT("File/Test2/Copy"), 20, nullptr, nullptr);
-		UIManager::GetInstance().RegisterMainMenuItem(TT("File/Test3/Copy1"), 11, nullptr, nullptr);
-		UIManager::GetInstance().RegisterMainMenuItem(TT("File/Test3/Copy3"), 50, nullptr, nullptr);
-		UIManager::GetInstance().RegisterMainMenuItem(TT("File/Test3/Copy2"), 6, nullptr, nullptr);
-		UIManager::GetInstance().RegisterMainMenuItem(TT("File/Test/Copy"), 10, nullptr, nullptr);
 	}
 	void MainMenuLayer::Destroy()
 	{
@@ -47,22 +32,18 @@ namespace JG
 	{
 		if (ImGui::BeginMainMenuBar())
 		{
-			const MainMenuItemNode* currParentNode = nullptr;
+			const MenuItemNode* currParentNode = nullptr;
 			u64 currPriority = 0;
-			UIManager::GetInstance().ForEach(
-				[&](const MainMenuItemNode* Node)
+			UIManager::GetInstance().ForEach(MenuItemNode::ENodeType::MainMenu,
+				[&](const MenuItemNode* Node)
 			{
 
-				if (Node->Parent != currParentNode)
-				{
-					currPriority = Node->Priority;
-					currParentNode = Node->Parent;
-				}
+				// Node
 				if (Node->MenuItem == nullptr)
 				{
 					if (Node->Parent->IsOpen)
 					{
-						if (UIManager::GetInstance().IsMainMenuRootNode(Node) == false && Node->Priority - currPriority >= 10)
+						if (Node->IsSperator == true)
 						{
 							ImGui::Separator();
 						}
@@ -72,12 +53,14 @@ namespace JG
 					{
 						Node->IsOpen = false;
 					}
+
 				}
+				// MenuItem
 				else
 				{
 					if (Node->Parent->IsOpen)
 					{
-						if (UIManager::GetInstance().IsMainMenuRootNode(Node) == false && Node->Priority - currPriority >= 10)
+						if (Node->IsSperator == true)
 						{
 							ImGui::Separator();
 						}
@@ -93,17 +76,17 @@ namespace JG
 				}
 
 			},
-			[&](const MainMenuItemNode* Node)
+			[&](const MenuItemNode* Node)
 			{
 				if (Node->MenuItem == nullptr && Node->IsOpen)
 				{
 					ImGui::EndMenu();
 				}
+
 			});
 			ImGui::EndMainMenuBar();
 		}
 
-		
 		return EScheduleResult::Continue;
 	}
 }

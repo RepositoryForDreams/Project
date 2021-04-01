@@ -9,7 +9,7 @@
 namespace JG
 {
 #define MAX_RENDERTARGET 8
-
+#define TEXTURE_ID_NULL  0
 	using TextureID = u64;
 
 	enum class ETextureFormat

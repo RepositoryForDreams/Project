@@ -39,7 +39,8 @@ namespace JG
 		virtual void SubmitTexture(SharedPtr<ITexture> texture) = 0;
 		virtual void Resize(u32 width, u32 height)		    = 0;
 		virtual const FrameBufferInfo& GetInfo() const = 0;
-
+	public:
+		virtual ~IFrameBuffer() = default;
 	public:
 		static SharedPtr<IFrameBuffer> Create(const FrameBufferInfo& info);
 	};

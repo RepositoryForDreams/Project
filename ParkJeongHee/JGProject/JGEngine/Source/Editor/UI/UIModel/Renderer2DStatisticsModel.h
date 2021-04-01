@@ -25,5 +25,7 @@ namespace JG
 	public:
 		u64 GetDrawCalls() const;
 		u64 GetQuadCount() const;
+	public:
+		virtual ~Renderer2DStatisticsModel() = default;
 	};
 }

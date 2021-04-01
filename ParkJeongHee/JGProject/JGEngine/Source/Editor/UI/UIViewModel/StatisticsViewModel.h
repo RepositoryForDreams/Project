@@ -24,5 +24,8 @@ namespace JG
 
 	public:
 		Renderer2DStatistics GetRenderer2DStats() const;
+
+	public:
+		virtual ~StatisticsViewModel() = default;
 	};
 }

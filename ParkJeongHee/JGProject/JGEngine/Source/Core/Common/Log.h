@@ -34,6 +34,7 @@ namespace JG
 	};
 }
 
+
 #if   _DEBUG
 #define JG_CORE_TRACE(...)   ::JG::Log::GetCoreLogger()->trace(__VA_ARGS__)
 #define JG_CORE_INFO(...)     ::JG::Log::GetCoreLogger()->info(__VA_ARGS__)

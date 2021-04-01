@@ -20,7 +20,7 @@ namespace JG
 	}
 	void DevLayer::OnDetach()
 	{
-
+	
 	}
 	//void DevLayer::Update()
 	//{

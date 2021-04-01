@@ -187,6 +187,10 @@ namespace JG
         }
 
     }
+    const Timer* Scheduler::GetScheduleTimer() const
+    {
+        return mScheduleTimer.get();
+    }
     void Scheduler::Update()
     {
         mIsRunSyncTaskAll = true;

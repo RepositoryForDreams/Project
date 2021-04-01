@@ -27,6 +27,8 @@ namespace JG
 		void AddUpdateCallBack(const DirectX12FrameBufferUpdateCallBack& callBack);
 	public:
 		void Reset();
+	public:
+		virtual ~DirectX12FrameBuffer() = default;
 
 	};
 

@@ -25,6 +25,5 @@ int main(int argc, char** argv)
 
 	delete app;
 	app = nullptr;
-
 	return 0;
 }

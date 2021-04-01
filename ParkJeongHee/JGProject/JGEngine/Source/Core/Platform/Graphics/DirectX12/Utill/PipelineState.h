@@ -15,6 +15,8 @@ namespace JG
 		ComPtr<ID3D12PipelineState> mD3DPSO;
 		bool mIsDirty = true;
 	public:
+		virtual ~PipelineState() = default;
+	public:
 		ID3D12PipelineState* Get() const {
 			return mD3DPSO.Get();
 		}
@@ -29,6 +31,8 @@ namespace JG
 	private:
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC mDesc = {};
 		List<D3D12_INPUT_ELEMENT_DESC> mD3DInputLayoutDescs;
+	public:
+		virtual ~GraphicsPipelineState() = default;
 	public:
 		GraphicsPipelineState();
 		void BindRootSignature(const RootSignature& rootSig);
@@ -50,6 +54,8 @@ namespace JG
 	{
 	private:
 		D3D12_COMPUTE_PIPELINE_STATE_DESC mDesc = {};
+	public:
+		virtual ~ComputePipelineState() = default;
 	public:
 		ComputePipelineState();
 		void BindRootSignature(const RootSignature& rootSig);

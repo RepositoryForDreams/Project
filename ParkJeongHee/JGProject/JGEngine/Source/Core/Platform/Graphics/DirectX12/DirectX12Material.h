@@ -63,6 +63,8 @@ namespace JG
 	public:
 		virtual bool Bind() override;
 		virtual void Init(SharedPtr<IShader> shader) override;
+	public:
+		virtual ~DirectX12Material() = default;
 	};
 
 }

@@ -19,6 +19,6 @@ namespace JG
 		PushLayer(CreateSharedPtr<ImGuiLayer>());
 		PushLayer(CreateSharedPtr<MainMenuLayer>());
 		PushLayer(CreateSharedPtr<UILayer>());
-		PushLayer(CreateSharedPtr<DevLayer>());
+		//PushLayer(CreateSharedPtr<DevLayer>());
 	}
 }

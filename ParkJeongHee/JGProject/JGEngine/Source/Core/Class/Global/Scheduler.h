@@ -139,6 +139,7 @@ namespace JG
 
 
 		void FlushAsyncTask(bool isRestart = true);
+		const Timer* GetScheduleTimer() const;
 	private:
 		void Update();
 		void Update(SharedPtr<SyncTaskByTick> task);

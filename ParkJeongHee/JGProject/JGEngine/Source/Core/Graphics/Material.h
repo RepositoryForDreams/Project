@@ -67,6 +67,9 @@ namespace JG
 		virtual void Init(SharedPtr<IShader> shader) = 0;
 		virtual bool Bind() = 0;
 	public:
+		virtual ~IMaterial() = default;
+	public:
 		static SharedPtr<IMaterial> Create(const String& name, SharedPtr<IShader> shader);
+
 	};
 }
