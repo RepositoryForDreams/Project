@@ -17,7 +17,7 @@ namespace JG
 	
 	
 	*/
-	bool Renderer3D::Begin(SharedPtr<Camera> camera, SharedPtr<ITexture> renderTexture, SharedPtr<ITexture> depthTexture)
+	bool Renderer3D::Begin(SharedPtr<Camera> camera)
 	{
 		return false;
 	}
@@ -28,37 +28,13 @@ namespace JG
 
 	void Renderer3D::End()
 	{
+
 	}
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	/* Renderer 2D Pipeline
-
-
-
-
-
-*/
+	/* Renderer 2D Pipeline */
 	struct QuadVertex
 	{
 		JVector3 Pos;

@@ -15,9 +15,7 @@ namespace JG
 
 	{
 	private:
-		//SharedPtr<IFrameBuffer> mFrameBuffer;
 		SharedPtr<Camera>     mCamera;
-		CommandProperty<u64> mTest;
 	public:
 		virtual ~DevLayer() = default;
 	public:

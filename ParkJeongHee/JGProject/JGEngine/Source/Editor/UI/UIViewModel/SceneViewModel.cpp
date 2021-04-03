@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "SceneViewModel.h"
 #include "UI/UIModel/SceneModel.h"
 

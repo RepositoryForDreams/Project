@@ -14,7 +14,12 @@ namespace JG
 	class Renderer3D
 	{
 	public:
-		static bool Begin(SharedPtr<Camera> camera, SharedPtr<ITexture> renderTexture, SharedPtr<ITexture> depthTexture);
+		struct Statistics
+		{
+			u32 DrawCalls = 0;
+		};
+	public:
+		static bool Begin(SharedPtr<Camera> camera);
 		static void DrawCall(SharedPtr<IMesh> mesh, SharedPtr<IMaterial> material);
 		static void End();
 	};

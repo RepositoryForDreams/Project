@@ -1,4 +1,8 @@
 
+local PCH_HEADER = "pch.h"
+local PCH_HEADER_PATH = "Source/Core/pch.h"
+local PCH_CPP_PATH    = "Source/Core/pch.cpp"
+
 
 function DebugConfig()
     symbols  "On"
@@ -27,6 +31,7 @@ workspace "JGEngine"
         location  "Build"
         kind "StaticLib"
         language "C++"
+        debugdir  ("Bin/%{cfg.buildcfg}/")
         targetdir ("Bin/%{cfg.buildcfg}/")
         objdir("Build/Obj/%{cfg.buildcfg}/")
 
@@ -36,6 +41,8 @@ workspace "JGEngine"
             path .. "**.h",
             path .. "**.cpp",
             path .. "**.c",
+            PCH_HEADER_PATH,
+            PCH_CPP_PATH,
         }
 
 
@@ -50,6 +57,7 @@ workspace "JGEngine"
         location  "Build"
         kind "SharedLib"
         language "C++"
+        debugdir  ("Bin/%{cfg.buildcfg}/")
         targetdir ("Bin/%{cfg.buildcfg}/")
         objdir("Build/Obj/%{cfg.buildcfg}/")
 
@@ -60,6 +68,8 @@ workspace "JGEngine"
             path .. "**.h",
             path .. "**.cpp",
             path .. "**.c",
+            PCH_HEADER_PATH,
+            PCH_CPP_PATH,
         }
 
         filter "configurations:Debug"
@@ -73,13 +83,16 @@ workspace "JGEngine"
         location  "Build"
         kind "ConsoleApp"
         language "C++"
+        debugdir  ("Bin/%{cfg.buildcfg}/")
         targetdir ("Bin/%{cfg.buildcfg}/")
         objdir("Build/Obj/%{cfg.buildcfg}/")
 
         -- file
         files {
             path .. "**.h",
-            path .. "**.cpp"
+            path .. "**.cpp",
+            PCH_HEADER_PATH,
+            PCH_CPP_PATH,
         }
 
         filter "configurations:Debug"
@@ -113,8 +126,10 @@ workspace "JGEngine"
                     "Imgui",
                     "stb",
                 }
-                pchheader "pch.h"
-                pchsource "Source/Core/pch.cpp"
+                pchheader (PCH_HEADER)
+                pchsource (PCH_CPP_PATH)
+                postbuildcommands {"copy /b /y \"..\\Publish/Debug\\*.lib\" \"..\\Bin\\%{cfg.buildcfg}\""}
+                postbuildcommands {"copy /b /y \"..\\Publish/Debug\\*.dll\" \"..\\Bin\\%{cfg.buildcfg}\""}
                 SetStaticLibConfig("Source/Core/")
         group "Engine/Editor"
             project "Editor"
@@ -126,6 +141,8 @@ workspace "JGEngine"
                 links {
                     "Core"
                 }
+                pchheader (PCH_HEADER)
+                pchsource (PCH_CPP_PATH)
                 SetConsoleAppConfig("Source/Editor/")
     group "ThirdParty"
         project "Imgui"
@@ -136,8 +153,8 @@ workspace "JGEngine"
 
         
 
-        
     
+
 
 
 
