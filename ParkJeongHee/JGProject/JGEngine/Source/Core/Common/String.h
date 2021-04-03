@@ -35,4 +35,24 @@ namespace JG
 		}
 		return result;
 	}
+
+	inline String CombinePath(const String& dest, const String& src)
+	{
+		String result = TT("");
+		u64 lastIndex = dest.length() - 1;
+		if (src[0] != TT('/') && result[lastIndex] != TT('/'))
+		{
+			result = dest + TT('/') + src;
+		}
+		else if (src[0] == TT('/') && result[lastIndex] == TT('/'))
+		{
+			result = dest.substr(0, lastIndex) + src;
+		}
+		else
+		{
+			result = dest + src;
+		}
+		return result;
+	}
+
 }

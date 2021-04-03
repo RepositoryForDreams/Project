@@ -15,6 +15,9 @@ namespace JG
 	};
 	class Application
 	{
+	public:
+		static const String& GetAssetPath();
+	private:
 		static Application* smInstance;
 	private:
 		ApplicaionProps         mProps;

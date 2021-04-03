@@ -11,6 +11,14 @@ namespace JG
 {
 	Application* Application::smInstance = nullptr;
 
+	static String gAssetPath = TT("../Asset/");
+
+
+	const String& Application::GetAssetPath()
+	{
+		return gAssetPath;
+	}
+
 	Application::~Application() {}
 
 	bool Application::Create(const ApplicaionProps& prop)
