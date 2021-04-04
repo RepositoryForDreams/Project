@@ -11,7 +11,7 @@ namespace JG
 {
 	Application* Application::smInstance = nullptr;
 
-	static String gAssetPath = TT("../Asset/");
+	static String gAssetPath = TT("../../JGGameProject/Project_C/Asset");
 
 
 	const String& Application::GetAssetPath()
