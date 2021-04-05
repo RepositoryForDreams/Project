@@ -33,7 +33,7 @@ namespace JG
 
 	class AssetImporter
 	{
-	private:
+	public:
 		struct Vertex
 		{
 			JVector3 Position;
@@ -66,7 +66,7 @@ namespace JG
 				writer->Write(Indices);
 				writer->Write(IsSkinned);
 			}
-			virtual void DeSerialize(FileStreamReader* reader) const override {
+			virtual void DeSerialize(FileStreamReader* reader) override {
 				reader->Read(&Name);
 				reader->Read(&SubMeshNames);
 				reader->Read(&Vertices);
@@ -74,16 +74,12 @@ namespace JG
 				reader->Read(&IsSkinned);
 			}
 		};
-
-		//struct 
-
-
 	public:
 		static EAssetImportResult Import(const AssetImportSettings& setting);
 
 	private:
 		static void ReadMesh(aiMesh* mesh, MeshInfo* output);
 	private:
-		static void WriteMesh(const String& outputPath, const MeshInfo& info);
+		static void WriteMesh(const String& outputPath, MeshInfo& info);
 	};
 }

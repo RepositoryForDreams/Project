@@ -40,11 +40,11 @@ namespace JG
 	{
 		String result = TT("");
 		u64 lastIndex = dest.length() - 1;
-		if (src[0] != TT('/') && result[lastIndex] != TT('/'))
+		if (src[0] != TT('/') && dest[lastIndex] != TT('/'))
 		{
 			result = dest + TT('/') + src;
 		}
-		else if (src[0] == TT('/') && result[lastIndex] == TT('/'))
+		else if (src[0] == TT('/') && dest[lastIndex] == TT('/'))
 		{
 			result = dest.substr(0, lastIndex) + src;
 		}

@@ -10,6 +10,9 @@
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 
+
+
+
 namespace JG
 {
 	EAssetImportResult AssetImporter::Import(const AssetImportSettings& setting)
@@ -34,9 +37,10 @@ namespace JG
 		);
 
 
-		if (scene == nullptr)
+		if (scene != nullptr)
 		{
 			MeshInfo meshInfo;
+			meshInfo.Name = s2ws(scene->mName.C_Str());
 			if (scene->HasMeshes() == true)
 			{
 				u32 meshCount = scene->mNumMeshes;
@@ -45,6 +49,7 @@ namespace JG
 					auto mesh = scene->mMeshes[i];
 					ReadMesh(mesh, &meshInfo);
 				}
+				WriteMesh(setting.OutputPath, meshInfo);
 			}
 			if (scene->HasAnimations() == true)
 			{
@@ -141,12 +146,16 @@ namespace JG
 
 
 	}
-	void AssetImporter::WriteMesh(const String& outputPath, const MeshInfo& info)
+	void AssetImporter::WriteMesh(const String& outputPath, MeshInfo& info)
 	{
+		if (info.Name.empty() == true)
+		{
+			info.Name = info.SubMeshNames[0];
+		}
 		auto filePath = CombinePath(outputPath, info.Name) + ASSET_MESH_FORMAT;
 		FileStreamWriter writer;
 
-		if (writer.Open(outputPath) == true)
+		if (writer.Open(filePath) == true)
 		{
 			writer.Write(info);
 			writer.Close();

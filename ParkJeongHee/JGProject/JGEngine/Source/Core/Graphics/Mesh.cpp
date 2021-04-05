@@ -13,4 +13,9 @@ namespace JG
         
         return api->CreateMesh(name);
     }
+    SharedPtr<IMesh> IMesh::CreateFromFile(const String& path)
+    {
+        // TODO
+        return SharedPtr<IMesh>();
+    }
 }

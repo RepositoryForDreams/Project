@@ -4,6 +4,7 @@
 #include "Layer/ImGuiLayer.h"
 #include "Layer/MainMenuLayer.h"
 #include "Layer/UILayer.h"
+#include "Layer/GraphicsLayer.h"
 
 namespace JG
 {
@@ -20,6 +21,7 @@ namespace JG
 		PushLayer(CreateSharedPtr<ImGuiLayer>());
 		PushLayer(CreateSharedPtr<MainMenuLayer>());
 		PushLayer(CreateSharedPtr<UILayer>());
+		PushLayer(CreateSharedPtr<GraphicsLayer>());
 		//PushLayer(CreateSharedPtr<DevLayer>());
 	}
 }

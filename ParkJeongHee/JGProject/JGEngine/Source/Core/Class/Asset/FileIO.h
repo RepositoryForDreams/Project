@@ -14,7 +14,7 @@ namespace JG
 		friend FileStreamReader;
 	protected:
 		virtual void Serialize(FileStreamWriter* writer)   const = 0;
-		virtual void DeSerialize(FileStreamReader* reader) const = 0;
+		virtual void DeSerialize(FileStreamReader* reader)  = 0;
 	};
 
 
@@ -104,10 +104,9 @@ namespace JG
 			}
 			if (IsOpen() == true)
 			{
-				
 				if constexpr (std::is_base_of<ISerializable, T>::value == true)
 				{
-					static_cast<ISerializable*>(&data)->DeSerialize(this);
+					static_cast<ISerializable*>(data)->DeSerialize(this);
 				}
 				else
 				{
