@@ -1,6 +1,6 @@
 #pragma once
 #include "JGCore.h"
-
+#include "Graphics/GraphicsDefine.h"
 
 namespace JG
 {
@@ -9,7 +9,7 @@ namespace JG
 	class IMaterial 
 	{
 		friend class Renderer2D;
-
+		friend class Renderer3D;
 	public:
 		virtual bool SetFloat(const String& name, float value) = 0;
 		virtual bool SetFloat2(const String& name, const JVector2& value) = 0;
@@ -61,7 +61,13 @@ namespace JG
 		virtual bool GetUint4(const String& name, JVector4Uint* value) = 0;
 		virtual bool GetFloat4x4(const String& name, JMatrix* out_value) = 0;
 		virtual bool GetTexture(const String& name, u32 textureSlot, SharedPtr<ITexture>* out_value) = 0;
-		virtual void  SetName(const String& name) = 0;
+
+		virtual void SetDepthStencilState(EDepthStencilStateTemplate _template) = 0;
+		virtual void SetBlendState(u32 slot, EBlendStateTemplate _template) = 0;
+		virtual void SetRasterizerState(ERasterizerStateTemplate _template) = 0;
+
+
+		virtual void SetName(const String& name) = 0;
 		virtual const String& GetName() const = 0;
 	protected:
 		virtual void Init(SharedPtr<IShader> shader) = 0;

@@ -17,10 +17,12 @@ namespace JG
 		virtual void AddVertexBuffer(SharedPtr<IVertexBuffer> vertexBuffer) override;
 		virtual void SetIndexBuffer(SharedPtr<IIndexBuffer> indexBuffer) override;
 		virtual void SetInputLayout(SharedPtr<InputLayout> inputLayout) override;
-		virtual bool Bind() override;
+
 
 
 		virtual void SetName(const String& name) override;
 		virtual const String& GetName() override;
+		virtual u32 GetIndexCount() const override;
+		virtual bool Bind() override;
 	};
 }

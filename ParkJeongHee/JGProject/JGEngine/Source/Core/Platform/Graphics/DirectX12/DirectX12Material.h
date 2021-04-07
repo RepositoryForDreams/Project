@@ -11,6 +11,9 @@ namespace JG
 	private:
 		String mName;
 		UniquePtr<ShaderData> mShaderData;
+		D3D12_BLEND_DESC         mBlendDesc;
+		D3D12_DEPTH_STENCIL_DESC mDepthStencilDesc;
+		D3D12_RASTERIZER_DESC    mRasterzerDesc;
 	public:
 		virtual bool SetFloat(const String& name, float value) override;
 		virtual bool SetFloat2(const String& name, const JVector2& value) override;
@@ -57,6 +60,11 @@ namespace JG
 		virtual bool GetUint4(const String& name, JVector4Uint* out_value) override;
 		virtual bool GetFloat4x4(const String& name, JMatrix* outValue) override;
 		virtual bool GetTexture(const String& name, u32 textureSlot, SharedPtr<ITexture>* out_value) override;
+
+
+		virtual void SetDepthStencilState(EDepthStencilStateTemplate _template) override;
+		virtual void SetBlendState(u32 slot, EBlendStateTemplate _template) override;
+		virtual void SetRasterizerState(ERasterizerStateTemplate _template) override;
 
 		virtual void  SetName(const String& name) override;
 		virtual const String& GetName() const override;

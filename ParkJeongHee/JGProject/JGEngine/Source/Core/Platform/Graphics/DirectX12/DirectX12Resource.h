@@ -53,7 +53,7 @@ namespace JG
 		friend class DirectX12Mesh;
 	private:
 		u32* mCPUData    = nullptr;
-		u64  mIndexCount = 0;
+		u32  mIndexCount = 0;
 		EBufferLoadMethod mLoadMethod;
 		ComPtr<ID3D12Resource>  mD3DResource;
 	public:
@@ -73,7 +73,7 @@ namespace JG
 		{
 			return mCPUData;
 		}
-		u64 GetIndexCount() const
+		virtual u32 GetIndexCount() const override
 		{
 			return mIndexCount;
 		}

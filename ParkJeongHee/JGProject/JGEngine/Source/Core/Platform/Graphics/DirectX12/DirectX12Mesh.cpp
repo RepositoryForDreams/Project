@@ -26,14 +26,29 @@ namespace JG
 
 	void DirectX12Mesh::SetInputLayout(SharedPtr<InputLayout> inputLayout)
 	{
-
-
-
-		
-
 		mInputLayout = inputLayout;
 	}
 
+
+
+	void DirectX12Mesh::SetName(const String& name)
+	{
+		mName = name;
+	}
+
+	const String& DirectX12Mesh::GetName()
+	{
+		return mName;
+	}
+
+	u32 DirectX12Mesh::GetIndexCount() const
+	{
+		if (mIndexBuffer == nullptr || mIndexBuffer->IsValid() == false)
+		{
+			return 0;
+		}
+		return mIndexBuffer->GetIndexCount();
+	}
 	bool DirectX12Mesh::Bind()
 	{
 		if (mInputLayout == nullptr)
@@ -70,15 +85,4 @@ namespace JG
 
 		return true;
 	}
-
-	void DirectX12Mesh::SetName(const String& name)
-	{
-		mName = name;
-	}
-
-	const String& DirectX12Mesh::GetName()
-	{
-		return mName;
-	}
-
 }

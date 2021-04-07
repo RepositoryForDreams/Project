@@ -7,6 +7,9 @@ enum   DXGI_FORMAT;
 struct ID3D12Device;
 struct IDXGIFactory4;
 struct ID3D12Resource;
+struct D3D12_DEPTH_STENCIL_DESC;
+struct D3D12_RENDER_TARGET_BLEND_DESC;
+struct D3D12_RASTERIZER_DESC;
 
 namespace JG
 {
@@ -76,6 +79,10 @@ namespace JG
 		static SharedPtr<GraphicsPipelineState> GetGraphicsPipelineState();
 		static SharedPtr<ComputePipelineState>  GetComputePipelineState();
 		static SharedPtr<RootSignature>			GetRootSignature();
+
+		static void GetDepthStencilDesc(EDepthStencilStateTemplate _template,  D3D12_DEPTH_STENCIL_DESC* out);
+		static void GetBlendDesc(EBlendStateTemplate _template,  D3D12_RENDER_TARGET_BLEND_DESC* out);
+		static void GetRasterizerDesc(ERasterizerStateTemplate _template,  D3D12_RASTERIZER_DESC* out);
 	protected:
 		// Application
 		virtual bool Create() override;

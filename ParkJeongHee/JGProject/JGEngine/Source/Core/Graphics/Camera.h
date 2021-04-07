@@ -66,7 +66,7 @@ namespace JG
 		float GetAspectRatio() const;
 		const JVector2& GetResolution() const;
 		SharedPtr<ITexture> GetTargetTexture(u8 slot = 0) const;
-		const List<SharedPtr<ITexture>> GetTargetTextures() const;
+		const List<SharedPtr<ITexture>>& GetTargetTextures() const;
 		SharedPtr<ITexture> GetTargetDepthTexture() const;
 	private:
 		bool UpdateProj() const;

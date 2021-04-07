@@ -171,7 +171,7 @@ namespace JG
 		}
 		return mTargetTextures[slot];
 	}
-	const List<SharedPtr<ITexture>> Camera::GetTargetTextures() const
+	const List<SharedPtr<ITexture>>& Camera::GetTargetTextures() const
 	{
 		return mTargetTextures;
 	}

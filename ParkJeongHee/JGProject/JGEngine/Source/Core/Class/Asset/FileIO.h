@@ -15,6 +15,8 @@ namespace JG
 	protected:
 		virtual void Serialize(FileStreamWriter* writer)   const = 0;
 		virtual void DeSerialize(FileStreamReader* reader)  = 0;
+	public:
+		virtual ~ISerializable() = default;
 	};
 
 

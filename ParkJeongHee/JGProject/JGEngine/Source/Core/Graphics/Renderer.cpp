@@ -10,6 +10,36 @@
 
 namespace JG
 {
+	/* Renderer State
+	* 
+	
+	*/
+	enum class ERendererState
+	{
+		Wait,
+		Run
+	};
+	struct Renderer
+	{
+		static std::atomic<ERendererState> mState;
+		static std::mutex mMutex;
+
+	public:
+		static void SetState(ERendererState state)
+		{
+			mState = state;
+		}
+		static ERendererState GetState() {
+			return mState;
+		}
+
+		static bool IsRunable() {
+			return mState == ERendererState::Wait;
+		}
+
+	};
+	std::atomic<ERendererState> Renderer::mState = ERendererState::Wait;
+
 	/* Renderer 3D Pipeline
 	
 	
@@ -19,15 +49,55 @@ namespace JG
 	*/
 	bool Renderer3D::Begin(SharedPtr<Camera> camera)
 	{
-		return false;
+		if (Renderer::IsRunable() == false)
+		{
+			return false;
+		}
+
+		auto api = Application::GetInstance().GetGraphicsAPI();
+		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
+
+		if (camera == nullptr || camera->IsOrthographic() == false)
+		{
+			return false;
+		}
+		Renderer::SetState(ERendererState::Run);
+		// TODO Camera 
+		auto targetTextures = camera->GetTargetTextures();
+		auto depthTargetTexture = camera->GetTargetDepthTexture();
+
+
+		auto resolution = camera->GetResolution();
+		api->SetViewports({ Viewport(resolution.x, resolution.y) });
+		api->SetScissorRects({ ScissorRect(0,0, resolution.x,resolution.y) });
+		api->ClearRenderTarget(targetTextures, depthTargetTexture);
+		api->SetRenderTarget(targetTextures, depthTargetTexture);
+
+
+		return true;
 	}
 
 	void Renderer3D::DrawCall(SharedPtr<IMesh> mesh, SharedPtr<IMaterial> material)
 	{
+		auto api = Application::GetInstance().GetGraphicsAPI();
+		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
+
+
+		if (material->Bind() == false)
+		{
+			return;
+		}
+		if (mesh->Bind() == false)
+		{
+			return;
+		}
+
+		api->DrawIndexed(mesh->GetIndexCount());
 	}
 
 	void Renderer3D::End()
 	{
+		Renderer::SetState(ERendererState::Wait);
 
 	}
 
@@ -199,6 +269,8 @@ float4 ps_main(VS_OUT pin) : SV_TARGET
 			JG_CORE_ERROR("Failed Set Texture in WhiteTexture");
 			return false;
 		}
+		gRenderer2DItem->Standard2DMaterial->SetDepthStencilState(EDepthStencilStateTemplate::NoDepth);
+		gRenderer2DItem->Standard2DMaterial->SetBlendState(0, EBlendStateTemplate::Transparent_Default);
 		
 		Scheduler::GetInstance().ScheduleByFrame(0, 0, -1, 0,
 			[&]() -> EScheduleResult
@@ -219,6 +291,11 @@ float4 ps_main(VS_OUT pin) : SV_TARGET
 	}
 	bool Renderer2D::Begin(SharedPtr<Camera> camera)
 	{
+		if (Renderer::IsRunable() == false)
+		{
+			return false;
+		}
+
 		auto api = Application::GetInstance().GetGraphicsAPI();
 		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
 
@@ -226,13 +303,13 @@ float4 ps_main(VS_OUT pin) : SV_TARGET
 		{
 			return false;
 		}
+
+		Renderer::SetState(ERendererState::Run);
 		// TODO Camera 
 		List<SharedPtr<ITexture>> targetTextures = camera->GetTargetTextures();
 
 
 		auto resolution = camera->GetResolution();
-		api->SetDepthStencilState(EDepthStencilStateTemplate::NoDepth);
-		api->SetBlendState(0, EBlendStateTemplate::Transparent_Default);
 		api->SetViewports({ Viewport (resolution.x, resolution.y)});
 		api->SetScissorRects({ ScissorRect(0,0, resolution.x,resolution.y) });
 		api->ClearRenderTarget(targetTextures, nullptr);
@@ -325,6 +402,7 @@ float4 ps_main(VS_OUT pin) : SV_TARGET
 	void Renderer2D::End()
 	{
 		NextBatch();
+		Renderer::SetState(ERendererState::Wait);
 	}
 
 	const Renderer2D::Statistics& Renderer2D::GetStats()

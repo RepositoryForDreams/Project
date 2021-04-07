@@ -206,6 +206,25 @@ namespace JG
 		return mShaderData->GetTexture(name, textureSlot, out_value);
 	}
 
+	void DirectX12Material::SetDepthStencilState(EDepthStencilStateTemplate _template)
+	{
+		DirectX12API::GetDepthStencilDesc(_template, &mDepthStencilDesc);
+	}
+
+	void DirectX12Material::SetBlendState(u32 slot, EBlendStateTemplate _template)
+	{
+		if (slot >= MAX_RENDERTARGET)
+		{
+			return;
+		}
+		DirectX12API::GetBlendDesc(_template, &mBlendDesc.RenderTarget[slot]);
+	}
+
+	void DirectX12Material::SetRasterizerState(ERasterizerStateTemplate _template)
+	{
+		DirectX12API::GetRasterizerDesc(_template, &mRasterzerDesc);
+	}
+
 
 	void DirectX12Material::SetName(const String& name)
 	{
@@ -219,12 +238,19 @@ namespace JG
 
 	bool DirectX12Material::Bind()
 	{
+		auto pso = DirectX12API::GetGraphicsPipelineState();
+		pso->SetDepthStencilState(mDepthStencilDesc);
+		pso->SetBlendState(mBlendDesc);
+		pso->SetRasterizerState(mRasterzerDesc);
 		return mShaderData->Bind();
 	}
 
 	void DirectX12Material::Init(SharedPtr<IShader> shader)
 	{
 		mShaderData = CreateUniquePtr<ShaderData>(shader);
-
+		SetDepthStencilState(EDepthStencilStateTemplate::Default);
+		mBlendDesc = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+		SetBlendState(0, EBlendStateTemplate::Default);
+		SetRasterizerState(ERasterizerStateTemplate::Default);
 	}
 }

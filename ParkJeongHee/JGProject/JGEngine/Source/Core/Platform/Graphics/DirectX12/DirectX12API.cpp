@@ -219,6 +219,65 @@ namespace JG
 		return gRootSignature;
 	}
 
+	void DirectX12API::GetDepthStencilDesc(EDepthStencilStateTemplate _template, D3D12_DEPTH_STENCIL_DESC* out)
+	{
+		auto desc = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+		switch (_template)
+		{
+		case EDepthStencilStateTemplate::NoDepth:
+			desc.DepthEnable = false;
+			break;
+		default:
+			break;
+		}
+		if (out != nullptr)
+		{
+			*out = desc;
+		}
+	}
+
+	void DirectX12API::GetBlendDesc(EBlendStateTemplate _template, D3D12_RENDER_TARGET_BLEND_DESC* out)
+	{
+		auto desc = D3D12_RENDER_TARGET_BLEND_DESC
+		{
+			FALSE,FALSE,
+			D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
+			D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
+			D3D12_LOGIC_OP_NOOP,
+			D3D12_COLOR_WRITE_ENABLE_ALL,
+		};
+
+
+		switch (_template)
+		{
+		case EBlendStateTemplate::Transparent_Default:
+			desc.BlendEnable    = true;
+			desc.SrcBlend       = D3D12_BLEND_SRC_ALPHA;
+			desc.DestBlend      = D3D12_BLEND_INV_SRC_ALPHA;
+			desc.BlendOp        = D3D12_BLEND_OP_ADD;
+			desc.SrcBlendAlpha  = D3D12_BLEND_ONE;
+			desc.DestBlendAlpha = D3D12_BLEND_ZERO;
+			desc.BlendOpAlpha   = D3D12_BLEND_OP_ADD;
+			desc.RenderTargetWriteMask = 0x0f;
+			break;
+		}
+
+		if (out != nullptr)
+		{
+			*out = desc;
+		}
+	}
+
+	void DirectX12API::GetRasterizerDesc(ERasterizerStateTemplate _template, D3D12_RASTERIZER_DESC* out)
+	{
+		auto desc = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+
+		if (out != nullptr)
+		{
+			*out = desc;
+		}
+	}
+
 
 
 	bool DirectX12API::Create()
@@ -474,15 +533,8 @@ namespace JG
 	void DirectX12API::SetDepthStencilState(EDepthStencilStateTemplate _template)
 	{
 		auto pso = GetGraphicsPipelineState();
-		auto desc = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
-		switch (_template)
-		{
-		case EDepthStencilStateTemplate::NoDepth:
-			desc.DepthEnable = false;
-			break;
-		default:
-			break;
-		}
+		D3D12_DEPTH_STENCIL_DESC desc = {};
+		GetDepthStencilDesc(_template, &desc);
 		pso->SetDepthStencilState(desc);
 	}
 
@@ -493,30 +545,20 @@ namespace JG
 			return;
 		}
 		auto pso = GetGraphicsPipelineState();
-		auto desc = pso->GetBlendDesc();
-		
+		auto blendDesc = pso->GetBlendDesc();
+		D3D12_RENDER_TARGET_BLEND_DESC desc = {};
 
-		switch (_template)
-		{
-		case EBlendStateTemplate::Transparent_Default:
-			desc.RenderTarget[renderTargetSlot].BlendEnable = true;
-			desc.RenderTarget[renderTargetSlot].SrcBlend = D3D12_BLEND_SRC_ALPHA;
-			desc.RenderTarget[renderTargetSlot].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
-			desc.RenderTarget[renderTargetSlot].BlendOp = D3D12_BLEND_OP_ADD;
-			desc.RenderTarget[renderTargetSlot].SrcBlendAlpha = D3D12_BLEND_ONE;
-			desc.RenderTarget[renderTargetSlot].DestBlendAlpha = D3D12_BLEND_ZERO;
-			desc.RenderTarget[renderTargetSlot].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-			desc.RenderTarget[renderTargetSlot].RenderTargetWriteMask = 0x0f;
-			break;
-		}
-
-		pso->SetBlendState(desc);
+		GetBlendDesc(_template, &desc);
+		blendDesc.RenderTarget[renderTargetSlot] = desc;
+		pso->SetBlendState(blendDesc);
 	}
 
 	void DirectX12API::SetRasterizerState(ERasterizerStateTemplate _template)
 	{
 		auto pso = GetGraphicsPipelineState();
-		auto desc = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+
+		D3D12_RASTERIZER_DESC desc = {};
+		GetRasterizerDesc(_template, &desc);
 
 		pso->SetRasterizerState(desc);
 	}

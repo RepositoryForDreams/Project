@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "AssetImporter.h"
-#include "Asset.h"
 #include "FileIO.h"
 #include "Application.h"
 #include "Common/String.h"
@@ -39,7 +38,7 @@ namespace JG
 
 		if (scene != nullptr)
 		{
-			MeshInfo meshInfo;
+			StaticMeshAssetStock meshInfo;
 			meshInfo.Name = s2ws(scene->mName.C_Str());
 			if (scene->HasMeshes() == true)
 			{
@@ -72,13 +71,13 @@ namespace JG
 
 		return EAssetImportResult::Success;
 	}
-	void AssetImporter::ReadMesh(aiMesh* mesh, MeshInfo* output)
+	void AssetImporter::ReadMesh(aiMesh* mesh, StaticMeshAssetStock* output)
 	{
 		if (output == nullptr || mesh == nullptr)
 		{
 			return;
 		}
-		List<Vertex> vertices;
+		List<Asset::Vertex> vertices;
 		List<u32>&   indices = output->Indices;
 		output->SubMeshNames.push_back(s2ws(mesh->mName.C_Str()));
 
@@ -86,7 +85,7 @@ namespace JG
 		
 		for (u32 i = 0; i < mesh->mNumVertices; ++i)
 		{
-			Vertex v;
+			Asset::Vertex v;
 			if (mesh->HasPositions() == true)
 			{
 				auto& ai_pos = mesh->mVertices[i];
@@ -146,7 +145,7 @@ namespace JG
 
 
 	}
-	void AssetImporter::WriteMesh(const String& outputPath, MeshInfo& info)
+	void AssetImporter::WriteMesh(const String& outputPath, StaticMeshAssetStock& info)
 	{
 		if (info.Name.empty() == true)
 		{
