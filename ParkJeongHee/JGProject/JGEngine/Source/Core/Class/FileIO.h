@@ -83,6 +83,42 @@ namespace JG
 			}
 
 		}
+
+		template<class T1, class T2>
+		void Write(const Dictionary<T1, T2>& dic)
+		{
+			if (dic.empty() == true)
+			{
+				return;
+			}
+			if (IsOpen() == true)
+			{
+				Write(dic.size());
+				for (auto& _pair : dic)
+				{
+					Write(_pair.first);
+					Write(_pair.second);
+				}
+			}
+		}
+
+		template<class T1, class T2>
+		void Write(const SortedDictionary<T1, T2>& dic)
+		{
+			if (dic.empty() == true)
+			{
+				return;
+			}
+			if (IsOpen() == true)
+			{
+				Write(dic.size());
+				for (auto& _pair : dic)
+				{
+					Write(_pair.first);
+					Write(_pair.second);
+				}
+			}
+		}
 	private:
 		void Write(const void* data, u64 size);
 	};
@@ -151,7 +187,51 @@ namespace JG
 					Read(&(*dataList)[i]);
 				}
 			}
-		
+		}
+
+		template<class T1, class T2>
+		void Read(Dictionary<T1, T2>* dic)
+		{
+			if (dic == nullptr)
+			{
+				return;
+			}
+			if (IsOpen() == true)
+			{
+				u64 size = 0;
+				Read(&size);
+				for (u64 i = 0; i < size; ++i)
+				{
+					T1 key;
+					T2 value;
+					Read(&key);
+					Read(&value);
+					dic->emplace(key, value);
+				}
+			}
+		}
+
+		template<class T1, class T2>
+		void Read(SortedDictionary<T1, T2>* dic)
+		{
+			if (dic == nullptr)
+			{
+				return;
+			}
+			if (IsOpen() == true)
+			{
+				u64 size = 0;
+				Read(&size);
+
+				for (u64 i = 0; i < size; ++i)
+				{
+					T1 key;
+					T2 value;
+					Read(&key);
+					Read(&value);
+					dic->emplace(key, value);
+				}
+			}
 		}
 	private:
 		void Read(void* data, u64 size);

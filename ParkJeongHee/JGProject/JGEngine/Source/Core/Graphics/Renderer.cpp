@@ -41,11 +41,7 @@ namespace JG
 	std::atomic<ERendererState> Renderer::mState = ERendererState::Wait;
 
 	/* Renderer 3D Pipeline
-	
-	
-	
-	
-	
+
 	*/
 	bool Renderer3D::Begin(SharedPtr<Camera> camera)
 	{
@@ -57,7 +53,7 @@ namespace JG
 		auto api = Application::GetInstance().GetGraphicsAPI();
 		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
 
-		if (camera == nullptr || camera->IsOrthographic() == false)
+		if (camera == nullptr || camera->IsOrthographic() == true)
 		{
 			return false;
 		}

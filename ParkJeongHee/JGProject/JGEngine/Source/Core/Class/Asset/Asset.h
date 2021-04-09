@@ -1,6 +1,7 @@
 #pragma once
-#include "FileIO.h"
+
 #include "Graphics/Resource.h"
+#include "Class/FileIO.h"
 namespace JG
 {
 #define ASSET_MESH_FORMAT TT(".mesh")

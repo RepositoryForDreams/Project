@@ -1,10 +1,18 @@
 #pragma once
-
+#include "JGCore.h"
+#include "Graphics/Camera.h"
+#include "Graphics/Resource.h"
+#include "Graphics/Mesh.h"
+#include "Graphics/Material.h"
 #include "Class/Layer.h"
+
 namespace JG
 {
 	class GraphicsLayer : public ILayer
 	{
+		SharedPtr<Camera>    mCamera;
+		SharedPtr<IMesh>     mMesh;
+		SharedPtr<IMaterial> mMaterial;
 	public:
 		virtual ~GraphicsLayer() {}
 	public:

@@ -37,7 +37,6 @@ namespace JG
 			UIManager::GetInstance().ForEach(MenuItemNode::ENodeType::MainMenu,
 				[&](const MenuItemNode* Node)
 			{
-
 				// Node
 				if (Node->MenuItem == nullptr)
 				{

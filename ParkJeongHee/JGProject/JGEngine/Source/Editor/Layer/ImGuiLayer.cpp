@@ -15,6 +15,7 @@ namespace JG
 	void ImGuiLayer::Begin() 
 	{
 		Scheduler::GetInstance().ScheduleByFrame(0, 0, -1, SchedulePriority::ImGuiLayer, SCHEDULE_BIND_FN(&ImGuiLayer::Update));
+		
 	}
 	void ImGuiLayer::OnEvent(IEvent& e)
 	{

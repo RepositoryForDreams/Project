@@ -6,6 +6,7 @@
 namespace JG
 {
 	class IUIView;
+
 	struct MenuItem
 	{
 		String ShortCut;

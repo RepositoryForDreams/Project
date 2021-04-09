@@ -32,11 +32,10 @@ namespace JG
 		virtual void OnGUI()       = 0;
 		virtual void Destroy()     = 0;
 
-
+	public:
 		virtual void Open()  = 0;
 		virtual void Close() = 0;
 		virtual bool IsOpen() const = 0;
-	public:
 		virtual Type GetType() const = 0;
 	public:
 		virtual ~IUIView() = default;

@@ -3,8 +3,9 @@
 
 #include "Math/JVector.h"
 #include "Math/JMatrix.h"
+#include "Class/FileIO.h"
 #include "Asset.h"
-#include "FileIO.h"
+
 
 struct aiMesh;
 namespace JG
