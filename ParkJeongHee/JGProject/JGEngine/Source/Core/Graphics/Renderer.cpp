@@ -331,18 +331,25 @@ float4 ps_main(VS_OUT pin) : SV_TARGET
 			NextBatch();
 		}
 		i32 textureIndex = 0;
-		if (texture != nullptr)
+		if (texture != nullptr && texture->IsValid() == true)
 		{
 			for (auto& tex : gRenderer2DItem->TextureArray)
 			{
-				if (tex->GetTextureID() == texture->GetTextureID() || tex == nullptr)
+				if (tex == nullptr || tex->GetTextureID() == texture->GetTextureID())
 				{
+					gRenderer2DItem->TextureCount++;
+					gRenderer2DItem->TextureArray[textureIndex] = texture;
+					if (gRenderer2DItem->Standard2DMaterial->SetTexture(TT("gTexture"), textureIndex, gRenderer2DItem->TextureArray[textureIndex]) == false)
+					{
+						JG_CORE_ERROR("Failed Set Texture Slot : {0}", textureIndex);
+					}
 					break;
 				}
 				++textureIndex;
+
 			}
 		}
-		 
+	
 		u32 offset = gRenderer2DItem->QuadCount * Renderer2DItem::QuadVertexCount;
 		for (u32 i = 0; i < Renderer2DItem::QuadVertexCount; ++i)
 		{
@@ -353,11 +360,6 @@ float4 ps_main(VS_OUT pin) : SV_TARGET
 			gRenderer2DItem->Vertices[index].TextureIndex = textureIndex;
 		}
 		gRenderer2DItem->QuadCount++;
-		if (textureIndex != 0)
-		{
-			gRenderer2DItem->TextureCount++;
-		}
-
 	}
 
 	void Renderer2D::DrawCall(const JVector2& Pos, const JVector2& Size, float rotation, SharedPtr<ITexture> texture, const Color& color)

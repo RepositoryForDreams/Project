@@ -47,7 +47,10 @@ namespace JG
 
 	SharedPtr<ITexture> ITexture::CreateFromFile(const String& path)
 	{
-		return nullptr;
+		auto api = Application::GetInstance().GetGraphicsAPI();
+		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
+
+		return api->CreateTextureFromFile(path);
 	}
 
 

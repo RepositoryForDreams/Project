@@ -123,7 +123,7 @@ namespace JG
         SyncTask->Repeat = repeat;
         SyncTask->Priority = priority;
         SyncTask->Function = task;
-
+       
         auto handle = CreateSharedPtr<ScheduleHandle>();
         handle->mID = ID;
         handle->mState = EScheduleState::Wait;

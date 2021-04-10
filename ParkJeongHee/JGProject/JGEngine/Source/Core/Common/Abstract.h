@@ -35,10 +35,6 @@ namespace JG
 	template<class T, class ...Args>
 	T* GlobalSingleton<T, Args...>::smInstance = nullptr;
 
-	
-
-
-
 
 	template<class T>
 	class CustomWeakPtr
@@ -89,6 +85,33 @@ namespace JG
 		virtual void DestructorImpl() = 0;
 	};
 
+
+
+
+	//template<class InterfaceObject, class ...Args>
+	//class ObjectFactory : GlobalSingleton<ObjectFactory<InterfaceObject, Args ...>>
+	//{
+	//public:
+
+	//protected:
+	//	Dictionary<InterfaceObject*, SharedPtr<InterfaceObject>> mObjectPool;
+	//public:
+	//	template<class T>
+	//	virtual WeakPtr<T> CreateObject()
+	//	{
+	//		// TODO
+	//	}
+
+
+	//	virtual void DestroyObject()
+	//	{
+	//		// TODO
+	//		// Factory ·ÎÁ÷
+	//	}
+
+
+
+	//};
 
 
 }

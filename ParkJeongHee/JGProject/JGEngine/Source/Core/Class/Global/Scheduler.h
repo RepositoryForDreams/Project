@@ -87,7 +87,7 @@ namespace JG
 		{
 			SharedPtr<ScheduleHandle> Handle;
 			u64 ID = SCHEDULE_NULL_ID;
-			f32 Delay = 0.0f;
+			i32 Delay = 0;
 			i32 FrameCycle = 0;
 			i32 Repeat = 0;
 			i32 Priority = 0;

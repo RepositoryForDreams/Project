@@ -654,39 +654,67 @@ namespace JG
 			d3dRscFlags, D3D12_TEXTURE_LAYOUT_UNKNOWN, 0);
 
 
-		D3D12_CLEAR_VALUE clearValue;
+		SharedPtr<D3D12_CLEAR_VALUE> clearValue = nullptr;
 		if (flags & ETextureFlags::Allow_RenderTarget)
 		{
-			clearValue.Color[0] = info.ClearColor.R;
-			clearValue.Color[1] = info.ClearColor.G;
-			clearValue.Color[2] = info.ClearColor.B;
-			clearValue.Color[3] = info.ClearColor.A;
+			clearValue = CreateSharedPtr< D3D12_CLEAR_VALUE>();
+			clearValue->Color[0] = info.ClearColor.R;
+			clearValue->Color[1] = info.ClearColor.G;
+			clearValue->Color[2] = info.ClearColor.B;
+			clearValue->Color[3] = info.ClearColor.A;
+			clearValue->Format = ConvertDXGIFormat(info.Format);
 		}
 		else if (flags & ETextureFlags::Allow_DepthStencil)
 		{
-			clearValue.DepthStencil.Depth = info.ClearDepth;
-			clearValue.DepthStencil.Stencil = info.ClearStencil;
+			clearValue = CreateSharedPtr< D3D12_CLEAR_VALUE>();
+			clearValue->DepthStencil.Depth = info.ClearDepth;
+			clearValue->DepthStencil.Stencil = info.ClearStencil;
+			clearValue->Format = ConvertDXGIFormat(info.Format);
 		}
-		clearValue.Format = ConvertDXGIFormat(info.Format);
+
+		
 
 		DirectX12API::GetD3DDevice()->CreateCommittedResource(
 			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT), D3D12_HEAP_FLAG_NONE,
 			&rscDesc,
 			D3D12_RESOURCE_STATE_COMMON,
-			&clearValue, IID_PPV_ARGS(mD3DResource.GetAddressOf()));
+			clearValue.get(), IID_PPV_ARGS(mD3DResource.GetAddressOf()));
 		mD3DResource->SetName(GetName().c_str());
 		ResourceStateTracker::RegisterResource(GetName(), mD3DResource.Get(), D3D12_RESOURCE_STATE_COMMON);
 	}
 	bool DirectX12Texture::IsValid() const
 	{
 		
-		return mD3DResource != nullptr;;
+		return mD3DResource != nullptr && mIsEnd == true;
 	}
 
 	void DirectX12Texture::Create(const String& name, const TextureInfo& info)
 	{
 		SetName(name);
 		SetTextureInfo(info);
+		mIsEnd = true;
+	}
+
+	void DirectX12Texture::CreateFromMemory(const String& name, byte* pixels, i32 width, i32 height, i32 channels)
+	{
+		TextureInfo info;
+		info.ArraySize = 1;
+		info.Flags	   = ETextureFlags::None;
+		info.MipLevel  = 1;
+		info.Width     = (u32)width;
+		info.Height    = (u32)height;
+		info.Format    = ETextureFormat::R8G8B8A8_Unorm;
+		
+		SetName(name);
+		SetTextureInfo(info);
+		auto commandList = DirectX12API::GetCopyCommandList();
+		commandList->CopyTextrueFromMemory(Get(), pixels, width, height, channels);
+		Scheduler::GetInstance().ScheduleByFrame(DirectX12API::GetFrameBufferCount() + 1, 0, 1,
+			0, [&]() -> EScheduleResult
+		{
+			mIsEnd = true;
+			return EScheduleResult::Break;
+		});
 	}
 
 	void DirectX12Texture::Reset()

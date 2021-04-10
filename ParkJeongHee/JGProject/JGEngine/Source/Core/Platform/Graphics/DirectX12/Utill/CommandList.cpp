@@ -117,6 +117,43 @@ namespace JG
 
 	}
 
+	void CommandList::CopyTextrueFromMemory(ID3D12Resource* resource, void* pixels, i32 width, i32 height, i32 channels)
+	{
+		if (resource == nullptr)
+		{
+			return;
+		}
+		auto d3dDevice = DirectX12API::GetD3DDevice();
+
+		u64 uploadSize =  GetRequiredIntermediateSize(resource, 0, 1);
+
+		ComPtr<ID3D12Resource> uploadBuffer;
+		HRESULT hResult = d3dDevice->CreateCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+			D3D12_HEAP_FLAG_NONE,
+			&CD3DX12_RESOURCE_DESC::Buffer(uploadSize),
+			D3D12_RESOURCE_STATE_GENERIC_READ,
+			nullptr,
+			IID_PPV_ARGS(uploadBuffer.GetAddressOf()));
+		uploadBuffer->SetName(TT("UploadBuffer"));
+
+
+
+		D3D12_SUBRESOURCE_DATA subResourceData = {};
+		subResourceData.pData      = pixels;
+		subResourceData.RowPitch = width * channels;
+		subResourceData.SlicePitch = subResourceData.RowPitch * height;
+
+		TransitionBarrier(resource, D3D12_RESOURCE_STATE_COPY_DEST);
+		FlushResourceBarrier();
+
+
+		UpdateSubresources(mD3DCommandList.Get(), resource, uploadBuffer.Get(), 0, 0, 1, &subResourceData);
+
+		BackupResource(resource);
+		BackupResource(uploadBuffer.Get());
+	}
+
 	void CommandList::CopyBuffer(ID3D12Resource* buffer, void* data, u64 elementSize, u64 elementCount)
 	{
 		if (buffer == nullptr)
@@ -142,6 +179,7 @@ namespace JG
 		subResourceData.SlicePitch = subResourceData.RowPitch;
 
 		TransitionBarrier(buffer, D3D12_RESOURCE_STATE_COPY_DEST);
+		FlushResourceBarrier();
 		UpdateSubresources(mD3DCommandList.Get(), buffer, uploadBuffer.Get(), 0, 0, 1, &subResourceData);
 
 		BackupResource(buffer);

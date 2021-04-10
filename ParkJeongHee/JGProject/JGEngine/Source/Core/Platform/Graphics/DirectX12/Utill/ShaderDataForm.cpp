@@ -1252,6 +1252,10 @@ namespace JG
 						{
 							handles.push_back(static_cast<DirectX12Texture*>(textureList[i].get())->GetSRV());
 						}
+						else
+						{
+							break;
+						}
 					}
 
 					if (handles.empty() == false)

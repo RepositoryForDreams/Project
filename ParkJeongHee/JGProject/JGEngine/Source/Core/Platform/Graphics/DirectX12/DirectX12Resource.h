@@ -186,6 +186,7 @@ namespace JG
 		mutable std::shared_mutex mSRVMutex;
 		mutable std::shared_mutex mUAVMutex;
 
+		bool mIsEnd = false;
 	public:
 		DirectX12Texture() = default;
 		virtual ~DirectX12Texture();
@@ -197,6 +198,7 @@ namespace JG
 		virtual bool IsValid() const override;
 	public:
 		void Create(const String& name, const TextureInfo& info);
+		void CreateFromMemory(const String& name, byte* pixels, i32 width, i32 height, i32 comp);
 		void Reset();
 
 

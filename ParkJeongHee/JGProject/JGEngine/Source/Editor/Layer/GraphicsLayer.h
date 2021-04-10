@@ -13,6 +13,8 @@ namespace JG
 		SharedPtr<Camera>    mCamera;
 		SharedPtr<IMesh>     mMesh;
 		SharedPtr<IMaterial> mMaterial;
+		SharedPtr<IShader> mShader;
+		SharedPtr<ITexture> mTestTexture;
 	public:
 		virtual ~GraphicsLayer() {}
 	public:
