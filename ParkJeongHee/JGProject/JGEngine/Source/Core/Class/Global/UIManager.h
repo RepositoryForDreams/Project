@@ -37,6 +37,7 @@ namespace JG
 	};
 	class UIManager : public GlobalSingleton<UIManager>
 	{
+		friend class Application;
 	public:
 		static const u64 DEFAULT_PRIORITY = 1000;
 		static const u64 SPERATOR_PRIORITY_DELTA = 10;

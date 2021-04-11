@@ -11,12 +11,16 @@ namespace JG
 	class SchedulePriority
 	{
 	public:
-		enum
+		enum 
 		{
-			ImGuiLayer    = -100,
+			ImGuiLayer    = -100000,
 			Default       = 0,
-			MainMenuLayer = 10,
-			OnGUI         = 100,
+			DestroyGameClass = 0,
+			StartGameClass = 50000,
+			GameClass     = 100000,
+			MainMenuLayer = 200000,
+			OnGUI         = 300000,
+			DestroyObject = 400000,
 		};
 	};
 	enum class EScheduleState

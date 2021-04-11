@@ -9,6 +9,7 @@ namespace JG
 {
 	class Log : public GlobalSingleton<Log>
 	{
+		friend class Application;
 	private:
 		SharedPtr<spdlog::logger> smCoreLogger;
 		SharedPtr<spdlog::logger> smClientLogger;

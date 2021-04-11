@@ -5,5 +5,13 @@
 
 namespace JG
 {
-
+	void GameComponent::Start()
+	{
+		GameObject::Start();
+	}
+	void GameComponent::Destory()
+	{
+		GameObject::Destory();
+		mOwnerNode = nullptr;
+	}
 }

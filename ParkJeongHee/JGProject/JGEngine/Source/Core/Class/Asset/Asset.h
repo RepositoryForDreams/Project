@@ -1,6 +1,8 @@
 #pragma once
+#include "Common/Abstract.h"
 
 #include "Graphics/Resource.h"
+#include "Class/Global/Scheduler.h"
 #include "Class/FileIO.h"
 namespace JG
 {
@@ -62,4 +64,23 @@ namespace JG
 
 
 
+	class IAsset
+	{
+	public:
+		virtual EAssetType GetAssetType() const        = 0;
+		virtual const String& GetAssetFullPath() const = 0;
+		virtual const String& GetAssetPath() const     = 0;
+		virtual const String& GetAssetName() const     = 0;
+	public:
+		virtual ~IAsset() = default;
+	};
+
+
+	class AssetDataBase : public ObjectFactory<IAsset, 2>
+	{
+	protected:
+		virtual void CreateObjectImpl(IAsset* asset) override;
+		virtual void DestroyObjectImpl(IAsset* asset) override;
+		virtual void ReserveDestroyObjectImpl(IAsset* asset) override;
+	};
 }

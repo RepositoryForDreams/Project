@@ -20,4 +20,19 @@ namespace JG
 		reader->Read(&Indices);
 
 	}
+
+
+
+	void AssetDataBase::CreateObjectImpl(IAsset* asset)
+	{
+
+	}
+	void AssetDataBase::DestroyObjectImpl(IAsset* asset)
+	{
+
+	}
+	void AssetDataBase::ReserveDestroyObjectImpl(IAsset* asset)
+	{
+
+	}
 }

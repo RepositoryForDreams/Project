@@ -34,6 +34,7 @@ namespace JG
 	};
 	class ShaderLibrary : public GlobalSingleton<ShaderLibrary>
 	{
+		friend class Application;
 	private:
 		Dictionary<String, SharedPtr<IShader>> mShaders;
 		std::shared_mutex mMutex;
