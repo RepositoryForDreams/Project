@@ -37,6 +37,7 @@ namespace JG
 				ID = TypeIDProvider::IDOffset++;
 			}
 		}
+		TypeID(T* _this) : TypeID() {}
 	};
 	template<class T>
 	u64 TypeID<T>::ID = TypeIDProvider::TYPE_NULL_ID;
@@ -54,6 +55,8 @@ namespace JG
 			mID = typeID.ID;
 			mName = s2ws(typeid(T).name());
 		}
+		
+
 		template<class T>
 		constexpr Type& operator=(const TypeID<T>& typeID)
 		{

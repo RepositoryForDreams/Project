@@ -15,28 +15,28 @@ namespace JG
 	SharedPtr<ScheduleHandle> GameObject::Schedule(f32 delay, f32 tickCycle, i32 repeat, i32 priority, const SyncTaskFunction& task)
 	{
 		ArrangeScheduleHandle();
-		auto handle = Scheduler::GetInstance().Schedule(delay, tickCycle, repeat, SchedulePriority::GameClass + priority, task);
+		auto handle = Scheduler::GetInstance().Schedule(delay, tickCycle, repeat, SchedulePriority::UpdateGameClass + priority, task);
 		mScheduleHandleList.push_back(handle);
 		return handle;
 	}
 	SharedPtr<ScheduleHandle> GameObject::ScheduleOnce(f32 delay, i32 priority, const SyncTaskFunction& task)
 	{
 		ArrangeScheduleHandle();
-		auto handle = Scheduler::GetInstance().ScheduleOnce(delay, SchedulePriority::GameClass + priority, task);
+		auto handle = Scheduler::GetInstance().ScheduleOnce(delay, SchedulePriority::UpdateGameClass + priority, task);
 		mScheduleHandleList.push_back(handle);
 		return handle;
 	}
 	SharedPtr<ScheduleHandle> GameObject::ScheduleByFrame(i32 delayFrame, i32 frameCycle, i32 repeat, i32 priority, const SyncTaskFunction& task)
 	{
 		ArrangeScheduleHandle();
-		auto handle = Scheduler::GetInstance().ScheduleByFrame(delayFrame, frameCycle, repeat, SchedulePriority::GameClass + priority, task);
+		auto handle = Scheduler::GetInstance().ScheduleByFrame(delayFrame, frameCycle, repeat, SchedulePriority::UpdateGameClass + priority, task);
 		mScheduleHandleList.push_back(handle);
 		return handle;
 	}
 	SharedPtr<ScheduleHandle> GameObject::ScheduleOnceByFrame(i32 delayFrame, i32 priority, const SyncTaskFunction& task)
 	{
 		ArrangeScheduleHandle();
-		auto handle = Scheduler::GetInstance().ScheduleOnceByFrame(delayFrame, SchedulePriority::GameClass + priority, task);
+		auto handle = Scheduler::GetInstance().ScheduleOnceByFrame(delayFrame, SchedulePriority::UpdateGameClass + priority, task);
 		mScheduleHandleList.push_back(handle);
 		return handle;
 	}

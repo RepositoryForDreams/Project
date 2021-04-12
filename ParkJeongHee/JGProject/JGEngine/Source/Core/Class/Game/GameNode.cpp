@@ -24,6 +24,32 @@ namespace JG
 		mComponents.erase(std::remove(begin, end, component), mComponents.end());
 		GameObjectFactory::GetInstance().DestroyObject(component);
 	}
+	void GameNode::ForEach(const std::function<void(GameNode*)>& action)
+	{
+		for (auto& node : mChilds)
+		{
+			action(node);
+		}
+	}
+	GameNode* GameNode::FindNode(const String& name) const
+	{
+		for (auto& node : mChilds)
+		{
+			if (node->GetName() == name)
+			{
+				return node;
+			}
+		}
+		return nullptr;
+	}
+	GameNode* GameNode::FindNode(u32 index) const
+	{
+		if (mChilds.size() <= index)
+		{
+			return nullptr;
+		}
+		return mChilds[index];
+	}
 	void GameNode::SetParent(GameNode* node)
 	{
 		bool isDiff = mParent != node;

@@ -36,6 +36,7 @@ workspace "JGEngine"
         objdir("Build/Obj/%{cfg.buildcfg}/")
 
 
+
         -- file
         files {
             path .. "**.h",
@@ -60,7 +61,6 @@ workspace "JGEngine"
         debugdir  ("Bin/%{cfg.buildcfg}/")
         targetdir ("Bin/%{cfg.buildcfg}/")
         objdir("Build/Obj/%{cfg.buildcfg}/")
-
         defines(defined)
 
         -- file
@@ -86,7 +86,6 @@ workspace "JGEngine"
         debugdir  ("Bin/%{cfg.buildcfg}/")
         targetdir ("Bin/%{cfg.buildcfg}/")
         objdir("Build/Obj/%{cfg.buildcfg}/")
-
         -- file
         files {
             path .. "**.h",
@@ -129,6 +128,7 @@ workspace "JGEngine"
                 }
                 pchheader (PCH_HEADER)
                 pchsource (PCH_CPP_PATH)
+
                 postbuildcommands {"copy /b /y \"..\\Publish/Debug\\*.lib\" \"..\\Bin\\%{cfg.buildcfg}\""}
                 postbuildcommands {"copy /b /y \"..\\Publish/Debug\\*.dll\" \"..\\Bin\\%{cfg.buildcfg}\""}
                 SetStaticLibConfig("Source/Core/")
@@ -137,14 +137,28 @@ workspace "JGEngine"
                 includedirs{
                     "Source/Core/",
                     "Source/Editor/",
+                    "Source/Game/",
                     "ThirdParty/",
-                }
-                links {
-                    "Core"
                 }
                 pchheader (PCH_HEADER)
                 pchsource (PCH_CPP_PATH)
+                links {
+                    "Core", "Game",
+                }
                 SetConsoleAppConfig("Source/Editor/")
+        group "Engine/Game"
+            project "Game"
+                includedirs{
+                    "Source/Core/",
+                    "Source/Game/",
+                    "ThirdParty",
+                }
+                pchheader (PCH_HEADER)
+                pchsource (PCH_CPP_PATH)
+                links{
+                    "Core"
+                }
+                SetStaticLibConfig("Source/Game/")
     group "ThirdParty"
         project "Imgui"
             SetStaticLibConfig("ThirdParty/Imgui/")

@@ -4,7 +4,6 @@
 #include "Graphics/Renderer.h"
 #include "Graphics/Shader.h"
 #include "Class/Asset/AssetImporter.h"
-#include "UI/UIView/SceneView.h"
 namespace JG
 {
 	void GraphicsLayer::OnAttach()
@@ -42,22 +41,6 @@ namespace JG
 
 
 		Scheduler::GetInstance().Schedule(0, 0.16f, -1, SchedulePriority::Default, SCHEDULE_BIND_FN(&GraphicsLayer::Update));
-
-		Scheduler::GetInstance().Schedule(0, 0.16f, -1, SchedulePriority::Default, 
-			[&]() -> EScheduleResult
-		{
-			auto sceneView = UIManager::GetInstance().GetUIView<SceneView>();
-			if (sceneView != nullptr)
-			{
-				auto sceneVm = sceneView->GetViewModel();
-				if (sceneVm != nullptr)
-				{
-					sceneVm->SetSceneTexture(mCamera->GetTargetTexture());
-					return EScheduleResult::Break;
-				}
-			}
-			return EScheduleResult::Continue;
-		});
 		
 
 		mShader = IShader::Create(TT("Test_3DRender"),

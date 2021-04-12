@@ -94,7 +94,7 @@ namespace JG
 	{
 	protected:
 		Dictionary<InterfaceClass*, SharedPtr<InterfaceClass>> mObjectPool;
-		Queue<InterfaceClass*> mReseredDestroyObjectQueue[BufferCount];
+		Queue<InterfaceClass*> mReservedDestroyObjectQueue[BufferCount];
 		i32 mQueueBufferIndex = 0;
 		std::shared_mutex mMutex;
 	public:
@@ -102,7 +102,7 @@ namespace JG
 		{
 			Scheduler::GetInstance().ScheduleByFrame(0, 3, -1, SchedulePriority::DestroyObject, [&]() -> EScheduleResult
 			{
-				auto& currQueue = mReseredDestroyObjectQueue[mQueueBufferIndex];
+				auto& currQueue = mReservedDestroyObjectQueue[mQueueBufferIndex];
 				if (currQueue.empty())
 				{
 					return EScheduleResult::Continue;
@@ -155,7 +155,7 @@ namespace JG
 				return;
 			}
 			i32 nextIndex   = (mQueueBufferIndex + 1) % BufferCount;
-			auto& nextQueue = mReseredDestroyObjectQueue[nextIndex];
+			auto& nextQueue = mReservedDestroyObjectQueue[nextIndex];
 			std::lock_guard<std::shared_mutex> lock(mMutex);
 			auto iter = mObjectPool.find(ifClass);
 			if (iter != mObjectPool.end())

@@ -3,9 +3,8 @@
 #include "Common/Type.h"
 namespace JG		
 {
-#define GameClass(x) \
-	static  Type GetStaticObjectType() { return Type(TypeID<##x>()); } \
-	virtual Type GetObjectType() const override { return Type(TypeID<##x>());} \
+#define GameClass \
+	virtual Type GetObjectType() const override { return Type(TypeID(this));} \
 
 	template<class T>
 	using GamePtr = WeakPtr<T>;
@@ -29,7 +28,7 @@ namespace JG
 
 	class GameObject : public IGameObject, public ISubscriber
 	{
-		GameClass(GameObject)
+		GameClass
 	private:
 		u64    mID = 0;
 		String mName;

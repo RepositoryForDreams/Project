@@ -6,7 +6,7 @@ namespace JG
 	class GameComponent;
 	class GameNode : public GameObject
 	{
-		GameClass(GameNode)
+		GameClass
 	private:
 		GameNode* mParent;
 		List<GameNode*>      mChilds;
@@ -37,11 +37,41 @@ namespace JG
 		// 일단 이 클래스의 배열에서 제거하고, 
 		void Destroy(GameNode* node);
 		void Destroy(GameComponent* component);
+
+
+		void ForEach(const std::function<void(GameNode*)>& action);
+	public:
+		GameNode* FindNode(const String& name) const;
+		GameNode* FindNode(u32 index) const;
+
+		template<class T>
+		T* FindNode() const {
+			for (auto& node : mChilds)
+			{
+				if (node->GetObjectType().GetID() == Type(TypeID<T>()).GetID())
+				{
+					return node;
+				}
+			}
+			return nullptr;
+		}
+
+		template<class T>
+		T* FindComponent() const
+		{
+			for (auto& com : mComponents)
+			{
+				if (com->GetObjectType().GetID() == Type(TypeID<T>()).GetID())
+				{
+					return com;
+				}
+			}
+			return nullptr;
+		}
 	public:
 		void SetParent(GameNode* node);
 		GameNode* GetParent() const;
 	private:
 		void DestroyRecursive();
-
 	};
 }
