@@ -20,8 +20,13 @@ namespace JG
 
 		virtual String GetLayerName() override;
 	private:
+		bool OnWorldHierarchyUpdate(WorldHierarchyUpdateEvent& e);
+
 		void LoadUISettings(const String& fileName);
 		void SaveUISettings(const String& fileName);
+		EScheduleResult MenuUpdate();
+
+
 	};
 
 }

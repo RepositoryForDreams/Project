@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Common/Enum.h"
+#include "Common/Abstract.h"
 #include <string>
 
 
@@ -8,10 +9,16 @@ namespace JG
 {
 	enum class EEventType
 	{
+		// Application
 		AppOpen, AppClose,  AppResize,
+
+		// Input
 		KeyPressed, KeyReleased, KeyTyping,
 		MouseMoved, MouseButtonPressed, MouseButtonReleased,
 		MouseScrollMoved,
+
+		// Game
+		WorldHierarchyUpdate,
 	};
 
 
@@ -24,6 +31,7 @@ namespace JG
 		Mouse			= 4,
 		MouseButton		= 8,
 		Input			= 16,
+		Game            = 32,
 	};
 
 #define EVENT_TYPE(type) \

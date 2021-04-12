@@ -54,6 +54,11 @@ namespace JG
 		{
 			mID = typeID.ID;
 			mName = s2ws(typeid(T).name());
+			u64 pos = mName.find(TT(" "), 0);
+			if (pos != String::npos)
+			{
+				mName = mName.substr(pos + 1);
+			}
 		}
 		
 
@@ -62,11 +67,17 @@ namespace JG
 		{
 			mID = typeID.ID;
 			mName = s2ws(typeid(T).name());
+			u64 pos = mName.find(TT(" "), 0);
+			if (pos != String::npos)
+			{
+				mName = mName.substr(pos + 1);
+			}
 			return *this;
 		}
 		Type& operator=(const Type& type)
 		{
-			mID = type.mID;
+			mID   = type.mID;
+			mName = type.mName;
 			return *this;
 		}
 		bool operator==(const Type& type) const

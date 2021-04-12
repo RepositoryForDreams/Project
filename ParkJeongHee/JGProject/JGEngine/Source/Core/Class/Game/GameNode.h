@@ -69,9 +69,17 @@ namespace JG
 			return nullptr;
 		}
 	public:
-		void SetParent(GameNode* node);
+		virtual void SetParent(GameNode* node);
 		GameNode* GetParent() const;
 	private:
 		void DestroyRecursive();
 	};
+
+	class GameRootNode : public GameNode
+	{
+		GameClass
+	public:
+		virtual void SetParent(GameNode* node) override {}
+	};
+
 }

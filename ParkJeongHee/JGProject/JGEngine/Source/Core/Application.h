@@ -25,6 +25,8 @@ namespace JG
 		UniquePtr<LayerStack>	mLayerStack;
 		UniquePtr<IGraphicsAPI> mGraphcisAPI;
 
+		Queue<UniquePtr<IEvent>> mEventQueue;
+
 		JVector2Uint mDisplaySize;
 		bool mIsRunning = true;
 		bool mMinimized = false;
@@ -55,9 +57,20 @@ namespace JG
 	public:
 		IWindow*	  GetWindow() const;
 		IGraphicsAPI* GetGraphicsAPI() const;
-
-
 		JVector2Uint  GetDisplaySize() const;
+	public:
+		template<class T>
+		void SendEvent(const T& e)
+		{
+			auto pE = CreateUniquePtr<T>();
+			*pE = e;
+			mEventQueue.push(std::move(pE));
+		}
+		template<class T>
+		void SendEventImmediate(T& e)
+		{
+			OnEvent(e);
+		}
 	private:
 		friend int ::main(int argc, char** argv);
 	};

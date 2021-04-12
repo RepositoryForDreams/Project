@@ -30,10 +30,11 @@ namespace JG
 	{
 		GameClass
 	private:
-		u64    mID = 0;
-		String mName;
+		mutable u64     mID = 0;
+		mutable String mName;
 		List<SharedPtr<ScheduleHandle>> mScheduleHandleList;
 	public:
+		GameObject() = default;
 		virtual ~GameObject();
 	protected:
 		virtual void Start() override {}
@@ -44,6 +45,20 @@ namespace JG
 		SharedPtr<ScheduleHandle> ScheduleByFrame(i32 delayFrame, i32 frameCycle, i32 repeat, i32 priority, const SyncTaskFunction& task);
 		SharedPtr<ScheduleHandle> ScheduleOnceByFrame(i32 delayFrame, i32 priority, const SyncTaskFunction& task);
 		SharedPtr<ScheduleHandle> ScheduleAsync(const AsyncTaskFunction& task);
+
+		template<class T>
+		void SendEvent(T& e)
+		{
+			Application::GetInstance().SendEvent(e);
+		}
+
+
+		template<class T>
+		void SendEventImmediate(T& e)
+		{
+			Application::GetInstance().SendEventImmediate(e);
+		}
+
 	public:
 		virtual u64 GetID() const override;
 		virtual const String& GetName() const override;

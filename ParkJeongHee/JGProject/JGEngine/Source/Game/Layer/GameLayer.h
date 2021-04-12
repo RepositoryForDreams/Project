@@ -4,8 +4,11 @@
 
 namespace JG
 {
+	class GameNode;
+	class GameRootNode;
 	class GameLayer : public ILayer
 	{
+		GameRootNode* mGameRootNode = nullptr;
 	public:
 		virtual ~GameLayer() {}
 	public:
@@ -18,5 +21,7 @@ namespace JG
 		virtual void OnEvent(IEvent& e) override;
 
 		virtual String GetLayerName() override;
+	public:
+		EScheduleResult WorldHierarchyUpdate();
 	};
 }

@@ -13,14 +13,21 @@ namespace JG
 	public:
 		enum 
 		{
-			ImGuiLayer    = -100000,
-			Default       = 0,
-			DestroyGameClass = 0,
-			StartGameClass   = 50000,
-			UpdateGameClass  = 100000,
-			MainMenuLayer = 200000,
-			OnGUI         = 300000,
-			DestroyObject = 400000,
+			// Layer
+			ImGuiLayer		 = -900000,
+			GameLayer        = -800000,
+			UILayer          = -700000,
+			MainMenuLayer    = -600000,
+			//
+			Default = 0,
+			// GameLogic
+			DestroyGameClass = 100000,
+			StartGameClass   = 200000,
+			UpdateGameClass  = 300000,
+
+			// System
+			OnGUI = 1000000,
+			DestroyObject = 2000000,
 		};
 	};
 	enum class EScheduleState

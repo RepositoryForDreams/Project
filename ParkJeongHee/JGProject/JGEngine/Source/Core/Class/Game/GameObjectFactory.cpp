@@ -12,7 +12,7 @@ namespace JG
 
 		if (is_run_start == false)
 		{
-			Scheduler::GetInstance().ScheduleOnceByFrame(1, SchedulePriority::StartGameClass, SCHEDULE_BIND_FN(&GameObjectFactory::StartObject));
+			Scheduler::GetInstance().ScheduleOnceByFrame(1, SchedulePriority::StartGameClass, SCHEDULE_BIND_FN(&GameObjectFactory::UpdateStartObject));
 		}
 
 	}
@@ -28,22 +28,24 @@ namespace JG
 
 		if (is_run_destroy == false)
 		{
-			Scheduler::GetInstance().ScheduleOnceByFrame(1, SchedulePriority::DestroyGameClass, SCHEDULE_BIND_FN(&GameObjectFactory::DestroyObject));
+			Scheduler::GetInstance().ScheduleOnceByFrame(1, SchedulePriority::DestroyGameClass, SCHEDULE_BIND_FN(&GameObjectFactory::UpdateDestroyObject));
 		}
 	}
-	EScheduleResult GameObjectFactory::StartObject()
+	EScheduleResult GameObjectFactory::UpdateStartObject()
 	{
 		for (auto& obj : mReserveStartObjects)
 		{
+			JG_INFO("GameNode : {0}  Start", ws2s(obj->GetName()));
 			obj->Start();
 		}
 		mReserveStartObjects.clear();
 		return EScheduleResult::Continue;
 	}
-	EScheduleResult GameObjectFactory::DestroyObject()
+	EScheduleResult GameObjectFactory::UpdateDestroyObject()
 	{
 		for (auto& obj : mReservedDestroyObjects)
 		{
+			JG_INFO("GameNode : {0}  Destroy", ws2s(obj->GetName()));
 			obj->Destory();
 		}
 		mReservedDestroyObjects.clear();

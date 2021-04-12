@@ -46,10 +46,19 @@ namespace JG
 	}
 	u64 GameObject::GetID() const
 	{
+		if (mID == 0)
+		{
+			mID = (u64)this;
+		}
 		return mID;
 	}
 	const String& GameObject::GetName() const
 	{
+		if (mName.empty())
+		{
+			mName = GetObjectType().GetName();
+			mName = ReplaceAll(mName, TT("JG::"), TT(""));
+		}
 		return mName;
 	}
 	void GameObject::SetName(const String& name)

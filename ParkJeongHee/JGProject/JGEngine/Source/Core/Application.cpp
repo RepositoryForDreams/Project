@@ -100,6 +100,12 @@ namespace JG
 			mGraphcisAPI->Begin();
 			mWindow->Update();
 
+			while (mEventQueue.empty() == false)
+			{
+				auto e = std::move(mEventQueue.front()); mEventQueue.pop();
+				OnEvent(*e);
+			}
+
 			if (Scheduler::IsValid())
 			{
 				Scheduler::GetInstance().Update();

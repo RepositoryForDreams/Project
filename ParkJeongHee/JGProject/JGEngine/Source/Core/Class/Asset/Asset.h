@@ -76,7 +76,7 @@ namespace JG
 	};
 
 
-	class AssetDataBase : public ObjectFactory<IAsset, 2>
+	class AssetDataBase : public ObjectFactory<AssetDataBase, IAsset, 2>
 	{
 	protected:
 		virtual void CreateObjectImpl(IAsset* asset) override;

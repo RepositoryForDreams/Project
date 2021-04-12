@@ -89,8 +89,8 @@ namespace JG
 
 
 
-	template<class InterfaceClass, i32 BufferCount, class ...Args>
-	class ObjectFactory : public GlobalSingleton<ObjectFactory<InterfaceClass, BufferCount, Args ...>>
+	template<class FactoryClass, class InterfaceClass, i32 BufferCount, class ...Args>
+	class ObjectFactory : public GlobalSingleton<FactoryClass, Args ...>
 	{
 	protected:
 		Dictionary<InterfaceClass*, SharedPtr<InterfaceClass>> mObjectPool;
@@ -165,9 +165,9 @@ namespace JG
 			}
 		}
 	protected:
-		virtual void CreateObjectImpl(InterfaceClass* ifClass)  = 0;
-		virtual void DestroyObjectImpl(InterfaceClass* ifClass) = 0;
-		virtual void ReserveDestroyObjectImpl(InterfaceClass* ifClass) = 0;
+		virtual void CreateObjectImpl(InterfaceClass* ifClass) {};
+		virtual void DestroyObjectImpl(InterfaceClass* ifClass) {};
+		virtual void ReserveDestroyObjectImpl(InterfaceClass* ifClass) {};
 	};
 }
 
