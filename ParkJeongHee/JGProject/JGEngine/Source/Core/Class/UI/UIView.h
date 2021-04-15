@@ -28,6 +28,7 @@ namespace JG
 	{
 		friend class UIManager;
 	protected:
+		virtual void Load()        = 0;
 		virtual void Initialize()  = 0;
 		virtual void OnGUI()       = 0;
 		virtual void Destroy()     = 0;
@@ -52,10 +53,16 @@ namespace JG
 	private:
 		UniquePtr<ViewModelType> mViewModel;
 		bool mIsOpen = false;
+		bool mIsLoad = false;
 	private:
 		virtual void OnEvent(IEvent& e) override {
 			static_cast<IUIViewModel*>(mViewModel.get())->OnEvent(e);
 		}
+	protected:
+		virtual void Load() override {};
+		virtual void Initialize() override {};
+		virtual void OnGUI() override {}
+		virtual void Destroy() override {}
 	public:
 		ViewModelType* GetViewModel() const {
 			return mViewModel.get();
@@ -73,6 +80,12 @@ namespace JG
 					mViewModel = CreateUniquePtr<ViewModelType>();
 				}
 				static_cast<IUIViewModel*>(mViewModel.get())->Initialize();
+
+				if (mIsLoad == false)
+				{
+					Load();
+					mIsLoad = true;
+				}
 				Initialize();
 			}
 		}

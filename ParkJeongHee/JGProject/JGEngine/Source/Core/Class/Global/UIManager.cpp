@@ -25,16 +25,31 @@ namespace JG
 		}
 		mUIViewPool.clear();
 	}
-	void UIManager::RegisterMenuItem(const String& menuPath, u64 priority, const std::function<void()>& action, const std::function<bool()> enableAction)
+	void UIManager::RegisterMainMenuItem(const String& menuPath, u64 priority, const std::function<void()>& action, const std::function<bool()> enableAction)
 	{
 		if (mMainMenuItemRootNode == nullptr)
 		{
 			mMainMenuItemRootNode = CreateUniquePtr<MenuItemNode>();
 			mMainMenuItemRootNode->Name = TT("Root");
 			mMainMenuItemRootNode->IsOpen = true;
-			mMainMenuItemRootNode->NodeType = MenuItemNode::ENodeType::MainMenu;
 		}
 		RegisterMenuItem(mMainMenuItemRootNode.get(), menuPath, priority, action, enableAction);
+	}
+	void UIManager::RegisterContextMenuItem(const Type& type, const String& menuPath, u64 priority, const std::function<void()>& action, const std::function<bool()> enableAction)
+	{
+		if (mUIViewPool.find(type) == mUIViewPool.end())
+		{
+			return;
+		}
+
+		auto iter = mUIViewContextMenu.find(type);
+		if (iter == mUIViewContextMenu.end())
+		{
+			mUIViewContextMenu[type] = CreateUniquePtr<MenuItemNode>();
+			mUIViewContextMenu[type]->Name = type.GetName();
+			mUIViewContextMenu[type]->IsOpen = true;
+		}
+		RegisterMenuItem(mUIViewContextMenu[type].get(), menuPath, priority, action, enableAction);
 	}
 	void UIManager::ForEach(const std::function<void(IUIView*)> action)
 	{
@@ -45,18 +60,20 @@ namespace JG
 	}
 
 	void UIManager::ForEach(
-		MenuItemNode::ENodeType nodeType,
 		const std::function<void(const MenuItemNode*)>& beginAction,
 		const std::function<void(const MenuItemNode*)>& endAction)
 	{
-		switch (nodeType)
+		ForEach(mMainMenuItemRootNode.get(), beginAction, endAction);
+	}
+
+	void UIManager::ForEach(const Type& type, const std::function<void(const MenuItemNode*)>& beginAction, const std::function<void(const MenuItemNode*)>& endAction)
+	{
+		auto iter = mUIViewContextMenu.find(type);
+		if (iter == mUIViewContextMenu.end())
 		{
-		case MenuItemNode::ENodeType::MainMenu:
-			ForEach(mMainMenuItemRootNode.get(), beginAction, endAction);
-			break;
-		case MenuItemNode::ENodeType::Context:
-			break;
+			return;
 		}
+		ForEach(iter->second.get(), beginAction, endAction);
 	}
 
 
@@ -245,7 +262,6 @@ namespace JG
 		menuItem->Name     = menuName;
 		menuItem->Parent   = parentNode;
 		menuItem->Priority = priority;
-		menuItem->NodeType = parentNode->NodeType;
 		parentNode->ChildNodes[priority].push_back(std::move(menuItem));
 		return result;
 	}

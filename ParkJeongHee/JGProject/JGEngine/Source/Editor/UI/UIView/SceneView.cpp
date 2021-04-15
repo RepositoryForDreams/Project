@@ -10,7 +10,7 @@ namespace JG
 
 	SceneView::SceneView()
 	{
-		UIManager::GetInstance().RegisterMenuItem(TT("Windows/SceneView"), 0,
+		UIManager::GetInstance().RegisterMainMenuItem(TT("Windows/SceneView"), 0,
 			[&]()
 		{
 			Open();

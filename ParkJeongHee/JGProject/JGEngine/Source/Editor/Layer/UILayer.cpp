@@ -43,6 +43,16 @@ namespace JG
 	}
 
 
+	void UILayer::ShowContextMenu(const Type& type)
+	{
+		if (ImGui::BeginPopupContextItem(ws2s(type.GetName() + TT("_Context")).c_str()))
+		{
+			UIManager::GetInstance().ForEach(type, UILayer::BeginMenu, UILayer::EndMenu);
+			ImGui::EndPopup();
+		}
+	}
+
+
 
 
 	void UILayer::LoadUISettings(const String& fileName)
@@ -98,61 +108,58 @@ namespace JG
 	{
 		if (ImGui::BeginMainMenuBar())
 		{
-			const MenuItemNode* currParentNode = nullptr;
-			u64 currPriority = 0;
-			UIManager::GetInstance().ForEach(MenuItemNode::ENodeType::MainMenu,
-				[&](const MenuItemNode* Node)
-			{
-				// Node
-				if (Node->MenuItem == nullptr)
-				{
-					if (Node->Parent->IsOpen)
-					{
-						if (Node->IsSperator == true)
-						{
-							ImGui::Separator();
-						}
-						Node->IsOpen = ImGui::BeginMenu(ws2s(Node->Name).c_str());
-					}
-					else
-					{
-						Node->IsOpen = false;
-					}
-
-				}
-				// MenuItem
-				else
-				{
-					if (Node->Parent->IsOpen)
-					{
-						if (Node->IsSperator == true)
-						{
-							ImGui::Separator();
-						}
-						bool isEnable = Node->MenuItem->EnableAction ? Node->MenuItem->EnableAction() : true;
-						if (ImGui::MenuItem(ws2s(Node->Name).c_str(), ws2s(Node->MenuItem->ShortCut).c_str(), nullptr, isEnable) == true)
-						{
-							if (Node->MenuItem->Action)
-							{
-								Node->MenuItem->Action();
-							}
-						}
-					}
-				}
-
-			},
-				[&](const MenuItemNode* Node)
-			{
-				if (Node->MenuItem == nullptr && Node->IsOpen)
-				{
-					ImGui::EndMenu();
-				}
-
-			});
+			UIManager::GetInstance().ForEach(UILayer::BeginMenu, UILayer::EndMenu);
 			ImGui::EndMainMenuBar();
 		}
 
 		return EScheduleResult::Continue;
+	}
+
+	void UILayer::BeginMenu(const MenuItemNode* Node)
+	{
+		if (Node->MenuItem == nullptr)
+		{
+			if (Node->Parent->IsOpen)
+			{
+				if (Node->IsSperator == true)
+				{
+					ImGui::Separator();
+				}
+				Node->IsOpen = ImGui::BeginMenu(ws2s(Node->Name).c_str());
+			}
+			else
+			{
+				Node->IsOpen = false;
+			}
+
+		}
+		// MenuItem
+		else
+		{
+			if (Node->Parent->IsOpen)
+			{
+				if (Node->IsSperator == true)
+				{
+					ImGui::Separator();
+				}
+				bool isEnable = Node->MenuItem->EnableAction ? Node->MenuItem->EnableAction() : true;
+				if (ImGui::MenuItem(ws2s(Node->Name).c_str(), ws2s(Node->MenuItem->ShortCut).c_str(), nullptr, isEnable) == true)
+				{
+					if (Node->MenuItem->Action)
+					{
+						Node->MenuItem->Action();
+					}
+				}
+			}
+		}
+	}
+
+	void UILayer::EndMenu(const MenuItemNode* Node)
+	{
+		if (Node->MenuItem == nullptr && Node->IsOpen)
+		{
+			ImGui::EndMenu();
+		}
 	}
 
 }

@@ -22,6 +22,7 @@ namespace JG
 	void WorldHierarchyViewModel::Destroy()
 	{
 		UIViewModel::Destroy();
+		mTreeNodePool.clear();
 		mWorldHierarchyModel = nullptr;
 	}
 
@@ -33,18 +34,36 @@ namespace JG
 		
 	}
 
-	void WorldHierarchyViewModel::ForEach(std::function<void(GameNode*)> action)
+	void WorldHierarchyViewModel::ForEach(
+		const std::function<bool(WorldHierarchyTreeNode)>& pushAction, 
+		const std::function<void(WorldHierarchyTreeNode)>& action,
+		const std::function<void(WorldHierarchyTreeNode)>& popAction)
 	{
 		if (mWorldHierarchyModel == nullptr)
 		{
 			return;
 		}
-		if (mWorldHierarchyModel->GetGameWorld() != nullptr)
+		auto gameWorld = mWorldHierarchyModel->GetGameWorld();
+		if (gameWorld != nullptr)
 		{
-			action(mWorldHierarchyModel->GetGameWorld());
+			auto iter = mTreeNodePool.find(gameWorld);
+			if (iter == mTreeNodePool.end())
+			{
+				mTreeNodePool[gameWorld].Object    = gameWorld;
+				mTreeNodePool[gameWorld].UserFlags = 0;
+			}
+			auto& treeNode = mTreeNodePool[gameWorld];
+			
+			bool isOpen = pushAction(treeNode);
+			action(treeNode);
+			if (isOpen == true)
+			{
+				popAction(treeNode);
+			}
 		}
-	
+
 	}
+
 
 
 

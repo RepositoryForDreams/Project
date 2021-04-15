@@ -8,7 +8,7 @@ namespace JG
 {
 	StatisticsView::StatisticsView()
 	{
-		UIManager::GetInstance().RegisterMenuItem(TT("Windows/StatisticsView"), 0,
+		UIManager::GetInstance().RegisterMainMenuItem(TT("Windows/StatisticsView"), 0,
 			[&]()
 		{
 			Open();

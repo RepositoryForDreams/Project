@@ -1,3 +1,4 @@
+#include "GameNode.h"
 #include "pch.h"
 #include "GameNode.h"
 #include "GameComponent.h"
@@ -49,6 +50,10 @@ namespace JG
 			return nullptr;
 		}
 		return mChilds[index];
+	}
+	u64 GameNode::GetChildCount() const
+	{
+		return mChilds.size();
 	}
 	void GameNode::SetParent(GameNode* node)
 	{

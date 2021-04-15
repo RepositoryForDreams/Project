@@ -16,16 +16,9 @@ namespace JG
 
 	struct MenuItemNode
 	{
-		enum ENodeType
-		{
-			MainMenu,
-			Context,
-		};
 		String    Name;
 		u64       Priority = 0;
 		bool      IsSperator = false;
-		ENodeType NodeType = ENodeType::MainMenu;
-
 
 		const MenuItemNode* Parent = nullptr;
 		UniquePtr<MenuItem> MenuItem;
@@ -45,7 +38,8 @@ namespace JG
 		static const wchar SHIFT_SHORTCUT_TOKEN = TT('#');
 		static const wchar ALT_SHORTCUT_TOKEN   = TT('&');
 	private:
-		Dictionary<JG::Type, UniquePtr<IUIView>>       mUIViewPool;
+		Dictionary<JG::Type, UniquePtr<IUIView>>      mUIViewPool;
+		Dictionary<JG::Type, UniquePtr<MenuItemNode>> mUIViewContextMenu;
 		UniquePtr<MenuItemNode> mMainMenuItemRootNode;
 		mutable std::shared_mutex   mMutex;
 	public:
@@ -64,7 +58,7 @@ namespace JG
 			{
 				return;
 			}
-			mUIViewPool[type] = CreateUniquePtr<UIViewType>();
+			mUIViewPool[type]        = CreateUniquePtr<UIViewType>();
 		}
 
 		// UI¿ë WeakPtr ±¸Çö
@@ -82,10 +76,14 @@ namespace JG
 			}
 			return static_cast<UIViewType*>(iter->second.get());
 		}
-		void RegisterMenuItem(const String& menuPath, u64 priority,  const std::function<void()>& action, const std::function<bool()> enableAction);
+		void RegisterMainMenuItem(const String& menuPath, u64 priority,  const std::function<void()>& action, const std::function<bool()> enableAction);
+		void RegisterContextMenuItem(const Type& type, const String& menuPath, u64 priority, const std::function<void()>& action, const std::function<bool()> enableAction);
 		void ForEach(const std::function<void(IUIView*)> action);
 		void ForEach(
-			MenuItemNode::ENodeType nodeType,
+			const std::function<void(const MenuItemNode*)>& beginAction,
+			const std::function<void(const MenuItemNode*)>& endAction);
+		void ForEach(
+			const Type& type,
 			const std::function<void(const MenuItemNode*)>& beginAction,
 			const std::function<void(const MenuItemNode*)>& endAction);
 	private:

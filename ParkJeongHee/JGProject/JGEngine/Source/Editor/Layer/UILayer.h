@@ -3,7 +3,11 @@
 #include "Class/FileIO.h"
 namespace JG
 {
-
+	enum class MenuType
+	{
+		MainMenu,
+		ContextMenu,
+	};
 	class UILayer : public ILayer
 	{
 
@@ -19,12 +23,16 @@ namespace JG
 		virtual void OnEvent(IEvent& e) override;
 
 		virtual String GetLayerName() override;
+	public:
+		static void ShowContextMenu(const Type& type);
+
 	private:
 		void LoadUISettings(const String& fileName);
 		void SaveUISettings(const String& fileName);
+	private:
 		EScheduleResult MenuUpdate();
-
-
+		static void BeginMenu(const MenuItemNode* Node);
+		static void EndMenu(const MenuItemNode* Node);
 	};
 
 }

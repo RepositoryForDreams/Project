@@ -69,6 +69,8 @@ namespace JG
 			return nullptr;
 		}
 	public:
+		u64 GetChildCount() const;
+
 		virtual void SetParent(GameNode* node);
 		GameNode* GetParent() const;
 	private:

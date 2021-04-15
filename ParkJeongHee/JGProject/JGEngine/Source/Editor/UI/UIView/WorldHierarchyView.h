@@ -6,6 +6,7 @@
 
 namespace JG
 {
+
 	class WorldHierarchyView : public UIView<WorldHierarchyViewModel>
 	{
 		UIVIEWCLASS
@@ -17,6 +18,7 @@ namespace JG
 	public:
 		virtual ~WorldHierarchyView() = default;
 	protected:
+		virtual void Load() override;
 		virtual void Initialize() override;
 		virtual void OnGUI() override;
 		virtual void Destroy() override;
