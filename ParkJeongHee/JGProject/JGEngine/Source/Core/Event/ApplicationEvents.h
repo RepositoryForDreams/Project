@@ -7,7 +7,7 @@ namespace JG
 {
 	class AppOpenEvent : public IEvent
 	{
-		EVENT_CLASS(EEventType::AppOpen, EEventCategory::Application)
+		EVENTCLASS(EEventCategory::Application)
 	public:
 		virtual ~AppOpenEvent() override {}
 		virtual String ToString() const override
@@ -18,7 +18,7 @@ namespace JG
 
 	class AppCloseEvent : public IEvent
 	{
-		EVENT_CLASS(EEventType::AppClose, EEventCategory::Application)
+		EVENTCLASS(EEventCategory::Application)
 	public:
 		virtual ~AppCloseEvent() override  {}
 		virtual String ToString() const override
@@ -29,7 +29,7 @@ namespace JG
 
 	class AppResizeEvent : public IEvent
 	{
-		EVENT_CLASS(EEventType::AppResize, EEventCategory::Application)
+		EVENTCLASS(EEventCategory::Application)
 	public:
 		virtual ~AppResizeEvent() override {}
 		virtual String ToString() const override

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "GameLayer.h"
 #include "Application.h"
-#include "Class/Game/GameNode.h"
+#include "Class/Game/GameWorld.h"
 
 
 
@@ -17,9 +17,7 @@ namespace JG
 	}
 	void GameLayer::Begin()
 	{
-		Scheduler::GetInstance().Schedule(0.0f, 0.16f, -1, SchedulePriority::GameLayer, SCHEDULE_BIND_FN(&GameLayer::WorldHierarchyUpdate));
-
-		mGameRootNode = GameObjectFactory::GetInstance().CreateObject<GameRootNode>();
+		mGameWorld = GameObjectFactory::GetInstance().CreateObject<GameWorld>();
 	}
 	void GameLayer::Destroy()
 	{
@@ -27,16 +25,18 @@ namespace JG
 	}
 	void GameLayer::OnEvent(IEvent& e)
 	{
+		EventDispatcher eventDispatcher(e);
+		eventDispatcher.Dispatch<RequestGameWorldEvent>(EVENT_BIND_FN(&GameLayer::ResponseGameWorld));
 	}
 	String GameLayer::GetLayerName()
 	{
 		return TT("GameLayer");
 	}
-	EScheduleResult GameLayer::WorldHierarchyUpdate()
+	bool GameLayer::ResponseGameWorld(RequestGameWorldEvent& e)
 	{
-		WorldHierarchyUpdateEvent e;
-		e.RootNode = mGameRootNode;
-		Application::GetInstance().SendEvent(e);
-		return EScheduleResult::Continue;
+		ResponseGameWorldEvent response;
+		response.GameWorld = mGameWorld;
+		Application::GetInstance().SendEvent(response);
+		return true;
 	}
 }

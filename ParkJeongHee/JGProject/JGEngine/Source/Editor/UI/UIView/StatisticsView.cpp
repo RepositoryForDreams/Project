@@ -14,10 +14,9 @@ namespace JG
 			Open();
 		}, nullptr);
 	}
-	bool StatisticsView::Initialize()
+	void StatisticsView::Initialize()
 	{
 
-		return true;
 	}
 	void StatisticsView::OnGUI()
 	{
@@ -43,9 +42,5 @@ namespace JG
 
 
 
-	}
-	Type StatisticsView::GetType() const
-	{
-		return Type(TypeID<StatisticsView>());
 	}
 }

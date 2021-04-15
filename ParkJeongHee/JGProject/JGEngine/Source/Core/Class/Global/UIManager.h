@@ -90,6 +90,7 @@ namespace JG
 			const std::function<void(const MenuItemNode*)>& endAction);
 	private:
 		void OnGUI();
+		void OnEvent(IEvent& e);
 		void ForEach(
 			MenuItemNode* rootNode,
 			const std::function<void(const MenuItemNode*)>& beginAction,

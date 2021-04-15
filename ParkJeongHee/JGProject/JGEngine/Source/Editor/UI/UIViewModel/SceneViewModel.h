@@ -12,7 +12,7 @@ namespace JG
 		class SceneModel* mSceneMdoel = nullptr;
 
 	protected:
-		virtual bool Initialize() override;
+		virtual void Initialize() override;
 		virtual void Destroy() override;
 	public:
 		void SetMinSize(const JVector2& size);

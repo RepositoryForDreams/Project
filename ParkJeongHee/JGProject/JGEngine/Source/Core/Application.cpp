@@ -145,8 +145,6 @@ namespace JG
 		dispatcher.Dispatch<AppCloseEvent>(EVENT_BIND_FN(&Application::Close));
 		dispatcher.Dispatch<AppResizeEvent>(EVENT_BIND_FN(&Application::Resize));
 
-
-		
 		mLayerStack->ForEach([&](ILayer* layer)
 		{
 			if(e.Handled == false)
@@ -154,6 +152,12 @@ namespace JG
 				layer->OnEvent(e);
 			}
 		});
+
+		if (e.Handled == false)
+		{
+			UIManager::GetInstance().OnEvent(e);
+		}
+	
 	}
 	bool Application::Open(AppOpenEvent& e)
 	{

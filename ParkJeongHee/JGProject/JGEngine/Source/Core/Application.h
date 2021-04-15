@@ -60,7 +60,7 @@ namespace JG
 		JVector2Uint  GetDisplaySize() const;
 	public:
 		template<class T>
-		void SendEvent(const T& e)
+		void SendEvent(T& e)
 		{
 			auto pE = CreateUniquePtr<T>();
 			*pE = e;

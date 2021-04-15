@@ -17,7 +17,7 @@ namespace JG
 
 		SharedPtr<ScheduleHandle> mHandle;
 	protected:
-		virtual bool Initialize();
+		virtual void Initialize();
 		virtual void Destroy();
 
 		void Start();

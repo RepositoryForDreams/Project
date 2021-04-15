@@ -1,6 +1,6 @@
 #pragma once
 #include "JGCore.h"
-
+#include "Application.h"
 
 
 
@@ -12,11 +12,15 @@ namespace JG
 	class IUIErrorReceiver;
 	class IUIViewModel
 	{
+	private:
 		template<class T>
 		friend class UIView;
 	protected:
-		virtual bool Initialize() = 0;
+		virtual void Initialize() = 0;
 		virtual void Destroy()    = 0;
+		virtual void OnEvent(IEvent& e) = 0;
+
+	protected:
 		virtual void SetErrorReceiver(IUIErrorReceiver* receiver) = 0;
 	public:
 		virtual ~IUIViewModel() = default;
@@ -35,13 +39,11 @@ namespace JG
 		UIModelType* RegisterUIModel()
 		{
 			Type type = Type(TypeID<UIModelType>());
-			if (mUIModelPool.find(type) != mUIModelPool.end())
+			if (mUIModelPool.find(type) == mUIModelPool.end())
 			{
-				return nullptr;
+				mUIModelPool[type] = CreateSharedPtr<UIModelType>();
 			}
-			mUIModelPool[type] = CreateSharedPtr<UIModelType>();
 			mUIModelPool[type]->Initialize();
-
 			return static_cast<UIModelType*>(mUIModelPool[type].get());
 		}
 
@@ -56,8 +58,13 @@ namespace JG
 			}
 			return static_cast<UIModelType*>(iter->second.get());
 		}
-
+		template<class EventClass>
+		void SendEvent(EventClass& e)
+		{
+			Application::GetInstance().SendEvent(e);
+		}
 		virtual void Destroy() override;
+		virtual void OnEvent(IEvent& e);
 	protected:
 		void SendError(SharedPtr<IUIError> error);
 	private:

@@ -8,39 +8,23 @@
 
 namespace JG
 {
-	class TypeIDProvider
-	{
-	protected:
-		template<class T>
-		friend class TypeID;
-
-
-		const static u64 TYPE_NULL_ID = -1;
-		static std::atomic<u64> IDOffset;
-	private:
-		TypeIDProvider() = default;
-	};
-
-
-
-
 	template<class T>
 	class TypeID 
 	{
 		friend class Type;
+		const static u64 TYPE_NULL_ID = -1;
 		static u64 ID;
 	public:
-		TypeID()
+		TypeID(T* _this = nullptr)
 		{
-			if (ID == TypeIDProvider::TYPE_NULL_ID)
+			if (ID == TYPE_NULL_ID)
 			{
-				ID = TypeIDProvider::IDOffset++;
+				ID = typeid(T).hash_code();
 			}
 		}
-		TypeID(T* _this) : TypeID() {}
 	};
 	template<class T>
-	u64 TypeID<T>::ID = TypeIDProvider::TYPE_NULL_ID;
+	u64 TypeID<T>::ID = TYPE_NULL_ID;
 
 
 

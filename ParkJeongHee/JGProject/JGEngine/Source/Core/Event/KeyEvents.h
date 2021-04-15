@@ -16,7 +16,7 @@ namespace JG
 
 	class KeyPressedEvent : public KeyEvent
 	{
-		EVENT_CLASS(EEventType::KeyPressed, EEventCategory::Keyboard | EEventCategory::Input)
+		EVENTCLASS(EEventCategory::Keyboard | EEventCategory::Input)
 	public:
 		virtual ~KeyPressedEvent() override  {}
 		virtual String ToString() const override
@@ -29,7 +29,7 @@ namespace JG
 
 	class KeyReleasedEvent : public KeyEvent
 	{
-		EVENT_CLASS(EEventType::KeyPressed, EEventCategory::Keyboard | EEventCategory::Input)
+		EVENTCLASS(EEventCategory::Keyboard | EEventCategory::Input)
 	public:
 		virtual ~KeyReleasedEvent() override  {}
 		virtual String ToString() const override
@@ -41,7 +41,7 @@ namespace JG
 
 	class KeyTypingEvent : public IEvent
 	{
-		EVENT_CLASS(EEventType::KeyTyping, EEventCategory::Keyboard | EEventCategory::Input)
+		EVENTCLASS(EEventCategory::Keyboard | EEventCategory::Input)
 	public:
 		virtual ~KeyTypingEvent() override {}
 		virtual String ToString() const override

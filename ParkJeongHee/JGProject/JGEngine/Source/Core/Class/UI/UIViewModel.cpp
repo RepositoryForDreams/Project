@@ -11,6 +11,9 @@ namespace JG
 			_pair.second->Destroy();
 		}
 	}
+	void UIViewModel::OnEvent(IEvent& e)
+	{
+	}
 	void UIViewModel::SendError(SharedPtr<IUIError> error)
 	{
 		mUIErrorReceiver->ReceiveError(error);

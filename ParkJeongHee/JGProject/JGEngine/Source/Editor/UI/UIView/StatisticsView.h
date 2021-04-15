@@ -8,15 +8,14 @@ namespace JG
 	class StatisticsViewModel;
 	class StatisticsView : public UIView<StatisticsViewModel>
 	{
+		UIVIEWCLASS
 		bool mOpenGUI = true;
 	public:
 		StatisticsView();
+		virtual ~StatisticsView() = default;
 	protected:
-		virtual bool Initialize() override;
+		virtual void Initialize() override;
 		virtual void OnGUI() override;
 		virtual void Destroy() override;
-	public:
-		virtual Type GetType() const override;
-		virtual ~StatisticsView() = default;
 	};
 }

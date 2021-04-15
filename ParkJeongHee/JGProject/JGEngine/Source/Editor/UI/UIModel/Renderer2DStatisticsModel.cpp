@@ -9,10 +9,9 @@ namespace JG
 
 
 
-	bool Renderer2DStatisticsModel::Initialize()
+	void Renderer2DStatisticsModel::Initialize()
 	{
 		Start();
-		return true;
 	}
 
 	void Renderer2DStatisticsModel::Destroy()

@@ -7,7 +7,7 @@ namespace JG
 {
 	class MouseMovedEvent : public IEvent
 	{
-		EVENT_CLASS(EEventType::MouseMoved, EEventCategory::Mouse)
+		EVENTCLASS(EEventCategory::Mouse)
 	public:
 		virtual ~MouseMovedEvent() override {}
 		virtual String ToString() const override
@@ -23,7 +23,7 @@ namespace JG
 
 	class MouseButtonPressedEvent : public IEvent
 	{
-		EVENT_CLASS(EEventType::MouseButtonPressed, EEventCategory::Input | EEventCategory::MouseButton | EEventCategory::Mouse)
+		EVENTCLASS(EEventCategory::Input | EEventCategory::MouseButton | EEventCategory::Mouse)
 	public:
 		virtual ~MouseButtonPressedEvent() override {}
 		virtual String ToString() const override
@@ -36,7 +36,7 @@ namespace JG
 
 	class MouseButtonReleasedEvent : public IEvent
 	{
-		EVENT_CLASS(EEventType::MouseButtonReleased, EEventCategory::Input | EEventCategory::MouseButton | EEventCategory::Mouse)
+		EVENTCLASS(EEventCategory::Input | EEventCategory::MouseButton | EEventCategory::Mouse)
 	public:
 		virtual ~MouseButtonReleasedEvent() override {}
 		virtual String ToString() const override
@@ -49,7 +49,7 @@ namespace JG
 
 	class MouseScrollMovedEvent : public IEvent
 	{
-		EVENT_CLASS(EEventType::MouseScrollMoved, EEventCategory::Mouse);
+		EVENTCLASS( EEventCategory::Mouse);
 	public:
 		virtual ~MouseScrollMovedEvent(){}
 		virtual String ToString() const override

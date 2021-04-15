@@ -4,10 +4,8 @@
 
 namespace JG
 {
-	bool SceneModel::Initialize()
+	void SceneModel::Initialize()
 	{
-
-		return true;
 	}
 	void SceneModel::Destroy()
 	{

@@ -32,8 +32,8 @@
 #include "Event/ApplicationEvents.h"
 #include "Event/KeyEvents.h"
 #include "Event/MouseEvents.h"
-#include "Event/GameEvent.h"
-#include "Event/EditorEvent.h"
+#include "Event/GameEvents.h"
+#include "Event/EditorEvents.h"
 
 
 #include "Class/Command.h"

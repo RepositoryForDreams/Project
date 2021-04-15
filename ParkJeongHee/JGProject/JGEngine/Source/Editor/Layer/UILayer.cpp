@@ -3,9 +3,9 @@
 #include "Imgui/imgui.h"
 #include "UI/UIView/StatisticsView.h"
 #include "UI/UIView/SceneView.h"
+#include "UI/UIView/WorldHierarchyView.h"
 
-
-#include "Class/Game/GameNode.h"
+#include "Class/Game/GameWorld.h"
 namespace JG
 {
 	void UILayer::OnAttach()
@@ -25,6 +25,7 @@ namespace JG
 
 		UIManager::GetInstance().RegisterUIView<SceneView>();
 		UIManager::GetInstance().RegisterUIView<StatisticsView>();
+		UIManager::GetInstance().RegisterUIView<WorldHierarchyView>();
 		LoadUISettings(TT("JGUI.ini"));
 	}
 	void UILayer::Destroy()
@@ -33,19 +34,15 @@ namespace JG
 	}
 	void UILayer::OnEvent(IEvent& e)
 	{
-		EventDispatcher dispatcher(e);
-		dispatcher.Dispatch<WorldHierarchyUpdateEvent>(EVENT_BIND_FN(&UILayer::OnWorldHierarchyUpdate));
+		//EventDispatcher dispatcher(e);
+		//dispatcher.Dispatch<WorldHierarchyUpdateEvent>(EVENT_BIND_FN(&UILayer::OnWorldHierarchyUpdate));
 	}
 	String UILayer::GetLayerName()
 	{
 		return TT("UILayer");
 	}
 
-	bool UILayer::OnWorldHierarchyUpdate(WorldHierarchyUpdateEvent& e)
-	{
-		JG_INFO("Update WorldHierarchy : {0} ", ws2s(e.RootNode->GetName()));
-		return true;
-	}
+
 
 
 	void UILayer::LoadUISettings(const String& fileName)

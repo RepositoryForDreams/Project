@@ -3,10 +3,9 @@
 #include "UI/UIModel/Renderer2DStatisticsModel.h"
 namespace JG
 {
-	bool StatisticsViewModel::Initialize()
+	void StatisticsViewModel::Initialize()
 	{
 		RegisterUIModel<Renderer2DStatisticsModel>();
-		return true;
 	}
 	void StatisticsViewModel::Destroy()
 	{

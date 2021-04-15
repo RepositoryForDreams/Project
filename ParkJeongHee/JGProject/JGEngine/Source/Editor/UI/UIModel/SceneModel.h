@@ -10,7 +10,7 @@ namespace JG
 		SharedPtr<ITexture> mSceneTexture;
 		JVector2 mMinSize;
 	protected:
-		virtual bool Initialize() override;
+		virtual void Initialize() override;
 		virtual void Destroy() override;
 	public:
 		void SetMinSize(const JVector2& size);

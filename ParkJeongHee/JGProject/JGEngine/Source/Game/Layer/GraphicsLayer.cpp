@@ -101,8 +101,6 @@ float4 ps_main(VS_OUT pin) : SV_TARGET
 }
 )"), EShaderFlags::Allow_PixelShader | EShaderFlags::Allow_VertexShader);
 
-
-
 		mMaterial = IMaterial::Create(TT("Material"), mShader);
 		if (mMaterial->SetFloat4x4(TT("gWorld"), JMatrix::Identity()) == false)
 		{
@@ -132,20 +130,20 @@ float4 ps_main(VS_OUT pin) : SV_TARGET
 
 	EScheduleResult GraphicsLayer::Update()
 	{
-		//if (Renderer3D::Begin(mCamera))
-		//{
-		//	Renderer3D::DrawCall(mMesh, mMaterial);
-
-		//	Renderer3D::End();
-		//}
-
-		mCamera->SetOrthographic(true);
-		if (Renderer2D::Begin(mCamera))
+		if (Renderer3D::Begin(mCamera))
 		{
-			Renderer2D::DrawCall(JVector2(0, 0), JVector2(200, 200), mTestTexture);
+			Renderer3D::DrawCall(mMesh, mMaterial);
 
-			Renderer2D::End();
+			Renderer3D::End();
 		}
+
+		//mCamera->SetOrthographic(true);
+		//if (Renderer2D::Begin(mCamera))
+		//{
+		//	Renderer2D::DrawCall(JVector2(0, 0), JVector2(200, 200), mTestTexture);
+
+		//	Renderer2D::End();
+		//}
 
 		return EScheduleResult::Continue;
 	}

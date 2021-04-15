@@ -1,52 +1,48 @@
 ﻿#pragma once
 #include "Common/Enum.h"
+#include "Common/Type.h"
 #include "Common/Abstract.h"
+
 #include <string>
 
 
 
 namespace JG
 {
-	enum class EEventType
-	{
-		// Application
-		AppOpen, AppClose,  AppResize,
+	//enum class EEventType
+	//{
+	//	// Application
+	//	AppOpen, AppClose,  AppResize,
 
-		// Input
-		KeyPressed, KeyReleased, KeyTyping,
-		MouseMoved, MouseButtonPressed, MouseButtonReleased,
-		MouseScrollMoved,
+	//	// Input
+	//	KeyPressed, KeyReleased, KeyTyping,
+	//	MouseMoved, MouseButtonPressed, MouseButtonReleased,
+	//	MouseScrollMoved,
 
-		// Game
-		WorldHierarchyUpdate,
-	};
+	//	// Game
+	//};
 
 
 	ENUM_FLAG(EEventCategory)
 	enum class EEventCategory
 	{
 		None			= 0,
-		Application		= 1,
-		Keyboard		= 2,
-		Mouse			= 4,
-		MouseButton		= 8,
-		Input			= 16,
-		Game            = 32,
+		Application		= 0x001,
+		Keyboard		= 0x002,
+		Mouse			= 0x004,
+		MouseButton		= 0x008,
+		Input			= 0x010,
+		Game            = 0x020,
+		Editor          = 0x030,
+
+		Request         = 0x100,
+		Response        = 0x200,
 	};
 
-#define EVENT_TYPE(type) \
-	static EEventType GetStaticType() { return type; } \
-	virtual EEventType GetEventType() const override { return type; } \
-
-	
-#define EVENT_CATEGORY(category) \
-	virtual EEventCategory GetCategory() const override { return category; } \
-
-
-#define  EVENT_CLASS(eventType, category) \
+#define  EVENTCLASS(category) \
 public: \
-	EVENT_TYPE(eventType) \
-	EVENT_CATEGORY(category) \
+	virtual Type GetEventType()  const override { return Type(TypeID(this)); } \
+	virtual EEventCategory GetCategory() const override { return category; } \
 private: \
 
 
@@ -59,7 +55,7 @@ private: \
 	public:
 		virtual ~IEvent() = default;
 		virtual String    ToString()    const = 0;
-		virtual EEventType     GetEventType()const = 0;
+		virtual Type      GetEventType()const = 0;
 		virtual EEventCategory GetCategory() const = 0;
 	public:
 		bool IsInCategory(EEventCategory category) const
@@ -82,7 +78,7 @@ private: \
 		template<class T, class Func>
 		bool Dispatch(const Func& func)
 		{
-			if(mEvent.GetEventType() == T::GetStaticType())
+			if(mEvent.GetEventType() == Type(TypeID<T>()))
 			{
 				mEvent.Handled |= func(static_cast<T&>(mEvent));
 				return true;

@@ -71,6 +71,16 @@ namespace JG
 			}
 		}
 	}
+	void UIManager::OnEvent(IEvent& e)
+	{
+		for (auto& _pair : mUIViewPool)
+		{
+			if (_pair.second->IsOpen() && e.Handled == false)
+			{
+				_pair.second->OnEvent(e);
+			}
+		}
+	}
 	void UIManager::ForEach(MenuItemNode* rootNode, const std::function<void(const MenuItemNode*)>& beginAction, const std::function<void(const MenuItemNode*)>& endAction)
 	{
 		if (rootNode == nullptr)

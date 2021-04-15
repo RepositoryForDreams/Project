@@ -7,15 +7,14 @@ namespace JG
 {
 	class SceneView : public UIView<SceneViewModel>
 	{
+		UIVIEWCLASS
 		bool mOpenGUI = true;
 	public:
 		SceneView();
+		virtual ~SceneView() = default;
 	protected:
-		virtual bool Initialize() override;
+		virtual void Initialize() override;
 		virtual void OnGUI() override;
 		virtual void Destroy() override;
-	public:
-		virtual Type GetType() const override;
-		virtual ~SceneView() = default;
 	};
 }

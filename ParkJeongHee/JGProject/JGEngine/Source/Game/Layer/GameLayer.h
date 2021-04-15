@@ -4,11 +4,10 @@
 
 namespace JG
 {
-	class GameNode;
-	class GameRootNode;
+	class GameWorld;
 	class GameLayer : public ILayer
 	{
-		GameRootNode* mGameRootNode = nullptr;
+		GameWorld* mGameWorld = nullptr;
 	public:
 		virtual ~GameLayer() {}
 	public:
@@ -22,6 +21,6 @@ namespace JG
 
 		virtual String GetLayerName() override;
 	public:
-		EScheduleResult WorldHierarchyUpdate();
+		bool ResponseGameWorld(RequestGameWorldEvent& e);
 	};
 }

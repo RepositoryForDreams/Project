@@ -19,7 +19,7 @@ namespace JG
 
 
 	protected:
-		virtual bool Initialize() override;
+		virtual void Initialize() override;
 		virtual void Destroy() override;
 
 	public:

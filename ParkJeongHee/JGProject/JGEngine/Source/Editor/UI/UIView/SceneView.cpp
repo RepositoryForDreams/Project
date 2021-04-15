@@ -17,12 +17,10 @@ namespace JG
 		}, nullptr);
 	}
 
-	bool SceneView::Initialize()
+	void SceneView::Initialize()
 	{
 		auto viewModel = GetViewModel();
 		viewModel->SetMinSize(JVector2(820, 620));
-
-		return true;
 	}
 
 	void SceneView::OnGUI()
@@ -69,10 +67,4 @@ namespace JG
 	void SceneView::Destroy()
 	{
 	}
-
-	Type SceneView::GetType() const
-	{
-		return Type(TypeID<SceneView>());
-	}
-
 }

@@ -8,7 +8,7 @@ namespace JG
 	class IUIViewModel;
 	class UIViewModel;
 	// Param / Child
-
+#define UIVIEWCLASS 		virtual Type GetType() const override { return Type(TypeID(this));}
 	class IUIError
 	{
 	public:
@@ -28,10 +28,11 @@ namespace JG
 	{
 		friend class UIManager;
 	protected:
-		virtual bool Initialize()  = 0;
+		virtual void Initialize()  = 0;
 		virtual void OnGUI()       = 0;
 		virtual void Destroy()     = 0;
-
+	protected:
+		virtual void OnEvent(IEvent& e) = 0;
 	public:
 		virtual void Open()  = 0;
 		virtual void Close() = 0;
@@ -51,6 +52,10 @@ namespace JG
 	private:
 		UniquePtr<ViewModelType> mViewModel;
 		bool mIsOpen = false;
+	private:
+		virtual void OnEvent(IEvent& e) override {
+			static_cast<IUIViewModel*>(mViewModel.get())->OnEvent(e);
+		}
 	public:
 		ViewModelType* GetViewModel() const {
 			return mViewModel.get();

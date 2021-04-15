@@ -5,14 +5,9 @@
 
 namespace JG
 {
-	bool SceneViewModel::Initialize()
+	void SceneViewModel::Initialize()
 	{
-		if (mSceneMdoel == nullptr)
-		{
-			mSceneMdoel = RegisterUIModel<SceneModel>();
-		}
-
-		return true;
+		mSceneMdoel = RegisterUIModel<SceneModel>();
 	}
 
 	void SceneViewModel::Destroy()

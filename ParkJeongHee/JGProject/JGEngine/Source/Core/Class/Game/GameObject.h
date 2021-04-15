@@ -3,7 +3,7 @@
 #include "Common/Type.h"
 namespace JG		
 {
-#define GameClass \
+#define GAMECLASS \
 	virtual Type GetObjectType() const override { return Type(TypeID(this));} \
 
 	template<class T>
@@ -28,7 +28,7 @@ namespace JG
 
 	class GameObject : public IGameObject, public ISubscriber
 	{
-		GameClass
+		GAMECLASS
 	private:
 		mutable u64     mID = 0;
 		mutable String mName;

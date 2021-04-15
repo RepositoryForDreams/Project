@@ -6,7 +6,7 @@ namespace JG
 	class GameComponent;
 	class GameNode : public GameObject
 	{
-		GameClass
+		GAMECLASS
 	private:
 		GameNode* mParent;
 		List<GameNode*>      mChilds;
@@ -75,11 +75,5 @@ namespace JG
 		void DestroyRecursive();
 	};
 
-	class GameRootNode : public GameNode
-	{
-		GameClass
-	public:
-		virtual void SetParent(GameNode* node) override {}
-	};
 
 }
