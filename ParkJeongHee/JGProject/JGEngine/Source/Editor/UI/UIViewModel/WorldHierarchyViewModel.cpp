@@ -17,12 +17,22 @@ namespace JG
 		mWorldHierarchyModel = RegisterUIModel<WorldHierarchyModel>();
 		RequestGameWorldEvent e;
 		SendEvent(e);
+
+
+		mAddEmptyObject = CreateUniquePtr<Command<GameNode*>>();
+		mAddEmptyObject->Subscribe(this, [&](GameNode* parent)
+		{
+			parent->AddNode<GameNode>(TT("Empty"));
+		});
 	}
 
 	void WorldHierarchyViewModel::Destroy()
 	{
 		UIViewModel::Destroy();
+
+		mAddEmptyObject->UnSubscribe(this);
 		mTreeNodePool.clear();
+		mAddEmptyObject = nullptr;
 		mWorldHierarchyModel = nullptr;
 	}
 
@@ -35,9 +45,9 @@ namespace JG
 	}
 
 	void WorldHierarchyViewModel::ForEach(
-		const std::function<bool(WorldHierarchyTreeNode)>& pushAction, 
-		const std::function<void(WorldHierarchyTreeNode)>& action,
-		const std::function<void(WorldHierarchyTreeNode)>& popAction)
+		const std::function<bool(WorldHierarchyTreeNode&)>& pushAction,
+		const std::function<void(WorldHierarchyTreeNode&)>& action,
+		const std::function<void(WorldHierarchyTreeNode&)>& popAction)
 	{
 		if (mWorldHierarchyModel == nullptr)
 		{
@@ -46,22 +56,84 @@ namespace JG
 		auto gameWorld = mWorldHierarchyModel->GetGameWorld();
 		if (gameWorld != nullptr)
 		{
-			auto iter = mTreeNodePool.find(gameWorld);
-			if (iter == mTreeNodePool.end())
-			{
-				mTreeNodePool[gameWorld].Object    = gameWorld;
-				mTreeNodePool[gameWorld].UserFlags = 0;
-			}
-			auto& treeNode = mTreeNodePool[gameWorld];
-			
-			bool isOpen = pushAction(treeNode);
-			action(treeNode);
-			if (isOpen == true)
-			{
-				popAction(treeNode);
-			}
+			ForEach(gameWorld, pushAction, action, popAction);
 		}
 
+	}
+
+	ICommand<GameNode*>* WorldHierarchyViewModel::GetCommand_AddEmptyObject() const
+	{
+		return mAddEmptyObject.get();
+	}
+
+	void WorldHierarchyViewModel::SetCurrentSelectedNode(GameNode* node)
+	{
+		if (mTreeNodePool.find(node) == mTreeNodePool.end())
+		{
+			return;
+		}
+		auto& treeNode = mTreeNodePool[node];
+		treeNode.IsSelected = true;
+
+		if (mCurrentSelectedNode != nullptr)
+		{
+			auto& treeNode = mTreeNodePool[mCurrentSelectedNode];
+			treeNode.IsSelected = false;
+		}
+
+		mCurrentSelectedNode = node;
+
+	}
+
+	GameNode* WorldHierarchyViewModel::GetCurrentSelectdNode() const
+	{
+		return mCurrentSelectedNode;
+	}
+
+
+	void WorldHierarchyViewModel::ForEach(GameNode* gameNode,
+		const std::function<bool(WorldHierarchyTreeNode&)>& pushAction,
+		const std::function<void(WorldHierarchyTreeNode&)>& action,
+		const std::function<void(WorldHierarchyTreeNode&)>& popAction)
+	{
+		if (gameNode == nullptr)
+		{
+			return;
+		}
+		auto iter = mTreeNodePool.find(gameNode);
+		if (iter == mTreeNodePool.end())
+		{
+			mTreeNodePool[gameNode].Object = gameNode;
+			mTreeNodePool[gameNode].UserFlags = 0;
+		}
+		auto& treeNode = mTreeNodePool[gameNode];
+
+		bool isOpen = pushAction(treeNode);
+		action(treeNode);
+
+		if (treeNode.IsSelected)
+		{
+			mSelectedNodes.insert(treeNode.Object);
+		}
+		else
+		{
+			mSelectedNodes.erase(treeNode.Object);
+		}
+
+
+		if (isOpen == true)
+		{
+			gameNode->ForEach([&](GameNode* node)
+			{
+				ForEach(node, pushAction, action, popAction);
+			});
+		
+		}
+	
+		if (treeNode.IsTreePop)
+		{
+			popAction(treeNode);
+		}
 	}
 
 

@@ -43,13 +43,15 @@ namespace JG
 	}
 
 
-	void UILayer::ShowContextMenu(const Type& type)
+	bool UILayer::ShowContextMenu(const Type& type)
 	{
-		if (ImGui::BeginPopupContextItem(ws2s(type.GetName() + TT("_Context")).c_str()))
+		if (ImGui::BeginPopupContextItem())
 		{
 			UIManager::GetInstance().ForEach(type, UILayer::BeginMenu, UILayer::EndMenu);
 			ImGui::EndPopup();
+			return true;
 		}
+		return false;
 	}
 
 

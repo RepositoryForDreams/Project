@@ -44,13 +44,19 @@ namespace JG
 
 		}
 	};
+	template<class ... Args>
+	class ICommand
+	{
+	public:
+		virtual void Execute(Args... args) = 0;
+	};
 
 
 	template<class ... Args>
-	class Command : public CommandBase<Args...>
+	class Command : public CommandBase<Args...>, public ICommand<Args...>
 	{
 	public:
-		void Execute(Args... args)
+		virtual void Execute(Args... args) override
 		{
 			u64 cnt = mSubscriberList.size();
 			for (u64 i = 0; i < cnt; ++i)

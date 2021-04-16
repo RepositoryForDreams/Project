@@ -23,7 +23,7 @@ namespace JG
 		{
 			auto obj = GameObjectFactory::GetInstance().CreateObject<T>();
 			obj->SetName(name);
-			mChilds.push_back(obj);
+			obj->SetParent(this);
 			return obj;
 		}
 

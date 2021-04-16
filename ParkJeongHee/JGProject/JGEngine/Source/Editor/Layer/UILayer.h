@@ -24,7 +24,7 @@ namespace JG
 
 		virtual String GetLayerName() override;
 	public:
-		static void ShowContextMenu(const Type& type);
+		static bool ShowContextMenu(const Type& type);
 
 	private:
 		void LoadUISettings(const String& fileName);

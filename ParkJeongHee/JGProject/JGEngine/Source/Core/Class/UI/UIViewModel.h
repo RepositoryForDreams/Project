@@ -10,7 +10,7 @@ namespace JG
 	class IUIModel;
 	class IUIError;
 	class IUIErrorReceiver;
-	class IUIViewModel
+	class IUIViewModel : public ISubscriber
 	{
 	private:
 		template<class T>

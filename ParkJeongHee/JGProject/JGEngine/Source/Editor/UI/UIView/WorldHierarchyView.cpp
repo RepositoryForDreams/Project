@@ -16,7 +16,10 @@ namespace JG
 	}
 	void WorldHierarchyView::Load()
 	{
-		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("2D"), 0, nullptr, nullptr);
+		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("Empty Object"), 0, [&]()
+		{
+			mVm->GetCommand_AddEmptyObject()->Execute(mVm->GetCurrentSelectdNode());
+		}, nullptr);
 		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("2D/Sprite"), 0, nullptr, nullptr);
 		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("3D/Cube"), 0, nullptr, nullptr);
 		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("3D/Sphere"), 0, nullptr, nullptr);
@@ -44,31 +47,37 @@ namespace JG
 				(isLeaf) ?
 					nodeData.UserFlags |= ImGuiTreeNodeFlags_Leaf :
 					nodeData.UserFlags &= ~(ImGuiTreeNodeFlags_Leaf);
-				
-				isOpen = ImGui::TreeNodeEx(ws2s(TT("World : ") + nodeData.Object->GetName()).c_str(), nodeData.UserFlags);
 
-				if (isRoot && isLeaf)
-				{
-					return false;
-				}
-
+				isOpen = ImGui::TreeNodeEx((void*)nodeData.Object->GetID(), nodeData.UserFlags, ws2s(nodeData.Object->GetName()).c_str());
+				nodeData.IsTreePop = (isOpen == true && isRoot == false);
 				return isOpen;
 			},
 				[&](WorldHierarchyTreeNode& nodeData)
 			{
-				if (ImGui::IsItemClicked() == true)
+				static bool isContextOpen = false;
+				ImGui::PushID(nodeData.Object->GetID());
+				if (UILayer::ShowContextMenu(GetType()) == true)
 				{
-					nodeData.IsSelected = true;
+					if (isContextOpen == false)
+					{
+						isContextOpen = true;
+						mVm->SetCurrentSelectedNode(nodeData.Object);
+					}
+		
 				}
-				else if (ImGui::IsKeyDown((i32)EKeyCode::Ctrl) == false)
+				else
 				{
-					nodeData.IsSelected = false;
+					isContextOpen = false;
+					if (ImGui::IsItemClicked() == true)
+					{
+						mVm->SetCurrentSelectedNode(nodeData.Object);
+					}
 				}
 				(nodeData.IsSelected == true) ?
 					nodeData.UserFlags |= ImGuiTreeNodeFlags_Selected :
 					nodeData.UserFlags &= ~ImGuiTreeNodeFlags_Selected;
-	
-				UILayer::ShowContextMenu(GetType());
+
+				ImGui::PopID();
 			},
 				[&](WorldHierarchyTreeNode& nodeData)
 			{

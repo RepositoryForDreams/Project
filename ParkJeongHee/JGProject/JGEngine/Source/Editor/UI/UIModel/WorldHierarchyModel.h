@@ -5,9 +5,10 @@
 namespace JG
 {
 	class GameWorld;
+	class GameNode;
 	class WorldHierarchyModel : public UIModel
 	{
-		GameWorld* mGameWorld = nullptr;
+		GameWorld*      mGameWorld = nullptr;
 	public:
 		virtual ~WorldHierarchyModel() = default;
 	protected:
@@ -16,5 +17,6 @@ namespace JG
 	public:
 		void SetGameWorld(GameWorld* gameWorld);
 		GameWorld* GetGameWorld() const;
+
 	};
 }

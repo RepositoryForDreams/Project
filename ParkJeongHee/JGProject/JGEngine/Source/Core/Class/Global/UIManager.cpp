@@ -104,6 +104,7 @@ namespace JG
 		{
 			return;
 		}
+
 		using NodeIterator = SortedDictionary<u64, List<UniquePtr<MenuItemNode>>>::iterator;
 		struct NodeHistroy
 		{
@@ -209,7 +210,18 @@ namespace JG
 		MenuItemNode* currRootNode = nullptr;
 		if (pos == String::npos)
 		{
-			RegisterMenuNode(rootNode, menuPath, priority);
+			if (rootNode == mMainMenuItemRootNode.get())
+			{
+				RegisterMenuNode(rootNode, menuPath, priority);
+			}
+			else
+			{
+				currRootNode = RegisterMenuNode(rootNode, path, priority);
+				currRootNode->MenuItem = CreateUniquePtr<MenuItem>();
+				currRootNode->MenuItem->Action = action;
+				currRootNode->MenuItem->EnableAction = enableAction;
+				currRootNode->MenuItem->ShortCut = shortCut;
+			}
 			return;
 		}
 		else
