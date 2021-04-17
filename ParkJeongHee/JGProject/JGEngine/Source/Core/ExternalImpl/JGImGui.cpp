@@ -28,6 +28,8 @@ namespace JG
 	namespace DirectX12
 	{
 		static ComPtr<ID3D12DescriptorHeap> gSrvDescriptorHeap;
+		static ComPtr<ID3D12CommandAllocator>    gCommandAlloc;
+		static ComPtr<ID3D12GraphicsCommandList> gCommandList;
 		static u32 gIncreaseSize = 0;
 		static u32 gCurrentSrvIndex     = 0;
 		static const u32 gSrvStartIndex = 1;
@@ -49,6 +51,16 @@ namespace JG
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
 		ImGui::StyleColorsDark();
 
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+
+		ImGuiStyle& style = ImGui::GetStyle();
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		{
+			style.WindowRounding = 0.0f;
+			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+		}
 
 
 		FrameBufferInfo info;
@@ -75,7 +87,9 @@ namespace JG
 		{
 			DirectX12::gSrvDescriptorHeap = CreateD3DDescriptorHeap(DirectX12API::GetD3DDevice(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
 				D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, DirectX12::gMaxSrvCount * bufferCount);
-
+			DirectX12::gCommandAlloc = CreateD3DCommandAllocator(DirectX12API::GetD3DDevice(), D3D12_COMMAND_LIST_TYPE_DIRECT);
+			DirectX12::gCommandList  = CreateD3DCommandList(DirectX12API::GetD3DDevice(), DirectX12::gCommandAlloc, D3D12_COMMAND_LIST_TYPE_DIRECT);
+			DirectX12::gCommandList->Close();
 			ImGui_ImplDX12_Init(DirectX12API::GetD3DDevice(), (i32)DirectX12API::GetFrameBufferCount(),
 				DXGI_FORMAT_R8G8B8A8_UNORM, DirectX12::gSrvDescriptorHeap.Get(),
 				DirectX12::gSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
@@ -100,8 +114,18 @@ namespace JG
 				ImGui::Render();
 				ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdList);
 
+
 				DirectX12::gCurrentSrvIndex = (DirectX12::gMaxSrvCount * DirectX12API::GetFrameBufferIndex()) + DirectX12::gSrvStartIndex;
 				return state;
+			});
+
+			dx12FrameBuffer->AddPresentCallBack([&]()
+			{
+				if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+				{
+					ImGui::UpdatePlatformWindows();
+					ImGui::RenderPlatformWindowsDefault(NULL, (void*)DirectX12::gCommandList.Get());
+				}
 			});
 		}
 		break;
@@ -118,6 +142,8 @@ namespace JG
 		{
 		case JG::EGraphicsAPI::DirectX12:
 			DirectX12::gSrvDescriptorHeap.Reset(); DirectX12::gSrvDescriptorHeap = nullptr;
+			DirectX12::gCommandList.Reset(); DirectX12::gCommandList   = nullptr;
+			DirectX12::gCommandAlloc.Reset(); DirectX12::gCommandAlloc = nullptr;
 			ImGui_ImplDX12_Shutdown();
 		break;
 		default:

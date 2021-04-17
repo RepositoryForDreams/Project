@@ -31,61 +31,59 @@ namespace JG
 	}
 	void WorldHierarchyView::OnGUI()
 	{
-		if (ImGui::Begin("WorldHierarchyView", &mOpenGUI))
+		ImGui::Begin("WorldHierarchyView", &mOpenGUI);
+
+		mVm->ForEach(
+			[&](WorldHierarchyTreeNode& nodeData) -> bool
 		{
-			mVm->ForEach(
-				[&](WorldHierarchyTreeNode& nodeData) -> bool
-			{
-				bool isOpen = false;
-				bool isRoot = nodeData.Object->GetParent() == nullptr;
-				bool isLeaf = nodeData.Object->GetChildCount() == 0;
-				nodeData.UserFlags |= ImGuiTreeNodeFlags_OpenOnArrow;
-				(isRoot) ?
-					nodeData.UserFlags |= (ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader) :
-					nodeData.UserFlags &= ~(ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader);
+			bool isOpen = false;
+			bool isRoot = nodeData.Object->GetParent() == nullptr;
+			bool isLeaf = nodeData.Object->GetChildCount() == 0;
+			nodeData.UserFlags |= ImGuiTreeNodeFlags_OpenOnArrow;
+			(isRoot) ?
+				nodeData.UserFlags |= (ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader) :
+				nodeData.UserFlags &= ~(ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader);
 
-				(isLeaf) ?
-					nodeData.UserFlags |= ImGuiTreeNodeFlags_Leaf :
-					nodeData.UserFlags &= ~(ImGuiTreeNodeFlags_Leaf);
+			(isLeaf) ?
+				nodeData.UserFlags |= ImGuiTreeNodeFlags_Leaf :
+				nodeData.UserFlags &= ~(ImGuiTreeNodeFlags_Leaf);
 
-				isOpen = ImGui::TreeNodeEx((void*)nodeData.Object->GetID(), nodeData.UserFlags, ws2s(nodeData.Object->GetName()).c_str());
-				nodeData.IsTreePop = (isOpen == true && isRoot == false);
-				return isOpen;
-			},
-				[&](WorldHierarchyTreeNode& nodeData)
+			isOpen = ImGui::TreeNodeEx((void*)nodeData.Object->GetID(), nodeData.UserFlags, ws2s(nodeData.Object->GetName()).c_str());
+			nodeData.IsTreePop = (isOpen == true && isRoot == false);
+			return isOpen;
+		},
+			[&](WorldHierarchyTreeNode& nodeData)
+		{
+			static bool isContextOpen = false;
+			ImGui::PushID(nodeData.Object->GetID());
+			if (UILayer::ShowContextMenu(GetType()) == true)
 			{
-				static bool isContextOpen = false;
-				ImGui::PushID(nodeData.Object->GetID());
-				if (UILayer::ShowContextMenu(GetType()) == true)
+				if (isContextOpen == false)
 				{
-					if (isContextOpen == false)
-					{
-						isContextOpen = true;
-						mVm->SetCurrentSelectedNode(nodeData.Object);
-					}
-		
+					isContextOpen = true;
+					mVm->SetCurrentSelectedNode(nodeData.Object);
 				}
-				else
-				{
-					isContextOpen = false;
-					if (ImGui::IsItemClicked() == true)
-					{
-						mVm->SetCurrentSelectedNode(nodeData.Object);
-					}
-				}
-				(nodeData.IsSelected == true) ?
-					nodeData.UserFlags |= ImGuiTreeNodeFlags_Selected :
-					nodeData.UserFlags &= ~ImGuiTreeNodeFlags_Selected;
 
-				ImGui::PopID();
-			},
-				[&](WorldHierarchyTreeNode& nodeData)
+			}
+			else
 			{
-				ImGui::TreePop();
-			});
+				isContextOpen = false;
+				if (ImGui::IsItemClicked() == true)
+				{
+					mVm->SetCurrentSelectedNode(nodeData.Object);
+				}
+			}
+			(nodeData.IsSelected == true) ?
+				nodeData.UserFlags |= ImGuiTreeNodeFlags_Selected :
+				nodeData.UserFlags &= ~ImGuiTreeNodeFlags_Selected;
 
-			ImGui::End();
-		}
+			ImGui::PopID();
+		},
+			[&](WorldHierarchyTreeNode& nodeData)
+		{
+			ImGui::TreePop();
+		});
+		ImGui::End();
 
 
 		if (mOpenGUI == false)

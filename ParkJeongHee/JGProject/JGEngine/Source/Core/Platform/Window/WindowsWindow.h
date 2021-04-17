@@ -19,7 +19,7 @@ namespace JG
 		virtual ~WindowsWindow() override {}
 	public:
 		virtual bool Create(const WindowProps& props) override;
-		virtual void Update() override;
+		virtual bool Update() override;
 		virtual void Destroy() override;
 
 

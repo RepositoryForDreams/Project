@@ -26,37 +26,25 @@ namespace JG
 	void SceneView::OnGUI()
 	{
 		auto viewModel = GetViewModel();
+		ImGui::Begin("SceneView", &mOpenGUI);
 
-		if (ImGui::Begin("SceneView", &mOpenGUI))
+		auto minSize = viewModel->GetMinSize();
+		auto currSize = ImGui::GetWindowSize();
+
+		if (currSize.x <= minSize.x || currSize.y <= minSize.y)
 		{
-			auto minSize = viewModel->GetMinSize();
-			auto currSize = ImGui::GetWindowSize();
-			
-			if (currSize.x <= minSize.x || currSize.y <= minSize.y)
-			{
-				ImGui::SetWindowSize(ImVec2(minSize.x, minSize.y));
-			}
-
-
-
-
-
-
-			auto sceneTexture = viewModel->GetSceneTexture();
-
-			if (sceneTexture != nullptr && sceneTexture->IsValid())
-			{
-				auto textureInfo = sceneTexture->GetTextureInfo();
-				auto textureID = (ImTextureID)JGImGui::GetInstance().ConvertImGuiTextureID(sceneTexture->GetTextureID());
-				ImGui::Image(textureID, ImVec2(textureInfo.Width, textureInfo.Height));
-			}
-
-
-
-
-
-			ImGui::End();
+			ImGui::SetWindowSize(ImVec2(minSize.x, minSize.y));
 		}
+		auto sceneTexture = viewModel->GetSceneTexture();
+
+		if (sceneTexture != nullptr && sceneTexture->IsValid())
+		{
+			auto textureInfo = sceneTexture->GetTextureInfo();
+			auto textureID = (ImTextureID)JGImGui::GetInstance().ConvertImGuiTextureID(sceneTexture->GetTextureID());
+			ImGui::Image(textureID, ImVec2(textureInfo.Width, textureInfo.Height));
+		}
+
+		ImGui::End();
 		if (mOpenGUI == false)
 		{
 			mOpenGUI = true;

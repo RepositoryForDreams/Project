@@ -20,6 +20,7 @@ namespace JG
 
 	void UILayer::Begin()
 	{
+		
 		Scheduler::GetInstance().ScheduleByFrame(0, 0, -1, SchedulePriority::UILayer, SCHEDULE_BIND_FN(&UILayer::MenuUpdate));
 
 
@@ -108,12 +109,36 @@ namespace JG
 
 	EScheduleResult UILayer::MenuUpdate()
 	{
-		if (ImGui::BeginMainMenuBar())
+		ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;
+		ImGuiWindowFlags   window_flags    = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+		const ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->WorkPos);
+		ImGui::SetNextWindowSize(viewport->WorkSize);
+		ImGui::SetNextWindowViewport(viewport->ID);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+		window_flags |= ImGuiWindowFlags_NoBackground;
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::Begin("UILayer", nullptr, window_flags);
+		ImGui::PopStyleVar();
+		ImGui::PopStyleVar(2);
+		// DockSpace
+		ImGuiIO& io = ImGui::GetIO();
+		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
 		{
-			UIManager::GetInstance().ForEach(UILayer::BeginMenu, UILayer::EndMenu);
-			ImGui::EndMainMenuBar();
+			ImGuiID dockspace_id = ImGui::GetID("UILayer DockSpace");
+			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 		}
 
+		if (ImGui::BeginMenuBar())
+		{
+			UIManager::GetInstance().ForEach(UILayer::BeginMenu, UILayer::EndMenu);
+			ImGui::EndMenuBar();
+		}
+
+		ImGui::End();
 		return EScheduleResult::Continue;
 	}
 

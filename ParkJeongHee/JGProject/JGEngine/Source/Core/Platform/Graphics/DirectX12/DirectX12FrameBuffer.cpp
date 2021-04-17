@@ -3,7 +3,7 @@
 #include "DirectX12API.h"
 #include "Utill/CommandQueue.h"
 #include "Utill/CommandList.h"
-
+#include "Imgui/imgui.h"
 
 namespace JG
 {
@@ -88,6 +88,10 @@ namespace JG
 
 	bool DirectX12FrameBuffer::Present()
 	{
+		for (auto& callBack : mPresentCallBackList)
+		{
+			callBack();
+		}
 		HRESULT hResult = mSwapChain->Present(0, 0);
 		return SUCCEEDED(hResult);
 	}
@@ -133,6 +137,11 @@ namespace JG
 	void DirectX12FrameBuffer::AddUpdateCallBack(const DirectX12FrameBufferUpdateCallBack& callBack)
 	{
 		mUpdateCallBackList.push_back(callBack);
+	}
+
+	void DirectX12FrameBuffer::AddPresentCallBack(const DirectX12FrameBufferPresentCallBack& callBack)
+	{
+		mPresentCallBackList.push_back(callBack);
 	}
 
 	void DirectX12FrameBuffer::Reset()

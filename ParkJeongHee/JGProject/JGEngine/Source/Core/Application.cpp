@@ -90,15 +90,19 @@ namespace JG
 		});
 		
 
-
 		while(mIsRunning)
 		{
+			if (mWindow->Update() == false)
+			{
+				break;
+			}
 			if (TimerManager::IsValid())
 			{
 				TimerManager::GetInstance().Update();
 			}
+
 			mGraphcisAPI->Begin();
-			mWindow->Update();
+
 
 			while (mEventQueue.empty() == false)
 			{
@@ -112,6 +116,7 @@ namespace JG
 			}
 
 			mGraphcisAPI->End();
+
 		}
 
 		

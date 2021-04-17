@@ -50,17 +50,24 @@ namespace JG
 		return true;
 	}
 
-	void WindowsWindow::Update()
+	bool WindowsWindow::Update()
 	{
 		MSG msg;
-		if(PeekMessage(&msg, mHandle, 0,0, PM_REMOVE))
+		while(::PeekMessage(&msg, NULL, 0,0, PM_REMOVE))
 		{
 			if(msg.message != WM_QUIT)
 			{
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 			}
+			else
+			{
+				AppCloseEvent e;
+				Application::GetInstance().SendEventImmediate(e);
+				return false;
+			}
 		}
+		return true;
 	}
 
 	void WindowsWindow::Destroy()
@@ -143,7 +150,7 @@ namespace JG
 			return WindowCallBackFn::WindowOpenCallBack();
 		case WM_DESTROY:
 			PostQuitMessage(0);
-			return WindowCallBackFn::WindowCloseCallBack();
+			return 0;
 		}
 		return DefWindowProc(hWnd, msg, wParam, lParam);
 	}

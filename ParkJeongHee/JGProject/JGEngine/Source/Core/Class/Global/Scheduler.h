@@ -13,6 +13,8 @@ namespace JG
 	public:
 		enum 
 		{
+			// System 
+			BeginSystem      = -1000000,
 			// Layer
 			ImGuiLayer		 = -900000,
 			GameLayer        = -800000,
@@ -26,8 +28,9 @@ namespace JG
 			UpdateGameClass  = 300000,
 
 			// System
-			OnGUI = 1000000,
+			OnGUI         = 1000000,
 			DestroyObject = 2000000,
+			EndSystem     = 10000000,
 		};
 	};
 	enum class EScheduleState

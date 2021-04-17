@@ -20,17 +20,16 @@ namespace JG
 	}
 	void StatisticsView::OnGUI()
 	{
-		if (ImGui::Begin("StatisticsView", &mOpenGUI))
-		{
-			auto stats = GetViewModel()->GetRenderer2DStats();
+		ImGui::Begin("StatisticsView", &mOpenGUI);
+		auto stats = GetViewModel()->GetRenderer2DStats();
 
-			ImGui::Text("DrawCalls : %d", stats.DrawCalls);
-			ImGui::Text("QuadCount : %d", stats.QuadCount);
+		ImGui::Text("DrawCalls : %d", stats.DrawCalls);
+		ImGui::Text("QuadCount : %d", stats.QuadCount);
 
-			ImGui::Text("FPS : %d", Scheduler::GetInstance().GetScheduleTimer()->GetFPS());
+		ImGui::Text("FPS : %d", Scheduler::GetInstance().GetScheduleTimer()->GetFPS());
 
-			ImGui::End();
-		}
+		ImGui::End();
+
 		if (mOpenGUI == false)
 		{
 			mOpenGUI = true;
