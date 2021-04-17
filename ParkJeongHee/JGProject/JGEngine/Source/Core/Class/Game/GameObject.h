@@ -1,5 +1,6 @@
 #pragma once
 #include "JGCore.h"
+#include "Imgui/imgui.h"
 #include "Common/Type.h"
 namespace JG		
 {
@@ -25,12 +26,16 @@ private: \
 		virtual Type GetType()    const = 0;
 	public:
 		virtual void  SetName(const String& name) = 0;
-		virtual void* GetInspectorData() const = 0;
-		virtual Type  GetInspectorDataType() const = 0;
+	};
+
+	class IInspectorGUI
+	{
+	public:
+		virtual void OnInspectorGUI() = 0;
 	};
 
 
-	class GameObject : public IGameObject, public ISubscriber
+	class GameObject : public IGameObject, public ISubscriber, public IInspectorGUI
 	{
 		GAMECLASS
 	private:
@@ -63,12 +68,13 @@ private: \
 			Application::GetInstance().SendEventImmediate(e);
 		}
 
+
 	public:
 		virtual u64 GetID() const override;
 		virtual const String& GetName() const override;
 		virtual void SetName(const String& name) override;
-		virtual void* GetInspectorData() const override { return nullptr; }
-		virtual Type  GetInspectorDataType() const override { return Type(TypeID<void>()); }
+
+		virtual void OnInspectorGUI() {}
 	private:
 		void ArrangeScheduleHandle();
 		//void 

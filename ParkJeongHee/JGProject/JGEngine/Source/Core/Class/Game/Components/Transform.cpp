@@ -21,12 +21,11 @@ namespace JG
 	}
 	const JVector3& Transform::GetLocalLocation() const
 	{
-
-		// TODO: 여기에 return 문을 삽입합니다.
+		return mLocation;
 	}
 	const JVector3& Transform::GetLocalRotation() const
 	{
-		// TODO: 여기에 return 문을 삽입합니다.
+		return mRotation;
 	}
 	JVector3 Transform::GetWorldLocation() const
 	{
@@ -38,7 +37,15 @@ namespace JG
 	}
 	const JVector3& Transform::GetScale() const
 	{
-		// TODO: 여기에 return 문을 삽입합니다.
+		return mScale;
+	}
+	void Transform::OnInspectorGUI()
+	{
+		float padding = ImGui::CalcTextSize("Location").x - ImGui::CalcTextSize("Scale").x;
+		
+		ImGui::OnGui("Location", &mLocation);
+		ImGui::OnGui("Rotation", &mRotation);
+		ImGui::OnGui("Scale", &mScale, padding);
 	}
 	void Transform::SendDirty()
 	{

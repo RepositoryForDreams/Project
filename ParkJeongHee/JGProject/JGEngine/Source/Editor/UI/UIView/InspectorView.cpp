@@ -44,11 +44,23 @@ namespace JG
 
 				ImGui::Dummy(ImVec2(0, 1.0f));
 				ImGui::Separator();
-				
-				UIManager::GetInstance().OnInspectorGUI(
-					gameObject->GetType(),
-					gameObject->GetInspectorDataType(), 
-					gameObject->GetInspectorData());
+
+				gameObject->OnInspectorGUI();
+
+				ImGui::Spacing();	ImGui::Spacing();	ImGui::Spacing();
+				auto padding = ImGui::GetStyle().FramePadding;
+				if (ImGui::Button("Add Component", ImVec2(ImGui::GetWindowSize().x - (padding.x * 4), 0)) == true)
+				{
+					ImGui::OpenPopup("Component Finder");
+				}
+
+				if (ImGui::BeginPopupContextWindow("Component Finder") == true)
+				{
+					static char buf[256] = { 0, };
+					ImGui::InputText("##Finder Serach", buf, 256);
+					ImGui::Text("Component Finder");
+					ImGui::EndPopup();
+				}
 			}
 			else
 			{

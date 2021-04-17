@@ -19,7 +19,8 @@ namespace JG
 	private:
 		class WorldHierarchyModel* mWorldHierarchyModel = nullptr;
 		HashSet<GameNode*> mSelectedNodes;
-		GameNode*          mCurrentSelectedNode = nullptr;
+		GameNode*	mCurrentSelectedNodeInContextMenu   = nullptr;
+		GameNode*	mCurrentSelectedNodeInInspector     = nullptr;
 	private:
 		UniquePtr<Command<GameNode*>> mAddEmptyObject;
 	private:
@@ -37,8 +38,11 @@ namespace JG
 			const std::function<void(WorldHierarchyTreeNode&)>& popAction);
 		ICommand<GameNode*>* GetCommand_AddEmptyObject() const;
 
-		void SetCurrentSelectedNode(GameNode* node);
-		GameNode* GetCurrentSelectdNode() const;
+		void SetSelectedNodeInInspector(GameNode* node);
+		GameNode* GetSelectedNodeInInspector() const;
+
+		void SetSelectedNodeInContextMenu(GameNode* node);
+		GameNode* GetSelectdNodeInContextMenu() const;
 	private:
 		void ForEach(
 			GameNode* gameNode,

@@ -40,3 +40,6 @@
 #include "Class/Global/TimerManager.h"
 #include "Class/Global/Scheduler.h"
 #include "Class/Global/UIManager.h"
+
+
+#include "ExternalImpl/ImGuiExternal.h"

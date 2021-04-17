@@ -1,8 +1,7 @@
 #include "GameNode.h"
 #include "pch.h"
 #include "GameNode.h"
-#include "GameComponent.h"
-
+#include "Components/Transform.h"
 namespace JG
 {
 	void GameNode::Start()
@@ -14,12 +13,32 @@ namespace JG
 		GameObject::Destory();
 		SetParent(nullptr);
 	}
+	GameNode::GameNode()
+	{
+		mTransform = AddComponent<Transform>();
+	}
+	void GameNode::OnInspectorGUI() 
+	{
+		for (auto& com : mComponents)
+		{
+			ImGui::Spacing();
+			if (ImGui::TreeNodeEx(ws2s(com->GetName()).c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader) == true)
+			{
+				com->OnInspectorGUI();
+			}
+		
+		}
+	}
 	void GameNode::Destroy(GameNode* node)
 	{
 		node->DestroyRecursive();
 	}
 	void GameNode::Destroy(GameComponent* component)
 	{
+		if (mTransform == component)
+		{
+			return;
+		}
 		auto& begin = mComponents.begin();
 		auto& end   = mComponents.end();
 		mComponents.erase(std::remove(begin, end, component), mComponents.end());

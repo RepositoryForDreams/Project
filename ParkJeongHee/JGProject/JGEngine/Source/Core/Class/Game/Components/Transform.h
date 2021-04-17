@@ -11,7 +11,7 @@ namespace JG
 	private:
 		JVector3 mLocation;
 		JVector3 mRotation;
-		JVector3 mScale;
+		JVector3 mScale = { 1.0f,1.0f,1.0f };
 
 		mutable bool mIsDirty = true;
 	public:
@@ -26,7 +26,8 @@ namespace JG
 		JVector3 GetWorldLocation() const;
 		JVector3 GetWorldRotation() const;
 		const JVector3& GetScale() const;
-
+	public:
+		virtual void OnInspectorGUI() override;
 	private:
 		void SendDirty();
 	};

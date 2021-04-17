@@ -40,7 +40,6 @@ namespace JG
 	private:
 		Dictionary<JG::Type, UniquePtr<IUIView>>      mUIViewPool;
 		Dictionary<JG::Type, UniquePtr<MenuItemNode>> mUIViewContextMenu;
-		Dictionary<JG::Type, std::function<void(Type, const void*)>>  mInspectorGUIPool;
 		UniquePtr<MenuItemNode> mMainMenuItemRootNode;
 		mutable std::shared_mutex   mMutex;
 	public:
@@ -77,16 +76,6 @@ namespace JG
 			}
 			return static_cast<UIViewType*>(iter->second.get());
 		}
-		template<class ObjectClass>
-		void RegisterInspectorGUI(const std::function<void(Type, const void*)>& onGui)
-		{
-			auto type = Type(TypeID<ObjectClass>());
-			auto iter = mInspectorGUIPool.find(type);
-			if (iter == mInspectorGUIPool.end())
-			{
-				mInspectorGUIPool[type] = onGui;
-			}
-		}
 		void RegisterMainMenuItem(const String& menuPath, u64 priority,  const std::function<void()>& action, const std::function<bool()> enableAction);
 		void RegisterContextMenuItem(const Type& type, const String& menuPath, u64 priority, const std::function<void()>& action, const std::function<bool()> enableAction);
 		void ForEach(const std::function<void(IUIView*)> action);
@@ -97,10 +86,6 @@ namespace JG
 			const Type& type,
 			const std::function<void(const MenuItemNode*)>& beginAction,
 			const std::function<void(const MenuItemNode*)>& endAction);
-
-
-		void OnInspectorGUI(const Type& objectType, const Type& paramType, void* data);
-
 	private:
 		void OnGUI();
 		void OnEvent(IEvent& e);

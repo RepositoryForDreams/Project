@@ -4,18 +4,25 @@
 namespace JG
 {
 	class GameComponent;
+	class Transform;
 	class GameNode : public GameObject
 	{
 		GAMECLASS
 	private:
-		GameNode* mParent;
+		GameNode* mParent = nullptr;
 		List<GameNode*>      mChilds;
 		List<GameComponent*> mComponents;
+		Transform* mTransform = nullptr;
+
 	protected:
 		virtual void Start() override;
 		virtual void Destory() override;
+	
 	public:
+		GameNode();
 		virtual ~GameNode() = default;
+	public:
+		virtual void OnInspectorGUI() override;
 	public:
 		// Ãß°¡
 		template<class T>
@@ -31,6 +38,7 @@ namespace JG
 		T* AddComponent()
 		{
 			auto obj = GameObjectFactory::GetInstance().CreateObject<T>();
+			obj->mOwnerNode = this;
 			mComponents.push_back(obj);
 			return obj;
 		}
@@ -70,9 +78,8 @@ namespace JG
 		}
 	public:
 		u64 GetChildCount() const;
-
 		virtual void SetParent(GameNode* node);
-		GameNode* GetParent() const;
+		GameNode*    GetParent() const;
 	private:
 		void DestroyRecursive();
 	};

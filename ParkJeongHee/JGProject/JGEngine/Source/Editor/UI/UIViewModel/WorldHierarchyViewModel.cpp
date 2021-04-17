@@ -33,8 +33,10 @@ namespace JG
 
 		mAddEmptyObject->UnSubscribe(this);
 		mTreeNodePool.clear();
-		mAddEmptyObject = nullptr;
+		mAddEmptyObject      = nullptr;
 		mWorldHierarchyModel = nullptr;
+		mCurrentSelectedNodeInInspector   = nullptr;
+		mCurrentSelectedNodeInContextMenu = nullptr;
 	}
 
 	void WorldHierarchyViewModel::OnEvent(IEvent& e)
@@ -67,36 +69,74 @@ namespace JG
 		return mAddEmptyObject.get();
 	}
 
-	void WorldHierarchyViewModel::SetCurrentSelectedNode(GameNode* node)
+	void WorldHierarchyViewModel::SetSelectedNodeInInspector(GameNode* node)
 	{
-		if (mTreeNodePool.find(node) == mTreeNodePool.end())
+		if (mTreeNodePool.find(node) == mTreeNodePool.end() || node == mCurrentSelectedNodeInInspector)
 		{
 			return;
 		}
 		auto& treeNode = mTreeNodePool[node];
 		treeNode.IsSelected = true;
 
-		if (mCurrentSelectedNode != nullptr)
+		if (mCurrentSelectedNodeInInspector != nullptr)
 		{
-			auto& treeNode = mTreeNodePool[mCurrentSelectedNode];
+			auto& treeNode = mTreeNodePool[mCurrentSelectedNodeInInspector];
 			treeNode.IsSelected = false;
 		}
+		if (mCurrentSelectedNodeInContextMenu != nullptr)
+		{
+			auto& treeNode = mTreeNodePool[mCurrentSelectedNodeInContextMenu];
+			treeNode.IsSelected = false;
+			mCurrentSelectedNodeInContextMenu = nullptr;
+		}
 
-		mCurrentSelectedNode = node;
+		mCurrentSelectedNodeInInspector = node;
+
 		auto inspector = UIManager::GetInstance().GetUIView<InspectorView>();
 		if (inspector != nullptr)
 		{
 			auto inspectorVm = inspector->GetViewModel();
 			if (inspectorVm != nullptr)
 			{
-				inspectorVm->SetTargetGameObject(mCurrentSelectedNode);
+				inspectorVm->SetTargetGameObject(mCurrentSelectedNodeInInspector);
 			}
 		}
+
+
 	}
 
-	GameNode* WorldHierarchyViewModel::GetCurrentSelectdNode() const
+	GameNode* WorldHierarchyViewModel::GetSelectedNodeInInspector() const
 	{
-		return mCurrentSelectedNode;
+		return mCurrentSelectedNodeInInspector;
+	}
+
+	void WorldHierarchyViewModel::SetSelectedNodeInContextMenu(GameNode* node)
+	{
+		if (mTreeNodePool.find(node) == mTreeNodePool.end() || node == mCurrentSelectedNodeInContextMenu)
+		{
+			return;
+		}
+		auto& treeNode = mTreeNodePool[node];
+		treeNode.IsSelected = true;
+
+		if (mCurrentSelectedNodeInContextMenu != nullptr)
+		{
+			auto& treeNode = mTreeNodePool[mCurrentSelectedNodeInContextMenu];
+			treeNode.IsSelected = false;
+		}
+
+		if (mCurrentSelectedNodeInInspector != nullptr)
+		{
+			auto& treeNode = mTreeNodePool[mCurrentSelectedNodeInInspector];
+			treeNode.IsSelected = false;
+			mCurrentSelectedNodeInInspector = nullptr;
+		}
+		mCurrentSelectedNodeInContextMenu = node;
+	}
+
+	GameNode* WorldHierarchyViewModel::GetSelectdNodeInContextMenu() const
+	{
+		return mCurrentSelectedNodeInContextMenu;
 	}
 
 

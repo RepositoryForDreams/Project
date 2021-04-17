@@ -18,7 +18,7 @@ namespace JG
 
 		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("Empty Object"), 0, [&]()
 		{
-			mVm->GetCommand_AddEmptyObject()->Execute(mVm->GetCurrentSelectdNode());
+			mVm->GetCommand_AddEmptyObject()->Execute(mVm->GetSelectdNodeInContextMenu());
 		}, nullptr);
 		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("2D/Sprite"), 0, nullptr, nullptr);
 		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("3D/Cube"), 0, nullptr, nullptr);
@@ -61,7 +61,7 @@ namespace JG
 				if (isContextOpen == false)
 				{
 					isContextOpen = true;
-					mVm->SetCurrentSelectedNode(nodeData.Object);
+					mVm->SetSelectedNodeInContextMenu(nodeData.Object);
 				}
 
 			}
@@ -70,7 +70,7 @@ namespace JG
 				isContextOpen = false;
 				if (ImGui::IsItemClicked() == true)
 				{
-					mVm->SetCurrentSelectedNode(nodeData.Object);
+					mVm->SetSelectedNodeInInspector(nodeData.Object);
 				}
 			}
 			(nodeData.IsSelected == true) ?
