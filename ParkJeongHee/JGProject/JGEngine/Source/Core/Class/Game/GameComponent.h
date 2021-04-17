@@ -20,6 +20,6 @@ namespace JG
 		virtual void Start() override;
 		virtual void Destory() override;
 	public:
-
+		GameNode* GetOwner() const;
 	};
 }

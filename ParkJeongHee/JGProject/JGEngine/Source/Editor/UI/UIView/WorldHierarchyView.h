@@ -15,7 +15,6 @@ namespace JG
 		WorldHierarchyViewModel* mVm = nullptr;
 	public:
 		WorldHierarchyView();
-	public:
 		virtual ~WorldHierarchyView() = default;
 	protected:
 		virtual void Load() override;

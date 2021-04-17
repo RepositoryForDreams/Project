@@ -76,6 +76,16 @@ namespace JG
 		ForEach(iter->second.get(), beginAction, endAction);
 	}
 
+	void UIManager::OnInspectorGUI(const Type& objectType, const Type& paramType, void* data)
+	{
+		auto iter = mInspectorGUIPool.find(objectType);
+		if (iter == mInspectorGUIPool.end())
+		{
+			return;
+		}
+		mInspectorGUIPool[objectType](paramType, data);
+	}
+
 
 
 	void UIManager::OnGUI()

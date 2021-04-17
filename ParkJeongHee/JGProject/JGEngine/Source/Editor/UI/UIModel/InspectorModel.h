@@ -1,15 +1,13 @@
 #pragma once
-#include "Class/UI/UIViewModel.h"
 
+#include "Class/UI/UIModel.h"
 
 
 namespace JG
 {
-	class InspectorModel;
-	class GameObject;
-	class InspectorViewModel : public UIViewModel
+	class InspectorModel : public UIModel
 	{
-		InspectorModel* mInspectorModel = nullptr;
+		class GameObject* mTargetGameObject = nullptr;
 	protected:
 		virtual void Initialize() override;
 		virtual void Destroy() override;

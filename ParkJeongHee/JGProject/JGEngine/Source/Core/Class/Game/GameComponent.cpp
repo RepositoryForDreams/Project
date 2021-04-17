@@ -14,4 +14,8 @@ namespace JG
 		GameObject::Destory();
 		mOwnerNode = nullptr;
 	}
+	GameNode* GameComponent::GetOwner() const
+	{
+		return mOwnerNode;
+	}
 }

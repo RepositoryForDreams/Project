@@ -59,10 +59,10 @@ namespace JG
 			static_cast<IUIViewModel*>(mViewModel.get())->OnEvent(e);
 		}
 	protected:
-		virtual void Load() override {};
-		virtual void Initialize() override {};
-		virtual void OnGUI() override {}
-		virtual void Destroy() override {}
+		virtual void Load()		  override {}
+		virtual void Initialize() override {}
+		virtual void OnGUI()	  override {}
+		virtual void Destroy()	  override {}
 	public:
 		ViewModelType* GetViewModel() const {
 			return mViewModel.get();

@@ -7,15 +7,15 @@ namespace JG
 {
 	WorldHierarchyView::WorldHierarchyView()
 	{
-		UIManager::GetInstance().RegisterMainMenuItem(TT("Windows/WorldHierarchyView"), 0, [&]()
+		UIManager::GetInstance().RegisterMainMenuItem(TT("Windows/WorldHierarchy"), 0, [&]()
 		{
 			Open();
 		}, nullptr);
-
-
 	}
 	void WorldHierarchyView::Load()
 	{
+
+
 		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("Empty Object"), 0, [&]()
 		{
 			mVm->GetCommand_AddEmptyObject()->Execute(mVm->GetCurrentSelectdNode());
@@ -31,7 +31,7 @@ namespace JG
 	}
 	void WorldHierarchyView::OnGUI()
 	{
-		ImGui::Begin("WorldHierarchyView", &mOpenGUI);
+		ImGui::Begin("WorldHierarchy", &mOpenGUI);
 
 		mVm->ForEach(
 			[&](WorldHierarchyTreeNode& nodeData) -> bool

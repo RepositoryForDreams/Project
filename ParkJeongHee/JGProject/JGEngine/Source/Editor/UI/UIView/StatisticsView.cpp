@@ -14,6 +14,10 @@ namespace JG
 			Open();
 		}, nullptr);
 	}
+	void StatisticsView::Load()
+	{
+
+	}
 	void StatisticsView::Initialize()
 	{
 

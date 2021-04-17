@@ -4,6 +4,7 @@
 #include "Application.h"
 #include "Class/Game/GameNode.h"
 #include "Class/Game/GameWorld.h"
+#include "UI/UIView/InspectorView.h"
 
 
 namespace JG
@@ -82,7 +83,15 @@ namespace JG
 		}
 
 		mCurrentSelectedNode = node;
-
+		auto inspector = UIManager::GetInstance().GetUIView<InspectorView>();
+		if (inspector != nullptr)
+		{
+			auto inspectorVm = inspector->GetViewModel();
+			if (inspectorVm != nullptr)
+			{
+				inspectorVm->SetTargetGameObject(mCurrentSelectedNode);
+			}
+		}
 	}
 
 	GameNode* WorldHierarchyViewModel::GetCurrentSelectdNode() const

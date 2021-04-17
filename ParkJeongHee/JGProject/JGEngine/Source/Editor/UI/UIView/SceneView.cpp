@@ -5,9 +5,6 @@
 
 namespace JG
 {
-
-
-
 	SceneView::SceneView()
 	{
 		UIManager::GetInstance().RegisterMainMenuItem(TT("Windows/SceneView"), 0,
@@ -15,6 +12,10 @@ namespace JG
 		{
 			Open();
 		}, nullptr);
+	}
+	void SceneView::Load()
+	{
+
 	}
 
 	void SceneView::Initialize()

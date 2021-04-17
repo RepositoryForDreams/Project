@@ -4,7 +4,9 @@
 namespace JG		
 {
 #define GAMECLASS \
-	virtual Type GetObjectType() const override { return Type(TypeID(this));} \
+public: \
+	virtual Type GetType() const override { return Type(TypeID(this));} \
+private: \
 
 	template<class T>
 	using GamePtr = WeakPtr<T>;
@@ -20,9 +22,11 @@ namespace JG
 	public:
 		virtual u64           GetID()   const = 0;
 		virtual const String& GetName() const = 0;
-		virtual Type GetObjectType() const = 0;
+		virtual Type GetType()    const = 0;
 	public:
-		virtual void SetName(const String& name) = 0;
+		virtual void  SetName(const String& name) = 0;
+		virtual void* GetInspectorData() const = 0;
+		virtual Type  GetInspectorDataType() const = 0;
 	};
 
 
@@ -30,7 +34,7 @@ namespace JG
 	{
 		GAMECLASS
 	private:
-		mutable u64     mID = 0;
+		mutable u64    mID = 0;
 		mutable String mName;
 		List<SharedPtr<ScheduleHandle>> mScheduleHandleList;
 	public:
@@ -63,6 +67,8 @@ namespace JG
 		virtual u64 GetID() const override;
 		virtual const String& GetName() const override;
 		virtual void SetName(const String& name) override;
+		virtual void* GetInspectorData() const override { return nullptr; }
+		virtual Type  GetInspectorDataType() const override { return Type(TypeID<void>()); }
 	private:
 		void ArrangeScheduleHandle();
 		//void 

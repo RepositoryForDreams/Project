@@ -4,7 +4,7 @@
 #include "UI/UIView/StatisticsView.h"
 #include "UI/UIView/SceneView.h"
 #include "UI/UIView/WorldHierarchyView.h"
-
+#include "UI/UIView/InspectorView.h"
 #include "Class/Game/GameWorld.h"
 namespace JG
 {
@@ -27,6 +27,13 @@ namespace JG
 		UIManager::GetInstance().RegisterUIView<SceneView>();
 		UIManager::GetInstance().RegisterUIView<StatisticsView>();
 		UIManager::GetInstance().RegisterUIView<WorldHierarchyView>();
+		UIManager::GetInstance().RegisterUIView<InspectorView>();
+
+		// GameNode
+		//UIManager::GetInstance().RegisterInspectorGUI()
+		// GameWorld
+		// UIManager::GetIn
+
 		LoadUISettings(TT("JGUI.ini"));
 	}
 	void UILayer::Destroy()
