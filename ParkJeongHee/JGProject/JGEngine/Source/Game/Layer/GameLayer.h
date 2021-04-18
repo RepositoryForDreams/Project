@@ -22,5 +22,7 @@ namespace JG
 		virtual String GetLayerName() override;
 	public:
 		bool ResponseGameWorld(RequestGameWorldEvent& e);
+	private:
+		void RegisterGameObjectType();
 	};
 }

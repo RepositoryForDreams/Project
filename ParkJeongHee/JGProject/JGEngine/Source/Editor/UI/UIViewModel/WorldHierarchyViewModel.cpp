@@ -23,7 +23,7 @@ namespace JG
 		mAddEmptyObject = CreateUniquePtr<Command<GameNode*>>();
 		mAddEmptyObject->Subscribe(this, [&](GameNode* parent)
 		{
-			parent->AddNode<GameNode>(TT("Empty"));
+			parent->AddNode(TT("Empty"));
 		});
 	}
 
@@ -98,7 +98,7 @@ namespace JG
 			auto inspectorVm = inspector->GetViewModel();
 			if (inspectorVm != nullptr)
 			{
-				inspectorVm->SetTargetGameObject(mCurrentSelectedNodeInInspector);
+				inspectorVm->SetTargetGameNode(mCurrentSelectedNodeInInspector);
 			}
 		}
 

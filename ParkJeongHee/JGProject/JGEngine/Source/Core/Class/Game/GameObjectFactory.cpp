@@ -4,6 +4,63 @@
 
 namespace JG
 {
+	Type GameObjectFactory::GetGameObjectType(const String& typeName) const
+	{
+		if (mObjectTypeByName.find(typeName) == mObjectTypeByName.end())
+		{
+			return Type();
+		}
+		return mObjectTypeByName.at(typeName);
+	}
+	Type GameObjectFactory::GetGameObjectType(u64 typeID) const
+	{
+		if (mObjectTypeByID.find(typeID) == mObjectTypeByID.end())
+		{
+			return Type();
+		}
+		return mObjectTypeByID.at(typeID);
+	}
+
+	bool GameObjectFactory::IsGameComponent(const Type& type) const
+	{
+		return mRegisteredComponentTypeSet.find(type) != mRegisteredComponentTypeSet.end();
+	}
+	bool GameObjectFactory::IsGameNode(const Type& type)      const
+	{
+		return mRegisteredNodeTypeSet.find(type) != mRegisteredNodeTypeSet.end();
+	}
+	bool GameObjectFactory::IsGameSystem(const Type& type)    const
+	{
+		return mRegisteredSystemTypeSet.find(type) != mRegisteredSystemTypeSet.end();
+	}
+	bool GameObjectFactory::IsGameComponent(IGameObject* gameObject) const
+	{
+		return IsGameComponent(gameObject->GetType());
+	}
+	bool GameObjectFactory::IsGameNode(IGameObject* gameObject) const
+	{
+		return IsGameNode(gameObject->GetType());
+	}
+	bool GameObjectFactory::IsGameSystem(IGameObject* gameObject) const
+	{
+		return IsGameSystem(gameObject->GetType());
+	}
+	IGameObject* GameObjectFactory::CreateObjectByType(const Type& type)
+	{
+		if (mCreateFuncByObjectType.find(type) == mCreateFuncByObjectType.end())
+		{
+			return nullptr;
+		}
+		return mCreateFuncByObjectType[type]();
+	}
+	const HashSet<Type>& GameObjectFactory::GetGameNodeTypeSet() const
+	{
+		return mRegisteredNodeTypeSet;
+	}
+	const HashSet<Type>& GameObjectFactory::GetGameComponentTypeSet() const
+	{
+		return mRegisteredComponentTypeSet;
+	}
 	void GameObjectFactory::CreateObjectImpl(IGameObject* gameObject)
 	{
 		bool is_run_start = mReserveStartObjects.empty() == false;
@@ -30,12 +87,13 @@ namespace JG
 		{
 			Scheduler::GetInstance().ScheduleOnceByFrame(1, SchedulePriority::DestroyGameClass, SCHEDULE_BIND_FN(&GameObjectFactory::UpdateDestroyObject));
 		}
+		std::function<void(GameObject**)> s;
 	}
 	EScheduleResult GameObjectFactory::UpdateStartObject()
 	{
 		for (auto& obj : mReserveStartObjects)
 		{
-			JG_INFO("GameNode : {0}  Start", ws2s(obj->GetName()));
+			JG_INFO("GameNode : {0}  Start", obj->GetName());
 			obj->Start();
 		}
 		mReserveStartObjects.clear();
@@ -45,7 +103,7 @@ namespace JG
 	{
 		for (auto& obj : mReservedDestroyObjects)
 		{
-			JG_INFO("GameNode : {0}  Destroy", ws2s(obj->GetName()));
+			JG_INFO("GameNode : {0}  Destroy", obj->GetName());
 			obj->Destory();
 		}
 		mReservedDestroyObjects.clear();

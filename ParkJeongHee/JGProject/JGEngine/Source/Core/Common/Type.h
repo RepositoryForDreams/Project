@@ -4,15 +4,14 @@
 #include <typeinfo>
 
 
-
-
+#define JGTYPE(x) Type(TypeID<##x>())
+#define TYPE_NULL_ID -1
 namespace JG
 {
 	template<class T>
 	class TypeID 
 	{
 		friend class Type;
-		const static u64 TYPE_NULL_ID = -1;
 		static u64 ID;
 	public:
 		TypeID(T* _this = nullptr)
@@ -30,15 +29,26 @@ namespace JG
 
 	class Type
 	{
-		u64    mID = 0;
+		u64    mID = TYPE_NULL_ID;
 		String mName;
 	public:
+		Type()
+		{
+			mID   = TYPE_NULL_ID;
+			mName = TT("NULL");
+		}
+
 		template<class T>
 		constexpr Type(const TypeID<T>& typeID)
 		{
 			mID = typeID.ID;
 			mName = s2ws(typeid(T).name());
 			u64 pos = mName.find(TT(" "), 0);
+			if (pos != String::npos)
+			{
+				mName = mName.substr(pos + 1);
+			}
+			pos = mName.find_last_of(TT("::"));
 			if (pos != String::npos)
 			{
 				mName = mName.substr(pos + 1);
@@ -52,6 +62,11 @@ namespace JG
 			mID = typeID.ID;
 			mName = s2ws(typeid(T).name());
 			u64 pos = mName.find(TT(" "), 0);
+			if (pos != String::npos)
+			{
+				mName = mName.substr(pos + 1);
+			}
+			pos = mName.find_last_of(TT("::"));
 			if (pos != String::npos)
 			{
 				mName = mName.substr(pos + 1);

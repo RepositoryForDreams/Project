@@ -1,5 +1,6 @@
 #pragma once
 #include "Define.h"
+#include "Type.h"
 namespace JG
 {
 
@@ -89,9 +90,10 @@ namespace JG
 
 
 
-	template<class FactoryClass, class InterfaceClass, i32 BufferCount, class ...Args>
-	class ObjectFactory : public GlobalSingleton<FactoryClass, Args ...>
+	template<class FactoryClass, class InterfaceClass, i32 BufferCount>
+	class ObjectFactory : public GlobalSingleton<FactoryClass>
 	{
+
 	protected:
 		Dictionary<InterfaceClass*, SharedPtr<InterfaceClass>> mObjectPool;
 		Queue<InterfaceClass*> mReservedDestroyObjectQueue[BufferCount];
@@ -120,12 +122,10 @@ namespace JG
 			});
 		}
 	public:
-
 		template<class T>
-		T* CreateObject(Args ... args)
+		T* CreateObject()
 		{
-			
-			SharedPtr<T> object = CreateSharedPtr<T>(args...);
+			SharedPtr<T> object = CreateSharedPtr<T>();
 			{
 				std::lock_guard<std::shared_mutex> lock(mMutex);
 				mObjectPool[object.get()] = object;

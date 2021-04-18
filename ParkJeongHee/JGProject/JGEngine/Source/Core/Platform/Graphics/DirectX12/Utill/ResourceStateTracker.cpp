@@ -187,7 +187,7 @@ namespace JG
 		auto iter = gResourceRefMap.find(d3dResource);
 		if (iter == gResourceRefMap.end())
 		{
-			JG_CORE_TRACE("Register {0} in ResourceRefMap", ws2s(name));
+			JG_CORE_TRACE("Register {0} in ResourceRefMap", name);
 			
 			gResourceRefMap.emplace(d3dResource, ResourceInfo(name, initState));
 		}
@@ -196,7 +196,7 @@ namespace JG
 			(*iter).second.RefCount += 1;
 		
 		}
-		JG_CORE_TRACE("Add Counting Resource : {0}   Ref : {1}", ws2s(gResourceRefMap[d3dResource].Name), gResourceRefMap[d3dResource].RefCount);
+		JG_CORE_TRACE("Add Counting Resource : {0}   Ref : {1}", gResourceRefMap[d3dResource].Name, gResourceRefMap[d3dResource].RefCount);
 	}
 	void ResourceStateTracker::SetResourceName(ID3D12Resource* d3dResource, const String& name)
 	{
@@ -204,7 +204,7 @@ namespace JG
 		auto iter = gResourceRefMap.find(d3dResource);
 		if (iter != gResourceRefMap.end())
 		{
-			JG_CORE_TRACE("ReName Resource : {0} -> {1}", ws2s((*iter).second.Name), ws2s(name));
+			JG_CORE_TRACE("ReName Resource : {0} -> {1}", (*iter).second.Name, name);
 			(*iter).second.Name = name;
 		}
 	}
@@ -230,10 +230,10 @@ namespace JG
 		{
 			(*iter).second.RefCount -= 1;
 
-			JG_CORE_TRACE("Remove Counting Resource : {0}   Ref : {1}", ws2s((*iter).second.Name), (*iter).second.RefCount);
+			JG_CORE_TRACE("Remove Counting Resource : {0}   Ref : {1}", (*iter).second.Name, (*iter).second.RefCount);
 			if ((*iter).second.RefCount <= 0)
 			{
-				JG_CORE_TRACE("UnRegister {0} in ResourceRefMap", ws2s((*iter).second.Name));
+				JG_CORE_TRACE("UnRegister {0} in ResourceRefMap", (*iter).second.Name);
 				gResourceRefMap.erase(iter);
 			}
 		}

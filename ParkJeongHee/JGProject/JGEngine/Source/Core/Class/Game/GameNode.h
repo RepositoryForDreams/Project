@@ -24,15 +24,7 @@ namespace JG
 	public:
 		virtual void OnInspectorGUI() override;
 	public:
-		// 추가
-		template<class T>
-		T* AddNode(const String& name)
-		{
-			auto obj = GameObjectFactory::GetInstance().CreateObject<T>();
-			obj->SetName(name);
-			obj->SetParent(this);
-			return obj;
-		}
+		GameNode* AddNode(const String& name);
 
 		template<class T>
 		T* AddComponent()
@@ -42,6 +34,7 @@ namespace JG
 			mComponents.push_back(obj);
 			return obj;
 		}
+		void AddComponent(const Type& type);
 		// 일단 이 클래스의 배열에서 제거하고, 
 		void Destroy(GameNode* node);
 		void Destroy(GameComponent* component);
@@ -52,17 +45,6 @@ namespace JG
 		GameNode* FindNode(const String& name) const;
 		GameNode* FindNode(u32 index) const;
 
-		template<class T>
-		T* FindNode() const {
-			for (auto& node : mChilds)
-			{
-				if (node->GetObjectType().GetID() == Type(TypeID<T>()).GetID())
-				{
-					return node;
-				}
-			}
-			return nullptr;
-		}
 
 		template<class T>
 		T* FindComponent() const
@@ -71,7 +53,7 @@ namespace JG
 			{
 				if (com->GetObjectType().GetID() == Type(TypeID<T>()).GetID())
 				{
-					return com;
+					return static_cast<T*>(com);
 				}
 			}
 			return nullptr;

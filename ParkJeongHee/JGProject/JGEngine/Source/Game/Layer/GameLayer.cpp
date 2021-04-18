@@ -1,9 +1,13 @@
 #include "pch.h"
 #include "GameLayer.h"
 #include "Application.h"
+#include "Class/Game/GameObject.h"
+
+#include "Class/Game/GameNode.h"
 #include "Class/Game/GameWorld.h"
 
-
+#include "Class/Game/GameComponent.h"
+#include "Class/Game/Components/Transform.h"
 
 namespace JG
 {
@@ -17,6 +21,7 @@ namespace JG
 	}
 	void GameLayer::Begin()
 	{
+		RegisterGameObjectType();
 		mGameWorld = GameObjectFactory::GetInstance().CreateObject<GameWorld>();
 	}
 	void GameLayer::Destroy()
@@ -38,5 +43,15 @@ namespace JG
 		response.GameWorld = mGameWorld;
 		Application::GetInstance().SendEvent(response);
 		return true;
+	}
+	void GameLayer::RegisterGameObjectType()
+	{
+		// GameNode
+		GameObjectFactory::GetInstance().RegisterNodeType<GameNode>();
+		GameObjectFactory::GetInstance().RegisterNodeType<GameWorld>();
+
+		//// GameComponent
+		GameObjectFactory::GetInstance().RegisterComponentType<GameComponent>();
+		GameObjectFactory::GetInstance().RegisterComponentType<Transform>();
 	}
 }

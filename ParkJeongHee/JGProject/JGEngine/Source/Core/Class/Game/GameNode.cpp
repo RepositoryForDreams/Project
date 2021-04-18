@@ -19,15 +19,54 @@ namespace JG
 	}
 	void GameNode::OnInspectorGUI() 
 	{
+		List<GameComponent*> removeComList;
+
 		for (auto& com : mComponents)
 		{
+			bool is_open = true;
 			ImGui::Spacing();
-			if (ImGui::TreeNodeEx(ws2s(com->GetName()).c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader) == true)
+			String id = com->GetName() + TT("##") + std::to_wstring(com->GetID());
+			if (ImGui::CollapsingHeader(
+				ws2s(id).c_str(), &is_open, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader) == true)
 			{
 				com->OnInspectorGUI();
 			}
-		
+
+			if (is_open == false)
+			{
+				removeComList.push_back(com);
+			}
 		}
+		for (auto& com : removeComList)
+		{
+			Destroy(com);
+		}
+	}
+	GameNode* GameNode::AddNode(const String& name)
+	{
+		auto obj = GameObjectFactory::GetInstance().CreateObject<GameNode>();
+		obj->SetName(name);
+		obj->SetParent(this);
+		return obj;
+	}
+	void GameNode::AddComponent(const Type& type)
+	{
+
+		bool isComponent = GameObjectFactory::GetInstance().IsGameComponent(type);
+		if (isComponent == false)
+		{
+			JG_CORE_ERROR("This Type({0}) is not Component Category.", type.GetName());
+			return;
+		}
+		auto obj = GameObjectFactory::GetInstance().CreateObjectByType(type);
+		if (obj == nullptr)
+		{
+			JG_CORE_ERROR("This Type({0}) is not registered.", type.GetName());
+			return;
+		}
+		auto com = static_cast<GameComponent*>(obj);
+		com->mOwnerNode = this;
+		mComponents.push_back(com);
 	}
 	void GameNode::Destroy(GameNode* node)
 	{

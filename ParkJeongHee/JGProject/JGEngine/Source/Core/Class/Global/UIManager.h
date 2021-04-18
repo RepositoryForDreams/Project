@@ -71,7 +71,7 @@ namespace JG
 			auto iter = mUIViewPool.find(type);
 			if (iter == mUIViewPool.end())
 			{
-				JG_CORE_ERROR("Not Find UIViewType : {0}", ws2s(type.GetName()));
+				JG_CORE_ERROR("Not Find UIViewType : {0}", type.GetName());
 				return nullptr;
 			}
 			return static_cast<UIViewType*>(iter->second.get());

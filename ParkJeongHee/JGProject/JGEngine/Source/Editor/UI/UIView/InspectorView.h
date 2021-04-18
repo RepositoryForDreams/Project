@@ -11,7 +11,12 @@ namespace JG
 		UIVIEWCLASS
 
 		bool mOpenGUI = true;
+		bool mIsOpenPopup = false;
 		InspectorViewModel* mVm = nullptr;
+
+
+		//Dictionary<String, bool> m
+		char mFindFilterStr[256];
 	public:
 		InspectorView();
 		virtual ~InspectorView() = default;
@@ -20,6 +25,8 @@ namespace JG
 		virtual void Initialize() override;
 		virtual void OnGUI() override;
 		virtual void Destroy() override;
+	private:
+
 	};
 }
 

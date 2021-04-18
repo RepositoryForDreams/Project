@@ -57,7 +57,6 @@ namespace JG
 		if (mName.empty())
 		{
 			mName = GetType().GetName();
-			mName = ReplaceAll(mName, TT("JG::"), TT(""));
 		}
 		return mName;
 	}

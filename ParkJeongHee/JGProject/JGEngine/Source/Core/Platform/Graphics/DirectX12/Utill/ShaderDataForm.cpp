@@ -941,7 +941,7 @@ namespace JG
 	{
 		if (StructDataMap.find(name) != StructDataMap.end())
 		{
-			JG_CORE_ERROR("{0} Struct Already Exists.", ws2s(name));
+			JG_CORE_ERROR("{0} Struct Already Exists.", name);
 			return false;
 		}
 		StructDataMap[name] = CreateUniquePtr<StructData>();
@@ -980,7 +980,7 @@ namespace JG
 
 		if (StructuredBufferDataMap.find(name) != StructuredBufferDataMap.end())
 		{
-			JG_CORE_ERROR("{0} StructuredBuffer Already Exists.", ws2s(name));
+			JG_CORE_ERROR("{0} StructuredBuffer Already Exists.", name);
 			return false;
 		}
 		StructuredBufferDataMap[name] = CreateUniquePtr<StructuredBufferData>();
@@ -991,7 +991,7 @@ namespace JG
 	{
 		if (RWStructuredBufferDataMap.find(name) != RWStructuredBufferDataMap.end())
 		{
-			JG_CORE_ERROR("{0} RWStructuredBuffer Already Exists.", ws2s(name));
+			JG_CORE_ERROR("{0} RWStructuredBuffer Already Exists.", name);
 			return false;
 		}
 		RWStructuredBufferDataMap[name] = CreateUniquePtr<StructuredBufferData>();
@@ -1003,7 +1003,7 @@ namespace JG
 
 		if (CBufferDataMap.find(name) != CBufferDataMap.end())
 		{
-			JG_CORE_ERROR("{0} CBuffer Already Exists.", ws2s(name));
+			JG_CORE_ERROR("{0} CBuffer Already Exists.", name);
 			return false;
 		}
 
@@ -1015,7 +1015,7 @@ namespace JG
 	{
 		if (TextureDataMap.find(name) != TextureDataMap.end())
 		{
-			JG_CORE_ERROR("{0} TextureData Already Exists.", ws2s(name));
+			JG_CORE_ERROR("{0} TextureData Already Exists.", name);
 			return false;
 		}
 
@@ -1028,7 +1028,7 @@ namespace JG
 	{
 		if (RWTextureDataMap.find(name) != RWTextureDataMap.end())
 		{
-			JG_CORE_ERROR("{0} RWTextureData Already Exists.", ws2s(name));
+			JG_CORE_ERROR("{0} RWTextureData Already Exists.", name);
 			return false;
 		}
 
@@ -1067,7 +1067,7 @@ namespace JG
 
 		if (CBufferVarMap.find(nameCode) != CBufferVarMap.end())
 		{
-			JG_CORE_ERROR("{0} CBuffer Var Already Exists.", ws2s(nameCode));
+			JG_CORE_ERROR("{0} CBuffer Var Already Exists.", nameCode);
 			return false;
 		}
 		CBufferVarMap[nameCode] = cBuffer->DataMap[nameCode].get();
@@ -1078,7 +1078,7 @@ namespace JG
 	{
 		if (SamplerStateDataMap.find(name) != SamplerStateDataMap.end())
 		{
-			JG_CORE_ERROR("{0} SamplerStateData Already Exists.", ws2s(name));
+			JG_CORE_ERROR("{0} SamplerStateData Already Exists.", name);
 			return false;
 		}
 
@@ -1139,7 +1139,7 @@ namespace JG
 		{
 			if (dx12Shader->Bind() == false)
 			{
-				JG_CORE_ERROR("Failed Bind {0} Shader", ws2s(dx12Shader->GetName()));
+				JG_CORE_ERROR("Failed Bind {0} Shader", dx12Shader->GetName());
 				return false;
 			}
 	

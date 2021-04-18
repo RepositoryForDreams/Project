@@ -40,16 +40,22 @@ namespace JG
 			bool isRoot = nodeData.Object->GetParent() == nullptr;
 			bool isLeaf = nodeData.Object->GetChildCount() == 0;
 			nodeData.UserFlags |= ImGuiTreeNodeFlags_OpenOnArrow;
-			(isRoot) ?
-				nodeData.UserFlags |= (ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader) :
-				nodeData.UserFlags &= ~(ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader);
 
 			(isLeaf) ?
 				nodeData.UserFlags |= ImGuiTreeNodeFlags_Leaf :
 				nodeData.UserFlags &= ~(ImGuiTreeNodeFlags_Leaf);
 
-			isOpen = ImGui::TreeNodeEx((void*)nodeData.Object->GetID(), nodeData.UserFlags, ws2s(nodeData.Object->GetName()).c_str());
-			nodeData.IsTreePop = (isOpen == true && isRoot == false);
+			if (isRoot == true)
+			{
+				isOpen = ImGui::CollapsingHeader(ws2s(nodeData.Object->GetName() + TT("##GameWorld")).c_str());
+				nodeData.IsTreePop = false;
+			}
+			else
+			{
+				isOpen = ImGui::TreeNodeEx((void*)nodeData.Object->GetID(), nodeData.UserFlags, ws2s(nodeData.Object->GetName()).c_str());
+				nodeData.IsTreePop = isOpen;
+			}
+
 			return isOpen;
 		},
 			[&](WorldHierarchyTreeNode& nodeData)

@@ -166,7 +166,7 @@ namespace JG
 	}
 	bool Application::Open(AppOpenEvent& e)
 	{
-		JG_CORE_INFO(ws2s(e.ToString()));
+		JG_CORE_INFO(e.ToString());
 		OpenImpl();
 		return true;
 	}
@@ -189,7 +189,7 @@ namespace JG
 	}
 	bool Application::Close(AppCloseEvent& e)
 	{
-		JG_CORE_INFO(ws2s(e.ToString()));
+		JG_CORE_INFO(e.ToString());
 		CloseImpl();
 		mIsRunning = false;
 		return true;

@@ -5,14 +5,19 @@
 
 namespace JG
 {
+	class GameNode;
 	class InspectorModel : public UIModel
 	{
-		class GameObject* mTargetGameObject = nullptr;
+		GameNode* mTargetGameNode = nullptr;
+		String            mFilterStr;
+		HashSet<Type>     mComponentTypeSet;
+		SortedSet<String> mFilteredTypeList;
 	protected:
 		virtual void Initialize() override;
 		virtual void Destroy() override;
 	public:
-		GameObject* GetTargetGameObject() const;
-		void SetTargetGameObject(GameObject* gameObject);
+		GameNode* GetTargetGameNode() const;
+		void SetTargetGameNode(GameNode* gameObject);
+		const SortedSet<String>& FindComponentTypeList(const String& filter);
 	};
 }

@@ -29,7 +29,7 @@ namespace JG
 		}
 
 
-		JG_CORE_INFO("{0} Compile Start", ws2s(GetName()));
+		JG_CORE_INFO("{0} Compile Start", GetName());
 		String code = sourceCode;
 		if (mShaderDataForm == nullptr)
 		{
@@ -61,7 +61,7 @@ namespace JG
 		}
 
 
-		JG_CORE_INFO("{0} Compile Success", ws2s(GetName()));
+		JG_CORE_INFO("{0} Compile Success", GetName());
 	
 		return true;
 	}
