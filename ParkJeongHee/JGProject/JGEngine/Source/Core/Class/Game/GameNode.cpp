@@ -17,6 +17,10 @@ namespace JG
 	{
 		mTransform = AddComponent<Transform>();
 	}
+	GameNode::GameNode(GameWorld* gameWorld) : GameNode()
+	{
+		mGameWorld = gameWorld;
+	}
 	void GameNode::OnInspectorGUI() 
 	{
 		List<GameComponent*> removeComList;
@@ -37,6 +41,7 @@ namespace JG
 				removeComList.push_back(com);
 			}
 		}
+
 		for (auto& com : removeComList)
 		{
 			Destroy(com);
@@ -47,6 +52,7 @@ namespace JG
 		auto obj = GameObjectFactory::GetInstance().CreateObject<GameNode>();
 		obj->SetName(name);
 		obj->SetParent(this);
+		obj->mGameWorld = mGameWorld;
 		return obj;
 	}
 	void GameNode::AddComponent(const Type& type)
@@ -66,6 +72,7 @@ namespace JG
 		}
 		auto com = static_cast<GameComponent*>(obj);
 		com->mOwnerNode = this;
+		com->mGameWorld = mGameWorld;
 		mComponents.push_back(com);
 	}
 	void GameNode::Destroy(GameNode* node)
@@ -124,7 +131,7 @@ namespace JG
 		{
 			auto& begin = mParent->mChilds.begin();
 			auto& end   = mParent->mChilds.end();
-			mParent->mChilds.erase(std::remove(begin, end, node), mParent->mChilds.end());
+			mParent->mChilds.erase(std::remove(begin, end, this), mParent->mChilds.end());
 			mParent = nullptr;
 		}
 		if (node != nullptr)
@@ -151,6 +158,6 @@ namespace JG
 		{
 			GameObjectFactory::GetInstance().DestroyObject(child);
 		}
-
+		GameObjectFactory::GetInstance().DestroyObject(this);
 	}
 }

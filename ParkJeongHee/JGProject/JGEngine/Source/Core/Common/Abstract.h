@@ -164,6 +164,15 @@ namespace JG
 				nextQueue.push(ifClass);
 			}
 		}
+
+
+		void ForEach(const std::function<void(InterfaceClass*)>& action)
+		{
+			for (auto& obj : mObjectPool)
+			{
+				action(obj.second.get());
+			}
+		}
 	protected:
 		virtual void CreateObjectImpl(InterfaceClass* ifClass) {};
 		virtual void DestroyObjectImpl(InterfaceClass* ifClass) {};

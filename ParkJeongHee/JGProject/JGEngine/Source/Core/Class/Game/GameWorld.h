@@ -7,8 +7,9 @@ namespace JG
 	{
 		GAMECLASS
 	public:
+		GameWorld();
+	public:
 		virtual void SetParent(GameNode* node) override {}
-
 		virtual void OnInspectorGUI() override {}
 	};
 }

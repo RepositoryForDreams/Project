@@ -21,7 +21,28 @@ namespace JG
 
 	}
 
+	u64 AssetBase::GetAssetID() const
+	{
+		return mAssetID;
+	}
 
+	const String& AssetBase::GetAssetFullPath() const
+	{
+		return mAssetFullPath;
+	}
+	const String& AssetBase::GetAssetPath() const
+	{
+		return mAssetPath;
+	}
+	const String& AssetBase::GetAssetName() const
+	{
+		return mName;
+	}
+
+	const String& AssetBase::GetExtension() const
+	{
+		return mExtension;
+	}
 
 	void AssetDataBase::CreateObjectImpl(IAsset* asset)
 	{
@@ -35,4 +56,5 @@ namespace JG
 	{
 
 	}
+
 }

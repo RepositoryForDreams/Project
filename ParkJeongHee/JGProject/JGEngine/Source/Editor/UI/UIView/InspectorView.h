@@ -14,8 +14,6 @@ namespace JG
 		bool mIsOpenPopup = false;
 		InspectorViewModel* mVm = nullptr;
 
-
-		//Dictionary<String, bool> m
 		char mFindFilterStr[256];
 	public:
 		InspectorView();

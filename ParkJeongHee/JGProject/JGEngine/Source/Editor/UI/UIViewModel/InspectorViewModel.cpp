@@ -14,6 +14,11 @@ namespace JG
 		UIViewModel::Destroy();
 		mInspectorModel = nullptr;
 	}
+	void InspectorViewModel::OnEvent(IEvent& e)
+	{
+		EventDispatcher dispatcher(e);
+		dispatcher.Dispatch<NotifyDestroyGameObjectEvent>(EVENT_BIND_FN(&InspectorViewModel::NotifyDestroyGameObject));
+	}
 	GameNode* InspectorViewModel::GetTargetGameNode() const
 	{
 		if (mInspectorModel != nullptr)
@@ -50,5 +55,17 @@ namespace JG
 			auto type = GameObjectFactory::GetInstance().GetGameObjectType(typeName);
 			gameNode->AddComponent(type);
 		}
+	}
+	bool InspectorViewModel::NotifyDestroyGameObject(NotifyDestroyGameObjectEvent& e)
+	{
+		auto targetNode = GetTargetGameNode();
+		if (targetNode != nullptr)
+		{
+			if (targetNode->GetID() == e.DestroyedGameObjectID)
+			{
+				SetTargetGameNode(nullptr);
+			}
+		}
+		return false;
 	}
 }

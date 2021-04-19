@@ -29,10 +29,6 @@ namespace JG
 		UIManager::GetInstance().RegisterUIView<WorldHierarchyView>();
 		UIManager::GetInstance().RegisterUIView<InspectorView>();
 
-		// GameNode
-		//UIManager::GetInstance().RegisterInspectorGUI()
-		// GameWorld
-		// UIManager::GetIn
 
 		LoadUISettings(TT("JGUI.ini"));
 	}
@@ -42,8 +38,7 @@ namespace JG
 	}
 	void UILayer::OnEvent(IEvent& e)
 	{
-		//EventDispatcher dispatcher(e);
-		//dispatcher.Dispatch<WorldHierarchyUpdateEvent>(EVENT_BIND_FN(&UILayer::OnWorldHierarchyUpdate));
+
 	}
 	String UILayer::GetLayerName()
 	{

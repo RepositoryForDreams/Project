@@ -22,9 +22,10 @@ namespace JG
 		GameNode*	mCurrentSelectedNodeInContextMenu   = nullptr;
 		GameNode*	mCurrentSelectedNodeInInspector     = nullptr;
 	private:
-		UniquePtr<Command<GameNode*>> mAddEmptyObject;
-	private:
 		Dictionary<GameNode*, WorldHierarchyTreeNode> mTreeNodePool;
+	public:
+		UniquePtr<Command<GameNode*>> AddEmptyObject;
+		UniquePtr<Command<GameNode*>> DeleteGameNode;
 	public:
 		virtual ~WorldHierarchyViewModel() = default;
 	protected:
@@ -36,7 +37,6 @@ namespace JG
 			const std::function<bool(WorldHierarchyTreeNode&)>& pushAction,
 			const std::function<void(WorldHierarchyTreeNode&)>& action,
 			const std::function<void(WorldHierarchyTreeNode&)>& popAction);
-		ICommand<GameNode*>* GetCommand_AddEmptyObject() const;
 
 		void SetSelectedNodeInInspector(GameNode* node);
 		GameNode* GetSelectedNodeInInspector() const;
@@ -51,5 +51,6 @@ namespace JG
 			const std::function<void(WorldHierarchyTreeNode&)>& popAction);
 	private:
 		bool RecieveGameWorldEvent(ResponseGameWorldEvent& e);
+		bool NotifyDestroyGameObject(NotifyDestroyGameObjectEvent& e);
 	};
 }

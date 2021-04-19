@@ -51,13 +51,19 @@ namespace JG
 				gameNode->OnInspectorGUI();
 
 				ImGui::Spacing();	ImGui::Spacing();	ImGui::Spacing();
-				auto padding = ImGui::GetStyle().FramePadding;
-				if (ImGui::Button("Add Component", ImVec2(ImGui::GetWindowSize().x - (padding.x * 4), 0)) == true)
+
+				if (gameNode->GetParent() != nullptr)
 				{
-					memset(mFindFilterStr, 0, 256);
-					ImGui::OpenPopup("Component Finder");
-					mIsOpenPopup = true;
+					auto padding = ImGui::GetStyle().FramePadding;
+					if (ImGui::Button("Add Component", ImVec2(ImGui::GetWindowSize().x - (padding.x * 4), 0)) == true)
+					{
+						memset(mFindFilterStr, 0, 256);
+						ImGui::OpenPopup("Component Finder");
+						mIsOpenPopup = true;
+					}
 				}
+
+
 				if (mIsOpenPopup == true)
 				{
 					if (ImGui::BeginPopupContextWindow("Component Finder") == true)

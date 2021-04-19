@@ -5,6 +5,7 @@
 namespace JG
 {
 	class GameWorld;
+	class IGameObject;
 	class GameLayer : public ILayer
 	{
 		GameWorld* mGameWorld = nullptr;

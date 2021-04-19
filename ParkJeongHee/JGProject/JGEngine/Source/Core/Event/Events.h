@@ -37,6 +37,7 @@ namespace JG
 
 		Request         = 0x100,
 		Response        = 0x200,
+		Destroy         = 0x400,
 	};
 
 #define  EVENTCLASS(category) \

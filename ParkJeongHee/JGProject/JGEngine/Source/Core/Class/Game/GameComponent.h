@@ -10,16 +10,19 @@ namespace JG
 	*/
 
 	class GameNode;
+	class GameWorld;
 	class GameComponent : public GameObject
 	{
 		friend GameNode;
 		GAMECLASS
 	private:
-		GameNode* mOwnerNode = nullptr;
+		GameNode*  mOwnerNode = nullptr;
+		GameWorld* mGameWorld = nullptr;
 	protected:
 		virtual void Start() override;
 		virtual void Destory() override;
 	public:
-		GameNode* GetOwner() const;
+		GameNode*  GetOwner() const;
+		GameWorld* GetGameWorld() const;
 	};
 }

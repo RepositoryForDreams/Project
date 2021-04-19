@@ -16,14 +16,24 @@ namespace JG
 	{
 
 
-		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("Empty Object"), 0, [&]()
+		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("Add/EmptyObject"), 0, [&]()
 		{
-			mVm->GetCommand_AddEmptyObject()->Execute(mVm->GetSelectdNodeInContextMenu());
+			mVm->AddEmptyObject->Execute(mVm->GetSelectdNodeInContextMenu());
 		}, nullptr);
-		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("2D/Sprite"), 0, nullptr, nullptr);
-		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("3D/Cube"), 0, nullptr, nullptr);
-		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("3D/Sphere"), 0, nullptr, nullptr);
-		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("3D/UnityChan"), 0, nullptr, nullptr);
+
+		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("Delete"), 0, 
+			[&]()
+		{
+			mVm->DeleteGameNode->Execute(mVm->GetSelectdNodeInContextMenu());
+		}, 
+			[&]() -> bool
+		{
+			if (mVm->GetSelectdNodeInContextMenu() != nullptr)
+			{
+				return mVm->GetSelectdNodeInContextMenu()->GetParent() != nullptr;
+			}
+			return false;
+		});
 	}
 	void WorldHierarchyView::Initialize()
 	{

@@ -21,4 +21,17 @@ namespace JG
 			return TT("ResponseGameWorldEvent");
 		}
 	};
+
+	class NotifyDestroyGameObjectEvent : public GameEvent
+	{
+		EVENTCLASS(EEventCategory::Editor | EEventCategory::Destroy)
+	public:
+		u64 DestroyedGameObjectID = 0;
+	public:
+		virtual ~NotifyDestroyGameObjectEvent() = default;
+		virtual String ToString() const override
+		{
+			return TT("NotifyDestroyGameObjectEvent");
+		}
+	};
 }

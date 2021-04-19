@@ -13,11 +13,14 @@ namespace JG
 	protected:
 		virtual void Initialize() override;
 		virtual void Destroy() override;
+		virtual void OnEvent(IEvent& e) override;
 	public:
 		GameNode* GetTargetGameNode() const;
 		void SetTargetGameNode(GameNode* gameObject);
 
 		const SortedSet<String>& FindComponentTypeList(const String& filter);
 		void SelectComponentType(const String& typeName);
+	private:
+		bool NotifyDestroyGameObject(NotifyDestroyGameObjectEvent& e);
 	};
 }

@@ -17,6 +17,7 @@ private: \
 	class IGameObject
 	{
 		friend class GameObjectFactory;
+		friend class GameLayer;
 	protected:
 		virtual void Start()   = 0;
 		virtual void Destory() = 0;

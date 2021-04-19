@@ -18,4 +18,8 @@ namespace JG
 	{
 		return mOwnerNode;
 	}
+	GameWorld* GameComponent::GetGameWorld() const
+	{
+		return mGameWorld;
+	}
 }

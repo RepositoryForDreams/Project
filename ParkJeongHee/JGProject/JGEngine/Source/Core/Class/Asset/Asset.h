@@ -1,17 +1,12 @@
 #pragma once
 #include "Common/Abstract.h"
-
+#include "Common/Type.h"
 #include "Graphics/Resource.h"
 #include "Class/Global/Scheduler.h"
 #include "Class/FileIO.h"
 namespace JG
 {
 #define ASSET_MESH_FORMAT TT(".mesh")
-
-	enum class EAssetType
-	{
-
-	};
 
 	namespace Asset
 	{
@@ -63,21 +58,74 @@ namespace JG
 	};
 
 
-
+#define ASSETCLASS virtual Type GetType() const { return Type(TypeID(this)); }
+#define ASSET_NULL_ID -1
 	class IAsset
 	{
 	public:
-		virtual EAssetType GetAssetType() const        = 0;
+		virtual u64 GetAssetID() const = 0;
+		virtual Type		  GetType() const = 0;
 		virtual const String& GetAssetFullPath() const = 0;
 		virtual const String& GetAssetPath() const     = 0;
 		virtual const String& GetAssetName() const     = 0;
+		virtual const String& GetExtension() const = 0;
 	public:
 		virtual ~IAsset() = default;
 	};
 
+	class AssetBase : public IAsset
+	{
+		u64    mAssetID = ASSET_NULL_ID;
+		String mAssetPath;
+		String mAssetFullPath;
+		String mExtension;
+		String mName;
+	public:
+		virtual u64 GetAssetID() const override;
+		virtual const String& GetAssetFullPath() const override;
+		virtual const String& GetAssetPath() const override;
+		virtual const String& GetAssetName() const override;
+		virtual const String& GetExtension() const override;
+	public:
+		virtual ~AssetBase() = default;
+	};
+
+	
+	namespace Asset
+	{
+		class Texture : public AssetBase
+		{
+			ASSETCLASS
+		public:
+			virtual ~Texture() = default;
+
+		};
+		class StaticMesh : public AssetBase
+		{
+			ASSETCLASS
+		public:
+			virtual ~StaticMesh() = default;
+		};
+		class Material : public AssetBase
+		{
+			ASSETCLASS
+		public:
+			virtual ~Material() = default;
+		};
+	}
+
+
 
 	class AssetDataBase : public ObjectFactory<AssetDataBase, IAsset, 2>
 	{
+	public:
+		template<class T>
+		void AsyncLoadAsset(const String& path)
+		{
+			// Asset
+			// id ¹èºÎ
+			//  
+		}
 	protected:
 		virtual void CreateObjectImpl(IAsset* asset) override;
 		virtual void DestroyObjectImpl(IAsset* asset) override;

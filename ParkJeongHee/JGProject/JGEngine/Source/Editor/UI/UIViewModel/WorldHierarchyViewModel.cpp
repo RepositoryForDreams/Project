@@ -20,10 +20,29 @@ namespace JG
 		SendEvent(e);
 
 
-		mAddEmptyObject = CreateUniquePtr<Command<GameNode*>>();
-		mAddEmptyObject->Subscribe(this, [&](GameNode* parent)
+		AddEmptyObject = CreateUniquePtr<Command<GameNode*>>();
+		AddEmptyObject->Subscribe(this, [&](GameNode* parent)
 		{
+			if (parent == nullptr)
+			{
+				return;
+			}
 			parent->AddNode(TT("Empty"));
+		});
+
+		DeleteGameNode = CreateUniquePtr<Command<GameNode*>>();
+		DeleteGameNode->Subscribe(this, [&](GameNode* node)
+		{
+			if (node == nullptr)
+			{
+				return;
+			}
+			node->Destroy(node);
+			Scheduler::GetInstance().ScheduleOnce(0, 0, [&]()
+			{
+				mTreeNodePool.erase(node);
+				return EScheduleResult::Break;
+			});
 		});
 	}
 
@@ -31,9 +50,11 @@ namespace JG
 	{
 		UIViewModel::Destroy();
 
-		mAddEmptyObject->UnSubscribe(this);
+		AddEmptyObject->UnSubscribe(this);
+		DeleteGameNode->UnSubscribe(this);
 		mTreeNodePool.clear();
-		mAddEmptyObject      = nullptr;
+		AddEmptyObject       = nullptr;
+		DeleteGameNode = nullptr;
 		mWorldHierarchyModel = nullptr;
 		mCurrentSelectedNodeInInspector   = nullptr;
 		mCurrentSelectedNodeInContextMenu = nullptr;
@@ -43,7 +64,7 @@ namespace JG
 	{
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<ResponseGameWorldEvent>(EVENT_BIND_FN(&WorldHierarchyViewModel::RecieveGameWorldEvent));
-
+		dispatcher.Dispatch<NotifyDestroyGameObjectEvent>(EVENT_BIND_FN(&WorldHierarchyViewModel::NotifyDestroyGameObject));
 		
 	}
 
@@ -63,12 +84,6 @@ namespace JG
 		}
 
 	}
-
-	ICommand<GameNode*>* WorldHierarchyViewModel::GetCommand_AddEmptyObject() const
-	{
-		return mAddEmptyObject.get();
-	}
-
 	void WorldHierarchyViewModel::SetSelectedNodeInInspector(GameNode* node)
 	{
 		if (mTreeNodePool.find(node) == mTreeNodePool.end() || node == mCurrentSelectedNodeInInspector)
@@ -195,6 +210,28 @@ namespace JG
 			mWorldHierarchyModel->SetGameWorld(e.GameWorld);
 		}
 		return true;
+	}
+
+	bool WorldHierarchyViewModel::NotifyDestroyGameObject(NotifyDestroyGameObjectEvent& e)
+	{
+		auto currentSelectedNodeInContextMenu = GetSelectdNodeInContextMenu();
+		if (currentSelectedNodeInContextMenu != nullptr)
+		{
+			if (currentSelectedNodeInContextMenu->GetID() == e.DestroyedGameObjectID)
+			{
+				SetSelectedNodeInContextMenu(nullptr);
+			}
+		}
+
+		auto currentSelectedNodeInInspector = GetSelectedNodeInInspector();
+		if (currentSelectedNodeInInspector != nullptr)
+		{
+			if (currentSelectedNodeInInspector->GetID() == e.DestroyedGameObjectID)
+			{
+				SetSelectedNodeInContextMenu(nullptr);
+			}
+		}
+		return false;
 	}
 
 }

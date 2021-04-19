@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "GameObjectFactory.h"
+#include "Application.h"
 
 
 namespace JG
@@ -87,7 +88,9 @@ namespace JG
 		{
 			Scheduler::GetInstance().ScheduleOnceByFrame(1, SchedulePriority::DestroyGameClass, SCHEDULE_BIND_FN(&GameObjectFactory::UpdateDestroyObject));
 		}
-		std::function<void(GameObject**)> s;
+		NotifyDestroyGameObjectEvent e;
+		e.DestroyedGameObjectID = gameObject->GetID();
+		Application::GetInstance().SendEvent(e);
 	}
 	EScheduleResult GameObjectFactory::UpdateStartObject()
 	{
