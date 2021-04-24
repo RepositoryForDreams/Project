@@ -25,16 +25,6 @@ namespace JG
 	}
 	AssetDataBase::~AssetDataBase()
 	{
-		for (auto& assetManager : mWaitingAssetManager)
-		{
-			assetManager->Reset();
-			while (assetManager->IsResetting() == true) {}
-		}
-		for (auto& assetManager : mAssetManagerPool)
-		{
-			assetManager.second->Reset();
-			while (assetManager.second->IsResetting() == true) {}
-		}
 		mWaitingAssetManager.clear();
 		mAssetManagerPool.clear();
 	}

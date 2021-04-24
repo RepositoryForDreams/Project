@@ -11,7 +11,7 @@ namespace JG
 	class IMesh
 	{
 		friend class Renderer2D;
-		friend class Renderer3D;
+		friend class Renderer;
 	public:
 		virtual void AddVertexBuffer(SharedPtr<IVertexBuffer> vertexBuffer) = 0;
 		virtual void SetIndexBuffer(SharedPtr<IIndexBuffer> indexBuffer) = 0;

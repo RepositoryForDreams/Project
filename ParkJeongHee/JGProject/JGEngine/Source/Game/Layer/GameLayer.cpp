@@ -9,6 +9,9 @@
 #include "Class/Game/GameComponent.h"
 #include "Class/Game/Components/Transform.h"
 
+#include "Class/Game/GlobalSystems/LayerSystem.h"
+
+
 #include "Class/Asset/Asset.h"
 
 namespace JG
@@ -24,12 +27,9 @@ namespace JG
 	void GameLayer::Begin()
 	{
 		RegisterGameObjectType();
+		RegisterGlobalGameSystem();
 		mGameWorld = GameObjectFactory::GetInstance().CreateObject<GameWorld>();
-
-		Asset<ITexture> tt;
-		IAsset* a = (IAsset*)(&tt);
-		auto type = a->GetType();
-		JG_INFO("TypeName : {0} , TypeID : {1}", type.GetName(), type.GetID());
+		mGameWorld->SetGlobalGameSystemList(mGameSystemList); 
 	}
 	void GameLayer::Destroy()
 	{
@@ -51,6 +51,10 @@ namespace JG
 		Application::GetInstance().SendEvent(response);
 		return true;
 	}
+	void GameLayer::RegisterGlobalGameSystem()
+	{
+		mGameSystemList.push_back(GameObjectFactory::GetInstance().CreateObject<LayerSystem>());
+	}
 	void GameLayer::RegisterGameObjectType()
 	{
 		// GameNode
@@ -60,5 +64,8 @@ namespace JG
 		//// GameComponent
 		GameObjectFactory::GetInstance().RegisterComponentType<GameComponent>();
 		GameObjectFactory::GetInstance().RegisterComponentType<Transform>();
+
+		// GlobalSystem
+		GameObjectFactory::GetInstance().RegisterGlobalSystemType<LayerSystem>();
 	}
 }

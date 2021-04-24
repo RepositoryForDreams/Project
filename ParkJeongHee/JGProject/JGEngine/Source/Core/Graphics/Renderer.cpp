@@ -19,7 +19,7 @@ namespace JG
 		Wait,
 		Run
 	};
-	struct Renderer
+	struct RendererState
 	{
 		static std::atomic<ERendererState> mState;
 		static std::mutex mMutex;
@@ -38,85 +38,24 @@ namespace JG
 		}
 
 	};
-	std::atomic<ERendererState> Renderer::mState = ERendererState::Wait;
-
-	/* Renderer 3D Pipeline
-
-	*/
-	bool Renderer3D::Begin(SharedPtr<Camera> camera)
-	{
-		if (Renderer::IsRunable() == false)
-		{
-			return false;
-		}
-
-		auto api = Application::GetInstance().GetGraphicsAPI();
-		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
-
-		if (camera == nullptr || camera->IsOrthographic() == true)
-		{
-			return false;
-		}
-		Renderer::SetState(ERendererState::Run);
-		// TODO Camera 
-		auto targetTextures = camera->GetTargetTextures();
-		auto depthTargetTexture = camera->GetTargetDepthTexture();
-
-
-		auto resolution = camera->GetResolution();
-		api->SetViewports({ Viewport(resolution.x, resolution.y) });
-		api->SetScissorRects({ ScissorRect(0,0, resolution.x,resolution.y) });
-		api->ClearRenderTarget(targetTextures, depthTargetTexture);
-		api->SetRenderTarget(targetTextures, depthTargetTexture);
-
-
-		return true;
-	}
-
-	void Renderer3D::DrawCall(SharedPtr<IMesh> mesh, SharedPtr<IMaterial> material)
-	{
-		auto api = Application::GetInstance().GetGraphicsAPI();
-		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
-
-
-		if (material->Bind() == false)
-		{
-			return;
-		}
-		if (mesh->Bind() == false)
-		{
-			return;
-		}
-
-		api->DrawIndexed(mesh->GetIndexCount());
-	}
-
-	void Renderer3D::End()
-	{
-		Renderer::SetState(ERendererState::Wait);
-
-	}
-
-
-
 
 	/* Renderer 2D Pipeline */
 	struct QuadVertex
 	{
 		JVector3 Pos;
 		JVector2 Tex;
-		Color _Color     = Color::White();
+		Color _Color = Color::White();
 		i32 TextureIndex = 0;
 		QuadVertex() = default;
 		QuadVertex(const JVector3& pos, const JVector2& tex) : Pos(pos), Tex(tex) {}
-		QuadVertex(const JVector3& pos, const JVector2& tex, const Color& color, i32 textureIndex) 
+		QuadVertex(const JVector3& pos, const JVector2& tex, const Color& color, i32 textureIndex)
 			: Pos(pos), Tex(tex), _Color(color), TextureIndex(textureIndex) {}
 	};
 	struct Renderer2DItem
 	{
-		static const u32 MaxQuadCount    = 1200;
-		static const u32 MaxVertexCount  = MaxQuadCount * 4;
-		static const u32 MaxIndexCount   = MaxQuadCount * 6;
+		static const u32 MaxQuadCount = 1200;
+		static const u32 MaxVertexCount = MaxQuadCount * 4;
+		static const u32 MaxIndexCount = MaxQuadCount * 6;
 		static const u32 MaxTextureCount = 64;
 
 		static const u32 QuadVertexCount = 4;
@@ -146,6 +85,90 @@ namespace JG
 		u32 DrawCall = 0;
 	};
 	UniquePtr<Renderer2DItem> gRenderer2DItem;
+	std::atomic<ERendererState> RendererState::mState = ERendererState::Wait;
+
+
+
+	bool Renderer::Create()
+	{
+		if (Renderer2D::Create() == false)
+		{
+			JG_CORE_CRITICAL("Failed Create Renderer2D");
+			return false;
+		}
+
+		return true;
+	}
+	void Renderer::Destroy()
+	{
+		Renderer2D::Destroy();
+	}
+	/* Renderer 3D Pipeline
+
+	*/
+	bool Renderer::Begin(SharedPtr<Camera> camera)
+	{
+		if (RendererState::IsRunable() == false)
+		{
+			return false;
+		}
+
+		auto api = Application::GetInstance().GetGraphicsAPI();
+		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
+
+		if (camera == nullptr)
+		{
+			return false;
+		}
+		RendererState::SetState(ERendererState::Run);
+		// TODO Camera 
+		auto targetTextures = camera->GetTargetTextures();
+		auto depthTargetTexture = camera->GetTargetDepthTexture();
+
+
+		auto resolution = camera->GetResolution();
+		api->SetViewports({ Viewport(resolution.x, resolution.y) });
+		api->SetScissorRects({ ScissorRect(0,0, resolution.x,resolution.y) });
+		api->ClearRenderTarget(targetTextures, depthTargetTexture);
+		api->SetRenderTarget(targetTextures, depthTargetTexture);
+
+		auto viewProj = JMatrix::Transpose(camera->GetViewProjMatrix());
+		if (gRenderer2DItem->Standard2DMaterial->SetFloat4x4(TT("gViewProj"), viewProj) == false)
+		{
+			JG_CORE_ERROR("Failed Set ViewProjMatrix in Renderer2D");
+			return false;
+		}
+		return true;
+	}
+
+	void Renderer::DrawCall(SharedPtr<IMesh> mesh, SharedPtr<IMaterial> material)
+	{
+		auto api = Application::GetInstance().GetGraphicsAPI();
+		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
+
+
+		if (material->Bind() == false)
+		{
+			return;
+		}
+		if (mesh->Bind() == false)
+		{
+			return;
+		}
+
+		api->DrawIndexed(mesh->GetIndexCount());
+	}
+
+	void Renderer::End()
+	{
+		Renderer2D::NextBatch();
+		RendererState::SetState(ERendererState::Wait);
+	}
+
+
+
+
+	
 
 	bool Renderer2D::Create()
 	{
@@ -285,44 +308,6 @@ float4 ps_main(VS_OUT pin) : SV_TARGET
 		gRenderer2DItem.reset();
 		gRenderer2DItem = nullptr;
 	}
-	bool Renderer2D::Begin(SharedPtr<Camera> camera)
-	{
-		if (Renderer::IsRunable() == false)
-		{
-			return false;
-		}
-
-		auto api = Application::GetInstance().GetGraphicsAPI();
-		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
-
-		if (camera == nullptr || camera->IsOrthographic() == false)
-		{
-			return false;
-		}
-
-		Renderer::SetState(ERendererState::Run);
-		// TODO Camera 
-		List<SharedPtr<ITexture>> targetTextures = camera->GetTargetTextures();
-
-
-		auto resolution = camera->GetResolution();
-		api->SetViewports({ Viewport (resolution.x, resolution.y)});
-		api->SetScissorRects({ ScissorRect(0,0, resolution.x,resolution.y) });
-		api->ClearRenderTarget(targetTextures, nullptr);
-		api->SetRenderTarget(targetTextures, nullptr);
-
-
-
-		auto viewProj = JMatrix::Transpose(camera->GetViewProjMatrix());
-		if (gRenderer2DItem->Standard2DMaterial->SetFloat4x4(TT("gViewProj"), viewProj) == false)
-		{
-			JG_CORE_ERROR("Failed Set ViewProjMatrix in Renderer2D");
-			return false;
-		}
-
-
-		return true;
-	}
 
 	void Renderer2D::DrawCall(const JMatrix& transform, SharedPtr<ITexture> texture, const Color& color)
 	{
@@ -396,12 +381,6 @@ float4 ps_main(VS_OUT pin) : SV_TARGET
 	//	//
 
 	//}
-
-	void Renderer2D::End()
-	{
-		NextBatch();
-		Renderer::SetState(ERendererState::Wait);
-	}
 
 	const Renderer2D::Statistics& Renderer2D::GetStats()
 	{

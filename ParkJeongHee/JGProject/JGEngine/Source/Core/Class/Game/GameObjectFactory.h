@@ -14,8 +14,10 @@ namespace JG
 		List<IGameObject*>  mReservedDestroyObjects;
 
 		HashSet<Type> mRegisteredSystemTypeSet;
+		HashSet<Type> mRegisteredGlobalSystemTypeSet;
 		HashSet<Type> mRegisteredNodeTypeSet;
 		HashSet<Type> mRegisteredComponentTypeSet;
+
 
 		Dictionary<Type, CreateFunc> mCreateFuncByObjectType;
 		Dictionary<String, Type> mObjectTypeByName;
@@ -42,14 +44,23 @@ namespace JG
 			RegisterType<T>();
 		}
 
+		template<class T>
+		void RegisterGlobalSystemType()
+		{
+			mRegisteredGlobalSystemTypeSet.emplace(Type(TypeID<T>()));
+			RegisterType<T>();
+		}
+
 		Type GetGameObjectType(const String& typeName) const;
 		Type GetGameObjectType(u64 typeID) const;
 		bool IsGameComponent(const Type& type) const;
 		bool IsGameNode(const Type& type)      const;
 		bool IsGameSystem(const Type& type)    const;
+		bool IsGlobalGameSystem(const Type& type) const;
 		bool IsGameComponent(IGameObject* gameObject) const;
 		bool IsGameNode(IGameObject* gameObject)      const;
 		bool IsGameSystem(IGameObject* gameObject)    const;
+		bool IsGlobalGameSystem(IGameObject* gameObject) const;
 
 		IGameObject* CreateObjectByType(const Type& type);
 

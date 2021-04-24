@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 #include "Application.h"
-
+#include "Class/Asset/Asset.h"
 
 
 #include "Platform/Window/WindowsWindow.h"
@@ -40,7 +40,7 @@ namespace JG
 		TimerManager::Create();
 		Scheduler::Create();
 		UIManager::Create();
-
+		AssetDataBase::Create();
 		// TODO
 		// 필요한 멤버 클래스 생성
 		mLayerStack  = CreateUniquePtr<LayerStack>();
@@ -72,7 +72,7 @@ namespace JG
 			JG_CORE_INFO("Successed Create Window");
 			mGraphcisAPI->Create();
 			ShaderLibrary::Create();
-			Renderer2D::Create();
+			Renderer::Create();
 
 			
 			mIsRunning = true;
@@ -132,7 +132,8 @@ namespace JG
 		mGraphcisAPI->Flush();
 		UIManager::Destroy();
 		mLayerStack.reset();
-		Renderer2D::Destroy();
+		Renderer::Destroy();
+		AssetDataBase::Destroy();
 		ShaderLibrary::Destroy();
 		mGraphcisAPI->Destroy();
 		mGraphcisAPI.reset();

@@ -11,13 +11,20 @@ namespace JG
 	class IMesh;
 	class Application;
 	class Camera;
-	class Renderer3D
+
+
+
+	class Renderer
 	{
+		friend Application;
 	public:
 		struct Statistics
 		{
 			u32 DrawCalls = 0;
 		};
+	private:
+		static bool Create();
+		static void Destroy();
 	public:
 		static bool Begin(SharedPtr<Camera> camera);
 		static void DrawCall(SharedPtr<IMesh> mesh, SharedPtr<IMaterial> material);
@@ -29,7 +36,7 @@ namespace JG
 
 	class Renderer2D
 	{
-		friend Application;
+		friend class Renderer;
 		static bool Create();
 		static void Destroy();
 	public:
@@ -42,8 +49,6 @@ namespace JG
 			u32 GetTotalIndexCount() const { return QuadCount * 6; }
 		};
 	public:
-		// Begin에 카메라
-		static bool Begin(SharedPtr<Camera> camera);
 		// Standard Material
 		static void DrawCall(const JMatrix& transform, SharedPtr<ITexture> texture, const Color& color);
 		static void DrawCall(const JVector2& Pos, const JVector2& Size, float rotation, SharedPtr<ITexture> texture , const Color& color);
@@ -53,10 +58,9 @@ namespace JG
 		static void DrawCall(const JVector2& Pos, const JVector2& Size, SharedPtr<ITexture> texture);
 		// Custom Material
 		//static void DrawCall(const JVector2& Pos, const JVector2& Size, float rotation, SharedPtr<IMaterial> material);
-
-		static void End();
 		static const Statistics& GetStats();
 	private:
+
 		static void StartBatch();
 		static void NextBatch();
 	};

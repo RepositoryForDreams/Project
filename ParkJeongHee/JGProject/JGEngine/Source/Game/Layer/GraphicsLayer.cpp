@@ -130,11 +130,11 @@ float4 ps_main(VS_OUT pin) : SV_TARGET
 
 	EScheduleResult GraphicsLayer::Update()
 	{
-		if (Renderer3D::Begin(mCamera))
+		if (Renderer::Begin(mCamera))
 		{
-			Renderer3D::DrawCall(mMesh, mMaterial);
+			Renderer::DrawCall(mMesh, mMaterial);
 
-			Renderer3D::End();
+			Renderer::End();
 		}
 
 		//mCamera->SetOrthographic(true);

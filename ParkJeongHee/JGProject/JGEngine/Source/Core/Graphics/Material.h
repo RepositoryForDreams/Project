@@ -9,7 +9,7 @@ namespace JG
 	class IMaterial 
 	{
 		friend class Renderer2D;
-		friend class Renderer3D;
+		friend class Renderer;
 	public:
 		virtual bool SetFloat(const String& name, float value) = 0;
 		virtual bool SetFloat2(const String& name, const JVector2& value) = 0;

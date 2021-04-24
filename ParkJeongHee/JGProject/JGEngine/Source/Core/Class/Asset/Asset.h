@@ -115,8 +115,9 @@ namespace JG
 
 
 	class AssetManager;
-	class AssetDataBase : GlobalSingleton<AssetDataBase>
+	class AssetDataBase : public GlobalSingleton<AssetDataBase>
 	{
+		friend class Application;
 		Dictionary<AssetManager*, SharedPtr<AssetManager>> mAssetManagerPool;
 		HashSet<SharedPtr<AssetManager>> mWaitingAssetManager;
 	public:

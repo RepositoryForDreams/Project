@@ -32,7 +32,7 @@ namespace JG
 
 		
 		friend class Renderer2D;
-		friend class Renderer3D;
+		friend class Renderer;
 		virtual void Begin() = 0;
 		virtual void End()	 = 0;
 		virtual void Flush() = 0;

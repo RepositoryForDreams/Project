@@ -34,6 +34,10 @@ namespace JG
 	{
 		return mRegisteredSystemTypeSet.find(type) != mRegisteredSystemTypeSet.end();
 	}
+	bool GameObjectFactory::IsGlobalGameSystem(const Type& type) const
+	{
+		return mRegisteredGlobalSystemTypeSet.find(type) != mRegisteredGlobalSystemTypeSet.end();
+	}
 	bool GameObjectFactory::IsGameComponent(IGameObject* gameObject) const
 	{
 		return IsGameComponent(gameObject->GetType());
@@ -45,6 +49,10 @@ namespace JG
 	bool GameObjectFactory::IsGameSystem(IGameObject* gameObject) const
 	{
 		return IsGameSystem(gameObject->GetType());
+	}
+	bool GameObjectFactory::IsGlobalGameSystem(IGameObject* gameObject) const
+	{
+		return IsGlobalGameSystem(gameObject->GetType());
 	}
 	IGameObject* GameObjectFactory::CreateObjectByType(const Type& type)
 	{
