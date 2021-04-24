@@ -8,32 +8,30 @@ namespace JG
 {
 #define ASSET_MESH_FORMAT TT(".mesh")
 
-	namespace Asset
+	struct JGVertex
 	{
-		struct Vertex
-		{
-			JVector3 Position;
-			JVector3 Normal;
-			JVector3 Tangent;
-			JVector3 Bitangent;
-			JVector2 Texcoord;
+		JVector3 Position;
+		JVector3 Normal;
+		JVector3 Tangent;
+		JVector3 Bitangent;
+		JVector2 Texcoord;
 
-			static SharedPtr<InputLayout> GetInputLayout() {
-				auto inputLayout = InputLayout::Create();
-				inputLayout->Add(EShaderDataType::_float3, "POSITION", 0);
-				inputLayout->Add(EShaderDataType::_float3, "NORMAL", 0);
-				inputLayout->Add(EShaderDataType::_float3, "TANGENT", 0);
-				inputLayout->Add(EShaderDataType::_float3, "BITANGENT", 0);
-				inputLayout->Add(EShaderDataType::_float2, "TEXCOORD", 0);
-				return inputLayout;
-			}
-		};
+		static SharedPtr<InputLayout> GetInputLayout() {
+			auto inputLayout = InputLayout::Create();
+			inputLayout->Add(EShaderDataType::_float3, "POSITION", 0);
+			inputLayout->Add(EShaderDataType::_float3, "NORMAL", 0);
+			inputLayout->Add(EShaderDataType::_float3, "TANGENT", 0);
+			inputLayout->Add(EShaderDataType::_float3, "BITANGENT", 0);
+			inputLayout->Add(EShaderDataType::_float2, "TEXCOORD", 0);
+			return inputLayout;
+		}
+	};
 
-		struct Bone
-		{
+	struct JGBone
+	{
 
-		};
-	}
+	};
+
 
 	class IAssetStock
 	{
@@ -48,7 +46,7 @@ namespace JG
 		String Name;
 		bool   IsSkinned = false;
 		List<String>                SubMeshNames;
-		List<List<Asset::Vertex>>   Vertices;
+		List<List<JGVertex>>   Vertices;
 		List<u32>		            Indices;
 	public:
 		virtual ~StaticMeshAssetStock() = default;
@@ -73,62 +71,59 @@ namespace JG
 		virtual ~IAsset() = default;
 	};
 
-	class AssetBase : public IAsset
+	template<class T>
+	class Asset : public IAsset
 	{
+		ASSETCLASS
+		friend class AssetManager;
 		u64    mAssetID = ASSET_NULL_ID;
 		String mAssetPath;
 		String mAssetFullPath;
 		String mExtension;
 		String mName;
+
+		SharedPtr<T> mData = nullptr;
 	public:
-		virtual u64 GetAssetID() const override;
-		virtual const String& GetAssetFullPath() const override;
-		virtual const String& GetAssetPath() const override;
-		virtual const String& GetAssetName() const override;
-		virtual const String& GetExtension() const override;
+		virtual u64 GetAssetID() const override
+		{
+			return mAssetID;
+		}
+		virtual const String& GetAssetFullPath() const override
+		{
+			return mAssetFullPath;
+		}
+		virtual const String& GetAssetPath() const override
+		{
+			return mAssetPath;
+		}
+		virtual const String& GetAssetName() const override
+		{
+			return mName;
+		}
+		virtual const String& GetExtension() const override
+		{
+			return mExtension;
+		}
+
+		T* Get() const
+		{
+			mData.get();
+		}
 	public:
-		virtual ~AssetBase() = default;
+		virtual ~Asset() = default;
 	};
 
-	
-	namespace Asset
+
+	class AssetManager;
+	class AssetDataBase : GlobalSingleton<AssetDataBase>
 	{
-		class Texture : public AssetBase
-		{
-			ASSETCLASS
-		public:
-			virtual ~Texture() = default;
-
-		};
-		class StaticMesh : public AssetBase
-		{
-			ASSETCLASS
-		public:
-			virtual ~StaticMesh() = default;
-		};
-		class Material : public AssetBase
-		{
-			ASSETCLASS
-		public:
-			virtual ~Material() = default;
-		};
-	}
-
-
-
-	class AssetDataBase : public ObjectFactory<AssetDataBase, IAsset, 2>
-	{
+		Dictionary<AssetManager*, SharedPtr<AssetManager>> mAssetManagerPool;
+		HashSet<SharedPtr<AssetManager>> mWaitingAssetManager;
 	public:
-		template<class T>
-		void AsyncLoadAsset(const String& path)
-		{
-			// Asset
-			// id ¹èºÎ
-			//  
-		}
-	protected:
-		virtual void CreateObjectImpl(IAsset* asset) override;
-		virtual void DestroyObjectImpl(IAsset* asset) override;
-		virtual void ReserveDestroyObjectImpl(IAsset* asset) override;
+		AssetDataBase();
+		virtual ~AssetDataBase();
+	public:
+		SharedPtr<AssetManager> RequestAssetManager();
+		void ReturnAssetManager(SharedPtr<AssetManager> assetManager);
 	};
 }

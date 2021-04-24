@@ -1,11 +1,14 @@
 #pragma once
 #include "GameNode.h"
+#include "Class/Asset/AssetManager.h"
 
 namespace JG
 {
 	class GameWorld : public GameNode
 	{
 		GAMECLASS
+	private:
+		SharedPtr<AssetManager> mAssetManager;
 	public:
 		GameWorld();
 	public:

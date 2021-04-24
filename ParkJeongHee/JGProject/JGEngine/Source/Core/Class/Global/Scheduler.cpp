@@ -51,7 +51,7 @@ namespace JG
                     {
                         // Task ½ÇÇà
                         task->SetState(EScheduleState::Run);
-                        task->Function();
+                        task->Function(task->Handle->UserData);
                         task->SetState(EScheduleState::Compelete);
                     }
 
@@ -146,7 +146,7 @@ namespace JG
     {
         return ScheduleByFrame(delayFrame, 0, 1, priority, task);
     }
-    SharedPtr<ScheduleHandle> Scheduler::ScheduleAsync(const AsyncTaskFunction& task)
+    SharedPtr<ScheduleHandle> Scheduler::ScheduleAsync(const AsyncTaskFunction& task, void* userData)
     {
         auto asyncTask = CreateSharedPtr<AsyncTask>();
         auto handle    = CreateSharedPtr<ScheduleHandle>();
@@ -155,10 +155,10 @@ namespace JG
             u64 ID = ReceiveScheduleID();
             handle->mID = ID;
             handle->mState = EScheduleState::Wait;
-            handle->mType = EScheduleType::Async;
+            handle->mType  = EScheduleType::Async;
+            handle->UserData = userData;
             asyncTask->Handle = handle;
             asyncTask->Function = task;
-
 
             mAsyncTaskQueue.push(asyncTask);
         }

@@ -76,7 +76,7 @@ namespace JG
 		{
 			return;
 		}
-		List<Asset::Vertex> vertices;
+		List<JGVertex> vertices;
 		List<u32>&   indices = output->Indices;
 		output->SubMeshNames.push_back(s2ws(mesh->mName.C_Str()));
 
@@ -84,7 +84,7 @@ namespace JG
 		
 		for (u32 i = 0; i < mesh->mNumVertices; ++i)
 		{
-			Asset::Vertex v;
+			JGVertex v;
 			if (mesh->HasPositions() == true)
 			{
 				auto& ai_pos = mesh->mVertices[i];

@@ -50,8 +50,7 @@ namespace JG
 		Continue,
 		Break,
 	};
-	using SyncTaskFunction  = std::function<EScheduleResult()>;
-	using AsyncTaskFunction = std::function<void()>;
+
 	class Timer;
 	class Application;
 	class Scheduler;
@@ -76,8 +75,11 @@ namespace JG
 		}
 		bool IsValid() const;
 		void Reset();
+	public:
+		void* UserData = nullptr;
 	};
-
+	using SyncTaskFunction  = std::function<EScheduleResult()>;
+	using AsyncTaskFunction = std::function<void(void*)>;
 	// Worker 를 생성하여 스케쥴 작성
 	class Scheduler : public GlobalSingleton<Scheduler>
 	{
@@ -112,7 +114,6 @@ namespace JG
 		struct AsyncTask
 		{
 			SharedPtr<ScheduleHandle> Handle;
-			AsyncTaskFunction UserFunction;
 			AsyncTaskFunction Function;
 			void SetState(EScheduleState State) {
 				Handle->mState = State;
@@ -149,7 +150,7 @@ namespace JG
 		SharedPtr<ScheduleHandle> ScheduleOnce(f32 delay, i32 priority, const SyncTaskFunction& task);
 		SharedPtr<ScheduleHandle> ScheduleByFrame(i32 delayFrame, i32 frameCycle, i32 repeat, i32 priority, const SyncTaskFunction& task);
 		SharedPtr<ScheduleHandle> ScheduleOnceByFrame(i32 delayFrame, i32 priority, const SyncTaskFunction& task);
-		SharedPtr<ScheduleHandle> ScheduleAsync(const AsyncTaskFunction& task);
+		SharedPtr<ScheduleHandle> ScheduleAsync(const AsyncTaskFunction& task, void* userData = nullptr);
 
 
 		void FlushAsyncTask(bool isRestart = true);

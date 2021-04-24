@@ -35,13 +35,13 @@ namespace JG
                     auto& subVertices = meshAsset.Vertices[i];
 
                     auto vertexBuffer = IVertexBuffer::Create(subMeshName + TT("_VertexBuffer"), EBufferLoadMethod::CPULoad);
-                    vertexBuffer->SetData(subVertices.data(), sizeof(Asset::Vertex), subVertices.size());
+                    vertexBuffer->SetData(subVertices.data(), sizeof(JGVertex), subVertices.size());
                     mesh->AddVertexBuffer(vertexBuffer);
                 }
                 auto indexBuffer = IIndexBuffer::Create(meshAsset.Name + TT("_IndexBuffer"), EBufferLoadMethod::CPULoad);
                 indexBuffer->SetData(meshAsset.Indices.data(), meshAsset.Indices.size());
                 mesh->SetIndexBuffer(indexBuffer);
-                mesh->SetInputLayout(Asset::Vertex::GetInputLayout());
+                mesh->SetInputLayout(JGVertex::GetInputLayout());
             }
             reader.Close();
 

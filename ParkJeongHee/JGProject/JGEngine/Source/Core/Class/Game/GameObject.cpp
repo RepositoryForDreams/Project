@@ -57,6 +57,12 @@ namespace JG
 		if (mName.empty())
 		{
 			mName = GetType().GetName();
+			u64 pos = mName.find(TT("JG::"));
+			if (pos != String::npos)
+			{
+				mName = mName.substr(pos + 4);
+			}
+		
 		}
 		return mName;
 	}

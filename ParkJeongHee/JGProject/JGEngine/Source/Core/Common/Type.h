@@ -48,11 +48,6 @@ namespace JG
 			{
 				mName = mName.substr(pos + 1);
 			}
-			pos = mName.find_last_of(TT("::"));
-			if (pos != String::npos)
-			{
-				mName = mName.substr(pos + 1);
-			}
 		}
 		
 
@@ -62,11 +57,6 @@ namespace JG
 			mID = typeID.ID;
 			mName = s2ws(typeid(T).name());
 			u64 pos = mName.find(TT(" "), 0);
-			if (pos != String::npos)
-			{
-				mName = mName.substr(pos + 1);
-			}
-			pos = mName.find_last_of(TT("::"));
 			if (pos != String::npos)
 			{
 				mName = mName.substr(pos + 1);

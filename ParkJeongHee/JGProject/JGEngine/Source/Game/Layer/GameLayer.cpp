@@ -9,6 +9,8 @@
 #include "Class/Game/GameComponent.h"
 #include "Class/Game/Components/Transform.h"
 
+#include "Class/Asset/Asset.h"
+
 namespace JG
 {
 	void GameLayer::OnAttach()
@@ -23,6 +25,11 @@ namespace JG
 	{
 		RegisterGameObjectType();
 		mGameWorld = GameObjectFactory::GetInstance().CreateObject<GameWorld>();
+
+		Asset<ITexture> tt;
+		IAsset* a = (IAsset*)(&tt);
+		auto type = a->GetType();
+		JG_INFO("TypeName : {0} , TypeID : {1}", type.GetName(), type.GetID());
 	}
 	void GameLayer::Destroy()
 	{

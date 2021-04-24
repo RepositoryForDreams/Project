@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Asset.h"
-
+#include "AssetManager.h"
 
 namespace JG
 {
@@ -20,41 +20,58 @@ namespace JG
 		reader->Read(&Indices);
 
 	}
-
-	u64 AssetBase::GetAssetID() const
+	AssetDataBase::AssetDataBase()
 	{
-		return mAssetID;
 	}
-
-	const String& AssetBase::GetAssetFullPath() const
+	AssetDataBase::~AssetDataBase()
 	{
-		return mAssetFullPath;
+		for (auto& assetManager : mWaitingAssetManager)
+		{
+			assetManager->Reset();
+			while (assetManager->IsResetting() == true) {}
+		}
+		for (auto& assetManager : mAssetManagerPool)
+		{
+			assetManager.second->Reset();
+			while (assetManager.second->IsResetting() == true) {}
+		}
+		mWaitingAssetManager.clear();
+		mAssetManagerPool.clear();
 	}
-	const String& AssetBase::GetAssetPath() const
+	SharedPtr<AssetManager> AssetDataBase::RequestAssetManager()
 	{
-		return mAssetPath;
+		SharedPtr<AssetManager> result = nullptr;
+		if (mWaitingAssetManager.empty() == false)
+		{
+			
+			for (auto& assetManager : mWaitingAssetManager)
+			{
+				if (assetManager->IsResetting() == false)
+				{
+					result = assetManager;
+					break;
+				}
+			}
+
+			if (result != nullptr)
+			{
+				mAssetManagerPool[result.get()] = result;
+				mWaitingAssetManager.erase(result);
+				return result;
+			}
+
+		}
+		
+		result = CreateSharedPtr<AssetManager>();
+		mAssetManagerPool[result.get()] = result;
+
+
+		return result;
 	}
-	const String& AssetBase::GetAssetName() const
+	void AssetDataBase::ReturnAssetManager(SharedPtr<AssetManager> assetManager)
 	{
-		return mName;
+		assetManager->Reset();
+		mWaitingAssetManager.insert(assetManager);
+		mAssetManagerPool.erase(assetManager.get());
 	}
-
-	const String& AssetBase::GetExtension() const
-	{
-		return mExtension;
-	}
-
-	void AssetDataBase::CreateObjectImpl(IAsset* asset)
-	{
-
-	}
-	void AssetDataBase::DestroyObjectImpl(IAsset* asset)
-	{
-
-	}
-	void AssetDataBase::ReserveDestroyObjectImpl(IAsset* asset)
-	{
-
-	}
-
 }
