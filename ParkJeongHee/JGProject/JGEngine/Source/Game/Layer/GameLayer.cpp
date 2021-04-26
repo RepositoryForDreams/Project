@@ -9,7 +9,7 @@
 #include "Class/Game/GameComponent.h"
 #include "Class/Game/Components/Transform.h"
 
-#include "Class/Game/GlobalSystems/LayerSystem.h"
+#include "Class/Game/GlobalSystems/GameLayerSystem.h"
 
 
 #include "Class/Asset/Asset.h"
@@ -53,7 +53,7 @@ namespace JG
 	}
 	void GameLayer::RegisterGlobalGameSystem()
 	{
-		mGameSystemList.push_back(GameObjectFactory::GetInstance().CreateObject<LayerSystem>());
+		mGameSystemList.push_back(GameObjectFactory::GetInstance().CreateObject<GameLayerSystem>());
 	}
 	void GameLayer::RegisterGameObjectType()
 	{
@@ -66,6 +66,6 @@ namespace JG
 		GameObjectFactory::GetInstance().RegisterComponentType<Transform>();
 
 		// GlobalSystem
-		GameObjectFactory::GetInstance().RegisterGlobalSystemType<LayerSystem>();
+		GameObjectFactory::GetInstance().RegisterGlobalSystemType<GameLayerSystem>();
 	}
 }
