@@ -55,14 +55,11 @@ namespace JG
 		virtual void DeSerialize(FileStreamReader* reader) override;
 	};
 
-
-#define ASSETCLASS virtual Type GetType() const { return Type(TypeID(this)); }
 #define ASSET_NULL_ID -1
-	class IAsset
+	class IAsset : public IJGObject
 	{
 	public:
 		virtual u64 GetAssetID() const = 0;
-		virtual Type		  GetType() const = 0;
 		virtual const String& GetAssetFullPath() const = 0;
 		virtual const String& GetAssetPath() const     = 0;
 		virtual const String& GetAssetName() const     = 0;
@@ -74,7 +71,7 @@ namespace JG
 	template<class T>
 	class Asset : public IAsset
 	{
-		ASSETCLASS
+		JGCLASS
 		friend class AssetManager;
 		u64    mAssetID = ASSET_NULL_ID;
 		String mAssetPath;
@@ -97,6 +94,10 @@ namespace JG
 			return mAssetPath;
 		}
 		virtual const String& GetAssetName() const override
+		{
+			return mName;
+		}
+		virtual const String& GetName() const override
 		{
 			return mName;
 		}

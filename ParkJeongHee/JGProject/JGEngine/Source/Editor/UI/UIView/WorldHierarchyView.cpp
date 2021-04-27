@@ -62,7 +62,7 @@ namespace JG
 			}
 			else
 			{
-				isOpen = ImGui::TreeNodeEx((void*)nodeData.Object->GetID(), nodeData.UserFlags, ws2s(nodeData.Object->GetName()).c_str());
+				isOpen = ImGui::TreeNodeEx((void*)nodeData.Object, nodeData.UserFlags, ws2s(nodeData.Object->GetName()).c_str());
 				nodeData.IsTreePop = isOpen;
 			}
 
@@ -71,7 +71,7 @@ namespace JG
 			[&](WorldHierarchyTreeNode& nodeData)
 		{
 			static bool isContextOpen = false;
-			ImGui::PushID(nodeData.Object->GetID());
+			ImGui::PushID(nodeData.Object);
 			if (UILayer::ShowContextMenu(GetType()) == true)
 			{
 				if (isContextOpen == false)

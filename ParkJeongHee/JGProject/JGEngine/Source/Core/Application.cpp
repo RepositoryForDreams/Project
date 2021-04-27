@@ -43,7 +43,7 @@ namespace JG
 		AssetDataBase::Create();
 		// TODO
 		// 필요한 멤버 클래스 생성
-		mLayerStack  = CreateUniquePtr<LayerStack>();
+		mLayerStack  = CreateUniquePtr<SystemLayerStack>();
 		mGraphcisAPI = IGraphicsAPI::Create(EGraphicsAPI::DirectX12);
 		
 
@@ -84,7 +84,7 @@ namespace JG
 	void Application::Run()
 	{
 		LoadImpl();
-		mLayerStack->ForEach([&](ILayer* layer)
+		mLayerStack->ForEach([&](ISystemLayer* layer)
 		{
 			layer->Begin();
 		});
@@ -120,7 +120,7 @@ namespace JG
 		}
 
 		
-		mLayerStack->ForEach([&](ILayer* layer)
+		mLayerStack->ForEach([&](ISystemLayer* layer)
 		{
 			layer->Destroy();
 		});
@@ -151,7 +151,7 @@ namespace JG
 		dispatcher.Dispatch<AppCloseEvent>(EVENT_BIND_FN(&Application::Close));
 		dispatcher.Dispatch<AppResizeEvent>(EVENT_BIND_FN(&Application::Resize));
 
-		mLayerStack->ForEach([&](ILayer* layer)
+		mLayerStack->ForEach([&](ISystemLayer* layer)
 		{
 			if(e.Handled == false)
 			{
@@ -196,11 +196,11 @@ namespace JG
 		return true;
 	}
 
-	void Application::PushLayer(const SharedPtr<ILayer>& layer)
+	void Application::PushLayer(const SharedPtr<ISystemLayer>& layer)
 	{
 		mLayerStack->PushLayer(layer);
 	}
-	void Application::PushOverlay(const SharedPtr<ILayer>& layer)
+	void Application::PushOverlay(const SharedPtr<ISystemLayer>& layer)
 	{
 		mLayerStack->PushOverlay(layer);
 	}

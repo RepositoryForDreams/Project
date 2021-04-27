@@ -23,7 +23,7 @@ namespace JG
 		{
 		
 			ImGui::Spacing();
-			String id = globalSystem->GetName() + TT("##") + std::to_wstring(globalSystem->GetID());
+			String id = globalSystem->GetName() + TT("##") + std::to_wstring((ptraddr)globalSystem);
 
 			if (ImGui::CollapsingHeader(
 				ws2s(id).c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader) == true)
@@ -38,7 +38,7 @@ namespace JG
 		{
 			bool is_open = true;
 			ImGui::Spacing();
-			String id = system->GetName() + TT("##") + std::to_wstring(system->GetID());
+			String id = system->GetName() + TT("##") + std::to_wstring((ptraddr)system);
 			if (ImGui::CollapsingHeader(
 				ws2s(id).c_str(), &is_open, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader) == true)
 			{

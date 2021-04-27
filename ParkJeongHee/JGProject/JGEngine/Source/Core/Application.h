@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "JGCore.h"
 #include "Platform/Window/Window.h"
-#include "Class/LayerStack.h"
+#include "Class/SystemLayerStack.h"
 #include "Graphics/GraphicsAPI.h"
 int main(int argc, char** argv);
 
@@ -22,7 +22,7 @@ namespace JG
 	private:
 		ApplicaionProps         mProps;
 		UniquePtr<IWindow>		mWindow;
-		UniquePtr<LayerStack>	mLayerStack;
+		UniquePtr<SystemLayerStack>	mLayerStack;
 		UniquePtr<IGraphicsAPI> mGraphcisAPI;
 
 		Queue<UniquePtr<IEvent>> mEventQueue;
@@ -47,8 +47,8 @@ namespace JG
 		virtual void CloseImpl(){}
 
 	protected:
-		void PushLayer(const SharedPtr<ILayer>& layer);
-		void PushOverlay(const SharedPtr<ILayer>& layer);
+		void PushLayer(const SharedPtr<ISystemLayer>& layer);
+		void PushOverlay(const SharedPtr<ISystemLayer>& layer);
 	public:
 		static Application& GetInstance()
 		{

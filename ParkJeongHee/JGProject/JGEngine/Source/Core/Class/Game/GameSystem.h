@@ -7,7 +7,7 @@ namespace JG
 	// 전역 시스템
 	class GlobalGameSystem : public GameObject
 	{
-		GAMECLASS
+		JGCLASS
 	protected:
 		virtual void Start()   override;
 		virtual void Destory() override;
@@ -20,7 +20,7 @@ namespace JG
 	// 월드에서만 적용되는 시스템
 	class GameSystem : public GameObject
 	{
-		GAMECLASS
+		JGCLASS
 
 		friend class GameWorld;
 		GameWorld* mGameWorld = nullptr;

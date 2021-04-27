@@ -8,7 +8,7 @@ namespace JG
 	class IMesh;
 	class IMaterial;
 	class Camera;
-	struct GameLayerInfo
+	struct SortingLayerInfo
 	{
 		String LayerName = TT("Default");
 		i64    SortDepth = 0;
@@ -18,14 +18,14 @@ namespace JG
 	struct GameRenderItem
 	{
 		//
-		GameLayerInfo LayerInfo;
+		SortingLayerInfo LayerInfo;
 		SharedPtr<IMesh> Mesh;
 		SharedPtr<IMaterial> Material;
 	};
 
-	class GameLayer
+	class SortingLayer
 	{
-		friend class GameLayerSystem;
+		friend class SortingLayerSystem;
 
 		// 레이어 이름
 		String Name;
@@ -36,24 +36,30 @@ namespace JG
 		// 바인딩되어있는 카메라
 		List<SharedPtr<Camera>>			BindedCameraList;
 	};
-	/// <summary>
+/// <summary>
 /// 1. 레이어 하나에 카메라 여러개 할당
 /// 2. 렌더러에서 원하는 레이어에 Depth, 레이어 이름을 전달하면 레이더에 할당된 카메라에서 그린다.
 /// 3. 최종적으로는 메인 카메라에 모든 레이어를 그린다.( 2D 렌더러 )
 /// </summary>
 /// 
-	class GameLayerSystem : public GlobalGameSystem
+	class SortingLayerSystem : public GlobalGameSystem
 	{
-		GAMECLASS
+		JGCLASS
 	private:
-		List<UniquePtr<GameLayer>> mGameLayerList;
-		Dictionary<String, GameLayer*> mGameLayerByName;
+		List<UniquePtr<SortingLayer>>     mSortingLayerList;
+		Dictionary<String, SortingLayer*> mSortingLayerByName;
 		// 레이어 이름 리스트
 		// 레이어별 담을 
 	public:
-		void AddGameLayer(const String& name, i64 priority);
-		void RemoveGameLayer(const String& name);
-		GameLayer* GetGameLayer(const String& name) const;
+		void AddSortingLayer(const String& name, i64 priority);
+		void RemoveSortingLayer(const String& name);
+		//
+		void BindCamera(const String& layerName, SharedPtr<Camera> camera);
+		void UnBindCamera(const String& layerName, SharedPtr<Camera> camera);
+		//
+		// 
+		//
+		SortingLayer* GetSortingLayer(const String& name) const;
 
 	};
 }

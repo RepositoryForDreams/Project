@@ -4,41 +4,30 @@
 #include "Common/Type.h"
 namespace JG		
 {
-#define GAMECLASS \
-public: \
-	virtual Type GetType() const override { return Type(TypeID(this));} \
-private: \
-
 	template<class T>
 	using GamePtr = WeakPtr<T>;
 
 
 
-	class IGameObject
+	class IGameObject : public IJGObject
 	{
+		JGCLASS
+	private:
 		friend class GameObjectFactory;
-		friend class GameLayer;
+		friend class GameLogicLayer;
 	protected:
 		virtual void Start()   = 0;
 		virtual void Destory() = 0;
 	public:
-		virtual u64           GetID()   const = 0;
-		virtual const String& GetName() const = 0;
-		virtual Type GetType()    const = 0;
-	public:
 		virtual void  SetName(const String& name) = 0;
 	};
 
-	class IInspectorGUI
-	{
-	public:
-		virtual void OnInspectorGUI() = 0;
-	};
 
 
-	class GameObject : public IGameObject, public ISubscriber, public IInspectorGUI
+
+	class GameObject : public IGameObject
 	{
-		GAMECLASS
+		JGCLASS
 	private:
 		mutable u64    mID = 0;
 		mutable String mName;
@@ -71,7 +60,6 @@ private: \
 
 
 	public:
-		virtual u64 GetID() const override;
 		virtual const String& GetName() const override;
 		virtual void SetName(const String& name) override;
 

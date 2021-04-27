@@ -1,5 +1,5 @@
 #pragma once
-#include "Class/Layer.h"
+#include "Class/SystemLayer.h"
 
 
 
@@ -7,7 +7,7 @@
 
 namespace JG
 {
-	class ImGuiLayer : public ILayer
+	class ImGuiLayer : public ISystemLayer
 	{
 	public:
 		virtual ~ImGuiLayer() {}

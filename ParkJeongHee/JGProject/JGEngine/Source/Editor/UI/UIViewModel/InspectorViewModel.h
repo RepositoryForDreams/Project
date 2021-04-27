@@ -6,7 +6,6 @@
 namespace JG
 {
 	class InspectorModel;
-	class GameNode;
 	class InspectorViewModel : public UIViewModel
 	{
 		InspectorModel* mInspectorModel = nullptr;
@@ -15,12 +14,12 @@ namespace JG
 		virtual void Destroy() override;
 		virtual void OnEvent(IEvent& e) override;
 	public:
-		GameNode* GetTargetGameNode() const;
-		void SetTargetGameNode(GameNode* gameObject);
+		IJGObject* GetTargetObject() const;
+		void SetTargetObject(IJGObject* gameObject);
 
 		const SortedSet<String>& FindComponentTypeList(const String& filter);
 		void SelectComponentType(const String& typeName);
 	private:
-		bool NotifyDestroyGameObject(NotifyDestroyGameObjectEvent& e);
+		bool NotifyDestroyGameObject(NotifyDestroyJGObjectEvent& e);
 	};
 }

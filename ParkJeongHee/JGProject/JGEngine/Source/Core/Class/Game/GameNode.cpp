@@ -29,7 +29,7 @@ namespace JG
 		{
 			bool is_open = true;
 			ImGui::Spacing();
-			String id = com->GetName() + TT("##") + std::to_wstring(com->GetID());
+			String id = com->GetName() + TT("##") + std::to_wstring((ptraddr)com);
 			if (ImGui::CollapsingHeader(
 				ws2s(id).c_str(), &is_open, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader) == true)
 			{

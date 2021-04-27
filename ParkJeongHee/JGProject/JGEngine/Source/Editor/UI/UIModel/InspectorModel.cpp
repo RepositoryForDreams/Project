@@ -17,15 +17,15 @@ namespace JG
 		mFilterStr.clear();
 		mComponentTypeSet.clear();
 		mFilteredTypeList.clear();
-		SetTargetGameNode(nullptr);
+		SetTargetObject(nullptr);
 	}
-	GameNode* InspectorModel::GetTargetGameNode() const
+	IJGObject* InspectorModel::GetTargetObject() const
 	{
-		return mTargetGameNode;
+		return mTargetObject;
 	}
-	void InspectorModel::SetTargetGameNode(GameNode* gameObject)
+	void InspectorModel::SetTargetObject(IJGObject* object)
 	{
-		mTargetGameNode = gameObject;
+		mTargetObject = object;
 	}
 	const SortedSet<String>& InspectorModel::FindComponentTypeList(const String& filter)
 	{
@@ -45,7 +45,7 @@ namespace JG
 				{
 					mFilteredTypeList.insert(type.GetName());
 				}
-				auto originName = type.GetName();
+				auto originName = ReplaceAll(type.GetName(), TT("JG::"), TT(""));
 				auto filterName = filter;
 
 				u64 pos = originName.find(filterName);

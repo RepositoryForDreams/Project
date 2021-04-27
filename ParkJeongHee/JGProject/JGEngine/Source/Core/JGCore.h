@@ -10,12 +10,11 @@
 #include "Common/Assert.h"
 #include "Common/Enum.h"
 #include "Common/Abstract.h"
-#include "Common/GlobalConst.h"
 #include "Common/Type.h"
 #include "Common/String.h"
 #include "Common/Log.h"
 #include "Common/Color.h"
-
+#include "Common/Object.h"
 
 
 #include"Math/Math.h"

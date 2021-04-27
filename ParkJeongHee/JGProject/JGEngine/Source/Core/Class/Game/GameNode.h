@@ -8,7 +8,7 @@ namespace JG
 	class Transform;
 	class GameNode : public GameObject
 	{
-		GAMECLASS
+		JGCLASS
 	private:
 		GameNode*  mParent    = nullptr;
 		GameWorld* mGameWorld = nullptr;

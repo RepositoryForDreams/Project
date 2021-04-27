@@ -6,7 +6,7 @@ namespace JG
 {
 	class GameObjectFactory : public ObjectFactory<GameObjectFactory, IGameObject, 2>
 	{
-		friend class GameLayer;
+		friend class GameLogicLayer;
 		using CreateFunc = std::function<IGameObject*()>;
 
 

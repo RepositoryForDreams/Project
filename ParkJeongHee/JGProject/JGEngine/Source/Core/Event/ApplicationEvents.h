@@ -40,5 +40,18 @@ namespace JG
 		u32 Width  = 0;
 		u32 Height = 0;
 	};
+
+	class NotifyDestroyJGObjectEvent : public IEvent
+	{
+		EVENTCLASS(EEventCategory::Application | EEventCategory::Destroy)
+	public:
+		class IJGObject* DestroyedObject = nullptr;
+	public:
+		virtual ~NotifyDestroyJGObjectEvent() = default;
+		virtual String ToString() const override
+		{
+			return TT("NotifyDestroyJGObjectEvent");
+		}
+	};
 	
 }

@@ -17,21 +17,21 @@ namespace JG
 	void InspectorViewModel::OnEvent(IEvent& e)
 	{
 		EventDispatcher dispatcher(e);
-		dispatcher.Dispatch<NotifyDestroyGameObjectEvent>(EVENT_BIND_FN(&InspectorViewModel::NotifyDestroyGameObject));
+		dispatcher.Dispatch<NotifyDestroyJGObjectEvent>(EVENT_BIND_FN(&InspectorViewModel::NotifyDestroyGameObject));
 	}
-	GameNode* InspectorViewModel::GetTargetGameNode() const
+	IJGObject* InspectorViewModel::GetTargetObject() const
 	{
 		if (mInspectorModel != nullptr)
 		{
-			return mInspectorModel->GetTargetGameNode();
+			return mInspectorModel->GetTargetObject();
 		}
 		return nullptr;
 	}
-	void InspectorViewModel::SetTargetGameNode(GameNode* gameNode)
+	void InspectorViewModel::SetTargetObject(IJGObject* gameNode)
 	{
 		if (mInspectorModel != nullptr)
 		{
-			mInspectorModel->SetTargetGameNode(gameNode);
+			mInspectorModel->SetTargetObject(gameNode);
 		}
 	}
 	const SortedSet<String>& InspectorViewModel::FindComponentTypeList(const String& filter)
@@ -45,25 +45,32 @@ namespace JG
 	}
 	void InspectorViewModel::SelectComponentType(const String& typeName)
 	{
-		if (GetTargetGameNode() == nullptr)
+		if (GetTargetObject() == nullptr)
 		{
 			return;
 		}
-		auto gameNode = GetTargetGameNode();
-		if (gameNode)
+		auto gameObject = GetTargetObject();
+
+		bool isGameNode = GameObjectFactory::GetInstance().IsGameNode(gameObject->GetType());
+		if (isGameNode == true)
 		{
-			auto type = GameObjectFactory::GetInstance().GetGameObjectType(typeName);
-			gameNode->AddComponent(type);
-		}
-	}
-	bool InspectorViewModel::NotifyDestroyGameObject(NotifyDestroyGameObjectEvent& e)
-	{
-		auto targetNode = GetTargetGameNode();
-		if (targetNode != nullptr)
-		{
-			if (targetNode->GetID() == e.DestroyedGameObjectID)
+			auto gameNode = static_cast<GameNode*>(gameObject);
+			if (gameNode)
 			{
-				SetTargetGameNode(nullptr);
+				auto type = GameObjectFactory::GetInstance().GetGameObjectType(typeName);
+				gameNode->AddComponent(type);
+			}
+		}
+		
+	}
+	bool InspectorViewModel::NotifyDestroyGameObject(NotifyDestroyJGObjectEvent& e)
+	{
+		auto targetObject = GetTargetObject();
+		if (targetObject != nullptr)
+		{
+			if (targetObject == e.DestroyedObject)
+			{
+				SetTargetObject(nullptr);
 			}
 		}
 		return false;

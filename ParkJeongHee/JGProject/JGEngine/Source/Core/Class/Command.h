@@ -5,11 +5,7 @@
 
 namespace JG
 {
-	class ISubscriber
-	{
-	public:
-		virtual ~ISubscriber() = default;
-	};
+
 
 
 

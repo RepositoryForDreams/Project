@@ -4,11 +4,11 @@
 #include "Graphics/Resource.h"
 #include "Graphics/Mesh.h"
 #include "Graphics/Material.h"
-#include "Class/Layer.h"
+#include "Class/SystemLayer.h"
 
 namespace JG
 {
-	class GraphicsLayer : public ILayer
+	class GraphicsLayer : public ISystemLayer
 	{
 		SharedPtr<Camera>    mCamera;
 		SharedPtr<IMesh>     mMesh;

@@ -1,12 +1,12 @@
 ﻿#include "pch.h"
-#include "LayerStack.h"
+#include "SystemLayerStack.h"
 
 
 
 
 namespace JG
 {
-	LayerStack::~LayerStack()
+	SystemLayerStack::~SystemLayerStack()
 	{
 		for(auto& layer : mLayers)
 		{
@@ -14,7 +14,7 @@ namespace JG
 		}
 	}
 
-	void LayerStack::PushLayer(const SharedPtr<ILayer>& layer)
+	void SystemLayerStack::PushLayer(const SharedPtr<ISystemLayer>& layer)
 	{
 		mLayers.insert(mLayers.begin() + mLayerInsertIndex, layer);
 		++mLayerInsertIndex;
@@ -22,16 +22,16 @@ namespace JG
 		layer->OnAttach();
 	}
 
-	void LayerStack::PushOverlay(const SharedPtr<ILayer>& layer)
+	void SystemLayerStack::PushOverlay(const SharedPtr<ISystemLayer>& layer)
 	{
 		mLayers.emplace_back(layer);
 
 		layer->OnAttach();
 	}
 
-	void LayerStack::PopLayer()
+	void SystemLayerStack::PopLayer()
 	{
-		SharedPtr<ILayer> layer;
+		SharedPtr<ISystemLayer> layer;
 		auto it = std::find(mLayers.begin(), mLayers.begin() + mLayerInsertIndex, layer);
 
 		if(it != mLayers.begin() + mLayerInsertIndex)
@@ -43,9 +43,9 @@ namespace JG
 		
 	}
 
-	void LayerStack::PopOverlay()
+	void SystemLayerStack::PopOverlay()
 	{
-		SharedPtr<ILayer> layer;
+		SharedPtr<ISystemLayer> layer;
 		auto it = std::find(mLayers.begin() + mLayerInsertIndex, mLayers.end(), layer);
 
 		if(it != mLayers.end())
@@ -55,7 +55,7 @@ namespace JG
 		}
 	}
 
-	void LayerStack::ForEach(const std::function<void(ILayer*)>& action)
+	void SystemLayerStack::ForEach(const std::function<void(ISystemLayer*)>& action)
 	{
 		for(auto& layer : mLayers)
 		{

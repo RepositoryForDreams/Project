@@ -6,7 +6,7 @@ namespace JG
 {
 	class GameWorld : public GameNode
 	{
-		GAMECLASS
+		JGCLASS
 	private:
 		SharedPtr<AssetManager> mAssetManager;
 		List<GameSystem*>	    mWorldGameSystemList;
@@ -33,7 +33,7 @@ namespace JG
 		void AddGameSystem(const Type& type);
 		void Destroy(GameSystem* sys);
 	private:
-		friend class GameLayer;
+		friend class GameLogicLayer;
 		void SetGlobalGameSystemList(const List<GlobalGameSystem*>& systemList);
 		List<GlobalGameSystem*> GetGlobalGameSystemList() const;
 	};

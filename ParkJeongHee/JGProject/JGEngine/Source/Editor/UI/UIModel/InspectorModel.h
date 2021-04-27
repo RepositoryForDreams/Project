@@ -8,7 +8,7 @@ namespace JG
 	class GameNode;
 	class InspectorModel : public UIModel
 	{
-		GameNode* mTargetGameNode = nullptr;
+		IJGObject* mTargetObject = nullptr;
 		String            mFilterStr;
 		HashSet<Type>     mComponentTypeSet;
 		SortedSet<String> mFilteredTypeList;
@@ -16,8 +16,8 @@ namespace JG
 		virtual void Initialize() override;
 		virtual void Destroy() override;
 	public:
-		GameNode* GetTargetGameNode() const;
-		void SetTargetGameNode(GameNode* gameObject);
+		IJGObject* GetTargetObject() const;
+		void SetTargetObject(IJGObject* object);
 		const SortedSet<String>& FindComponentTypeList(const String& filter);
 	};
 }

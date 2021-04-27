@@ -44,14 +44,6 @@ namespace JG
 	{
 		return Scheduler::GetInstance().ScheduleAsync(task);
 	}
-	u64 GameObject::GetID() const
-	{
-		if (mID == 0)
-		{
-			mID = (u64)this;
-		}
-		return mID;
-	}
 	const String& GameObject::GetName() const
 	{
 		if (mName.empty())

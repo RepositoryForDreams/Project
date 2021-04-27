@@ -1,18 +1,18 @@
 #pragma once
 #include "JGCore.h"
-#include "Class/Layer.h"
+#include "Class/SystemLayer.h"
 
 namespace JG
 {
 	class GlobalGameSystem;
 	class GameWorld;
 	class IGameObject;
-	class GameLayer : public ILayer
+	class GameLogicLayer : public ISystemLayer
 	{
 		GameWorld* mGameWorld = nullptr;
 		List<GlobalGameSystem*> mGameSystemList;
 	public:
-		virtual ~GameLayer() {}
+		virtual ~GameLogicLayer() {}
 	public:
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;

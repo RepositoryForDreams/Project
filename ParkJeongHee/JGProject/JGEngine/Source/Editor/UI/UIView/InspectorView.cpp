@@ -30,38 +30,59 @@ namespace JG
 		ImGui::Begin("Inspector", &mOpenGUI);
 		if (mVm != nullptr)
 		{
-			GameNode* gameNode = mVm->GetTargetGameNode();
-			if (gameNode != nullptr)
+			IJGObject* object = mVm->GetTargetObject();
+			if (object != nullptr)
 			{
 				ImGui::Dummy(ImVec2(0, 1.0f));
-				char objName[128] = { 0, };
-				strcpy(objName, ws2s(gameNode->GetName()).c_str());
+				
 				ImGui::AlignTextToFramePadding();
 				ImGui::Text("Name "); ImGui::SameLine(); 
-				if (ImGui::InputText("##Inspector_Name_InputText", objName, 128))
-				{
-					gameNode->SetName(s2ws(objName));
-				} 
 
-				ImGui::Text("ObjectID  :  %lu", gameNode->GetID());
+				bool isGameNode = GameObjectFactory::GetInstance().IsGameNode(object->GetType());
+				if (isGameNode == true)
+				{
+					auto gameNode = static_cast<GameNode*>(object);
+
+					char objName[128] = { 0, };
+					strcpy(objName, ws2s(object->GetName()).c_str());
+
+					if (ImGui::InputText("##Inspector_Name_InputText", objName, 128))
+					{
+						gameNode->SetName(s2ws(objName));
+					}
+				}
+				else
+				{
+					ImGui::Text(ws2s(object->GetName()).c_str());
+				}
+	
 
 				ImGui::Dummy(ImVec2(0, 1.0f));
 				ImGui::Separator();
 
-				gameNode->OnInspectorGUI();
+				object->OnInspectorGUI();
 
 				ImGui::Spacing();	ImGui::Spacing();	ImGui::Spacing();
 
-				if (gameNode->GetParent() != nullptr)
+
+
+				//
+				if (isGameNode == true)
 				{
-					auto padding = ImGui::GetStyle().FramePadding;
-					if (ImGui::Button("Add Component", ImVec2(ImGui::GetWindowSize().x - (padding.x * 4), 0)) == true)
+					auto gameNode = static_cast<GameNode*>(object);
+					if (gameNode->GetParent() != nullptr)
 					{
-						memset(mFindFilterStr, 0, 256);
-						ImGui::OpenPopup("Component Finder");
-						mIsOpenPopup = true;
+						auto padding = ImGui::GetStyle().FramePadding;
+						if (ImGui::Button("Add Component", ImVec2(ImGui::GetWindowSize().x - (padding.x * 4), 0)) == true)
+						{
+							memset(mFindFilterStr, 0, 256);
+							ImGui::OpenPopup("Component Finder");
+							mIsOpenPopup = true;
+						}
 					}
+
 				}
+
 
 
 				if (mIsOpenPopup == true)
@@ -77,7 +98,8 @@ namespace JG
 						bool _bool = false;
 						for (auto& type : comTypeList)
 						{
-							if (ImGui::Selectable(ws2s(type).c_str(), &_bool))
+							auto name = ReplaceAll(type, TT("JG::"), TT(""));
+							if (ImGui::Selectable(ws2s(name).c_str(), &_bool))
 							{
 								mVm->SelectComponentType(type);
 								ImGui::CloseCurrentPopup();

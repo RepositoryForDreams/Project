@@ -1,5 +1,5 @@
 #pragma once
-#include "Class/Layer.h"
+#include "Class/SystemLayer.h"
 #include "Class/FileIO.h"
 namespace JG
 {
@@ -8,7 +8,7 @@ namespace JG
 		MainMenu,
 		ContextMenu,
 	};
-	class UILayer : public ILayer
+	class UILayer : public ISystemLayer
 	{
 
 	public:

@@ -7,7 +7,7 @@ namespace JG
 {
 	class Transform : public GameComponent
 	{
-		GAMECLASS
+		JGCLASS
 	private:
 		JVector3 mLocation;
 		JVector3 mRotation;

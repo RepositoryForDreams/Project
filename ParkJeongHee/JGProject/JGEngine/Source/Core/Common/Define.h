@@ -117,8 +117,6 @@ namespace JG
 	// String
 	using String = std::wstring;
 	using wchar  = wchar_t;
-
-	
 }
 
 

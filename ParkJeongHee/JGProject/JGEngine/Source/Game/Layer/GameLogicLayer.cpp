@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "GameLayer.h"
+#include "GameLogicLayer.h"
 #include "Application.h"
 #include "Class/Game/GameObject.h"
 
@@ -9,63 +9,62 @@
 #include "Class/Game/GameComponent.h"
 #include "Class/Game/Components/Transform.h"
 
-#include "Class/Game/GlobalSystems/GameLayerSystem.h"
+#include "Class/Game/GlobalSystems/SortingLayerSystem.h"
 
 
 #include "Class/Asset/Asset.h"
 
 namespace JG
 {
-	void GameLayer::OnAttach()
+	void GameLogicLayer::OnAttach()
 	{
 		GameObjectFactory::Create();
 	}
-	void GameLayer::OnDetach()
+	void GameLogicLayer::OnDetach()
 	{
 		GameObjectFactory::Destroy();
 	}
-	void GameLayer::Begin()
+	void GameLogicLayer::Begin()
 	{
 		RegisterGameObjectType();
 		RegisterGlobalGameSystem();
 		mGameWorld = GameObjectFactory::GetInstance().CreateObject<GameWorld>();
 		mGameWorld->SetGlobalGameSystemList(mGameSystemList); 
 	}
-	void GameLayer::Destroy()
+	void GameLogicLayer::Destroy()
 	{
 
 	}
-	void GameLayer::OnEvent(IEvent& e)
+	void GameLogicLayer::OnEvent(IEvent& e)
 	{
 		EventDispatcher eventDispatcher(e);
-		eventDispatcher.Dispatch<RequestGameWorldEvent>(EVENT_BIND_FN(&GameLayer::ResponseGameWorld));
+		eventDispatcher.Dispatch<RequestGameWorldEvent>(EVENT_BIND_FN(&GameLogicLayer::ResponseGameWorld));
 	}
-	String GameLayer::GetLayerName()
+	String GameLogicLayer::GetLayerName()
 	{
-		return TT("GameLayer");
+		return TT("GameLogicLayer");
 	}
-	bool GameLayer::ResponseGameWorld(RequestGameWorldEvent& e)
+	bool GameLogicLayer::ResponseGameWorld(RequestGameWorldEvent& e)
 	{
 		ResponseGameWorldEvent response;
 		response.GameWorld = mGameWorld;
 		Application::GetInstance().SendEvent(response);
 		return true;
 	}
-	void GameLayer::RegisterGlobalGameSystem()
+	void GameLogicLayer::RegisterGlobalGameSystem()
 	{
-		mGameSystemList.push_back(GameObjectFactory::GetInstance().CreateObject<GameLayerSystem>());
+		mGameSystemList.push_back(GameObjectFactory::GetInstance().CreateObject<SortingLayerSystem>());
 	}
-	void GameLayer::RegisterGameObjectType()
+	void GameLogicLayer::RegisterGameObjectType()
 	{
 		// GameNode
 		GameObjectFactory::GetInstance().RegisterNodeType<GameNode>();
 		GameObjectFactory::GetInstance().RegisterNodeType<GameWorld>();
 
-		//// GameComponent
-		GameObjectFactory::GetInstance().RegisterComponentType<GameComponent>();
+		// GameComponent
 		GameObjectFactory::GetInstance().RegisterComponentType<Transform>();
 
 		// GlobalSystem
-		GameObjectFactory::GetInstance().RegisterGlobalSystemType<GameLayerSystem>();
+		GameObjectFactory::GetInstance().RegisterGlobalSystemType<SortingLayerSystem>();
 	}
 }

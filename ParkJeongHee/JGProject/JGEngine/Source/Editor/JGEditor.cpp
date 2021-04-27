@@ -4,7 +4,7 @@
 #include "Layer/ImGuiLayer.h"
 #include "Layer/UILayer.h"
 #include "Layer/GraphicsLayer.h"
-#include "Layer/GameLayer.h"
+#include "Layer/GameLogicLayer.h"
 namespace JG
 {
 	void JGEditor::OpenImpl()
@@ -19,7 +19,7 @@ namespace JG
 	{
 		PushLayer(CreateSharedPtr<ImGuiLayer>());
 		PushLayer(CreateSharedPtr<UILayer>());
-		PushLayer(CreateSharedPtr<GameLayer>());
+		PushLayer(CreateSharedPtr<GameLogicLayer>());
 		PushLayer(CreateSharedPtr<GraphicsLayer>());
 	}
 }

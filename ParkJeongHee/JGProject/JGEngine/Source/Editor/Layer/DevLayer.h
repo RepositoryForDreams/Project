@@ -1,6 +1,6 @@
 #pragma once
 #include "JGCore.h"
-#include "Class/Layer.h"
+#include "Class/SystemLayer.h"
 
 
 namespace JG
@@ -11,7 +11,7 @@ namespace JG
 	class IShader;
 	class IComputer;
 	class IComputeBuffer;
-	class DevLayer : public ILayer
+	class DevLayer : public ISystemLayer
 
 	{
 	private:

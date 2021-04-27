@@ -96,8 +96,8 @@ namespace JG
 		{
 			Scheduler::GetInstance().ScheduleOnceByFrame(1, SchedulePriority::DestroyGameClass, SCHEDULE_BIND_FN(&GameObjectFactory::UpdateDestroyObject));
 		}
-		NotifyDestroyGameObjectEvent e;
-		e.DestroyedGameObjectID = gameObject->GetID();
+		NotifyDestroyJGObjectEvent e;
+		e.DestroyedObject = gameObject;
 		Application::GetInstance().SendEvent(e);
 	}
 	EScheduleResult GameObjectFactory::UpdateStartObject()

@@ -64,7 +64,7 @@ namespace JG
 	{
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<ResponseGameWorldEvent>(EVENT_BIND_FN(&WorldHierarchyViewModel::RecieveGameWorldEvent));
-		dispatcher.Dispatch<NotifyDestroyGameObjectEvent>(EVENT_BIND_FN(&WorldHierarchyViewModel::NotifyDestroyGameObject));
+		dispatcher.Dispatch<NotifyDestroyJGObjectEvent>(EVENT_BIND_FN(&WorldHierarchyViewModel::NotifyDestroyGameObject));
 		
 	}
 
@@ -113,7 +113,7 @@ namespace JG
 			auto inspectorVm = inspector->GetViewModel();
 			if (inspectorVm != nullptr)
 			{
-				inspectorVm->SetTargetGameNode(mCurrentSelectedNodeInInspector);
+				inspectorVm->SetTargetObject(mCurrentSelectedNodeInInspector);
 			}
 		}
 
@@ -212,12 +212,12 @@ namespace JG
 		return true;
 	}
 
-	bool WorldHierarchyViewModel::NotifyDestroyGameObject(NotifyDestroyGameObjectEvent& e)
+	bool WorldHierarchyViewModel::NotifyDestroyGameObject(NotifyDestroyJGObjectEvent& e)
 	{
 		auto currentSelectedNodeInContextMenu = GetSelectdNodeInContextMenu();
 		if (currentSelectedNodeInContextMenu != nullptr)
 		{
-			if (currentSelectedNodeInContextMenu->GetID() == e.DestroyedGameObjectID)
+			if (currentSelectedNodeInContextMenu == e.DestroyedObject)
 			{
 				SetSelectedNodeInContextMenu(nullptr);
 			}
@@ -226,7 +226,7 @@ namespace JG
 		auto currentSelectedNodeInInspector = GetSelectedNodeInInspector();
 		if (currentSelectedNodeInInspector != nullptr)
 		{
-			if (currentSelectedNodeInInspector->GetID() == e.DestroyedGameObjectID)
+			if (currentSelectedNodeInInspector == e.DestroyedObject)
 			{
 				SetSelectedNodeInContextMenu(nullptr);
 			}

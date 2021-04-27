@@ -7,10 +7,10 @@
 
 namespace JG
 {
-	class ILayer : public ISubscriber
+	class ISystemLayer : public ISubscriber
 	{
 	public:
-		virtual ~ILayer() {}
+		virtual ~ISystemLayer() {}
 	public:
 		virtual void OnAttach() = 0;
 		virtual void OnDetach() = 0;

@@ -14,7 +14,7 @@ namespace JG
 	class GameComponent : public GameObject
 	{
 		friend GameNode;
-		GAMECLASS
+		JGCLASS
 	private:
 		GameNode*  mOwnerNode = nullptr;
 		GameWorld* mGameWorld = nullptr;
