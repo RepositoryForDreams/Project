@@ -16,9 +16,9 @@ namespace JG
 			// System 
 			BeginSystem      = -1000000,
 			// Layer
-			ImGuiLayer		 = -900000,
+			ImGuiSystemLayer		 = -900000,
 			GameLayer        = -800000,
-			UILayer          = -700000,
+			UISystemLayer          = -700000,
 			MainMenuLayer    = -600000,
 			//
 			Default = 0,

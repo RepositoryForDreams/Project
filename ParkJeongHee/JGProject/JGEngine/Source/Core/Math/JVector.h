@@ -317,6 +317,14 @@ namespace JG
 			assert(false && "Vector Index exceed..");
 			return FLT_MAX;
 		}
+
+	public:
+		inline bool operator==(const JVector3& v) const {
+			return (v.x == x && v.y == y && v.z == z);
+		}
+		inline bool operator!=(const JVector3& v) const {
+			return (v.x != x || v.y != y || v.z != z);
+		}
 	public: // ±â´Éµé
 		inline void  Set(float x, float y, float z) {
 			this->x = x;

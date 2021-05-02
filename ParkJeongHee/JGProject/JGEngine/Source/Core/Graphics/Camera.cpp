@@ -1,3 +1,10 @@
+#include "Camera.h"
+#include "Camera.h"
+#include "Camera.h"
+#include "Camera.h"
+#include "Camera.h"
+#include "Camera.h"
+#include "Camera.h"
 #include "pch.h"
 #include "Camera.h"
 #include "Resource.h"
@@ -10,45 +17,73 @@ namespace JG
 	}
 	void Camera::SetLocation(const JVector3& location)
 	{
-		mIsViewDirty = true;
+		if (mLocation != location)
+		{
+			mIsViewDirty = true;
+		}
+
 		mLocation = location;
 	}
 
 	void Camera::SetRotation(const JVector3& rotation)
 	{
-		mIsViewDirty = true;
-		mRotation = JVector3(
+		auto convertRotation = JVector3(
 			Math::ConvertToRadians(rotation.x),
 			Math::ConvertToRadians(rotation.y),
 			Math::ConvertToRadians(rotation.z));
+
+
+		if (mRotation != convertRotation)
+		{
+			mIsViewDirty = true;
+		}
+		mRotation = convertRotation;
 	}
 
-	void Camera::SetFOV(float fov)
+	void Camera::SetFOV(f32 fov)
 	{
-		mIsProjDirty = true;
-		mFov = fov;
+		f32 convertFOV = Math::ConvertToRadians(fov);
+		if (mFov != convertFOV)
+		{
+			mIsProjDirty = true;
+		}
+		mFov = convertFOV;
 	}
 
-	void Camera::SetFarZ(float farZ)
+	void Camera::SetFarZ(f32 farZ)
 	{
-		mIsProjDirty = true;
+		if (mFarZ != farZ)
+		{
+			mIsProjDirty = true;
+		}
 		mFarZ = farZ;
 	}
 
-	void Camera::SetNearZ(float nearZ)
+	void Camera::SetNearZ(f32 nearZ)
 	{
-		mIsProjDirty = true;
+		if (mNearZ != nearZ)
+		{
+			mIsProjDirty = true;
+		}
 		mNearZ = nearZ;
 	}
 
 	void Camera::SetOrthographic(bool isOrthographic)
 	{
-		mIsProjDirty = true;
+		if (mIsOrthographic != isOrthographic)
+		{
+			mIsProjDirty = true;
+		}
+
 		mIsOrthographic = isOrthographic;
 	}
 
 	void Camera::SetResolution(const JVector2& resolution)
 	{
+		if (mResolution != resolution)
+		{
+			mIsProjDirty = true;
+		}
 		mIsProjDirty = true;
 		mResolution = resolution;
 	}
@@ -84,14 +119,33 @@ namespace JG
 		}
 		return false;
 	}
+	void Camera::SetTargetLayer(const String& layerName)
+	{
+		mTargetLayer = layerName;
+	}
+	void Camera::SetCullingLayerMask(u64 mask)
+	{
+		mCullingLayerMask = mask;
+	}
+	void Camera::SetDepth(i64 depth)
+	{
+		mDepth = depth;
+	}
+	void Camera::SetEnable(bool enable)
+	{
+		mEnable = enable;
+	}
 	const JVector3& Camera::GetLocation() const
 	{
 		return mLocation;
 	}
 
-	const JVector3& Camera::GetRotation() const
+	JVector3 Camera::GetRotation() const
 	{
-		return mRotation;
+		return JVector3(
+			Math::ConvertToDegrees(mRotation.x),
+			Math::ConvertToDegrees(mRotation.y),
+			Math::ConvertToDegrees(mRotation.z));
 	}
 
 	const JMatrix& Camera::GetViewProjMatrix() const
@@ -119,17 +173,17 @@ namespace JG
 		return mProjMatrix;
 	}
 
-	float Camera::GetFOV() const
+	f32 Camera::GetFOV() const
 	{
-		return mFov;
+		return Math::ConvertToDegrees(mFov);
 	}
 
-	float Camera::GetFarZ() const
+	f32 Camera::GetFarZ() const
 	{
 		return mFarZ;
 	}
 
-	float Camera::GetNearZ() const
+	f32 Camera::GetNearZ() const
 	{
 		return mNearZ;
 	}
@@ -178,6 +232,22 @@ namespace JG
 	SharedPtr<ITexture> Camera::GetTargetDepthTexture() const
 	{
 		return mTargetDepthTexture;
+	}
+	const String& Camera::GetTargetLayer() const
+	{
+		return mTargetLayer;
+	}
+	u64 Camera::GetCullingLayerMask() const
+	{
+		return mCullingLayerMask;
+	}
+	i64 Camera::GetDepth() const
+	{
+		return mDepth;
+	}
+	bool Camera::IsEnable() const
+	{
+		return mEnable;
 	}
 	bool Camera::UpdateProj() const
 	{

@@ -294,6 +294,56 @@ namespace JG
 
 
 
+	// RenderItem
+	// ·»´õ¸µ Á¤º¸
+	class IMesh;
+	class IMaterial;
+	class ITexture;
+	class IRenderItem : public IJGObject
+	{
+		JGCLASS
+	public:
+		String TargetLayer = TT("Default");
+	public:
+		virtual ~IRenderItem() = default;
+	};
+
+	class StandardSpriteRenderItem : public IRenderItem
+	{
+		JGCLASS
+	public:
+		JMatrix WorldMatrix;
+		Color   Color = Color::White();
+		SharedPtr<ITexture> Texture;
+
+		String SortingLayer;
+		i64    SortingOrder = 0;
+	public:
+		virtual ~StandardSpriteRenderItem() = default;
+	};
+
+	class CustomSpriteRenderItem : public IRenderItem
+	{
+		JGCLASS
+	public:
+		JMatrix WorldMatrix;
+		SharedPtr<IMaterial> Material;
+	public:
+		virtual ~CustomSpriteRenderItem() = default;
+	};
+
+	class MeshRenderItem : public IRenderItem
+	{
+		JGCLASS
+	public:
+		JMatrix WorldMatrix;
+		SharedPtr<IMesh>     Mesh;
+		SharedPtr<IMaterial> Material;
+	public:
+		virtual ~MeshRenderItem() = default;
+	};
+
+
 
 	namespace HLSL
 	{

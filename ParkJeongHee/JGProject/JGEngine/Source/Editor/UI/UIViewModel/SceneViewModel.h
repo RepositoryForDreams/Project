@@ -14,6 +14,8 @@ namespace JG
 	protected:
 		virtual void Initialize() override;
 		virtual void Destroy() override;
+
+		virtual void OnEvent(IEvent& e);
 	public:
 		void SetMinSize(const JVector2& size);
 		const JVector2& GetMinSize() const;

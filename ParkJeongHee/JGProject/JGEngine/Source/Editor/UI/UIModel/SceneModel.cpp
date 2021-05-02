@@ -6,6 +6,7 @@ namespace JG
 {
 	void SceneModel::Initialize()
 	{
+
 	}
 	void SceneModel::Destroy()
 	{

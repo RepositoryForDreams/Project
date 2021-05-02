@@ -63,6 +63,11 @@ namespace JG
 		{
 			Application::GetInstance().SendEvent(e);
 		}
+		template<class EventClass>
+		void SendEventImmediate(EventClass& e)
+		{
+			Application::GetInstance().SendEventImmediate(e);
+		}
 		virtual void Destroy() override;
 		virtual void OnEvent(IEvent& e);
 	protected:

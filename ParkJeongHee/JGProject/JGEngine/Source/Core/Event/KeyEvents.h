@@ -46,7 +46,7 @@ namespace JG
 		virtual ~KeyTypingEvent() override {}
 		virtual String ToString() const override
 		{
-			return TT("KeyTyping : ") + String(&Key);
+			return TT("KeyTyping : ") + Key;
 		}
 	public:
 		wchar Key;

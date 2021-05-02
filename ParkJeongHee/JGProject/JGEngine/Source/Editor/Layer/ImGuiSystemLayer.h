@@ -7,10 +7,10 @@
 
 namespace JG
 {
-	class ImGuiLayer : public ISystemLayer
+	class ImGuiSystemLayer : public ISystemLayer
 	{
 	public:
-		virtual ~ImGuiLayer() {}
+		virtual ~ImGuiSystemLayer() {}
 	public:
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;

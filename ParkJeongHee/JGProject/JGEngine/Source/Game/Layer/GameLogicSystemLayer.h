@@ -7,12 +7,12 @@ namespace JG
 	class GlobalGameSystem;
 	class GameWorld;
 	class IGameObject;
-	class GameLogicLayer : public ISystemLayer
+	class GameLogicSystemLayer : public ISystemLayer
 	{
 		GameWorld* mGameWorld = nullptr;
 		List<GlobalGameSystem*> mGameSystemList;
 	public:
-		virtual ~GameLogicLayer() {}
+		virtual ~GameLogicSystemLayer() {}
 	public:
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;
@@ -24,7 +24,7 @@ namespace JG
 
 		virtual String GetLayerName() override;
 	public:
-		bool ResponseGameWorld(RequestGameWorldEvent& e);
+		bool ResponseGetGameWorld(RequestGetGameWorldEvent& e);
 	private:
 		void RegisterGlobalGameSystem();
 		void RegisterGameObjectType();

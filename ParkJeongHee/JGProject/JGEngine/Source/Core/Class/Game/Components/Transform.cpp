@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Transform.h"
-
+#include "Class/Game/GameNode.h"
 
 namespace JG
 {
@@ -50,5 +50,9 @@ namespace JG
 	void Transform::SendDirty()
 	{
 		mIsDirty = true;
+		ChangeData data;
+		data.Type = GetType();
+		data.Object = this;
+		GetOwner()->SendChangeData(data);
 	}
 }

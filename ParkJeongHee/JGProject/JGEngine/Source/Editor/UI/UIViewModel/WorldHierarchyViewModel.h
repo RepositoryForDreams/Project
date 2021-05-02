@@ -50,7 +50,6 @@ namespace JG
 			const std::function<void(WorldHierarchyTreeNode&)>& action,
 			const std::function<void(WorldHierarchyTreeNode&)>& popAction);
 	private:
-		bool RecieveGameWorldEvent(ResponseGameWorldEvent& e);
 		bool NotifyDestroyGameObject(NotifyDestroyJGObjectEvent& e);
 	};
 }

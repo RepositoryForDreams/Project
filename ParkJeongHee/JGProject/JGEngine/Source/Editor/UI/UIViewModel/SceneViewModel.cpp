@@ -8,11 +8,21 @@ namespace JG
 	void SceneViewModel::Initialize()
 	{
 		mSceneMdoel = RegisterUIModel<SceneModel>();
+		SharedPtr<ITexture> texture;
+		RequestGetMainSceneTextureEvent e;
+		SendEventImmediate(e);
+		mSceneMdoel->SetSceneTexture(e.SceneTexture);
 	}
 
 	void SceneViewModel::Destroy()
 	{
 		UIViewModel::Destroy();
+
+	}
+
+	void SceneViewModel::OnEvent(IEvent& e)
+	{
+
 
 	}
 

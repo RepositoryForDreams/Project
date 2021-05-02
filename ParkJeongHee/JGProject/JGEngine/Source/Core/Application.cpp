@@ -40,6 +40,7 @@ namespace JG
 		TimerManager::Create();
 		Scheduler::Create();
 		UIManager::Create();
+		GameLayerManager::Create();
 		AssetDataBase::Create();
 		// TODO
 		// 필요한 멤버 클래스 생성
@@ -133,6 +134,7 @@ namespace JG
 		UIManager::Destroy();
 		mLayerStack.reset();
 		Renderer::Destroy();
+		GameLayerManager::Destroy();
 		AssetDataBase::Destroy();
 		ShaderLibrary::Destroy();
 		mGraphcisAPI->Destroy();
@@ -146,6 +148,7 @@ namespace JG
 
 	void Application::OnEvent(IEvent& e)
 	{
+		JG_TRACE("RaiseEvent : {0}", e.ToString());
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<AppOpenEvent>(EVENT_BIND_FN(&Application::Open));
 		dispatcher.Dispatch<AppCloseEvent>(EVENT_BIND_FN(&Application::Close));

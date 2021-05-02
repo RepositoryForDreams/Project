@@ -1,8 +1,19 @@
 ﻿#pragma once
+#include "Common/Define.h"
 #include "Common/Enum.h"
 #include "Common/Type.h"
 #include "Common/Abstract.h"
-
+#include "Common/Color.h"
+#include "Common/Object.h"
+#include "Math/Math.h"
+#include "Math/JVector.h"
+#include "Math/JRect.h"
+#include "Math/JRay.h"
+#include "Math/JQuaternion.h"
+#include "Math/JPlane.h"
+#include "Math/JFrustum.h"
+#include "Math/JBBox.h"
+#include "Math/JMatrix.h"
 #include <string>
 
 
@@ -32,12 +43,11 @@ namespace JG
 		Mouse			= 0x004,
 		MouseButton		= 0x008,
 		Input			= 0x010,
-		Game            = 0x020,
-		Editor          = 0x030,
 
 		Request         = 0x100,
 		Response        = 0x200,
-		Destroy         = 0x400,
+		Notify			= 0x400,
+		Destroy         = 0x800,
 	};
 
 #define  EVENTCLASS(category) \
@@ -87,4 +97,134 @@ private: \
 			return false;
 		}
 	};
+
+
+	// Notify
+	class ITexture;
+	class NotifyChangeMainSceneTextureEvent : public IEvent
+	{
+		EVENTCLASS(EEventCategory::Notify)
+	public:
+		SharedPtr<ITexture> SceneTexture;
+	public:
+		virtual ~NotifyChangeMainSceneTextureEvent() = default;
+		virtual String ToString() const override
+		{
+			return TT("NotifyChangeMainSceneTextureEvent");
+		}
+	};
+
+	class NotifyChangeGameWorldEvent : public IEvent
+	{
+		EVENTCLASS(EEventCategory::Notify)
+	public:
+		class GameWorld* GameWorld = nullptr;
+	public:
+		virtual ~NotifyChangeGameWorldEvent() = default;
+		virtual String ToString() const override
+		{
+			return TT("NotifyChangeGameWorldEvent");
+		}
+	};
+
+
+	//
+	// Request Event
+	class RequestGetGameWorldEvent : public IEvent
+	{
+		EVENTCLASS(EEventCategory::Request)
+	public:
+		class GameWorld* GameWorld = nullptr;
+	public:
+		virtual ~RequestGetGameWorldEvent() = default;
+		virtual String ToString() const override
+		{
+			return TT("RequestGetGameWorldEvent");
+		}
+	};
+
+
+
+
+
+	class ITexture;
+	class RequestGetMainSceneTextureEvent : public IEvent
+	{
+		EVENTCLASS(EEventCategory::Request)
+	public:
+		SharedPtr<ITexture> SceneTexture;
+	public:
+		virtual ~RequestGetMainSceneTextureEvent() = default;
+		virtual String ToString() const override
+		{
+			return TT("RequestGetMainSceneTextureEvent");
+		}
+	};
+
+	class IRenderItem;
+	class RequestPushRenderItemEvent : public IEvent
+	{
+		EVENTCLASS(EEventCategory::Request)
+	public:
+		SharedPtr<IRenderItem> RenderItem;
+	public:
+		virtual ~RequestPushRenderItemEvent() = default;
+		virtual String ToString() const override
+		{
+			return TT("PushRenderItemEvent");
+		}
+	};
+
+
+	class RequestResolutionResizeEvent : public IEvent
+	{
+		EVENTCLASS(EEventCategory::Request)
+	public:
+		JVector2 Resolution;
+	public:
+		virtual ~RequestResolutionResizeEvent() = default;
+		virtual String ToString() const override
+		{
+			return TT("RequestResolutionResizeEvent : X : ") + std::to_wstring(Resolution.x) + TT(", Y : ") + std::to_wstring(Resolution.y);
+		}
+	};
+
+
+
+	class Camera;
+	class RequestRegisterCameraEvent : public IEvent
+	{
+		EVENTCLASS(EEventCategory::Request)
+	public:
+		SharedPtr<Camera> SharedCamera;
+	public:
+		virtual ~RequestRegisterCameraEvent() = default;
+		virtual String ToString() const override
+		{
+			return TT("RequestRegisterCameraEvent");
+		}
+	};
+	class RequestUnRegisterCameraEvent : public IEvent
+	{
+		EVENTCLASS(EEventCategory::Request)
+	public:
+		SharedPtr<Camera> SharedCamera;
+	public:
+		virtual ~RequestUnRegisterCameraEvent() = default;
+		virtual String ToString() const override
+		{
+			return TT("RequestUnRegisterCameraEvent");
+		}
+	};
+
+
+
+
+
+
+
+
+
+
+
 }

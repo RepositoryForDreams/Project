@@ -44,6 +44,7 @@ namespace JG
 
 
 		void ForEach(const std::function<void(GameNode*)>& action);
+		void SendChangeData(const ChangeData& data, EChangeDataFlags flags = EChangeDataFlags::Default);
 	public:
 		GameNode* FindNode(const String& name) const;
 		GameNode* FindNode(u32 index) const;

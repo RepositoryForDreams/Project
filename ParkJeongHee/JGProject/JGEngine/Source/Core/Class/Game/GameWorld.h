@@ -33,7 +33,7 @@ namespace JG
 		void AddGameSystem(const Type& type);
 		void Destroy(GameSystem* sys);
 	private:
-		friend class GameLogicLayer;
+		friend class GameLogicSystemLayer;
 		void SetGlobalGameSystemList(const List<GlobalGameSystem*>& systemList);
 		List<GlobalGameSystem*> GetGlobalGameSystemList() const;
 	};

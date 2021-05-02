@@ -2,6 +2,8 @@
 #include "JGCore.h"
 #include "Imgui/imgui.h"
 #include "Common/Type.h"
+#include "GameSettings.h"
+#include "Application.h"
 namespace JG		
 {
 	template<class T>
@@ -14,7 +16,7 @@ namespace JG
 		JGCLASS
 	private:
 		friend class GameObjectFactory;
-		friend class GameLogicLayer;
+		friend class GameLogicSystemLayer;
 	protected:
 		virtual void Start()   = 0;
 		virtual void Destory() = 0;
@@ -23,6 +25,20 @@ namespace JG
 	};
 
 
+	
+	struct ChangeData
+	{
+		Type Type;
+		IGameObject* Object = nullptr;
+		u64 Flags = 0;
+	};
+
+	ENUM_FLAG(EChangeDataFlags)
+	enum class EChangeDataFlags
+	{
+		Default = 0x0001,
+
+	};
 
 
 	class GameObject : public IGameObject
@@ -62,7 +78,7 @@ namespace JG
 	public:
 		virtual const String& GetName() const override;
 		virtual void SetName(const String& name) override;
-
+		virtual void OnChange(const ChangeData& data) {};
 		virtual void OnInspectorGUI() {}
 	private:
 		void ArrangeScheduleHandle();

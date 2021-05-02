@@ -2,7 +2,7 @@
 #include "WorldHierarchyView.h"
 #include "Class/Game/GameNode.h"
 #include "Imgui/imgui.h"
-#include "Layer/UILayer.h"
+#include "Layer/UISystemLayer.h"
 namespace JG
 {
 	WorldHierarchyView::WorldHierarchyView()
@@ -72,7 +72,7 @@ namespace JG
 		{
 			static bool isContextOpen = false;
 			ImGui::PushID(nodeData.Object);
-			if (UILayer::ShowContextMenu(GetType()) == true)
+			if (UISystemLayer::ShowContextMenu(GetType()) == true)
 			{
 				if (isContextOpen == false)
 				{

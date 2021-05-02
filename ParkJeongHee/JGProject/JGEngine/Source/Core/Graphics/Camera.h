@@ -25,10 +25,16 @@ namespace JG
 		JVector3 mLocation;
 		JVector3 mRotation;
 		
-		float mNearZ = 0.0f;
-		float mFarZ  = 0.0f;
-		float mFov   = 0.0f;
+		f32 mNearZ = 0.0f;
+		f32 mFarZ  = 0.0f;
+		f32 mFov   = 0.0f;
+
+		i64 mDepth = 0;
+		u64 mCullingLayerMask = JG_U64_MAX;
+		String mTargetLayer   = TT("Default");
+
 		bool mIsOrthographic = false;
+		bool mEnable = true;
 		//
 		List<SharedPtr<ITexture>> mTargetTextures;
 		SharedPtr<ITexture> mTargetDepthTexture;
@@ -38,25 +44,31 @@ namespace JG
 		void SetLocation(const JVector3& location);
 		void SetRotation(const JVector3& rotation);
 
-		void SetFOV(float fov);
-		void SetFarZ(float farZ);
-		void SetNearZ(float nearZ);
+		void SetFOV(f32 fov);
+		void SetFarZ(f32 farZ);
+		void SetNearZ(f32 nearZ);
 
 		void SetOrthographic(bool isOrthographic);
 		void SetResolution(const JVector2& resolution);
 
 		bool SetTargetTexture(SharedPtr<ITexture> texture, u8 slot = 0);
 		bool SetTargetDepthTexture(SharedPtr<ITexture> texture);
+
+
+		void SetTargetLayer(const String& layerName);
+		void SetCullingLayerMask(u64 mask);
+		void SetDepth(i64 depth);
+		void SetEnable(bool enable);
 	public:
 		const JVector3& GetLocation() const;
-		const JVector3& GetRotation() const;
+		JVector3 GetRotation() const;
 		const JMatrix& GetViewProjMatrix() const;
 		const JMatrix& GetViewMatrix() const;
 		const JMatrix& GetProjMatrix() const;
 
-		float GetFOV() const;
-		float GetFarZ() const;
-		float GetNearZ() const;
+		f32 GetFOV() const;
+		f32 GetFarZ() const;
+		f32 GetNearZ() const;
 
 		JVector3 GetLook()  const;
 		JVector3 GetRight() const;
@@ -68,6 +80,11 @@ namespace JG
 		SharedPtr<ITexture> GetTargetTexture(u8 slot = 0) const;
 		const List<SharedPtr<ITexture>>& GetTargetTextures() const;
 		SharedPtr<ITexture> GetTargetDepthTexture() const;
+
+		const String& GetTargetLayer() const;
+		u64 GetCullingLayerMask() const;
+		i64 GetDepth() const;
+		bool IsEnable() const;
 	private:
 		bool UpdateProj() const;
 		bool UpdateView() const;

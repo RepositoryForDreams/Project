@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "UILayer.h"
+#include "UISystemLayer.h"
 #include "Imgui/imgui.h"
 #include "UI/UIView/StatisticsView.h"
 #include "UI/UIView/SceneView.h"
@@ -8,20 +8,20 @@
 #include "Class/Game/GameWorld.h"
 namespace JG
 {
-	void UILayer::OnAttach()
+	void UISystemLayer::OnAttach()
 	{
 	
 	}
-	void UILayer::OnDetach()
+	void UISystemLayer::OnDetach()
 	{
 
 	}
 
 
-	void UILayer::Begin()
+	void UISystemLayer::Begin()
 	{
 		
-		Scheduler::GetInstance().ScheduleByFrame(0, 0, -1, SchedulePriority::UILayer, SCHEDULE_BIND_FN(&UILayer::MenuUpdate));
+		Scheduler::GetInstance().ScheduleByFrame(0, 0, -1, SchedulePriority::UISystemLayer, SCHEDULE_BIND_FN(&UISystemLayer::MenuUpdate));
 
 
 		UIManager::GetInstance().RegisterUIView<SceneView>();
@@ -32,25 +32,25 @@ namespace JG
 
 		LoadUISettings(TT("JGUI.ini"));
 	}
-	void UILayer::Destroy()
+	void UISystemLayer::Destroy()
 	{
 		SaveUISettings(TT("JGUI.ini"));
 	}
-	void UILayer::OnEvent(IEvent& e)
+	void UISystemLayer::OnEvent(IEvent& e)
 	{
 
 	}
-	String UILayer::GetLayerName()
+	String UISystemLayer::GetLayerName()
 	{
-		return TT("UILayer");
+		return TT("UISystemLayer");
 	}
 
 
-	bool UILayer::ShowContextMenu(const Type& type)
+	bool UISystemLayer::ShowContextMenu(const Type& type)
 	{
 		if (ImGui::BeginPopupContextItem())
 		{
-			UIManager::GetInstance().ForEach(type, UILayer::BeginMenu, UILayer::EndMenu);
+			UIManager::GetInstance().ForEach(type, UISystemLayer::BeginMenu, UISystemLayer::EndMenu);
 			ImGui::EndPopup();
 			return true;
 		}
@@ -60,7 +60,7 @@ namespace JG
 
 
 
-	void UILayer::LoadUISettings(const String& fileName)
+	void UISystemLayer::LoadUISettings(const String& fileName)
 	{
 		Dictionary<String, bool> IsOpen;
 
@@ -91,7 +91,7 @@ namespace JG
 		}
 
 	}
-	void UILayer::SaveUISettings(const String& fileName)
+	void UISystemLayer::SaveUISettings(const String& fileName)
 	{
 
 		Dictionary<String, bool> IsOpen;
@@ -109,7 +109,7 @@ namespace JG
 		
 	}
 
-	EScheduleResult UILayer::MenuUpdate()
+	EScheduleResult UISystemLayer::MenuUpdate()
 	{
 		ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;
 		ImGuiWindowFlags   window_flags    = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
@@ -123,20 +123,20 @@ namespace JG
 		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 		window_flags |= ImGuiWindowFlags_NoBackground;
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		ImGui::Begin("UILayer", nullptr, window_flags);
+		ImGui::Begin("UISystemLayer", nullptr, window_flags);
 		ImGui::PopStyleVar();
 		ImGui::PopStyleVar(2);
 		// DockSpace
 		ImGuiIO& io = ImGui::GetIO();
 		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
 		{
-			ImGuiID dockspace_id = ImGui::GetID("UILayer DockSpace");
+			ImGuiID dockspace_id = ImGui::GetID("UISystemLayer DockSpace");
 			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 		}
 
 		if (ImGui::BeginMenuBar())
 		{
-			UIManager::GetInstance().ForEach(UILayer::BeginMenu, UILayer::EndMenu);
+			UIManager::GetInstance().ForEach(UISystemLayer::BeginMenu, UISystemLayer::EndMenu);
 			ImGui::EndMenuBar();
 		}
 
@@ -144,7 +144,7 @@ namespace JG
 		return EScheduleResult::Continue;
 	}
 
-	void UILayer::BeginMenu(const MenuItemNode* Node)
+	void UISystemLayer::BeginMenu(const MenuItemNode* Node)
 	{
 		if (Node->MenuItem == nullptr)
 		{
@@ -183,7 +183,7 @@ namespace JG
 		}
 	}
 
-	void UILayer::EndMenu(const MenuItemNode* Node)
+	void UISystemLayer::EndMenu(const MenuItemNode* Node)
 	{
 		if (Node->MenuItem == nullptr && Node->IsOpen)
 		{

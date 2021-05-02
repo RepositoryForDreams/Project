@@ -97,6 +97,28 @@ namespace JG
 			action(node);
 		}
 	}
+	void GameNode::SendChangeData(const ChangeData& data, EChangeDataFlags flags)
+	{
+		for (auto& com : mComponents)
+		{
+			if (com == data.Object)
+			{
+				continue;
+			}
+			com->OnChange(data);
+		}
+
+		for (auto& node : mChilds)
+		{
+			if (node == data.Object)
+			{
+				continue;
+			}
+			node->OnChange(data);
+			node->SendChangeData(data);
+		}
+
+	}
 	GameNode* GameNode::FindNode(const String& name) const
 	{
 		for (auto& node : mChilds)

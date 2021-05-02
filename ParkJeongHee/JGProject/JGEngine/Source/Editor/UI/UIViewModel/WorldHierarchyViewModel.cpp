@@ -16,9 +16,10 @@ namespace JG
 	void WorldHierarchyViewModel::Initialize()
 	{
 		mWorldHierarchyModel = RegisterUIModel<WorldHierarchyModel>();
-		RequestGameWorldEvent e;
-		SendEvent(e);
 
+		RequestGetGameWorldEvent e;
+		SendEventImmediate(e);
+		mWorldHierarchyModel->SetGameWorld(e.GameWorld);
 
 		AddEmptyObject = CreateUniquePtr<Command<GameNode*>>();
 		AddEmptyObject->Subscribe(this, [&](GameNode* parent)
@@ -63,7 +64,6 @@ namespace JG
 	void WorldHierarchyViewModel::OnEvent(IEvent& e)
 	{
 		EventDispatcher dispatcher(e);
-		dispatcher.Dispatch<ResponseGameWorldEvent>(EVENT_BIND_FN(&WorldHierarchyViewModel::RecieveGameWorldEvent));
 		dispatcher.Dispatch<NotifyDestroyJGObjectEvent>(EVENT_BIND_FN(&WorldHierarchyViewModel::NotifyDestroyGameObject));
 		
 	}
@@ -198,18 +198,6 @@ namespace JG
 		{
 			popAction(treeNode);
 		}
-	}
-
-
-
-
-	bool WorldHierarchyViewModel::RecieveGameWorldEvent(ResponseGameWorldEvent& e)
-	{
-		if (mWorldHierarchyModel != nullptr)
-		{
-			mWorldHierarchyModel->SetGameWorld(e.GameWorld);
-		}
-		return true;
 	}
 
 	bool WorldHierarchyViewModel::NotifyDestroyGameObject(NotifyDestroyJGObjectEvent& e)

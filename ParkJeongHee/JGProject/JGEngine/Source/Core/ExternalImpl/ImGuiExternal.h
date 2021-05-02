@@ -8,4 +8,6 @@ namespace ImGui
 {
 	void OnGui(const char* label, JG::JVector3* v, float label_spacing = 0.0f);
 	void OnGui(const char* label, JG::JVector2* v, float label_spacing = 0.0f);
+	void OnGui(const char* label, JG::f32* v, float label_spacing = 0.0f);
+	void OnGui(const char* label, JG::i64* v, float label_spacing = 0.0f);
 }

@@ -8,11 +8,11 @@ namespace JG
 		MainMenu,
 		ContextMenu,
 	};
-	class UILayer : public ISystemLayer
+	class UISystemLayer : public ISystemLayer
 	{
 
 	public:
-		virtual ~UILayer() {}
+		virtual ~UISystemLayer() {}
 	public:
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;

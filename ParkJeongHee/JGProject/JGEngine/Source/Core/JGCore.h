@@ -31,14 +31,12 @@
 #include "Event/ApplicationEvents.h"
 #include "Event/KeyEvents.h"
 #include "Event/MouseEvents.h"
-#include "Event/GameEvents.h"
-#include "Event/EditorEvents.h"
 
 
 #include "Class/Command.h"
 #include "Class/Global/TimerManager.h"
 #include "Class/Global/Scheduler.h"
 #include "Class/Global/UIManager.h"
-
+#include "Class/Global/GameLayerManager.h"
 
 #include "ExternalImpl/ImGuiExternal.h"
