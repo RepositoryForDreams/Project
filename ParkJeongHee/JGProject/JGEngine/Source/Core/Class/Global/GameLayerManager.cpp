@@ -11,7 +11,7 @@ namespace JG
 
 	GameLayerManager::GameLayerManager()
 	{
-		RegisterGameLayer(TT("Default"));
+		RegisterGameLayer(GameLayer::DEFAULT_LAYER);
 	}
 
 	void GameLayerManager::RegisterGameLayer(const String& layerName)
@@ -54,7 +54,7 @@ namespace JG
 	{
 		if (mGameLayerByName.find(layerName) == mGameLayerByName.end())
 		{
-			return mGameLayerMask.at(TT("Default"));
+			return mGameLayerMask.at(GameLayer::DEFAULT_LAYER);
 		}
 
 		return mGameLayerMask.at(layerName);

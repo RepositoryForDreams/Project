@@ -9,6 +9,8 @@ namespace JG
 	{
 		friend class GameLayerManager;
 	public:
+		constexpr static const wchar* DEFAULT_LAYER = TT("Default");
+	public:
 		static u64 GetMask(const String& layerName);
 	private:
 		String Name;

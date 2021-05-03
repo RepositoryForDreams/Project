@@ -22,8 +22,7 @@ namespace JG
 
 	void GraphicsSystemLayer::Begin()
 	{
-		Scheduler::GetInstance().Schedule(0, 0.08f, -1, SchedulePriority::EndSystem, SCHEDULE_BIND_FN(&GraphicsSystemLayer::Update));
-
+		Scheduler::GetInstance().ScheduleByFrame(0, 0, -1, SchedulePriority::EndSystem, SCHEDULE_BIND_FN(&GraphicsSystemLayer::Update));
 
 		mMainCamera = Camera::Create(GameSettings::GetResolution(), Math::ConvertToRadians(90), 0.001f, 10000.0f, true);
 		mMainCamera->SetLocation(JVector3(0, 0, -10));
@@ -155,7 +154,7 @@ namespace JG
 			}
 		}
 		
-
+		mPushedRenderItemList.clear();
 		return EScheduleResult::Continue;
 	}
 }

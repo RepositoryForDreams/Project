@@ -31,7 +31,7 @@ namespace JG
 
 		i64 mDepth = 0;
 		u64 mCullingLayerMask = JG_U64_MAX;
-		String mTargetLayer   = TT("Default");
+		String mTargetLayer   = GameLayer::DEFAULT_LAYER;
 
 		bool mIsOrthographic = false;
 		bool mEnable = true;

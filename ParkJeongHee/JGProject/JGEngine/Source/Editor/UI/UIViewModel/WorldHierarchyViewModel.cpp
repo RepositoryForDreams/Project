@@ -65,7 +65,7 @@ namespace JG
 	{
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<NotifyDestroyJGObjectEvent>(EVENT_BIND_FN(&WorldHierarchyViewModel::NotifyDestroyGameObject));
-		
+		dispatcher.Dispatch<NotifyChangeGameWorldEvent>(EVENT_BIND_FN(&WorldHierarchyViewModel::NotifyChangeGameWorld));
 	}
 
 	void WorldHierarchyViewModel::ForEach(
@@ -218,6 +218,15 @@ namespace JG
 			{
 				SetSelectedNodeInContextMenu(nullptr);
 			}
+		}
+		return false;
+	}
+
+	bool WorldHierarchyViewModel::NotifyChangeGameWorld(NotifyChangeGameWorldEvent& e)
+	{
+		if (mWorldHierarchyModel != nullptr)
+		{
+			mWorldHierarchyModel->SetGameWorld(e.GameWorld);
 		}
 		return false;
 	}

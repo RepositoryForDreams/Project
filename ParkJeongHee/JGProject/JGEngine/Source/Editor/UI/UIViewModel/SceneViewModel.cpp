@@ -22,7 +22,8 @@ namespace JG
 
 	void SceneViewModel::OnEvent(IEvent& e)
 	{
-
+		EventDispatcher dispatcher(e);
+		dispatcher.Dispatch<NotifyChangeMainSceneTextureEvent>(EVENT_BIND_FN(&SceneViewModel::NotifyChangeMainSceneTexture));
 
 	}
 
@@ -43,6 +44,14 @@ namespace JG
 	SharedPtr<ITexture> SceneViewModel::GetSceneTexture() const
 	{
 		return mSceneMdoel->GetSceneTexture();
+	}
+	bool SceneViewModel::NotifyChangeMainSceneTexture(NotifyChangeMainSceneTextureEvent& e)
+	{
+		if (mSceneMdoel != nullptr)
+		{
+			mSceneMdoel->SetSceneTexture(e.SceneTexture);
+		}
+		return false;
 	}
 }
 
