@@ -26,9 +26,9 @@ namespace JG
 		mHandle = Scheduler::GetInstance().ScheduleByFrame(0, 0, -1, 0,
 			[&]()->EScheduleResult
 		{
-			auto stats = Renderer2D::GetStats();
-			mDrawCalls = stats.DrawCalls;
-			mQuadCount = stats.QuadCount;
+			//auto stats = Renderer2D::GetStats();
+			//mDrawCalls = stats.DrawCalls;
+			//mQuadCount = stats.QuadCount;
 
 			return EScheduleResult::Continue;
 		});

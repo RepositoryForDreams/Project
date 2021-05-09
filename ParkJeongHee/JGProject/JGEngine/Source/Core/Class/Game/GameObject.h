@@ -58,7 +58,9 @@ namespace JG
 		virtual void Destory() override {}
 		virtual void Update() {}
 		virtual void LateUpdate() {}
-
+		virtual SharedPtr<IRenderItem> PushRenderItem() {
+			return nullptr;
+		}
 	protected: // 스케쥴 관련
 		SharedPtr<ScheduleHandle> Schedule(f32 delay, f32 tickCycle, i32 repeat, i32 priority, const SyncTaskFunction& task);
 		SharedPtr<ScheduleHandle> ScheduleOnce(f32 delay, i32 priority, const SyncTaskFunction& task);

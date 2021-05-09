@@ -1,4 +1,5 @@
 #include "GameNode.h"
+#include "GameNode.h"
 #include "pch.h"
 #include "GameNode.h"
 #include "Components/Transform.h"
@@ -134,6 +135,38 @@ namespace JG
 		{
 			Destroy(com);
 		}
+	}
+	SharedPtr<IRenderItem> GameNode::PushRenderItem()
+	{
+		for (auto& com : mComponents)
+		{
+			if (com->IsActive())
+			{
+				auto item = com->PushRenderItem();
+				if (item != nullptr)
+				{
+					RequestPushRenderItemEvent e;
+					e.RenderItem = item;
+					SendEvent(e);
+				}
+			}
+			
+		}
+		for (auto& child : mChilds)
+		{
+			if (child->IsActive())
+			{
+				auto item = child->PushRenderItem();
+				if (item != nullptr)
+				{
+					RequestPushRenderItemEvent e;
+					e.RenderItem = item;
+					SendEvent(e);
+				}
+			}
+		}
+
+		return nullptr;
 	}
 	GameNode* GameNode::AddNode(const String& name)
 	{

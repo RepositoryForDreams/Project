@@ -32,6 +32,7 @@ namespace JG
 		virtual ~GameNode() = default;
 	public:
 		virtual void OnInspectorGUI() override;
+		virtual SharedPtr<IRenderItem> PushRenderItem() override;
 	public:
 		GameNode* AddNode(const String& name);
 

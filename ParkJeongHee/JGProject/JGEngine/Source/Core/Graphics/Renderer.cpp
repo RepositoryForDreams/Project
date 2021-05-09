@@ -236,7 +236,7 @@ float4 ps_main(VS_OUT pin) : SV_TARGET
 )"), EShaderFlags::Allow_VertexShader | EShaderFlags::Allow_PixelShader);
 		}
 
-		ShaderLibrary::RegisterShader(gRenderer2DItem->Standard2DShader);
+		//ShaderLibrary::RegisterShader(gRenderer2DItem->Standard2DShader);
 
 		gRenderer2DItem->Standard2DMaterial = IMaterial::Create(TT("Standard2DMaterial"),gRenderer2DItem->Standard2DShader);
 

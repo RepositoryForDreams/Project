@@ -38,6 +38,7 @@ namespace JG
 	{
 		EventDispatcher eventDispatcher(e);
 		eventDispatcher.Dispatch<RequestGetGameWorldEvent>(EVENT_BIND_FN(&GameLogicSystemLayer::ResponseGetGameWorld));
+		eventDispatcher.Dispatch<NotifyRenderingReadyCompeleteEvent>(EVENT_BIND_FN(&GameLogicSystemLayer::ResponseNotfyRenderingReadyCompelete));
 	}
 	String GameLogicSystemLayer::GetLayerName()
 	{
@@ -46,6 +47,20 @@ namespace JG
 	bool GameLogicSystemLayer::ResponseGetGameWorld(RequestGetGameWorldEvent& e)
 	{
 		e.GameWorld = mGameWorld;
+		return true;
+	}
+	bool GameLogicSystemLayer::ResponseNotfyRenderingReadyCompelete(NotifyRenderingReadyCompeleteEvent& e)
+	{
+		if (mGameWorld != nullptr)
+		{
+			auto item = mGameWorld->PushRenderItem();
+			if (item != nullptr)
+			{
+				RequestPushRenderItemEvent e;
+				e.RenderItem = item;
+				Application::GetInstance().SendEvent(e);
+			}
+		}
 		return true;
 	}
 	void GameLogicSystemLayer::RegisterGlobalGameSystem()

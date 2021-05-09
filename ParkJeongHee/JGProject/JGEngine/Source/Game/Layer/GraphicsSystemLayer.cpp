@@ -24,7 +24,7 @@ namespace JG
 
 	void GraphicsSystemLayer::Begin()
 	{
-		Scheduler::GetInstance().ScheduleByFrame(0, 0, -1, SchedulePriority::EndSystem, SCHEDULE_BIND_FN(&GraphicsSystemLayer::Update));
+		Scheduler::GetInstance().Schedule(0, 0.08f, -1, SchedulePriority::EndSystem, SCHEDULE_BIND_FN(&GraphicsSystemLayer::Update));
 
 		mMainCamera = Camera::Create(GameSettings::GetResolution(), Math::ConvertToRadians(90), 0.001f, 10000.0f, true);
 		mMainCamera->SetLocation(JVector3(0, 0, -10));
@@ -34,6 +34,7 @@ namespace JG
 		info.Width = mMainCamera->GetResolution().x;
 		info.Height = mMainCamera->GetResolution().y;
 		info.MipLevel = 1;
+		info.ClearColor = Color::Red();
 		auto mainTexture = ITexture::Create(TT("MainTexture"), info);
 		mMainCamera->SetTargetTexture(mainTexture);
 		mMainCamera->SetCullingLayerMask(JG_U64_MAX);
@@ -101,16 +102,26 @@ namespace JG
 		return true;
 	}
 
-	void GraphicsSystemLayer::Rendering(SharedPtr<IRenderItem> renderItem)
+	void GraphicsSystemLayer::Rendering(SharedPtr<Camera> camera, SharedPtr<IRenderItem> renderItem)
 	{
-		auto type = renderItem->GetType();
+		if (renderItem->Material == nullptr)
+		{
+			return;
+		}
+		renderItem->Material->SetFloat4x4(TT("gViewProj"), JMatrix::Transpose(camera->GetViewProjMatrix()));
+		renderItem->Material->SetFloat4x4(TT("gWorld"), JMatrix::Transpose(renderItem->WorldMatrix));
 
+
+
+		auto type = renderItem->GetType();
+		
 
 		if (type == JGTYPE(StandardSpriteRenderItem))
 		{
 			auto ri = static_cast<StandardSpriteRenderItem*>(renderItem.get());
-
-			Renderer2D::DrawCall(ri->WorldMatrix, ri->Texture, ri->Color);
+			ri->Material->SetFloat4(TT("gColor"), ri->Color);
+			Renderer::DrawCall(ri->Mesh, ri->Material);
+			//Renderer2D::DrawCall(ri->WorldMatrix, ri->Texture, ri->Color);
 		}
 		else
 		{
@@ -119,97 +130,113 @@ namespace JG
 		
 		// 렌더링 하는곳
 	}
-
 	EScheduleResult GraphicsSystemLayer::Update()
 	{
-		SortedDictionary<i64, SharedPtr<Camera>> sortedLayerCameraList;
-		for (auto& cam : mLayerCameras)
+		if (mIsRenderingReady == false)
 		{
-			sortedLayerCameraList[cam.second->GetDepth()] = cam.second;
+			mIsRenderingReady = true;
+			NotifyRenderingReadyCompeleteEvent e;
+			Application::GetInstance().SendEventImmediate(e);
 		}
-
-		//for (auto& layerCamera : sortedLayerCameraList)
-		//{
-		//	if (layerCamera.second->IsEnable() == false)
-		//	{
-		//		continue;
-		//	}
-		//	u64 layerMask = layerCamera.second->GetCullingLayerMask();
-		//	if (Renderer::Begin(layerCamera.second) == true)
-		//	{
-		//		for (auto& item : mPushedRenderItemList)
-		//		{
-		//			if (layerMask & GameLayer::GetMask(item->TargetLayer))
-		//			{
-		//				Rendering(item);
-		//			}
-		//		}
-		//		Renderer::End();
-		//	}
-		//}
-
-		for (auto& layerCamera : sortedLayerCameraList)
+		else
 		{
+			mIsRenderingReady = false;
+
+			SortedDictionary<i64, SharedPtr<Camera>> sortedLayerCameraList;
+			for (auto& cam : mLayerCameras)
+			{
+				sortedLayerCameraList[cam.second->GetDepth()] = cam.second;
+			}
+
+			//for (auto& layerCamera : sortedLayerCameraList)
+			//{
+			//	if (layerCamera.second->IsEnable() == false)
+			//	{
+			//		continue;
+			//	}
+			//	u64 layerMask = layerCamera.second->GetCullingLayerMask();
+			//	if (Renderer::Begin(layerCamera.second) == true)
+			//	{
+			//		for (auto& item : mPushedRenderItemList)
+			//		{
+			//			if (layerMask & GameLayer::GetMask(item->TargetLayer))
+			//			{
+			//				Rendering(layerCamera.second, item);
+			//			}
+			//		}
+			//		Renderer::End();
+			//	}
+			//}
+
+			//for (auto& layerCamera : sortedLayerCameraList)
+			//{
+			//	if (Renderer::Begin(mMainCamera) == true)
+			//	{
+			//
+			//		Renderer::End();
+			//	}
+			//}
+			
 			if (Renderer::Begin(mMainCamera) == true)
 			{
-				//Renderer2D::DrawCall(JVector2(0, 0), layerCamera.second->GetResolution(), layerCamera.second->GetTargetTexture());
+
 				for (auto& item : mPushedRenderItemList)
 				{
-					Rendering(item);
+					Rendering(mMainCamera, item);
 				}
-				Renderer2D::DrawCall(JVector2(100, 200), JVector2(100, 100), Color::White());
+				//Renderer2D::DrawCall(JVector2(0, 0), JVector2(100,100), nullptr);
 				Renderer::End();
 			}
+			mPushedRenderItemList.clear();
+
 		}
-		
-		mPushedRenderItemList.clear();
 		return EScheduleResult::Continue;
 	}
 	void GraphicsSystemLayer::LoadShaderScript()
 	{
 		{
-			auto shader = IShader::Create(HLSL::Script::Standard2DShader,
+			auto shader = IShader::Create(ShaderScript::Standard2DShader,
 				TT(R"(
 SamplerState gPointSampler
 {
 	Template = Point_Wrap
 };
 
-Texture2D gTexture[64];
+Texture2D gTexture;
 
 cbuffer Camera
 {
 	float4x4 gViewProj;
+	float4x4 gPadding1;
+	float4x4 gPadding2;
+	float4x4 gPadding3;
 };
+cbuffer Material
+{
+	float4 gColor;
+}
 
 struct VS_IN
 {
 	float3 posL : POSITION;
 	float2 tex  : TEXCOORD;
-	float4 color : COLOR;
-	int textureIndex : TEXTUREINDEX;
 };
 struct VS_OUT
 {
 	float4 posH : SV_POSITION;
 	float2 tex   : TEXCOORD;
-	float4 color : COLOR;
-	int textureIndex : TEXTUREINDEX;
 };
 
 VS_OUT vs_main(VS_IN vin)
 {
 	VS_OUT vout;
-    
 	vout.posH = mul(float4(vin.posL, 1.0f), gViewProj);
 	vout.tex = vin.tex;
-	vout.color = vin.color;
-	vout.textureIndex = vin.textureIndex;
 	return vout;
 }
 float4 ps_main(VS_OUT pin) : SV_TARGET
 {
-	return gTexture[pin.textureIndex].Sample(gPointSampler, pin.tex) * pin.color;
+	return gColor;
 }
 )"), EShaderFlags::Allow_VertexShader | EShaderFlags::Allow_PixelShader);
 			if (shader != nullptr)

@@ -92,6 +92,7 @@ namespace JG
 		Dictionary<String, UniquePtr<StructData>> StructDataMap;
 	private:
 		u64 RootParamOffset = 0;
+		u64 CBufferRegisterNumberOffset = 0;
 		u64 TextureRegisterNumberOffset = 0;
 		u64 TextureCubeRegisterNumberOffset = 0;
 		u64 SamplerStateRegisterNumberOffset = 0;
@@ -101,7 +102,7 @@ namespace JG
 		void Reset();
 	private:
 		u64 AnalysisStruct(const String& code, u64 startPos, bool* result);
-		u64 AnalysisCBuffer(const String& code, u64 startPos, bool* result);
+		u64 AnalysisCBuffer(String& code, u64 startPos, bool* result);
 		u64 AnalysisStructuredBuffer(String& code, u64 startPos, bool* result);
 		u64 AnalysisTexture2D(String& code, u64 startPos, bool* result);
 		u64 AnalysisSamplerState(String& code, u64 startPos, bool* result);

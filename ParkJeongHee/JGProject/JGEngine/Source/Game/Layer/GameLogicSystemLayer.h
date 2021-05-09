@@ -11,6 +11,7 @@ namespace JG
 	{
 		GameWorld* mGameWorld = nullptr;
 		List<GlobalGameSystem*> mGameSystemList;
+		bool mIsPushRenderItem = false;
 	public:
 		virtual ~GameLogicSystemLayer() {}
 	public:
@@ -25,6 +26,7 @@ namespace JG
 		virtual String GetLayerName() override;
 	public:
 		bool ResponseGetGameWorld(RequestGetGameWorldEvent& e);
+		bool ResponseNotfyRenderingReadyCompelete(NotifyRenderingReadyCompeleteEvent& e);
 	private:
 		void RegisterGlobalGameSystem();
 		void RegisterGameObjectType();

@@ -135,14 +135,19 @@ namespace JG
 		return startPos;
 	}
 
-	u64 ShaderDataForm::AnalysisCBuffer(const String& code, u64 startPos, bool* result)
+	u64 ShaderDataForm::AnalysisCBuffer(String& code, u64 startPos, bool* result)
 	{
 		CBufferData* cBuffer = nullptr;
 		u64 uploadDataSize = 0;
 		u64 dataTokenStartPos = code.find(HLSL::Token::CBuffer, startPos);
-
+		u64 endPos = String::npos;
 		if (dataTokenStartPos != String::npos)
 		{
+			endPos = code.find(TT("\n"), dataTokenStartPos);
+			if (endPos == String::npos) {
+				endPos = code.find(TT("{"), dataTokenStartPos);
+			}
+			
 			String cbName;
 			ExtractCBufferName(code, dataTokenStartPos, &cbName);
 			if (RegisterCBuffer(cbName) == false)
@@ -196,6 +201,9 @@ namespace JG
 		cBuffer->ElementType = HLSL::EHLSLElement::CBuffer;
 		cBuffer->RootParm = RootParamOffset++;
 		cBuffer->RegisterNum = (u32)CBufferDataMap.size() - 1;
+
+		code.insert(endPos, TT(" : register(b") + std::to_wstring(CBufferRegisterNumberOffset++) + TT(")"));
+
 		RootParamMap[cBuffer->RootParm] = cBuffer;
 		return startPos;
 	}

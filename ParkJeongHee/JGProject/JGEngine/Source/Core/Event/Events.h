@@ -128,6 +128,19 @@ private: \
 	};
 
 
+	class NotifyRenderingReadyCompeleteEvent : public IEvent
+	{
+		EVENTCLASS(EEventCategory::Notify)
+	public:
+		virtual ~NotifyRenderingReadyCompeleteEvent() = default;
+		virtual String ToString() const override
+		{
+			return TT("NotifyRenderingReadyCompeleteEvent");
+		}
+	};
+
+
+
 	//
 	// Request Event
 	class RequestGetGameWorldEvent : public IEvent

@@ -303,7 +303,10 @@ namespace JG
 	{
 		JGCLASS
 	public:
-		String TargetLayer = TT("Default");
+		String TargetLayer  = TT("Default");
+		JMatrix WorldMatrix = JMatrix::Identity();
+		SharedPtr<IMesh>	 Mesh = nullptr;
+		SharedPtr<IMaterial> Material = nullptr;
 	public:
 		virtual ~IRenderItem() = default;
 	};
@@ -312,10 +315,7 @@ namespace JG
 	{
 		JGCLASS
 	public:
-		JMatrix WorldMatrix;
-		Color   Color = Color::White();
-		SharedPtr<ITexture> Texture;
-
+		Color Color = Color::White();
 		String SortingLayer;
 		i64    SortingOrder = 0;
 	public:
@@ -326,9 +326,6 @@ namespace JG
 	{
 		JGCLASS
 	public:
-		JMatrix WorldMatrix;
-		SharedPtr<IMaterial> Material;
-	public:
 		virtual ~CustomSpriteRenderItem() = default;
 	};
 
@@ -336,21 +333,19 @@ namespace JG
 	{
 		JGCLASS
 	public:
-		JMatrix WorldMatrix;
-		SharedPtr<IMesh>     Mesh;
-		SharedPtr<IMaterial> Material;
-	public:
 		virtual ~MeshRenderItem() = default;
 	};
 
 
+	namespace ShaderScript
+	{
+		constexpr wchar* Standard2DShader = TT("Standard2DShader");
+	}
+
 
 	namespace HLSL
 	{
-		namespace Script
-		{
-			constexpr wchar* Standard2DShader = TT("Standard2DShader");
-		}
+		
 
 		using token = wchar;
 		namespace Token

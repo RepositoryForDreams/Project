@@ -19,6 +19,8 @@ namespace JG
 		virtual void Update() override;
 		virtual void LateUpdate() override;
 	public:
+		virtual SharedPtr<IRenderItem> PushRenderItem() override;
+	public:
 		virtual void OnChange(const ChangeData& data) override;
 		virtual void OnInspectorGUI() override;
 	};

@@ -35,6 +35,8 @@ namespace JG
 		// 이카메라로 컬링 또는 
 		Dictionary<Camera*, SharedPtr<Camera>> mLayerCameras;
 		List<SharedPtr<IRenderItem>> mPushedRenderItemList;
+
+		bool mIsRenderingReady = false;
 		// 메인 카메라
 		// 카메라안의 카메라
 	public:
@@ -56,7 +58,7 @@ namespace JG
 		bool ResponseRegisterCamera(RequestRegisterCameraEvent& e);
 		bool ResponseUnRegisterCamera(RequestUnRegisterCameraEvent& e);
 	private:
-		void Rendering(SharedPtr<IRenderItem> renderItem);
+		void Rendering(SharedPtr<Camera> camera, SharedPtr<IRenderItem> renderItem);
 	private:
 		EScheduleResult Update();
 	private:
