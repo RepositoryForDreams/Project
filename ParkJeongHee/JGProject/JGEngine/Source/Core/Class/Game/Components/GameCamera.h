@@ -11,6 +11,7 @@ namespace JG
 		JGCLASS
 		SharedPtr<Camera> mCamera;
 	protected:
+		virtual void Awake() override;
 		virtual void Start() override;
 		virtual void Destory() override;
 	public:

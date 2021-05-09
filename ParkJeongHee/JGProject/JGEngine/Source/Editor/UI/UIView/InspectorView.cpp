@@ -4,7 +4,7 @@
 #include "Class/Game/GameObjectFactory.h"
 #include "Class/Game/GameNode.h"
 #include "UI/UIModel/InspectorModel.h"
-
+#include "UI/ModalUI/ComponentFinderModalView.h"
 
 namespace JG
 {
@@ -33,40 +33,13 @@ namespace JG
 			IJGObject* object = mVm->GetTargetObject();
 			if (object != nullptr)
 			{
-				ImGui::Dummy(ImVec2(0, 1.0f));
-				
-				ImGui::AlignTextToFramePadding();
-				ImGui::Text("Name "); ImGui::SameLine(); 
+
 
 				bool isGameNode = GameObjectFactory::GetInstance().IsGameNode(object->GetType());
-				if (isGameNode == true)
-				{
-					auto gameNode = static_cast<GameNode*>(object);
-
-					char objName[128] = { 0, };
-					strcpy(objName, ws2s(object->GetName()).c_str());
-
-					if (ImGui::InputText("##Inspector_Name_InputText", objName, 128))
-					{
-						gameNode->SetName(s2ws(objName));
-					}
-				}
-				else
-				{
-					ImGui::Text(ws2s(object->GetName()).c_str());
-				}
-	
-
-				ImGui::Dummy(ImVec2(0, 1.0f));
-				ImGui::Separator();
-
 				object->OnInspectorGUI();
 
 				ImGui::Spacing();	ImGui::Spacing();	ImGui::Spacing();
 
-
-
-				//
 				if (isGameNode == true)
 				{
 					auto gameNode = static_cast<GameNode*>(object);
@@ -75,48 +48,16 @@ namespace JG
 						auto padding = ImGui::GetStyle().FramePadding;
 						if (ImGui::Button("Add Component", ImVec2(ImGui::GetWindowSize().x - (padding.x * 4), 0)) == true)
 						{
-							memset(mFindFilterStr, 0, 256);
-							ImGui::OpenPopup("Component Finder");
-							mIsOpenPopup = true;
+							UIManager::GetInstance().OpenModalUIView<ComponentFinderModalView>(ComponentFinderInitData());
 						}
 					}
-
 				}
-
-
-
-				if (mIsOpenPopup == true)
+				if (UIManager::GetInstance().OnModalUIView<ComponentFinderModalView>())
 				{
-					if (ImGui::BeginPopupContextWindow("Component Finder") == true)
-					{
-						ImGui::InputText("##Finder Serach", mFindFilterStr, 256);
-						ImGui::Spacing(); ImGui::Separator(); ImGui::Spacing();
-
-						ImGui::BeginChild("##ComponentList", ImVec2(0, 600.0f), true, ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_NoMove);
-
-						auto comTypeList = mVm->FindComponentTypeList(s2ws(mFindFilterStr));
-						bool _bool = false;
-						for (auto& type : comTypeList)
-						{
-							auto name = ReplaceAll(type, TT("JG::"), TT(""));
-							if (ImGui::Selectable(ws2s(name).c_str(), &_bool))
-							{
-								mVm->SelectComponentType(type);
-								ImGui::CloseCurrentPopup();
-							}
-						}
-
-						ImGui::EndChild();
-
-
-						ImGui::EndPopup();
-					}
-					else
-					{
-						mIsOpenPopup = false;
-					}
+					auto comFinder = UIManager::GetInstance().GetModalUIView<ComponentFinderModalView>();
+					auto selectedType = comFinder->GetSelectedComponent();
+					mVm->SelectComponentType(selectedType);
 				}
-			
 			}
 			else
 			{

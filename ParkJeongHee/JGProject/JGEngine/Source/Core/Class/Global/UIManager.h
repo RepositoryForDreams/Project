@@ -6,7 +6,7 @@
 namespace JG
 {
 	class IUIView;
-
+	class IModalUIView;
 	struct MenuItem
 	{
 		String ShortCut;
@@ -39,7 +39,9 @@ namespace JG
 		static const wchar ALT_SHORTCUT_TOKEN   = TT('&');
 	private:
 		Dictionary<JG::Type, UniquePtr<IUIView>>      mUIViewPool;
+		Dictionary<JG::Type, UniquePtr<IModalUIView>> mModalUIViewPool;
 		Dictionary<JG::Type, UniquePtr<MenuItemNode>> mUIViewContextMenu;
+		
 		UniquePtr<MenuItemNode> mMainMenuItemRootNode;
 		mutable std::shared_mutex   mMutex;
 	public:
@@ -60,8 +62,19 @@ namespace JG
 			}
 			mUIViewPool[type]        = CreateUniquePtr<UIViewType>();
 		}
+		template<class ModalUIViewType>
+		void RegisterModalUIView()
+		{
+			Type type = Type(TypeID<ModalUIViewType>());
+			std::lock_guard<std::shared_mutex> lock(mMutex);
 
-		// UI¿ë WeakPtr ±¸Çö
+			if (mModalUIViewPool.find(type) != mModalUIViewPool.end())
+			{
+				return;
+			}
+			mModalUIViewPool[type] = CreateUniquePtr<ModalUIViewType>();
+		}
+
 		template<class UIViewType>
 		UIViewType* GetUIView() const
 		{
@@ -76,8 +89,52 @@ namespace JG
 			}
 			return static_cast<UIViewType*>(iter->second.get());
 		}
+
+		template<class UIModalViewType, class InitData>
+		void OpenModalUIView(const InitData& initData) const
+		{
+			auto view = GetModalUIView<UIModalViewType>();
+			if (view != nullptr)
+			{
+				view->Open(initData);
+			}
+		}
+
+		template<class UIModalViewType>
+		bool OnModalUIView() const 
+		{
+			auto view = GetModalUIView<UIModalViewType>();
+			if (view != nullptr && view->IsOpen())
+			{
+				bool result = (static_cast<IModalUIView*>(view))->OnGUI();
+				if (result == false)
+				{
+					view->Close();
+					return true;
+				}
+			}
+			return false;
+		}
+
+		template<class UIModalViewType>
+		UIModalViewType* GetModalUIView() const 
+		{
+			Type type = Type(TypeID<UIModalViewType>());
+
+			std::shared_lock<std::shared_mutex> lock(mMutex);
+			auto iter = mModalUIViewPool.find(type);
+			if (iter == mModalUIViewPool.end())
+			{
+				JG_CORE_ERROR("Not Find UIModalViewType : {0}", type.GetName());
+				return nullptr;
+			}
+			return static_cast<UIModalViewType*>(iter->second.get());
+		}
+
+
 		void RegisterMainMenuItem(const String& menuPath, u64 priority,  const std::function<void()>& action, const std::function<bool()> enableAction);
 		void RegisterContextMenuItem(const Type& type, const String& menuPath, u64 priority, const std::function<void()>& action, const std::function<bool()> enableAction);
+
 		void ForEach(const std::function<void(IUIView*)> action);
 		void ForEach(
 			const std::function<void(const MenuItemNode*)>& beginAction,

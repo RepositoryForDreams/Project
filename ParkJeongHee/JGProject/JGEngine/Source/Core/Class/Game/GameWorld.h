@@ -11,9 +11,15 @@ namespace JG
 		SharedPtr<AssetManager> mAssetManager;
 		List<GameSystem*>	    mWorldGameSystemList;
 		List<GlobalGameSystem*> mGlobalGameSystemList;
+
+		f32 mTickCycle = 0.08f;
+		SharedPtr<ScheduleHandle> mUpdateScheduleHandle;
+		SharedPtr<ScheduleHandle> mLateUpdateScheduleHandle;
 	public:
 		GameWorld();
 	protected:
+		virtual void Update() override;
+		virtual void LateUpdate() override;
 		virtual void Destory() override;
 	public:
 		virtual void SetParent(GameNode* node) override {}

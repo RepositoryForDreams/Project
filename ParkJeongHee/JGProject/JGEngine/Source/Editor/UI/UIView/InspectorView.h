@@ -8,7 +8,7 @@ namespace JG
 	
 	class InspectorView : public UIView<InspectorViewModel>
 	{
-		UIVIEWCLASS
+		JGCLASS
 
 		bool mOpenGUI = true;
 		bool mIsOpenPopup = false;

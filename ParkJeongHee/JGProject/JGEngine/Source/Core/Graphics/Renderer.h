@@ -56,9 +56,7 @@ namespace JG
 		static void DrawCall(const JVector2& Pos, const JVector2& Size, float rotation, SharedPtr<ITexture> texture);
 		static void DrawCall(const JVector2& Pos, const JVector2& Size, const Color& color);
 		static void DrawCall(const JVector2& Pos, const JVector2& Size, SharedPtr<ITexture> texture);
-		// Custom Material
-		//static void DrawCall(const JVector2& Pos, const JVector2& Size, float rotation, SharedPtr<IMaterial> material);
-		static const Statistics& GetStats();
+		static const Renderer2D::Statistics& GetStats();
 	private:
 
 		static void StartBatch();

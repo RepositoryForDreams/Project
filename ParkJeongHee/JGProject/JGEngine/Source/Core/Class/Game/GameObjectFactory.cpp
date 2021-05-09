@@ -72,14 +72,6 @@ namespace JG
 	}
 	void GameObjectFactory::CreateObjectImpl(IGameObject* gameObject)
 	{
-		bool is_run_start = mReserveStartObjects.empty() == false;
-
-		mReserveStartObjects.push_back(gameObject);
-
-		if (is_run_start == false)
-		{
-			Scheduler::GetInstance().ScheduleOnceByFrame(1, SchedulePriority::StartGameClass, SCHEDULE_BIND_FN(&GameObjectFactory::UpdateStartObject));
-		}
 
 	}
 	void GameObjectFactory::DestroyObjectImpl(IGameObject* gameObject)
@@ -99,16 +91,6 @@ namespace JG
 		NotifyDestroyJGObjectEvent e;
 		e.DestroyedObject = gameObject;
 		Application::GetInstance().SendEvent(e);
-	}
-	EScheduleResult GameObjectFactory::UpdateStartObject()
-	{
-		for (auto& obj : mReserveStartObjects)
-		{
-			JG_INFO("GameNode : {0}  Start", obj->GetName());
-			obj->Start();
-		}
-		mReserveStartObjects.clear();
-		return EScheduleResult::Continue;
 	}
 	EScheduleResult GameObjectFactory::UpdateDestroyObject()
 	{

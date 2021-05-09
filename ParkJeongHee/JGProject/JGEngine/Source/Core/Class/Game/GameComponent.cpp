@@ -22,4 +22,8 @@ namespace JG
 	{
 		return mGameWorld;
 	}
+	bool GameComponent::IsActive() const
+	{
+		return mIsActive;
+	}
 }

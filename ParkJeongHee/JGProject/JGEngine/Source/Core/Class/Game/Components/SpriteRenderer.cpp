@@ -6,36 +6,36 @@
 #include "Class/Asset/Asset.h"
 namespace JG
 {
+	void SpriteRenderer::Awake()
+	{
+		mSpriteRI = CreateUniquePtr<StandardSpriteRenderItem>();
+		mSpriteRI->TargetLayer = GetOwner()->GetLayer();
+		mSpriteRI->Color = Color::White();
+		mSpriteRI->WorldMatrix = JMatrix::Identity();
+		mSpriteRI->Texture = nullptr;
+	}
 	void SpriteRenderer::Start()
 	{
 		BaseRenderer::Start();
-		mIsRunning = true;
-		ScheduleByFrame(0, 0, -1, 0, [&]() -> EScheduleResult
-		{
-			if (mIsRunning == true)
-			{
-				RequestPushRenderItemEvent e;
-				e.RenderItem = mSpriteRI;
-				SendEvent(e);
-				return EScheduleResult::Continue;
-			}
-			else
-			{
-				return EScheduleResult::Break;
-			}
-		});
 
-		GetGameWorld()->GetAssetManager()->AsyncLoadAsset(//"")
-
-		mSpriteRI->TargetLayer == TT(""); // 레이어 -> 게임 노드
-		mSpriteRI->Color = Color::White(); // 컬러  -> 기본
-		mSpriteRI->WorldMatrix = JMatrix::Identity(); // 월드 매트릭스 -> Transform 이
-		mSpriteRI->Texture = nullptr; // 텍스쳐 -> 
 	}
 	void SpriteRenderer::Destory()
 	{
 		BaseRenderer::Destory();
-		mIsRunning = false;
+	}
+
+	void SpriteRenderer::Update()
+	{
+	}
+
+	void SpriteRenderer::LateUpdate()
+	{
+		RequestPushRenderItemEvent e;
+		mSpriteRI->TargetLayer = GetOwner()->GetLayer();
+		mSpriteRI->WorldMatrix = JMatrix::Scaling(JVector3(100, 100, 1.0f));
+		e.RenderItem = mSpriteRI;
+
+		SendEvent(e);
 	}
 
 	void SpriteRenderer::OnChange(const ChangeData& data)
@@ -45,15 +45,16 @@ namespace JG
 		if (data.Type == JGTYPE(Transform))
 		{
 			auto transform = static_cast<Transform*>(data.Object);
-			// matrix 
-
-
-
 		}
 
 	}
 	void SpriteRenderer::OnInspectorGUI()
 	{
 		BaseRenderer::OnInspectorGUI();
+		
+	
+		ImGui::ColorEdit4("Color", (float*)&mSpriteRI->Color);
+
+
 	}
 }

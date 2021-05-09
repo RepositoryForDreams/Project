@@ -7,7 +7,7 @@ namespace JG
 {
 	class SceneView : public UIView<SceneViewModel>
 	{
-		UIVIEWCLASS
+		JGCLASS
 		bool mOpenGUI = true;
 	public:
 		SceneView();

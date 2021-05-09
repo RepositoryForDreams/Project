@@ -13,6 +13,52 @@ namespace JG
 		GameObject::Destory();
 		SetParent(nullptr);
 	}
+	void GameNode::Update()
+	{
+		if (mIsRunStart == false)
+		{
+			mIsRunStart = true;
+			Start();
+		}
+		for (auto& com : mComponents)
+		{
+			if (com->IsActive())
+			{
+				if (com->mIsRunStart == false)
+				{
+					com->mIsRunStart = true;
+					com->Start();
+				}
+				com->Update();
+			}
+		}
+
+		for (auto& child : mChilds)
+		{
+			if (child->IsActive())
+			{
+				child->Update();
+			}
+		}
+	}
+	void GameNode::LateUpdate()
+	{
+		for (auto& com : mComponents)
+		{
+			if (com->IsActive())
+			{
+				com->LateUpdate();
+			}
+		}
+
+		for (auto& child : mChilds)
+		{
+			if (child->IsActive())
+			{
+				child->LateUpdate();
+			}
+		}
+	}
 	GameNode::GameNode()
 	{
 		mTransform = AddComponent<Transform>();
@@ -23,8 +69,50 @@ namespace JG
 	}
 	void GameNode::OnInspectorGUI() 
 	{
-		List<GameComponent*> removeComList;
+		const float width = ImGui::GetWindowWidth();
+		const float wpadding = ImGui::GetStyle().FramePadding.x;
 
+		ImGui::Dummy(ImVec2(0, 1.0f));
+
+		ImGui::AlignTextToFramePadding();
+		ImGui::Text("Name"); ImGui::SameLine();
+
+		char objName[128] = { 0, };
+		strcpy(objName, ws2s(GetName()).c_str());
+		const float input_width = width * 0.4f;
+		ImGui::SetNextItemWidth(input_width);
+		if (ImGui::InputText(("##GameNode InputName"), objName, 128))
+		{
+			SetName(s2ws(objName));
+		}
+
+
+
+
+
+
+		const float combo_width = width * 0.2f;
+		ImGui::SameLine(width - ImGui::CalcTextSize("Layer").x - wpadding * 2 - combo_width);
+		ImGui::Text("Layer"); ImGui::SameLine();
+		ImGui::SetNextItemWidth(combo_width);
+		ImGui::SameLine(width - combo_width - wpadding);
+		if (ImGui::BeginCombo("##Layer Combo Box", ws2s(mTargetLayer).c_str()))
+		{
+			GameLayerManager::GetInstance().ForEach([&](const String& layerName)
+			{
+				bool _bool = false;
+				if (ImGui::Selectable(ws2s(layerName).c_str(), &_bool))
+				{
+					SetLayer(layerName);
+				}
+			});
+			ImGui::EndCombo();
+		}
+
+
+		ImGui::Dummy(ImVec2(0, 1.0f));
+		ImGui::Separator();
+		List<GameComponent*> removeComList;
 		for (auto& com : mComponents)
 		{
 			bool is_open = true;
@@ -53,6 +141,7 @@ namespace JG
 		obj->SetName(name);
 		obj->SetParent(this);
 		obj->mGameWorld = mGameWorld;
+		obj->Awake();
 		return obj;
 	}
 	void GameNode::AddComponent(const Type& type)
@@ -74,6 +163,7 @@ namespace JG
 		com->mOwnerNode = this;
 		com->mGameWorld = mGameWorld;
 		mComponents.push_back(com);
+		com->Awake();
 	}
 	void GameNode::Destroy(GameNode* node)
 	{
@@ -165,6 +255,25 @@ namespace JG
 	GameNode* GameNode::GetParent() const
 	{
 		return mParent;
+	}
+	void GameNode::SetLayer(const String& layer)
+	{
+		if (GameLayerManager::GetInstance().IsRegisterLayer(layer) == false)
+		{
+			mTargetLayer = GameLayer::DEFAULT_LAYER;
+		}
+		else
+		{
+			mTargetLayer = layer;
+		}
+	}
+	const String& GameNode::GetLayer()
+	{
+		return mTargetLayer;
+	}
+	bool GameNode::IsActive() const
+	{
+		return mIsActive;
 	}
 	void GameNode::DestroyRecursive()
 	{

@@ -29,6 +29,9 @@ namespace JG
 		void RegisterGameLayer(const String& layerName);
 		void UnRegisterGameLayer(const String& layerName);
 		u64 GetMask(const String& layerName) const;
+		bool IsRegisterLayer(const String& layerName);
+
+		void ForEach(const std::function<void(const String&)>& action);
 	private:
 		void MakeLayerMask();
 	};

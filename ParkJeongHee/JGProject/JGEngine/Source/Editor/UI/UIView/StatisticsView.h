@@ -8,7 +8,7 @@ namespace JG
 	class StatisticsViewModel;
 	class StatisticsView : public UIView<StatisticsViewModel>
 	{
-		UIVIEWCLASS
+		JGCLASS
 		bool mOpenGUI = true;
 	public:
 		StatisticsView();

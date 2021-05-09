@@ -59,6 +59,7 @@ namespace JG
 		void Rendering(SharedPtr<IRenderItem> renderItem);
 	private:
 		EScheduleResult Update();
-
+	private:
+		void LoadShaderScript();
 	};
 }

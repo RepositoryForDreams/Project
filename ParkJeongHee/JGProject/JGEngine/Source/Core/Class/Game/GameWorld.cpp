@@ -10,15 +10,63 @@ namespace JG
 	GameWorld::GameWorld() : GameNode(this)
 	{
 		mAssetManager = AssetDataBase::GetInstance().RequestAssetManager();
+		mUpdateScheduleHandle = ScheduleByFrame(0, 0, -1, 0, [&]() -> EScheduleResult
+		{
+			Update();
+			return EScheduleResult::Continue;
+		});
+		mLateUpdateScheduleHandle = ScheduleByFrame(0, 0, -1, 0, [&]() -> EScheduleResult
+		{
+			LateUpdate();
+			return EScheduleResult::Continue;
+		});
+
+	}
+	void GameWorld::Update()
+	{
+		ForEach([&](GameNode* node) {
+			
+			if (node->IsActive())
+			{
+				node->Update();
+			}
+		});
+	}
+	void GameWorld::LateUpdate()
+	{
+		ForEach([&](GameNode* node) {
+
+			if (node->IsActive())
+			{
+				node->LateUpdate();
+			}
+		});
 	}
 	void GameWorld::Destory()
 	{
 		GameNode::Destory();
+
+
+
 		AssetDataBase::GetInstance().ReturnAssetManager(mAssetManager);
 		mAssetManager = nullptr;
+
+		mUpdateScheduleHandle->Reset();
+		mLateUpdateScheduleHandle->Reset();
+
+		mUpdateScheduleHandle = nullptr;
+		mLateUpdateScheduleHandle = nullptr;
 	}
 	void GameWorld::OnInspectorGUI()
 	{
+		ImGui::Dummy(ImVec2(0, 1.0f));
+
+		ImGui::AlignTextToFramePadding();
+		ImGui::Text("Name "); ImGui::SameLine();
+		ImGui::Text(ws2s(GetName()).c_str());
+		ImGui::Dummy(ImVec2(0, 1.0f));
+		ImGui::Separator();
+
 		for (auto& globalSystem : mGlobalGameSystemList)
 		{
 		

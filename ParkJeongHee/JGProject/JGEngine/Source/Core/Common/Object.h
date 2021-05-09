@@ -39,7 +39,10 @@ private: \
 	{
 	public:
 		virtual Type GetType() const  = 0;
-		virtual const String& GetName() const = 0;
+		virtual const String& GetName() const 
+		{
+			return GetType().GetName();
+		}
 	protected:
 		virtual void Serialize(FileStreamWriter* writer)   const override {}
 		virtual void DeSerialize(FileStreamReader* reader) override {}

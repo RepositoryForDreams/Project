@@ -2,6 +2,8 @@
 #include "GraphicsSystemLayer.h"
 #include "Application.h"
 #include "Graphics/Renderer.h"
+#include "Graphics/Shader.h"
+#include "Graphics/Resource.h"
 #include "Class/Game/GameSettings.h"
 
 
@@ -10,7 +12,7 @@ namespace JG
 {
 	void GraphicsSystemLayer::OnAttach()
 	{
-
+		LoadShaderScript();
 	}
 
 	void GraphicsSystemLayer::OnDetach()
@@ -126,36 +128,101 @@ namespace JG
 			sortedLayerCameraList[cam.second->GetDepth()] = cam.second;
 		}
 
-		for (auto& layerCamera : sortedLayerCameraList)
-		{
-			if (layerCamera.second->IsEnable() == false)
-			{
-				continue;
-			}
-			u64 layerMask = layerCamera.second->GetCullingLayerMask();
-			if (Renderer::Begin(layerCamera.second) == true)
-			{
-				for (auto& item : mPushedRenderItemList)
-				{
-					if (layerMask & GameLayer::GetMask(item->TargetLayer))
-					{
-						Rendering(item);
-					}
-				}
-				Renderer::End();
-			}
-		}
+		//for (auto& layerCamera : sortedLayerCameraList)
+		//{
+		//	if (layerCamera.second->IsEnable() == false)
+		//	{
+		//		continue;
+		//	}
+		//	u64 layerMask = layerCamera.second->GetCullingLayerMask();
+		//	if (Renderer::Begin(layerCamera.second) == true)
+		//	{
+		//		for (auto& item : mPushedRenderItemList)
+		//		{
+		//			if (layerMask & GameLayer::GetMask(item->TargetLayer))
+		//			{
+		//				Rendering(item);
+		//			}
+		//		}
+		//		Renderer::End();
+		//	}
+		//}
+
 		for (auto& layerCamera : sortedLayerCameraList)
 		{
 			if (Renderer::Begin(mMainCamera) == true)
 			{
-				Renderer2D::DrawCall(JVector2(0, 0), layerCamera.second->GetResolution(), layerCamera.second->GetTargetTexture());
+				//Renderer2D::DrawCall(JVector2(0, 0), layerCamera.second->GetResolution(), layerCamera.second->GetTargetTexture());
+				for (auto& item : mPushedRenderItemList)
+				{
+					Rendering(item);
+				}
+				Renderer2D::DrawCall(JVector2(100, 200), JVector2(100, 100), Color::White());
 				Renderer::End();
 			}
 		}
 		
 		mPushedRenderItemList.clear();
 		return EScheduleResult::Continue;
+	}
+	void GraphicsSystemLayer::LoadShaderScript()
+	{
+		{
+			auto shader = IShader::Create(HLSL::Script::Standard2DShader,
+				TT(R"(
+SamplerState gPointSampler
+{
+	Template = Point_Wrap
+};
+
+Texture2D gTexture[64];
+
+cbuffer Camera
+{
+	float4x4 gViewProj;
+};
+
+struct VS_IN
+{
+	float3 posL : POSITION;
+	float2 tex  : TEXCOORD;
+	float4 color : COLOR;
+	int textureIndex : TEXTUREINDEX;
+};
+struct VS_OUT
+{
+	float4 posH : SV_POSITION;
+	float2 tex   : TEXCOORD;
+	float4 color : COLOR;
+	int textureIndex : TEXTUREINDEX;
+};
+
+VS_OUT vs_main(VS_IN vin)
+{
+	VS_OUT vout;
+    
+	vout.posH = mul(float4(vin.posL, 1.0f), gViewProj);
+	vout.tex = vin.tex;
+	vout.color = vin.color;
+	vout.textureIndex = vin.textureIndex;
+	return vout;
+}
+float4 ps_main(VS_OUT pin) : SV_TARGET
+{
+	return gTexture[pin.textureIndex].Sample(gPointSampler, pin.tex) * pin.color;
+}
+)"), EShaderFlags::Allow_VertexShader | EShaderFlags::Allow_PixelShader);
+			if (shader != nullptr)
+			{
+				ShaderLibrary::GetInstance().RegisterShader(shader);
+			}
+			else
+			{
+				JG_CORE_ERROR("Failed Compile {0}", shader->GetName());
+			}
+			
+		}
+		
 	}
 }
 

@@ -59,6 +59,17 @@ namespace JG
 
 		return mGameLayerMask.at(layerName);
 	}
+	bool GameLayerManager::IsRegisterLayer(const String& layerName)
+	{
+		return mGameLayerByName.find(layerName) != mGameLayerByName.end();
+	}
+	void GameLayerManager::ForEach(const std::function<void(const String&)>& action)
+	{
+		for (auto& layer : mGameLayerList)
+		{
+			action(layer->Name);
+		}
+	}
 	void GameLayerManager::MakeLayerMask()
 	{
 		mGameLayerMask.clear();
@@ -66,7 +77,7 @@ namespace JG
 		for (auto& layer : mGameLayerList)
 		{
 			mGameLayerMask[layer->Name] = mask;
-			mask << 1;
+			mask = mask << 1;
 		}
 	}
 

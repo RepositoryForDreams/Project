@@ -347,6 +347,11 @@ namespace JG
 
 	namespace HLSL
 	{
+		namespace Script
+		{
+			constexpr wchar* Standard2DShader = TT("Standard2DShader");
+		}
+
 		using token = wchar;
 		namespace Token
 		{

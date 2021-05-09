@@ -18,11 +18,15 @@ namespace JG
 	private:
 		GameNode*  mOwnerNode = nullptr;
 		GameWorld* mGameWorld = nullptr;
+		bool mIsActive = true;
+		bool mIsRunStart = false;
 	protected:
 		virtual void Start() override;
 		virtual void Destory() override;
 	public:
 		GameNode*  GetOwner() const;
 		GameWorld* GetGameWorld() const;
+	public:
+		bool IsActive() const;
 	};
 }

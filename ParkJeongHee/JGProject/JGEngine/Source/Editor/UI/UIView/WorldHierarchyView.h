@@ -9,7 +9,7 @@ namespace JG
 
 	class WorldHierarchyView : public UIView<WorldHierarchyViewModel>
 	{
-		UIVIEWCLASS
+		JGCLASS
 
 		bool mOpenGUI = true;
 		WorldHierarchyViewModel* mVm = nullptr;

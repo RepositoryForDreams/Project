@@ -24,8 +24,7 @@ namespace JG
 			Default = 0,
 			// GameLogic
 			DestroyGameClass = 100000,
-			StartGameClass   = 200000,
-			UpdateGameClass  = 300000,
+			UpdateGameClass  = 200000,
 
 			// System
 			OnGUI         = 1000000,

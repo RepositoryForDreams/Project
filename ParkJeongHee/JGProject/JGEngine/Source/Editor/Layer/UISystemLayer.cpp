@@ -1,10 +1,17 @@
 #include "pch.h"
 #include "UISystemLayer.h"
 #include "Imgui/imgui.h"
+
+// UI
 #include "UI/UIView/StatisticsView.h"
 #include "UI/UIView/SceneView.h"
 #include "UI/UIView/WorldHierarchyView.h"
 #include "UI/UIView/InspectorView.h"
+
+// PopupUI
+#include "UI/ModalUI/ComponentFinderModalView.h"
+#include "UI/ModalUI/AssetFinderModalView.h"
+
 #include "Class/Game/GameWorld.h"
 namespace JG
 {
@@ -24,11 +31,16 @@ namespace JG
 		Scheduler::GetInstance().ScheduleByFrame(0, 0, -1, SchedulePriority::UISystemLayer, SCHEDULE_BIND_FN(&UISystemLayer::MenuUpdate));
 
 
+		// UI
 		UIManager::GetInstance().RegisterUIView<SceneView>();
 		UIManager::GetInstance().RegisterUIView<StatisticsView>();
 		UIManager::GetInstance().RegisterUIView<WorldHierarchyView>();
 		UIManager::GetInstance().RegisterUIView<InspectorView>();
 
+
+		// PopupUI
+		UIManager::GetInstance().RegisterModalUIView<ComponentFinderModalView>();
+		UIManager::GetInstance().RegisterModalUIView<AssetFinderModalView>();
 
 		LoadUISettings(TT("JGUI.ini"));
 	}

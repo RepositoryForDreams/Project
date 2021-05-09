@@ -18,6 +18,7 @@ namespace JG
 		friend class GameObjectFactory;
 		friend class GameLogicSystemLayer;
 	protected:
+		virtual void Awake() = 0;
 		virtual void Start()   = 0;
 		virtual void Destory() = 0;
 	public:
@@ -52,8 +53,12 @@ namespace JG
 		GameObject() = default;
 		virtual ~GameObject();
 	protected:
+		virtual void Awake() override {}
 		virtual void Start() override {}
 		virtual void Destory() override {}
+		virtual void Update() {}
+		virtual void LateUpdate() {}
+
 	protected: // 스케쥴 관련
 		SharedPtr<ScheduleHandle> Schedule(f32 delay, f32 tickCycle, i32 repeat, i32 priority, const SyncTaskFunction& task);
 		SharedPtr<ScheduleHandle> ScheduleOnce(f32 delay, i32 priority, const SyncTaskFunction& task);

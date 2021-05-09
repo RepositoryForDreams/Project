@@ -5,7 +5,7 @@
 #include "Graphics/Resource.h"
 namespace JG
 {
-	void GameCamera::Start()
+	void GameCamera::Awake()
 	{
 		mCamera = Camera::Create(GameSettings::GetResolution(),
 			90, 0.001f, 10000.0f, false);
@@ -13,14 +13,15 @@ namespace JG
 		TextureInfo info = {};
 		info.ArraySize = 1; info.Flags = ETextureFlags::Allow_RenderTarget;
 		info.Format = ETextureFormat::R8G8B8A8_Unorm;
-		info.Width  = mCamera->GetResolution().x;
+		info.Width = mCamera->GetResolution().x;
 		info.Height = mCamera->GetResolution().y;
 		info.MipLevel = 1;
 		info.ClearColor = Color::White();
 		auto texture = ITexture::Create(GetName() + TT("_CameraTexture"), info);
 		mCamera->SetTargetTexture(texture);
-
-
+	}
+	void GameCamera::Start()
+	{
 		RequestRegisterCameraEvent e;
 		e.SharedCamera = mCamera;
 		SendEvent(e);
@@ -39,8 +40,6 @@ namespace JG
 			mCamera->SetLocation(transform->GetWorldLocation());
 			mCamera->SetRotation(transform->GetWorldRotation());
 		}
-
-
 	}
 	void GameCamera::OnInspectorGUI()
 	{

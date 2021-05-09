@@ -9,8 +9,6 @@ namespace JG
 		friend class GameLogicSystemLayer;
 		using CreateFunc = std::function<IGameObject*()>;
 
-
-		List<IGameObject*>  mReserveStartObjects;
 		List<IGameObject*>  mReservedDestroyObjects;
 
 		HashSet<Type> mRegisteredSystemTypeSet;
@@ -71,7 +69,6 @@ namespace JG
 		virtual void DestroyObjectImpl(IGameObject* gameObject) override;
 		virtual void ReserveDestroyObjectImpl(IGameObject* gameObject) override;
 	private:
-		EScheduleResult UpdateStartObject();
 		EScheduleResult UpdateDestroyObject();
 	private:
 		template<class T>

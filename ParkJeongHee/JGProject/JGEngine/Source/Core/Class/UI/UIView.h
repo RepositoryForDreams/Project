@@ -7,8 +7,8 @@ namespace JG
 {
 	class IUIViewModel;
 	class UIViewModel;
-	// Param / Child
-#define UIVIEWCLASS 		virtual Type GetType() const override { return Type(TypeID(this));}
+
+
 	class IUIError
 	{
 	public:
@@ -24,7 +24,7 @@ namespace JG
 	};
 
 
-	class IUIView
+	class IUIView : public IJGObject, public IUIErrorReceiver
 	{
 		friend class UIManager;
 	protected:
@@ -38,18 +38,14 @@ namespace JG
 		virtual void Open()  = 0;
 		virtual void Close() = 0;
 		virtual bool IsOpen() const = 0;
-		virtual Type GetType() const = 0;
 	public:
 		virtual ~IUIView() = default;
 	};
 
-	
-	// 직접적으로 보여주는 것
-	// UIView 는 UIModel의  존재를 몰라야한다.
-	// UIViewModel 을 템플릿으로
 	template<class ViewModelType>
-	class UIView : public IUIView, public IUIErrorReceiver
+	class UIView : public IUIView
 	{
+		JGCLASS
 	private:
 		UniquePtr<ViewModelType> mViewModel;
 		bool mIsOpen = false;
@@ -98,8 +94,61 @@ namespace JG
 				Destroy();
 			}
 		}
+
+
+		// IUIErrorReceiver
 		virtual void ReceiveError(SharedPtr<IUIError> error) override {}
+
 	public:
 		virtual ~UIView() = default;
+	};
+
+
+	class IModalUIView : IJGObject
+	{
+		friend class UIManager;
+	protected:
+		virtual bool OnGUI()      = 0;
+		virtual void OnEvent(IEvent& e) = 0;
+	protected:
+		virtual bool IsOpen() const = 0;
+	public:
+		virtual ~IModalUIView() = default;
+	};
+
+	template<class PopupInitData>
+	class ModalUIView : public IModalUIView
+	{
+		friend class UIManager;
+		bool mIsOpen = false;
+	protected:
+		virtual bool OnGUI() override { return false; }
+		virtual void OnEvent(IEvent& e) override {}
+	protected:
+		virtual void Initialize(const PopupInitData& data) = 0;
+		virtual void Destroy() = 0;
+	private:
+		virtual void Open(const PopupInitData& data)
+		{
+			if (mIsOpen == false)
+			{
+				mIsOpen = true;
+				Initialize(data);
+			}
+		}
+		virtual void Close()
+		{
+			if (mIsOpen == true)
+			{
+				mIsOpen = false;
+				Destroy();
+			}
+		}
+		virtual bool IsOpen() const
+		{
+			return mIsOpen;
+		}
+	public:
+		virtual ~ModalUIView() = default;
 	};
 }

@@ -14,11 +14,18 @@ namespace JG
 		GameWorld* mGameWorld = nullptr;
 		List<GameNode*>      mChilds;
 		List<GameComponent*> mComponents;
+
+		bool mIsActiveSelf = true;
+		bool mIsActive     = true;
+		bool mIsRunStart = false;
 		Transform* mTransform = nullptr;
+		String mTargetLayer = GameLayer::DEFAULT_LAYER;
 	protected:
 		virtual void Start() override;
 		virtual void Destory() override;
-	
+	public: 
+		virtual void Update() override;
+		virtual void LateUpdate() override;
 	public:
 		GameNode();
 		GameNode(GameWorld* gameWorld);
@@ -35,6 +42,7 @@ namespace JG
 			obj->mOwnerNode = this;
 			obj->mGameWorld = mGameWorld;
 			mComponents.push_back(obj);
+			obj->Awake();
 			return obj;
 		}
 		void AddComponent(const Type& type);
@@ -44,7 +52,11 @@ namespace JG
 
 
 		void ForEach(const std::function<void(GameNode*)>& action);
+
+
+
 		void SendChangeData(const ChangeData& data, EChangeDataFlags flags = EChangeDataFlags::Default);
+
 	public:
 		GameNode* FindNode(const String& name) const;
 		GameNode* FindNode(u32 index) const;
@@ -66,6 +78,10 @@ namespace JG
 		u64 GetChildCount() const;
 		virtual void SetParent(GameNode* node);
 		GameNode*    GetParent() const;
+		void SetLayer(const String& layer);
+		const String& GetLayer();
+
+		bool IsActive() const;
 	private:
 		void DestroyRecursive();
 	};
