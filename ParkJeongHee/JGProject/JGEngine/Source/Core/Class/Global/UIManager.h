@@ -44,10 +44,14 @@ namespace JG
 		
 		UniquePtr<MenuItemNode> mMainMenuItemRootNode;
 		mutable std::shared_mutex   mMutex;
+
+
+		std::function<bool(Type)> mShowContextMenuFunc;
 	public:
 		UIManager();
 		~UIManager();
 	public:
+
 		// µî·Ï
 		template<class UIViewType>
 		void RegisterUIView()
@@ -134,7 +138,8 @@ namespace JG
 
 		void RegisterMainMenuItem(const String& menuPath, u64 priority,  const std::function<void()>& action, const std::function<bool()> enableAction);
 		void RegisterContextMenuItem(const Type& type, const String& menuPath, u64 priority, const std::function<void()>& action, const std::function<bool()> enableAction);
-
+		void BindShowContextMenuFunc(const std::function<bool(Type)>& func);
+		bool ShowContextMenu(const Type& type);
 		void ForEach(const std::function<void(IUIView*)> action);
 		void ForEach(
 			const std::function<void(const MenuItemNode*)>& beginAction,

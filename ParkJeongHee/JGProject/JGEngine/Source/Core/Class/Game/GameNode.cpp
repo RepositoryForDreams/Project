@@ -1,8 +1,8 @@
-#include "GameNode.h"
-#include "GameNode.h"
 #include "pch.h"
 #include "GameNode.h"
 #include "Components/Transform.h"
+#include "Class/UI/UIView/InspectorView.h"
+#include "Class/UI/ModalUI/ComponentFinderModalView.h"
 namespace JG
 {
 	void GameNode::Start()
@@ -134,6 +134,22 @@ namespace JG
 		for (auto& com : removeComList)
 		{
 			Destroy(com);
+		}
+		ImGui::Spacing();	ImGui::Spacing();	ImGui::Spacing();
+		auto padding = ImGui::GetStyle().FramePadding;
+		if (ImGui::Button("Add Component", ImVec2(ImGui::GetWindowSize().x - (padding.x * 4), 0)) == true)
+		{
+			UIManager::GetInstance().OpenModalUIView<ComponentFinderModalView>(ComponentFinderInitData());
+		}
+		if (UIManager::GetInstance().OnModalUIView<ComponentFinderModalView>())
+		{
+			auto comFinder = UIManager::GetInstance().GetModalUIView<ComponentFinderModalView>();
+			auto selectedType = comFinder->GetSelectedComponent();
+			auto inspectorView = UIManager::GetInstance().GetUIView<InspectorView>();
+			if (inspectorView)
+			{
+				inspectorView->GetViewModel()->SelectComponentType(selectedType);
+			}
 		}
 	}
 	SharedPtr<IRenderItem> GameNode::PushRenderItem()

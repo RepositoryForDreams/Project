@@ -66,6 +66,8 @@ namespace JG
 	void GameLogicSystemLayer::RegisterGlobalGameSystem()
 	{
 
+
+
 	}
 	void GameLogicSystemLayer::RegisterGameObjectType()
 	{

@@ -129,6 +129,7 @@ namespace JG
 
 	void Application::Destroy()
 	{
+		while (!mEventQueue.empty()) { mEventQueue.pop(); }
 		Scheduler::GetInstance().FlushAsyncTask(false);
 		mGraphcisAPI->Flush();
 		UIManager::Destroy();

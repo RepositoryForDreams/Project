@@ -27,5 +27,8 @@ namespace JG
 	public:
 		static SharedPtr<IMesh> Create(const String& name);
 		static SharedPtr<IMesh> CreateFromFile(const String& path);
+
+		//
+
 	};
 }

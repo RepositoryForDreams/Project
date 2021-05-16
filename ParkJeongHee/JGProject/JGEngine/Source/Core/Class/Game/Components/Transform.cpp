@@ -4,20 +4,32 @@
 
 namespace JG
 {
-	void Transform::SetLocation(const JVector3& location)
+	void Transform::SetLocalLocation(const JVector3& location)
 	{
+		bool isDirty = mLocation != location;
 		mLocation = location;
-		SendDirty();
+		if (isDirty)
+		{
+			SendDirty();
+		}
 	}
-	void Transform::SetRotation(const JVector3& rotation)
+	void Transform::SetLocalRotation(const JVector3& rotation)
 	{
+		bool isDirty = mRotation != rotation;
 		mRotation = rotation;
-		SendDirty();
+		if (isDirty)
+		{
+			SendDirty();
+		}
 	}
 	void Transform::SetScale(const JVector3& scale)
 	{
+		bool isDirty = mScale != scale;
 		mScale = scale;
-		SendDirty();
+		if (isDirty)
+		{
+			SendDirty();
+		}
 	}
 	const JVector3& Transform::GetLocalLocation() const
 	{
@@ -29,23 +41,53 @@ namespace JG
 	}
 	JVector3 Transform::GetWorldLocation() const
 	{
-		return JVector3();
+		return mLocation;
 	}
 	JVector3 Transform::GetWorldRotation() const
 	{
-		return JVector3();
+		return mRotation;
 	}
 	const JVector3& Transform::GetScale() const
 	{
 		return mScale;
 	}
+	const JMatrix& Transform::GetWorldMatrix() const
+	{
+		UpdateWorldMatrix();
+		return mWorldMatrix;
+	}
+	void Transform::UpdateWorldMatrix() const
+	{
+		if (mIsDirty == false)
+		{
+			return;
+		}
+		mIsDirty = true;
+
+		mLocalMatrix = JMatrix::Scaling(mScale) * JMatrix::Rotation(JQuaternion::ToQuaternion(
+			JVector3(Math::ConvertToRadians(mRotation.x),
+				Math::ConvertToRadians(mRotation.y),
+				Math::ConvertToRadians(mRotation.z)))) * JMatrix::Translation(mLocation);
+
+		mWorldMatrix = mLocalMatrix;
+	}
 	void Transform::OnInspectorGUI()
 	{
 		float padding = ImGui::CalcTextSize("Location").x - ImGui::CalcTextSize("Scale").x;
 		
-		ImGui::OnGui("Location", &mLocation);
-		ImGui::OnGui("Rotation", &mRotation);
-		ImGui::OnGui("Scale", &mScale, padding);
+		auto location = GetLocalLocation();
+		auto rotation = GetLocalRotation();
+		auto scale = GetScale();
+
+
+
+		ImGui::OnGui("Location", &location);
+		ImGui::OnGui("Rotation", &rotation);
+		ImGui::OnGui("Scale", &scale, padding);
+
+		SetLocalLocation(location);
+		SetLocalRotation(rotation);
+		SetScale(scale);
 	}
 	void Transform::SendDirty()
 	{

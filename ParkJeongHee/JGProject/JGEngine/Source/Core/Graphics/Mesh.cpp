@@ -1,3 +1,4 @@
+#include "Mesh.h"
 #include "pch.h"
 #include "Mesh.h"
 #include "Application.h"

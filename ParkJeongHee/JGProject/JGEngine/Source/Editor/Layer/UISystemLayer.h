@@ -23,9 +23,6 @@ namespace JG
 		virtual void OnEvent(IEvent& e) override;
 
 		virtual String GetLayerName() override;
-	public:
-		static bool ShowContextMenu(const Type& type);
-
 	private:
 		void LoadUISettings(const String& fileName);
 		void SaveUISettings(const String& fileName);

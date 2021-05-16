@@ -3,14 +3,14 @@
 #include "Imgui/imgui.h"
 
 // UI
-#include "UI/UIView/StatisticsView.h"
-#include "UI/UIView/SceneView.h"
-#include "UI/UIView/WorldHierarchyView.h"
-#include "UI/UIView/InspectorView.h"
+#include "Class/UI/UIView/SceneView.h"
+#include "Class/UI/UIView/WorldHierarchyView.h"
+#include "Class/UI/UIView/InspectorView.h"
+#include "Class/UI/UIView/ContentsView.h"
 
 // PopupUI
-#include "UI/ModalUI/ComponentFinderModalView.h"
-#include "UI/ModalUI/AssetFinderModalView.h"
+#include "Class/UI/ModalUI/ComponentFinderModalView.h"
+#include "Class/UI/ModalUI/AssetFinderModalView.h"
 
 #include "Class/Game/GameWorld.h"
 namespace JG
@@ -29,14 +29,21 @@ namespace JG
 	{
 		
 		Scheduler::GetInstance().ScheduleByFrame(0, 0, -1, SchedulePriority::UISystemLayer, SCHEDULE_BIND_FN(&UISystemLayer::MenuUpdate));
-
+		UIManager::GetInstance().BindShowContextMenuFunc([&](Type type) -> bool {
+			if (ImGui::BeginPopupContextItem())
+			{
+				UIManager::GetInstance().ForEach(type, UISystemLayer::BeginMenu, UISystemLayer::EndMenu);
+				ImGui::EndPopup();
+				return true;
+			}
+			return false;
+		});
 
 		// UI
 		UIManager::GetInstance().RegisterUIView<SceneView>();
-		UIManager::GetInstance().RegisterUIView<StatisticsView>();
 		UIManager::GetInstance().RegisterUIView<WorldHierarchyView>();
 		UIManager::GetInstance().RegisterUIView<InspectorView>();
-
+		UIManager::GetInstance().RegisterUIView<ContentsView>();
 
 		// PopupUI
 		UIManager::GetInstance().RegisterModalUIView<ComponentFinderModalView>();
@@ -56,21 +63,6 @@ namespace JG
 	{
 		return TT("UISystemLayer");
 	}
-
-
-	bool UISystemLayer::ShowContextMenu(const Type& type)
-	{
-		if (ImGui::BeginPopupContextItem())
-		{
-			UIManager::GetInstance().ForEach(type, UISystemLayer::BeginMenu, UISystemLayer::EndMenu);
-			ImGui::EndPopup();
-			return true;
-		}
-		return false;
-	}
-
-
-
 
 	void UISystemLayer::LoadUISettings(const String& fileName)
 	{

@@ -25,7 +25,7 @@ namespace JG
 	{
 	public:
 		virtual EGraphicsAPI GetAPI() const = 0;
-	protected:
+	public:
 		friend class Application;
 		virtual bool Create() = 0;
 		virtual void Destroy() = 0;
@@ -71,7 +71,10 @@ namespace JG
 		virtual SharedPtr<ITexture>       CreateTexture(const String& name, const TextureInfo& info) = 0;
 		virtual SharedPtr<ITexture>       CreateTextureFromFile(const String& path) = 0;
 	public:
+		virtual void ClearTexture(SharedPtr<ITexture> texture);
+	public:
 		static UniquePtr<IGraphicsAPI> Create(EGraphicsAPI api);
+		
 	};
 
 

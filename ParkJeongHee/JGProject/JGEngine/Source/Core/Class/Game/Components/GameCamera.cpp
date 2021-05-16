@@ -16,7 +16,7 @@ namespace JG
 		info.Width = mCamera->GetResolution().x;
 		info.Height = mCamera->GetResolution().y;
 		info.MipLevel = 1;
-		info.ClearColor = Color::White();
+		info.ClearColor = Color::Red();
 		auto texture = ITexture::Create(GetName() + TT("_CameraTexture"), info);
 		mCamera->SetTargetTexture(texture);
 	}

@@ -6,10 +6,17 @@
 namespace JG
 {
 	/* Shader
-	 * HLSL 컴 파일 하고 모시기 하고하는곳
-	 * Compile 할때 코드 분석
-	 *
-	 * 
+
+	// Global Shader 
+	-> 무조건 포한하는 셰이더
+
+	// Include Shader 
+	-> 부분적으로 포함하는 셰이더
+
+	// Material Shader
+	-> 머터리얼 셰이더
+
+
 	 */
 
 

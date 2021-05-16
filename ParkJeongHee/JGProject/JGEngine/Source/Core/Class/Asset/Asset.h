@@ -6,15 +6,27 @@
 #include "Class/FileIO.h"
 namespace JG
 {
+#define JG_ASSET_FORMAT TT(".jgasset")
 #define ASSET_MESH_FORMAT TT(".mesh")
+
+	enum class EAssetFormat
+	{
+		None,
+		Mesh,
+		Skeletal,
+		Material,
+		Texture,
+		Directory,
+	};
 
 	struct JGVertex
 	{
 		JVector3 Position;
+		JVector2 Texcoord;
 		JVector3 Normal;
 		JVector3 Tangent;
 		JVector3 Bitangent;
-		JVector2 Texcoord;
+
 
 		static SharedPtr<InputLayout> GetInputLayout() {
 			auto inputLayout = InputLayout::Create();
@@ -26,6 +38,22 @@ namespace JG
 			return inputLayout;
 		}
 	};
+
+	struct JGQuadVertex
+	{
+		JVector3 Position;
+		JVector2 Texcoord;
+
+
+		static SharedPtr<InputLayout> GetInputLayout() {
+			auto inputLayout = InputLayout::Create();
+			inputLayout->Add(EShaderDataType::_float3, "POSITION", 0);
+			inputLayout->Add(EShaderDataType::_float2, "TEXCOORD", 0);
+			return inputLayout;
+		}
+	};
+
+
 
 	struct JGBone
 	{
@@ -45,9 +73,9 @@ namespace JG
 	public:
 		String Name;
 		bool   IsSkinned = false;
-		List<String>                SubMeshNames;
+		List<String>           SubMeshNames;
 		List<List<JGVertex>>   Vertices;
-		List<u32>		            Indices;
+		List<u32>		       Indices;
 	public:
 		virtual ~StaticMeshAssetStock() = default;
 	protected:

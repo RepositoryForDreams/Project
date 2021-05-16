@@ -315,9 +315,10 @@ namespace JG
 	{
 		JGCLASS
 	public:
-		Color Color = Color::White();
+		Color  Color = Color::White();
 		String SortingLayer;
 		i64    SortingOrder = 0;
+		SharedPtr<ITexture> Texture = nullptr;
 	public:
 		virtual ~StandardSpriteRenderItem() = default;
 	};
@@ -340,6 +341,14 @@ namespace JG
 	namespace ShaderScript
 	{
 		constexpr wchar* Standard2DShader = TT("Standard2DShader");
+		namespace Standard2D
+		{
+			constexpr wchar* ViewProj = TT("gViewProj");
+			constexpr wchar* World    = TT("gWorld");
+			constexpr wchar* Texture  = TT("gTexture");
+			constexpr wchar* Color    = TT("gColor");
+		}
+
 	}
 
 

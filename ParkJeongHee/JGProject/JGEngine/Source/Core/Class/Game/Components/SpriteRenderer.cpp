@@ -31,37 +31,27 @@ namespace JG
 		auto vBuffer = IVertexBuffer::Create(TT("Sprite_VBuffer"), EBufferLoadMethod::CPULoad);
 		auto iBuffer = IIndexBuffer::Create(TT("Sprite_IBuffer"), EBufferLoadMethod::CPULoad);
 
-		struct SpriteVertex
-		{
-			JVector3 Position;
-			JVector2 Texcoord;
-		};
 
-		SpriteVertex spriteVertex[4];
-		u32 spriteIndex[6];
-		//spriteVertex[0].Position = JVector3(-0.5f, -0.5f, 0.0f);
-		//spriteVertex[1].Position = JVector3(-0.5f, +0.5f, 0.0f);
-		//spriteVertex[2].Position = JVector3(+0.5f, +0.5f, 0.0f);
-		//spriteVertex[3].Position = JVector3(+0.5f, -0.5f, 0.0f);
+		JGQuadVertex quadVertex[4];
+		u32 quadIndex[6];
+		quadVertex[0].Position = JVector3(-0.5f, -0.5f, 0.0f);
+		quadVertex[1].Position = JVector3(-0.5f, +0.5f, 0.0f);
+		quadVertex[2].Position = JVector3(+0.5f, +0.5f, 0.0f);
+		quadVertex[3].Position = JVector3(+0.5f, -0.5f, 0.0f);
 
-		spriteVertex[0].Position = JVector3(-50.0f, -50.0f, 0.0f);
-		spriteVertex[1].Position = JVector3(-50.0f, +50.0f, 0.0f);
-		spriteVertex[2].Position = JVector3(+50.0f, +50.0f, 0.0f);
-		spriteVertex[3].Position = JVector3(+50.0f, -50.0f, 0.0f);
-
-		spriteVertex[0].Texcoord = JVector2(0.0f, 1.0f);
-		spriteVertex[1].Texcoord = JVector2(0.0f, 0.0f);
-		spriteVertex[2].Texcoord = JVector2(1.0f, 0.0f);
-		spriteVertex[3].Texcoord = JVector2(1.0f, 1.0f);
+		quadVertex[0].Texcoord = JVector2(0.0f, 1.0f);
+		quadVertex[1].Texcoord = JVector2(0.0f, 0.0f);
+		quadVertex[2].Texcoord = JVector2(1.0f, 0.0f);
+		quadVertex[3].Texcoord = JVector2(1.0f, 1.0f);
 		
-		spriteIndex[0] = 0;
-		spriteIndex[1] = 1;
-		spriteIndex[2] = 2;
-		spriteIndex[3] = 0;
-		spriteIndex[4] = 2;
-		spriteIndex[5] = 3;
-		vBuffer->SetData(spriteVertex, sizeof(SpriteVertex), 4);
-		iBuffer->SetData(spriteIndex, 6);
+		quadIndex[0] = 0;
+		quadIndex[1] = 1;
+		quadIndex[2] = 2;
+		quadIndex[3] = 0;
+		quadIndex[4] = 2;
+		quadIndex[5] = 3;
+		vBuffer->SetData(quadVertex, sizeof(JGQuadVertex), 4);
+		iBuffer->SetData(quadIndex, 6);
 		mSpriteRI->Mesh = IMesh::Create(TT("QuadMesh"));
 		mSpriteRI->Mesh->AddVertexBuffer(vBuffer);
 		mSpriteRI->Mesh->SetIndexBuffer(iBuffer);
@@ -100,6 +90,9 @@ namespace JG
 		if (data.Type == JGTYPE(Transform))
 		{
 			auto transform = static_cast<Transform*>(data.Object);
+			mSpriteRI->WorldMatrix = transform->GetWorldMatrix();
+
+
 		}
 
 	}

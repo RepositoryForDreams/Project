@@ -156,10 +156,6 @@ private: \
 		}
 	};
 
-
-
-
-
 	class ITexture;
 	class RequestGetMainSceneTextureEvent : public IEvent
 	{
@@ -217,6 +213,8 @@ private: \
 			return TT("RequestRegisterCameraEvent");
 		}
 	};
+
+
 	class RequestUnRegisterCameraEvent : public IEvent
 	{
 		EVENTCLASS(EEventCategory::Request)

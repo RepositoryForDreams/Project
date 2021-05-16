@@ -51,6 +51,18 @@ namespace JG
 		}
 		RegisterMenuItem(mUIViewContextMenu[type].get(), menuPath, priority, action, enableAction);
 	}
+	void UIManager::BindShowContextMenuFunc(const std::function<bool(Type)>& func)
+	{
+		mShowContextMenuFunc = func;
+	}
+	bool UIManager::ShowContextMenu(const Type& type)
+	{
+		if (mShowContextMenuFunc != nullptr)
+		{
+			return mShowContextMenuFunc(type);
+		}
+		return false;
+	}
 	void UIManager::ForEach(const std::function<void(IUIView*)> action)
 	{
 		for (auto& _pair : mUIViewPool)
