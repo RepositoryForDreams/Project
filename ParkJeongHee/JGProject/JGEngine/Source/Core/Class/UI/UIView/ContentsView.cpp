@@ -10,9 +10,18 @@ namespace JG
 		{
 			Open();
 		}, nullptr);
+
+
+
 	}
 	void ContentsView::Load()
 	{
+		// Copy Paste Delete Move 이정도만 일단 생성
+		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("NewFolder"), 0, [&]() {}, nullptr);
+		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("Copy"), 20, [&]() {}, nullptr);
+		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("Paste"), 20, [&]() {}, nullptr);
+		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("Move"), 20, [&]() {}, nullptr);
+		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("Delete"), 20, [&]() {}, nullptr);
 	}
 	void ContentsView::Initialize()
 	{
@@ -30,8 +39,9 @@ namespace JG
 		ImGui::Columns(2, nullptr, true);
 		if (mIsColumnInit)
 		{
+			mIsColumnInit = false;
 			f32 winWidth = ImGui::GetWindowWidth();
-			ImGui::SetColumnWidth(0, winWidth * 0.3f);
+			ImGui::SetColumnWidth(0, winWidth * 0.25f);
 		}
 		ImGui::BeginChild("DirectoryPanel", ImVec2(0, 0), true);
 		OnGui_ContentsDirectory();
@@ -41,6 +51,8 @@ namespace JG
 
 		ImGui::NextColumn();
 		ImGui::BeginChild("DetailPanel", ImVec2(0, 0), true);
+
+		OnGui_ContentsDirectoryDetail();
 		// ForEach로 보여주는 파일들만 표시
 		ImGui::EndChild();
 		
@@ -76,12 +88,16 @@ namespace JG
 			}
 			bool isRoot = fileInfo->OwnerDirectory == nullptr;
 			bool isLeaf = fileInfo->DirectoryList.size() == 0;
+			bool isSelectedInfo = Vm->IsSelectedContentsDirectory(fileInfo);
 
 			node->UserFlags |= ImGuiTreeNodeFlags_OpenOnArrow;
 
 			(isLeaf) ?
 				node->UserFlags |= ImGuiTreeNodeFlags_Leaf :
 				node->UserFlags &= ~(ImGuiTreeNodeFlags_Leaf);
+			(isSelectedInfo) ?
+				node->UserFlags |= ImGuiTreeNodeFlags_Selected :
+				node->UserFlags &= ~ImGuiTreeNodeFlags_Selected;
 
 			if (isRoot == true)
 			{
@@ -91,21 +107,45 @@ namespace JG
 			else
 			{
 				isOpen = ImGui::TreeNodeEx((void*)node, node->UserFlags, ws2s(fileInfo->Name).c_str());
+				node->IsIgnoreSelect = (isOpen != node->IsTreePop);
 				node->IsTreePop = isOpen;
 			}
 
 			return isOpen;
 		},
-			[&](ContentsDirectoryNode* info)
+			[&](ContentsDirectoryNode* node)
 		{
-			ImGui::PushID(info);
-			info->IsSelected = ImGui::IsItemClicked();
+			static bool isContextOpen = false;
+			ImGui::PushID(node);
+			UIManager::GetInstance().ShowContextMenu(GetType());
+			node->IsSelected = ImGui::IsItemClicked();
 			ImGui::PopID();
 		},
-			[&](ContentsDirectoryNode* info)
+			[&](ContentsDirectoryNode* node)
 		{
 			ImGui::TreePop();
 		});
+	}
+	void ContentsView::OnGui_ContentsDirectoryDetail()
+	{
+		auto Vm = GetViewModel();
+		if (Vm == nullptr)
+		{
+			return;
+		}
+		ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.0f, 0.5f));
+		Vm->ForEach([&](ContentsFileInfo* fileInfo)
+		{
+		
+			ImGui::Dummy(ImVec2(20.0f, 20.0f)); ImGui::SameLine();
+			
+			if (ImGui::Selectable(ws2s(fileInfo->Name).c_str(), false, ImGuiSelectableFlags_None, ImVec2(0, 20.0f)) == true)
+			{
+
+			}
+
+		});
+		ImGui::PopStyleVar();
 	}
 }
 

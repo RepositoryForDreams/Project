@@ -12,7 +12,7 @@ namespace JG
 		{
 			mThreadLoadData = CreateUniquePtr<ThreadLoadData>();
 		}
-		mControlUpdateHandle = Scheduler::GetInstance().Schedule(1.0f, 1.0f, -1, SchedulePriority::Default,
+		mControlUpdateHandle = Scheduler::GetInstance().Schedule(0.0f, 0.5f, -1, SchedulePriority::Default,
 			[&]()-> EScheduleResult
 		{
 
@@ -78,10 +78,25 @@ namespace JG
 			return EScheduleResult::Continue;
 		});
 		
+
+		NewFolder = CreateUniquePtr<Command<const String&>>();
+		Copy	  = CreateUniquePtr<Command<const String&>>();
+		Paste	  = CreateUniquePtr<Command<const String&>>();
+		Move	  = CreateUniquePtr<Command<const String&>>();
+		Delete	  = CreateUniquePtr<Command<const String&>>();
 	}
 
 	void ContentsViewModel::Destroy()
 	{
+		NewFolder->Clear(); NewFolder = nullptr;
+		Copy->Clear();	    Copy = nullptr;
+		Paste->Clear();	    Paste = nullptr;
+		Move->Clear();	    Move = nullptr;
+		Delete->Clear();	Delete = nullptr;
+
+
+
+
 		mControlUpdateHandle->Reset();
 		mControlUpdateHandle = nullptr;
 
@@ -102,8 +117,27 @@ namespace JG
 			return;
 		}
 		ForEeach(&mContentsDirRootNode, pushAction, action, popAction);
+	}
 
+	void ContentsViewModel::ForEach(const std::function<void(ContentsFileInfo*)>& guiAction)
+	{
+		if (mSelectedDir.length() == 0) {
+			return;
+		}
+		auto currSelectedFileInfo = GetContentsFileInfo(mSelectedDir);
+		if (currSelectedFileInfo == nullptr)
+		{
+			return;
+		}
 
+		for (auto& dir : currSelectedFileInfo->DirectoryList)
+		{
+			guiAction(dir);
+		}
+		for (auto& file : currSelectedFileInfo->FileList)
+		{
+			guiAction(file);
+		}
 	}
 
 	ContentsFileInfo* ContentsViewModel::GetContentsFileInfo(const String& path) const
@@ -120,7 +154,15 @@ namespace JG
 	{
 		return mSelectedDir;
 	}
+	bool ContentsViewModel::IsSelectedContentsDirectory(ContentsFileInfo* info) const
+	{
+		if (info == nullptr) return false;
 
+		auto selectedInfo = GetContentsFileInfo(mSelectedDir);
+		if (selectedInfo == nullptr) return false;
+
+		return info == selectedInfo;
+	}
 
 	void ContentsViewModel::ForEeach(ContentsDirectoryNode* CurrNode, const std::function<bool(ContentsDirectoryNode*)>& pushAction, const std::function<void(ContentsDirectoryNode*)>& action, const std::function<void(ContentsDirectoryNode*)>& popAction)
 	{
@@ -132,9 +174,17 @@ namespace JG
 		bool isOpen = pushAction(CurrNode);
 		action(CurrNode);
 
-		if (CurrNode->IsSelected == true)
+		if (CurrNode->IsSelected == true && CurrNode->IsIgnoreSelect == false)
 		{
 			mSelectedDir = CurrNode->Path;
+		}
+		if (CurrNode->IsTarget == true)
+		{
+			Subscribe(CurrNode);
+		}
+		else
+		{
+			UnSubscribe(CurrNode);
 		}
 		// Select File
 		if (isOpen == true)
@@ -154,7 +204,76 @@ namespace JG
 			popAction(CurrNode);
 		}
 	}
+	void ContentsViewModel::Subscribe(ContentsDirectoryNode* node)
+	{
+		NewFolder->Subscribe(node, [&](const String& path)
+		{
+			auto fileInfo = GetContentsFileInfo(path);
+			if (fileInfo == nullptr)
+			{
+				return;
+			}
 
+			// TODO Create Folder
+
+		});
+		Copy->Subscribe(node, [&](const String& path)
+		{
+			auto fileInfo = GetContentsFileInfo(path);
+			if (fileInfo == nullptr)
+			{
+				return;
+			}
+
+			// TODO Copy
+
+		});
+
+		Paste->Subscribe(node, [&](const String& path)
+		{
+			auto fileInfo = GetContentsFileInfo(path);
+			if (fileInfo == nullptr)
+			{
+				return;
+			}
+
+			// TODO Paste
+
+		});
+
+		Move->Subscribe(node, [&](const String& path)
+		{
+			auto fileInfo = GetContentsFileInfo(path);
+			if (fileInfo == nullptr)
+			{
+				return;
+			}
+
+			// TODO Move
+
+		});
+
+		Delete->Subscribe(node, [&](const String& path)
+		{
+			auto fileInfo = GetContentsFileInfo(path);
+			if (fileInfo == nullptr)
+			{
+				return;
+			}
+
+			// TODO Delete
+
+		});
+	}
+	void ContentsViewModel::UnSubscribe(ContentsDirectoryNode* node)
+	{
+		NewFolder->UnSubscribe(node);
+		Copy->UnSubscribe(node);
+		Paste->UnSubscribe(node);
+		Move->UnSubscribe(node);
+		Delete->UnSubscribe(node);
+
+	}
 
 	ContentsFileInfo* ContentsViewModel::Async_CreateContentsFileInfo(const String& name, const String& path, EAssetFormat fileFormat, ContentsFileInfo* ownerDirectory, bool isDirectory)
 	{

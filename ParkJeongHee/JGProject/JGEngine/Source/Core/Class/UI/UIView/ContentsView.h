@@ -8,11 +8,14 @@ namespace JG
 {
 	class ContentsView : public UIView<ContentsViewModel>
 	{
+		JGCLASS
+		class Directory {};
 	private:
 		bool mOpenGUI = true;
 		bool mIsColumnInit = true;
 	public:
 		ContentsView();
+		virtual ~ContentsView() = default;
 	protected:
 		virtual void Load() override;
 		virtual void Initialize() override;
@@ -20,5 +23,6 @@ namespace JG
 		virtual void Destroy() override;
 	private:
 		void OnGui_ContentsDirectory();
+		void OnGui_ContentsDirectoryDetail();
 	};
 }

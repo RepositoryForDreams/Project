@@ -149,7 +149,7 @@ namespace JG
 
 	void Application::OnEvent(IEvent& e)
 	{
-		JG_TRACE("RaiseEvent : {0}", e.ToString());
+		//JG_TRACE("RaiseEvent : {0}", e.ToString());
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<AppOpenEvent>(EVENT_BIND_FN(&Application::Open));
 		dispatcher.Dispatch<AppCloseEvent>(EVENT_BIND_FN(&Application::Close));

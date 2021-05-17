@@ -37,7 +37,11 @@ namespace JG
 				}
 				else ++i;
 			}
-
+		}
+		void Clear()
+		{
+			mSubscriberList.clear();
+			mFunctionList.clear();
 		}
 	};
 	template<class ... Args>
@@ -57,7 +61,11 @@ namespace JG
 			u64 cnt = mSubscriberList.size();
 			for (u64 i = 0; i < cnt; ++i)
 			{
-				mFunctionList[i](args...);
+				if (mFunctionList[i] != nullptr)
+				{
+					mFunctionList[i](args...);
+				}
+				
 			}
 		}
 	};
@@ -74,7 +82,10 @@ namespace JG
 				u64 cnt = mSubscriberList.size();
 				for (u64 i = 0; i < cnt; ++i)
 				{
-					mFunctionList[i](value);
+					if (mFunctionList[i] != nullptr)
+					{
+						mFunctionList[i](value);
+					}
 				}
 				Value = value;
 			}

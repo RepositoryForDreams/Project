@@ -20,14 +20,20 @@ namespace JG
 		List<ContentsFileInfo*> FileList;
 	};
 
-	struct ContentsDirectoryNode
+	struct ContentsDirectoryNode : public ISubscriber
 	{
 	public:
 		String Path;
 		u64  UserFlags  = 0;
 		bool IsTreePop  = true;
-		bool IsSelected = false;
+		bool IsIgnoreSelect = false;
+		bool IsSelected     = false;
+		bool IsTarget = false;
+	public:
+		virtual ~ContentsDirectoryNode() = default;
 	};
+
+	
 
 	class ContentsViewModel : public UIViewModel
 	{
@@ -62,11 +68,16 @@ namespace JG
 		Dictionary<String, ContentsDirectoryNode> mContentsDirectoryNodePool;
 		ContentsDirectoryNode mContentsDirRootNode;
 
-
-		
-
 		Queue<String> mHistoryQueue;
 		String mSelectedDir;
+
+	public:
+		UniquePtr<Command<const String&>> NewFolder;
+		UniquePtr<Command<const String&>> Copy;
+		UniquePtr<Command<const String&>> Paste;
+		UniquePtr<Command<const String&>> Move;
+		UniquePtr<Command<const String&>> Delete;
+
 	protected:
 		virtual void Initialize() override;
 		virtual void Destroy() override;
@@ -76,8 +87,13 @@ namespace JG
 			const std::function<bool(ContentsDirectoryNode*)>& pushAction,
 			const std::function<void(ContentsDirectoryNode*)>& action,
 			const std::function<void(ContentsDirectoryNode*)>& popAction);
+		void ForEach(const std::function<void(ContentsFileInfo*)>& guiAction);
+
+
 		ContentsFileInfo* GetContentsFileInfo(const String& path) const;
 		const String& GetSelectedContentsDirectory() const;
+
+		bool IsSelectedContentsDirectory(ContentsFileInfo* info) const;
 	private:
 
 		void ForEeach(
@@ -85,7 +101,8 @@ namespace JG
 			const std::function<bool(ContentsDirectoryNode*)>& pushAction,
 			const std::function<void(ContentsDirectoryNode*)>& action,
 			const std::function<void(ContentsDirectoryNode*)>& popAction);
-
+		void Subscribe(ContentsDirectoryNode* node);
+		void UnSubscribe(ContentsDirectoryNode* node);
 		// 비동기 함수
 	private:
 
