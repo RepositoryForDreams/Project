@@ -1,67 +1,55 @@
 #pragma once
-#include "JGCore.h"
-#include "GraphicsDefine.h"
-
-
-
+#include "Class/Game/GameComponent.h"
 
 
 
 namespace JG
 {
-	class ITexture;
-	class Camera
+	class Camera : public GameComponent
 	{
 	private:
-		mutable bool mIsViewDirty    = true;
-		mutable bool mIsProjDirty    = true;
-	
-	
+		friend class GraphicsSystemLayer;
+	private:
+		JGCLASS
+		mutable bool mIsViewDirty = true;
+		mutable bool mIsProjDirty = true;
+		//
 		mutable JMatrix  mProjMatrix;
 		mutable JMatrix  mViewMatrix;
 		mutable JMatrix  mViewProjMatrix;
-
+		//
 		JVector2 mResolution;
-		JVector3 mLocation;
-		JVector3 mRotation;
-		
+		//
 		f32 mNearZ = 0.0f;
-		f32 mFarZ  = 0.0f;
-		f32 mFov   = 0.0f;
-
+		f32 mFarZ = 0.0f;
+		f32 mFov = 0.0f;
+		//
 		i64 mDepth = 0;
 		u64 mCullingLayerMask = JG_U64_MAX;
-		String mTargetLayer   = GameLayer::DEFAULT_LAYER;
-
+		//
 		bool mIsOrthographic = false;
-		bool mEnable = true;
 		//
 		List<SharedPtr<ITexture>> mTargetTextures;
-		SharedPtr<ITexture> mTargetDepthTexture;
+		SharedPtr<ITexture>       mTargetDepthTexture;
+		// RenderingPath
+		// Default 
+	protected:
+		virtual void Awake() override;
+		virtual void Start() override;
+		virtual void Destory() override;
+	protected:
+		virtual void Serialize(FileStreamWriter* writer)   const override;
+		virtual void DeSerialize(FileStreamReader* reader) override;
 	public:
-		Camera();
-	public:
-		void SetLocation(const JVector3& location);
-		void SetRotation(const JVector3& rotation);
-
 		void SetFOV(f32 fov);
 		void SetFarZ(f32 farZ);
 		void SetNearZ(f32 nearZ);
 
 		void SetOrthographic(bool isOrthographic);
 		void SetResolution(const JVector2& resolution);
-
-		bool SetTargetTexture(SharedPtr<ITexture> texture, u8 slot = 0);
-		bool SetTargetDepthTexture(SharedPtr<ITexture> texture);
-
-
-		void SetTargetLayer(const String& layerName);
 		void SetCullingLayerMask(u64 mask);
 		void SetDepth(i64 depth);
-		void SetEnable(bool enable);
 	public:
-		const JVector3& GetLocation() const;
-		JVector3 GetRotation() const;
 		const JMatrix& GetViewProjMatrix() const;
 		const JMatrix& GetViewMatrix() const;
 		const JMatrix& GetProjMatrix() const;
@@ -81,15 +69,16 @@ namespace JG
 		const List<SharedPtr<ITexture>>& GetTargetTextures() const;
 		SharedPtr<ITexture> GetTargetDepthTexture() const;
 
-		const String& GetTargetLayer() const;
 		u64 GetCullingLayerMask() const;
 		i64 GetDepth() const;
-		bool IsEnable() const;
 	private:
 		bool UpdateProj() const;
 		bool UpdateView() const;
 	public:
-		static SharedPtr<Camera> Create(const JVector2& resolution, float fov, float nearZ, float farZ, bool isOrthographic);
+		virtual ~Camera() = default;
+	protected:
+		virtual void OnChange(const ChangeData& data) override;
+		virtual void OnInspectorGUI() override;
+
 	};
 }
-

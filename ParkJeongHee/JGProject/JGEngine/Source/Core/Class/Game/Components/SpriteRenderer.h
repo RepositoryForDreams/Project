@@ -8,7 +8,7 @@ namespace JG
 	{
 		JGCLASS
 	private:
-		SharedPtr<StandardSpriteRenderItem> mSpriteRI;
+		SharedPtr<Standard2DRenderItem> mSpriteRI;
 	public:
 		virtual ~SpriteRenderer() = default;
 	protected:

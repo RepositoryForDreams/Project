@@ -8,12 +8,13 @@
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 
-
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb/stb_image.h"
 
 
 namespace JG
 {
-	EAssetImportResult AssetImporter::Import(const AssetImportSettings& setting)
+	EAssetImportResult AssetImporter::Import(const FBXAssetImportSettings& setting)
 	{
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(ws2s(setting.AssetPath),
@@ -67,6 +68,30 @@ namespace JG
 
 
 
+
+		return EAssetImportResult::Success;
+	}
+	EAssetImportResult AssetImporter::Import(const TextureAssetImportSettings& settings)
+	{
+		TextureAssetStock stock;
+		
+		auto fileName = fs::path(settings.AssetPath).filename().wstring();
+		u64 extentionPos = fileName.find_last_of(TT("."));
+		stock.Name = fileName.substr(0, extentionPos - 1);
+		
+		
+		byte* pixels = stbi_load(ws2s(settings.AssetPath).c_str(), &stock.Width, &stock.Height, &stock.Channels, 0);
+		if (pixels == nullptr)
+		{
+			return EAssetImportResult::Fail;
+		}
+
+		u64 size = (u64)stock.Width * (u64)stock.Height * (u64)stock.Channels;
+		stock.Pixels.resize(size);
+		memcpy(&stock.Pixels[0], pixels, size);
+
+		delete pixels;
+		pixels = nullptr;
 
 		return EAssetImportResult::Success;
 	}
@@ -140,9 +165,6 @@ namespace JG
 		{
 
 		}
-
-
-
 	}
 	void AssetImporter::WriteMesh(const String& outputPath, StaticMeshAssetStock& info)
 	{
@@ -150,14 +172,30 @@ namespace JG
 		{
 			info.Name = info.SubMeshNames[0];
 		}
-		auto filePath = CombinePath(outputPath, info.Name) + ASSET_MESH_FORMAT;
+
+		auto filePath = CombinePath(outputPath, info.Name) + JG_ASSET_FORMAT;
 		FileStreamWriter writer;
 
 		if (writer.Open(filePath) == true)
 		{
+			writer.Write(EAssetFormat::Mesh);
 			writer.Write(info);
 			writer.Close();
 		}
+	}
+
+	void AssetImporter::WriteTexture(const String& outputPath, TextureAssetStock& stock)
+	{
+		auto filePath = CombinePath(outputPath, stock.Name) + JG_ASSET_FORMAT;
+		FileStreamWriter writer;
+
+		if (writer.Open(filePath) == true)
+		{
+			writer.Write(EAssetFormat::Texture);
+			writer.Write(stock);
+			writer.Close();
+		}
+
 	}
 
 }

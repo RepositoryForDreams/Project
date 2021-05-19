@@ -305,6 +305,10 @@ namespace JG
 	{
 		return mParent;
 	}
+	Transform* GameNode::GetTransform() const
+	{
+		return mTransform;
+	}
 	void GameNode::SetLayer(const String& layer)
 	{
 		if (GameLayerManager::GetInstance().IsRegisterLayer(layer) == false)

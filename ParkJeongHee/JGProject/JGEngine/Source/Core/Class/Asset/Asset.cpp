@@ -4,6 +4,25 @@
 
 namespace JG
 {
+	void TextureAssetStock::Serialize(FileStreamWriter* writer) const
+	{
+		writer->Write(Name);
+		writer->Write(Width);
+		writer->Write(Height);
+		writer->Write(Channels);
+		writer->Write(Pixels);
+	}
+
+	void TextureAssetStock::DeSerialize(FileStreamReader* reader)
+	{
+		reader->Read(&Name);
+		reader->Read(&Width);
+		reader->Read(&Height);
+		reader->Read(&Channels);
+		reader->Read(&Pixels);
+	}
+
+
 	void StaticMeshAssetStock::Serialize(FileStreamWriter* writer) const {
 		writer->Write(Name);
 		writer->Write(IsSkinned);
@@ -64,4 +83,5 @@ namespace JG
 		mWaitingAssetManager.insert(assetManager);
 		mAssetManagerPool.erase(assetManager.get());
 	}
+
 }

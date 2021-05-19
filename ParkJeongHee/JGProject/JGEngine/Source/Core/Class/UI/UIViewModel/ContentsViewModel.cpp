@@ -8,6 +8,9 @@ namespace JG
 	void ContentsViewModel::Initialize()
 	{
 		mSelectedDir.clear();
+		mTargetNode = nullptr;
+		mTargetNodeList.clear();
+
 		if (mThreadLoadData == nullptr)
 		{
 			mThreadLoadData = CreateUniquePtr<ThreadLoadData>();
@@ -79,11 +82,11 @@ namespace JG
 		});
 		
 
-		NewFolder = CreateUniquePtr<Command<const String&>>();
-		Copy	  = CreateUniquePtr<Command<const String&>>();
-		Paste	  = CreateUniquePtr<Command<const String&>>();
-		Move	  = CreateUniquePtr<Command<const String&>>();
-		Delete	  = CreateUniquePtr<Command<const String&>>();
+		NewFolder = CreateUniquePtr<Command<>>();
+		Copy	  = CreateUniquePtr<Command<>>();
+		Paste	  = CreateUniquePtr<Command<>>();
+		Move	  = CreateUniquePtr<Command<>>();
+		Delete	  = CreateUniquePtr<Command<>>();
 	}
 
 	void ContentsViewModel::Destroy()
@@ -94,7 +97,8 @@ namespace JG
 		Move->Clear();	    Move = nullptr;
 		Delete->Clear();	Delete = nullptr;
 
-
+		mTargetNode = nullptr;
+		mTargetNodeList.clear();
 
 
 		mControlUpdateHandle->Reset();
@@ -180,10 +184,12 @@ namespace JG
 		}
 		if (CurrNode->IsTarget == true)
 		{
+			mTargetNode = CurrNode;
 			Subscribe(CurrNode);
 		}
 		else
 		{
+			if (mTargetNode == CurrNode) mTargetNode = nullptr;
 			UnSubscribe(CurrNode);
 		}
 		// Select File
@@ -206,20 +212,46 @@ namespace JG
 	}
 	void ContentsViewModel::Subscribe(ContentsDirectoryNode* node)
 	{
-		NewFolder->Subscribe(node, [&](const String& path)
+		if (node == nullptr)
 		{
-			auto fileInfo = GetContentsFileInfo(path);
+			return;
+		}
+		if (mTargetNodeList.find(node) != mTargetNodeList.end())
+		{
+			return;
+		}
+		mTargetNodeList.insert(node);
+		NewFolder->Subscribe(node, [&]()
+		{
+			if (mTargetNode == nullptr)
+			{
+				return;
+			}
+			auto fileInfo = GetContentsFileInfo(mTargetNode->Path);
 			if (fileInfo == nullptr)
 			{
 				return;
 			}
+			if (fs::exists(fileInfo->Path))
+			{
+				fs::path newFloderPath = CombinePath(fileInfo->Path, TT("NewFolder"));
+				fs::path newPath = newFloderPath;
+				i32 i = 0;
+				while (fs::exists(newPath) == true)
+				{
+					newPath = newFloderPath.wstring() + TT("(") + std::to_wstring(++i) + TT(")");
+				}
 
-			// TODO Create Folder
-
+				fs::create_directory(newPath);
+			}
 		});
-		Copy->Subscribe(node, [&](const String& path)
+		Copy->Subscribe(node, [&]()
 		{
-			auto fileInfo = GetContentsFileInfo(path);
+			if (mTargetNode == nullptr)
+			{
+				return;
+			}
+			auto fileInfo = GetContentsFileInfo(mTargetNode->Path);
 			if (fileInfo == nullptr)
 			{
 				return;
@@ -229,9 +261,13 @@ namespace JG
 
 		});
 
-		Paste->Subscribe(node, [&](const String& path)
+		Paste->Subscribe(node, [&]()
 		{
-			auto fileInfo = GetContentsFileInfo(path);
+			if (mTargetNode == nullptr)
+			{
+				return;
+			}
+			auto fileInfo = GetContentsFileInfo(mTargetNode->Path);
 			if (fileInfo == nullptr)
 			{
 				return;
@@ -241,40 +277,67 @@ namespace JG
 
 		});
 
-		Move->Subscribe(node, [&](const String& path)
+		Move->Subscribe(node, [&]()
 		{
-			auto fileInfo = GetContentsFileInfo(path);
+			if (mTargetNode == nullptr)
+			{
+				return;
+			}
+			auto fileInfo = GetContentsFileInfo(mTargetNode->Path);
 			if (fileInfo == nullptr)
 			{
 				return;
 			}
-
-			// TODO Move
-
 		});
 
-		Delete->Subscribe(node, [&](const String& path)
+
+		Delete->Subscribe(node, [&]()
 		{
-			auto fileInfo = GetContentsFileInfo(path);
-			if (fileInfo == nullptr)
+			for (auto node : mTargetNodeList)
 			{
-				return;
+				auto fileInfo = GetContentsFileInfo(node->Path);
+				if (fileInfo == nullptr)
+				{
+					return;
+				}
+				if (fs::exists(fileInfo->Path))
+				{
+					if (fileInfo->FileFormat == EAssetFormat::Directory)
+					{
+						fs::remove_all(fileInfo->Path);
+					}
+					else
+					{
+						fs::remove(fileInfo->Path);
+					}
+				}
 			}
-
-			// TODO Delete
-
 		});
 	}
-	void ContentsViewModel::UnSubscribe(ContentsDirectoryNode* node)
+	void ContentsViewModel::UnSubscribe(ContentsDirectoryNode* node, bool is_remove_hashset)
 	{
+		if (node == nullptr)
+		{
+			return;
+		}
+		if (is_remove_hashset == true)
+		{
+			mTargetNodeList.erase(node);
+		}
 		NewFolder->UnSubscribe(node);
 		Copy->UnSubscribe(node);
 		Paste->UnSubscribe(node);
 		Move->UnSubscribe(node);
 		Delete->UnSubscribe(node);
-
 	}
-
+	void ContentsViewModel::UnSubscribe()
+	{
+		for (auto& node : mTargetNodeList)
+		{
+			UnSubscribe(node, false);
+		}
+		mTargetNodeList.clear();
+	}
 	ContentsFileInfo* ContentsViewModel::Async_CreateContentsFileInfo(const String& name, const String& path, EAssetFormat fileFormat, ContentsFileInfo* ownerDirectory, bool isDirectory)
 	{
 		auto contentsInfo = CreateUniquePtr<ContentsFileInfo>();

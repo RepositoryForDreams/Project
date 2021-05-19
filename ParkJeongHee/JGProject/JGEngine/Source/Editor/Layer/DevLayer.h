@@ -5,17 +5,10 @@
 
 namespace JG
 {
-	class Camera;
-	class IFrameBuffer;
-	class ITexture;
-	class IShader;
-	class IComputer;
-	class IComputeBuffer;
 	class DevLayer : public ISystemLayer
 
 	{
 	private:
-		SharedPtr<Camera>     mCamera;
 	public:
 		virtual ~DevLayer() = default;
 	public:

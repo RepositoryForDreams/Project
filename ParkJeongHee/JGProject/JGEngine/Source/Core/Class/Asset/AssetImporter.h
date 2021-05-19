@@ -13,31 +13,43 @@ namespace JG
 	enum class EAssetImportResult
 	{
 		Success,
+		Fail,
 		
 	};
 
-	enum class EAssetImportFlags
+	enum class EFBXAssetImportFlags
+	{
+		None,
+	};
+	enum class ETextureAssetImportFlags
 	{
 		None,
 	};
 
 
-	struct AssetImportSettings
+	struct FBXAssetImportSettings
 	{
 		String AssetPath;
 		String OutputPath;
-		EAssetImportFlags Flags = EAssetImportFlags::None;
+		EFBXAssetImportFlags Flags = EFBXAssetImportFlags::None;
+	};
+	struct TextureAssetImportSettings
+	{
+		String AssetPath;
+		String OutputPath;
+		ETextureAssetImportFlags Flags = ETextureAssetImportFlags::None;
 	};
 
 
 	class AssetImporter
 	{
 	public:
-		static EAssetImportResult Import(const AssetImportSettings& setting);
-
+		static EAssetImportResult Import(const FBXAssetImportSettings& setting);
+		static EAssetImportResult Import(const TextureAssetImportSettings& settings);
 	private:
 		static void ReadMesh(aiMesh* mesh, StaticMeshAssetStock* output);
 	private:
 		static void WriteMesh(const String& outputPath, StaticMeshAssetStock& info);
+		static void WriteTexture(const String& outputPath, TextureAssetStock& stock);
 	};
 }

@@ -67,6 +67,22 @@ namespace JG
 		virtual ~IAssetStock() = default;
 	};
 
+	class TextureAssetStock : public IAssetStock, public ISerializable
+	{
+	public:
+		String Name;
+		i32 Width    = 0;
+		i32 Height   = 0;
+		i32 Channels = 0;
+		List<byte> Pixels;
+
+	public:
+		virtual ~TextureAssetStock() = default;
+	protected:
+		virtual void Serialize(FileStreamWriter * writer) const override;
+		virtual void DeSerialize(FileStreamReader * reader) override;
+	};
+
 
 	class StaticMeshAssetStock : public IAssetStock, public ISerializable
 	{
@@ -82,6 +98,8 @@ namespace JG
 		virtual void Serialize(FileStreamWriter* writer) const override;
 		virtual void DeSerialize(FileStreamReader* reader) override;
 	};
+
+	
 
 #define ASSET_NULL_ID -1
 	class IAsset : public IJGObject

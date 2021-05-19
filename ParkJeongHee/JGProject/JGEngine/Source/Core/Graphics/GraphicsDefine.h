@@ -299,19 +299,18 @@ namespace JG
 	class IMesh;
 	class IMaterial;
 	class ITexture;
+
 	class IRenderItem : public IJGObject
 	{
 		JGCLASS
 	public:
-		String TargetLayer  = TT("Default");
+		String  TargetLayer  = TT("Default");
 		JMatrix WorldMatrix = JMatrix::Identity();
-		SharedPtr<IMesh>	 Mesh = nullptr;
-		SharedPtr<IMaterial> Material = nullptr;
 	public:
 		virtual ~IRenderItem() = default;
 	};
 
-	class StandardSpriteRenderItem : public IRenderItem
+	class Standard2DRenderItem : public IRenderItem
 	{
 		JGCLASS
 	public:
@@ -320,22 +319,16 @@ namespace JG
 		i64    SortingOrder = 0;
 		SharedPtr<ITexture> Texture = nullptr;
 	public:
-		virtual ~StandardSpriteRenderItem() = default;
+		virtual ~Standard2DRenderItem() = default;
 	};
 
-	class CustomSpriteRenderItem : public IRenderItem
-	{
-		JGCLASS
-	public:
-		virtual ~CustomSpriteRenderItem() = default;
-	};
 
-	class MeshRenderItem : public IRenderItem
-	{
-		JGCLASS
-	public:
-		virtual ~MeshRenderItem() = default;
-	};
+	//class MeshRenderItem : public IRenderItem
+	//{
+	//	JGCLASS
+	//public:
+	//	virtual ~MeshRenderItem() = default;
+	//};
 
 
 	namespace ShaderScript
@@ -344,9 +337,7 @@ namespace JG
 		namespace Standard2D
 		{
 			constexpr wchar* ViewProj = TT("gViewProj");
-			constexpr wchar* World    = TT("gWorld");
 			constexpr wchar* Texture  = TT("gTexture");
-			constexpr wchar* Color    = TT("gColor");
 		}
 
 	}

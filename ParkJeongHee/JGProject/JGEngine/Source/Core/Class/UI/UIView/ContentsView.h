@@ -10,6 +10,10 @@ namespace JG
 	{
 		JGCLASS
 		class Directory {};
+
+
+
+		ContentsViewModel* mVm = nullptr;
 	private:
 		bool mOpenGUI = true;
 		bool mIsColumnInit = true;

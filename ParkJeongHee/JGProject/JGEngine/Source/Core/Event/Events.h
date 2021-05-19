@@ -205,7 +205,7 @@ private: \
 	{
 		EVENTCLASS(EEventCategory::Request)
 	public:
-		SharedPtr<Camera> SharedCamera;
+		Camera* SharedCamera;
 	public:
 		virtual ~RequestRegisterCameraEvent() = default;
 		virtual String ToString() const override
@@ -219,7 +219,7 @@ private: \
 	{
 		EVENTCLASS(EEventCategory::Request)
 	public:
-		SharedPtr<Camera> SharedCamera;
+		Camera* SharedCamera;
 	public:
 		virtual ~RequestUnRegisterCameraEvent() = default;
 		virtual String ToString() const override

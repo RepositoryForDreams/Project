@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "AssetManager.h"
 #include "Application.h"
+#include "Class/FileIO.h"
 #include "Graphics/Mesh.h"
 namespace JG
 {
@@ -127,28 +128,63 @@ namespace JG
 		fs::path assetPath = path;
 		fs::path contentsPath = Application::GetAssetPath();
 
-		if (assetPath.extension() == ASSET_MESH_FORMAT)
+		if (fs::exists(assetPath) == false)
 		{
-			auto asset = CreateSharedPtr<Asset<IMesh>>();
-			asset->mData = IMesh::CreateFromFile(path);
-			if (asset->mData == nullptr)
-			{
-				JG_CORE_ERROR("Failed Load Mesh : {0} ", path);
-				return nullptr;
-			}
-			asset->mAssetFullPath = assetPath;
-			asset->mAssetPath = ReplaceAll(assetPath, contentsPath, TT(""));
-			asset->mName      = assetPath.filename();
-			asset->mExtension = assetPath.extension();
-			asset->mAssetID	  = (u64)asset.get();
-
-			return asset;
-		}
-		else
-		{
-			JG_CORE_ERROR("is not supported file format : {0} ", assetPath.extension().string());
 			return nullptr;
 		}
+		EAssetFormat assetFormat = EAssetFormat::None;
+		FileStreamReader reader;
+		if (reader.Open(assetPath) == true)
+		{
+			reader.Read(&assetFormat);
+
+			switch (assetFormat)
+			{
+			case EAssetFormat::Texture:
+			{
+				TextureAssetStock stock;
+				reader.Read(&stock);
+
+				// TODO
+				// LoadTexture
+			}
+				break;
+			case EAssetFormat::Mesh:
+			{
+				StaticMeshAssetStock stock;
+				reader.Read(&stock);
+				// Load Mesh
+			}
+				break;
+			default:
+				return nullptr;
+			}
+			reader.Close();
+		}
+
+		return nullptr;
+		//if (assetPath.extension() == ASSET_MESH_FORMAT)
+		//{
+		//	auto asset = CreateSharedPtr<Asset<IMesh>>();
+		//	asset->mData = IMesh::CreateFromFile(path);
+		//	if (asset->mData == nullptr)
+		//	{
+		//		JG_CORE_ERROR("Failed Load Mesh : {0} ", path);
+		//		return nullptr;
+		//	}
+		//	asset->mAssetFullPath = assetPath;
+		//	asset->mAssetPath = ReplaceAll(assetPath, contentsPath, TT(""));
+		//	asset->mName      = assetPath.filename();
+		//	asset->mExtension = assetPath.extension();
+		//	asset->mAssetID	  = (u64)asset.get();
+
+		//	return asset;
+		//}
+		//else
+		//{
+		//	JG_CORE_ERROR("is not supported file format : {0} ", assetPath.extension().string());
+		//	return nullptr;
+		//}
 
 
 	}

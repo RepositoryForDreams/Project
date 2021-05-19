@@ -56,7 +56,7 @@ namespace JG
 	private:
 		UniquePtr<ThreadLoadData> mThreadLoadData = nullptr;
 
-
+		//
 		SharedPtr<ScheduleHandle> mControlUpdateHandle;
 		SharedPtr<ScheduleHandle> mAsyncUpdateHandle;
 
@@ -71,12 +71,16 @@ namespace JG
 		Queue<String> mHistoryQueue;
 		String mSelectedDir;
 
+		HashSet<ContentsDirectoryNode*> mTargetNodeList;
+		ContentsDirectoryNode* mTargetNode = nullptr;
+
+		bool mIsCtrl = false;
 	public:
-		UniquePtr<Command<const String&>> NewFolder;
-		UniquePtr<Command<const String&>> Copy;
-		UniquePtr<Command<const String&>> Paste;
-		UniquePtr<Command<const String&>> Move;
-		UniquePtr<Command<const String&>> Delete;
+		UniquePtr<Command<>> NewFolder;
+		UniquePtr<Command<>> Copy;
+		UniquePtr<Command<>> Paste;
+		UniquePtr<Command<>> Move;
+		UniquePtr<Command<>> Delete;
 
 	protected:
 		virtual void Initialize() override;
@@ -95,17 +99,16 @@ namespace JG
 
 		bool IsSelectedContentsDirectory(ContentsFileInfo* info) const;
 	private:
-
 		void ForEeach(
 			ContentsDirectoryNode* CurrNode,
 			const std::function<bool(ContentsDirectoryNode*)>& pushAction,
 			const std::function<void(ContentsDirectoryNode*)>& action,
 			const std::function<void(ContentsDirectoryNode*)>& popAction);
 		void Subscribe(ContentsDirectoryNode* node);
-		void UnSubscribe(ContentsDirectoryNode* node);
+		void UnSubscribe(ContentsDirectoryNode* node, bool is_remove_hashset = true);
+		void UnSubscribe();
 		// 비동기 함수
 	private:
-
 		ContentsFileInfo* Async_CreateContentsFileInfo(
 			const String& name, const String& path, EAssetFormat fileFormat, ContentsFileInfo* ownerDirectory, bool isDirectory);
 		void Async_UpdateContentsDirectory();

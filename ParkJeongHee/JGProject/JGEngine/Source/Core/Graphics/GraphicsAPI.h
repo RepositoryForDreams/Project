@@ -25,7 +25,7 @@ namespace JG
 	{
 	public:
 		virtual EGraphicsAPI GetAPI() const = 0;
-	public:
+	protected:
 		friend class Application;
 		virtual bool Create() = 0;
 		virtual void Destroy() = 0;

@@ -8,7 +8,7 @@
 
 #include "Class/Game/GameComponent.h"
 #include "Class/Game/Components/Transform.h"
-#include "Class/Game/Components/GameCamera.h"
+#include "Class/Game/Components/Camera.h"
 #include "Class/Game/Components/SpriteRenderer.h"
 
 #include "Class/Asset/Asset.h"
@@ -77,7 +77,7 @@ namespace JG
 
 		// GameComponent
 		GameObjectFactory::GetInstance().RegisterComponentType<Transform>();
-		GameObjectFactory::GetInstance().RegisterComponentType<GameCamera>();
+		GameObjectFactory::GetInstance().RegisterComponentType<Camera>();
 		GameObjectFactory::GetInstance().RegisterComponentType<SpriteRenderer>();
 	}
 }

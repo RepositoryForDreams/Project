@@ -79,6 +79,7 @@ namespace JG
 		u64 GetChildCount() const;
 		virtual void SetParent(GameNode* node);
 		GameNode*    GetParent() const;
+		Transform*   GetTransform() const;
 		void SetLayer(const String& layer);
 		const String& GetLayer();
 

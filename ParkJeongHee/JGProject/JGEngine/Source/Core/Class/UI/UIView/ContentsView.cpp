@@ -17,15 +17,27 @@ namespace JG
 	void ContentsView::Load()
 	{
 		// Copy Paste Delete Move 이정도만 일단 생성
-		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("NewFolder"), 0, [&]() {}, nullptr);
+		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("NewFolder"), 0, [&]() {
+			if (mVm != nullptr)
+			{
+				mVm->NewFolder->Execute();
+			}
+		}, nullptr);
 		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("Copy"), 20, [&]() {}, nullptr);
 		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("Paste"), 20, [&]() {}, nullptr);
 		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("Move"), 20, [&]() {}, nullptr);
-		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("Delete"), 20, [&]() {}, nullptr);
+		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("Delete"), 20, [&]() 
+		{
+			if (mVm != nullptr)
+			{
+				mVm->Delete->Execute();
+			}
+		}, nullptr);
 	}
 	void ContentsView::Initialize()
 	{
 		mIsColumnInit = true;
+		mVm = GetViewModel();
 	}
 	void ContentsView::OnGUI()
 	{
@@ -117,8 +129,17 @@ namespace JG
 		{
 			static bool isContextOpen = false;
 			ImGui::PushID(node);
-			UIManager::GetInstance().ShowContextMenu(GetType());
 			node->IsSelected = ImGui::IsItemClicked();
+			if (UIManager::GetInstance().ShowContextMenu(GetType()) == true)
+			{
+				node->IsTarget = true;
+			}
+			else
+			{
+				node->IsTarget = false;
+			}
+
+
 			ImGui::PopID();
 		},
 			[&](ContentsDirectoryNode* node)

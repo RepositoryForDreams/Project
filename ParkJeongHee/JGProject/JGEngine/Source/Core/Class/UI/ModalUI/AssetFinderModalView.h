@@ -18,6 +18,5 @@ namespace JG
 		virtual void Initialize(const AssetFinderInitData& data) override;
 		virtual void Destroy() override;
 		virtual bool OnGUI() override;
-
 	};
 }
