@@ -1,4 +1,5 @@
 #include "pch.h"
+
 #include "DirectX12API.h"
 #include "DirectX12FrameBuffer.h"
 #include "DirectX12Resource.h"
@@ -12,6 +13,7 @@
 #include "Utill/PipelineState.h"
 #include "Utill/CommandList.h"
 #include "Utill/ResourceStateTracker.h"
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 namespace JG

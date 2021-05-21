@@ -8,6 +8,7 @@
 #include "Graphics/GraphicsAPI.h"
 #include "Class/Game/GameSettings.h"
 #include "Class/Game/Components/Camera.h"
+#include "Class/Asset/AssetImporter.h"
 
 
 
@@ -34,6 +35,47 @@ namespace JG
 
 
 		mRenderItemPriority[JGTYPE(Standard2DRenderItem)] = (u64)ERenderItemPriority::_2D;
+
+		// юс╫ц
+		String rawAssetPath = CombinePath(Application::GetAssetPath(), TT("RawResources"));
+		String outputPath = CombinePath(Application::GetAssetPath(), TT("Resources"));
+
+		for (auto& iter : fs::recursive_directory_iterator(rawAssetPath))
+		{
+			auto extenstion = iter.path().extension().wstring();
+			if (extenstion == TT("fbx"))
+			{
+				FBXAssetImportSettings settings;
+				settings.AssetPath = iter.path();
+				settings.OutputPath = outputPath;
+				auto result = AssetImporter::Import(settings);
+				if (result == EAssetImportResult::Success)
+				{
+					JG_CORE_INFO("Success Import {0}", iter.path());
+				}
+				else
+				{
+					JG_CORE_INFO("Fail Import {0}", iter.path());
+				}
+			}
+			if (extenstion == TT("png") || extenstion == TT("jpg") || extenstion == TT("TGA"))
+			{
+				TextureAssetImportSettings settings;
+				settings.AssetPath = iter.path();
+				settings.OutputPath = outputPath;
+				auto result = AssetImporter::Import(settings);
+				if (result == EAssetImportResult::Success)
+				{
+					JG_CORE_INFO("Success Import {0}", iter.path());
+				}
+				else
+				{
+					JG_CORE_INFO("Fail Import {0}", iter.path());
+				}
+			}
+
+		}
+
 	}
 
 	void GraphicsSystemLayer::Destroy()

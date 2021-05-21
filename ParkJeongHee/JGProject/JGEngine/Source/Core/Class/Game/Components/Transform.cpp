@@ -4,6 +4,24 @@
 
 namespace JG
 {
+	void Transform::Serialize(FileStreamWriter* writer) const
+	{
+		GameComponent::Serialize(writer);
+		writer->Write(mLocation);
+		writer->Write(mRotation);
+		writer->Write(mScale);
+	}
+	void Transform::DeSerialize(FileStreamReader* reader)
+	{
+		GameComponent::DeSerialize(reader);
+		JVector3 location;
+		JVector3 rotation;
+		JVector3 scale;
+
+		reader->Read(&location);
+		reader->Read(&rotation);
+		reader->Read(&scale);
+	}
 	void Transform::SetLocalLocation(const JVector3& location)
 	{
 		bool isDirty = mLocation != location;

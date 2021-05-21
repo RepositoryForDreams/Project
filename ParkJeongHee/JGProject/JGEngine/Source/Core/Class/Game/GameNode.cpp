@@ -14,6 +14,50 @@ namespace JG
 		GameObject::Destory();
 		SetParent(nullptr);
 	}
+	void GameNode::Serialize(FileStreamWriter* writer) const
+	{
+		GameObject::Serialize(writer);
+		
+		// ÄÄÆ÷³ÍÆ® °¹¼ö
+		writer->Write(mComponents.size());
+		for (auto& com : mComponents)
+		{
+			writer->Write(com->GetType().GetName());
+			writer->Write(*com);
+		}
+
+		writer->Write(mChilds.size());
+		for (auto& child : mChilds)
+		{
+			writer->Write(child);
+		}
+
+	
+
+		//
+		writer->Write(mIsActiveSelf);
+		writer->Write(mIsActive);
+		writer->Write(mTargetLayer);
+
+		// 
+		// ÀÚ½Ä °¹¼ö
+
+
+	}
+	void GameNode::DeSerialize(FileStreamReader* reader)
+	{
+		GameObject::DeSerialize(reader);
+		mChilds.clear();
+		mComponents.clear();
+
+		u64 comSize = 0;
+
+		// TODO
+
+
+
+
+	}
 	void GameNode::Update()
 	{
 		if (mIsRunStart == false)

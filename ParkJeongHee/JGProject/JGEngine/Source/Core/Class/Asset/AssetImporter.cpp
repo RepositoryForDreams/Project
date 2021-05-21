@@ -1,4 +1,5 @@
 #include "pch.h"
+
 #include "AssetImporter.h"
 #include "Class/FileIO.h"
 #include "Common/String.h"
@@ -7,7 +8,6 @@
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
-
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 

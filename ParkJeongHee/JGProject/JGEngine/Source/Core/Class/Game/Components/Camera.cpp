@@ -10,10 +10,6 @@ namespace JG
 	void Camera::Awake()
 	{
 		mTargetTextures.resize(MAX_RENDERTARGET, nullptr);
-
-
-		//mCamera = Camera::Create(GameSettings::GetResolution(),
-		//	90, 0.001f, 10000.0f, false);
 		SetFOV(90);
 		SetNearZ(0.001f);
 		SetFarZ(10000.0f);

@@ -17,6 +17,9 @@ namespace JG
 		mutable JMatrix mWorldMatrix;
 		mutable JMatrix mLocalMatrix;
 		mutable bool mIsDirty = true;
+	protected:
+		virtual void Serialize(FileStreamWriter* writer)   const override;
+		virtual void DeSerialize(FileStreamReader* reader) override;
 	public:
 
 		void SetLocalLocation(const JVector3& location);
