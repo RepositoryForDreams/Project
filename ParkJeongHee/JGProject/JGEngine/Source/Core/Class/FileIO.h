@@ -40,10 +40,6 @@ namespace JG
 		template<>
 		void Write(const String& data)
 		{
-			if (data.empty() == true)
-			{
-				return;
-			}
 			if (IsOpen() == true)
 			{
 				Write(data.length());

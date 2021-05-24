@@ -1,22 +1,22 @@
 #include "pch.h"
-#include "ComponentFinderModalView.h"
+#include "ComponentFinderContextView.h"
 #include "Class/Game/GameObjectFactory.h"
 namespace JG
 {
 
-	void ComponentFinderModalView::Initialize(const ComponentFinderInitData& data)
+	void ComponentFinderContextView::Initialize(const ComponentFinderInitData& data)
 	{
 		ImGui::OpenPopup(std::to_string(GetType().GetID()).c_str());
 		mSelectedComponentType.clear();
 	}
-	void ComponentFinderModalView::Destroy()
+	void ComponentFinderContextView::Destroy()
 	{
 		mFilterStr.clear();
 		mComponentTypeSet.clear();
 		mFilteredTypeList.clear();
 		mFilterStr.resize(256);
 	}
-	bool ComponentFinderModalView::OnGUI()
+	bool ComponentFinderContextView::OnGUI()
 	{
 		if (ImGui::BeginPopupContextWindow(std::to_string(GetType().GetID()).c_str()) == true)
 		{
@@ -47,11 +47,11 @@ namespace JG
 			return false;
 		}
 	}
-	const String& ComponentFinderModalView::GetSelectedComponent() const
+	const String& ComponentFinderContextView::GetSelectedComponent() const
 	{
 		return mSelectedComponentType;
 	}
-	void ComponentFinderModalView::FindComponentTypeList(const String& filter)
+	void ComponentFinderContextView::FindComponentTypeList(const String& filter)
 	{
 		bool isDirty = false;
 		auto& originSet = GameObjectFactory::GetInstance().GetGameComponentTypeSet();

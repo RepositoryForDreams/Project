@@ -51,11 +51,11 @@ namespace JG
 				auto result = AssetImporter::Import(settings);
 				if (result == EAssetImportResult::Success)
 				{
-					JG_CORE_INFO("Success Import {0}", iter.path());
+					JG_CORE_INFO("Success Import {0}", iter.path().wstring());
 				}
 				else
 				{
-					JG_CORE_INFO("Fail Import {0}", iter.path());
+					JG_CORE_INFO("Fail Import {0}", iter.path().wstring());
 				}
 			}
 			if (extenstion == TT("png") || extenstion == TT("jpg") || extenstion == TT("TGA"))
@@ -66,11 +66,11 @@ namespace JG
 				auto result = AssetImporter::Import(settings);
 				if (result == EAssetImportResult::Success)
 				{
-					JG_CORE_INFO("Success Import {0}", iter.path());
+					JG_CORE_INFO("Success Import {0}", iter.path().wstring());
 				}
 				else
 				{
-					JG_CORE_INFO("Fail Import {0}", iter.path());
+					JG_CORE_INFO("Fail Import {0}", iter.path().wstring());
 				}
 			}
 

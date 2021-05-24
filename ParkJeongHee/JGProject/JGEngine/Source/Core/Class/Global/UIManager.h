@@ -6,7 +6,7 @@
 namespace JG
 {
 	class IUIView;
-	class IModalUIView;
+	class IPopupUIView;
 	struct MenuItem
 	{
 		String ShortCut;
@@ -39,7 +39,7 @@ namespace JG
 		static const wchar ALT_SHORTCUT_TOKEN   = TT('&');
 	private:
 		Dictionary<JG::Type, UniquePtr<IUIView>>      mUIViewPool;
-		Dictionary<JG::Type, UniquePtr<IModalUIView>> mModalUIViewPool;
+		Dictionary<JG::Type, UniquePtr<IPopupUIView>> mPopupUIViewPool;
 		Dictionary<JG::Type, UniquePtr<MenuItemNode>> mUIViewContextMenu;
 		
 		UniquePtr<MenuItemNode> mMainMenuItemRootNode;
@@ -66,17 +66,17 @@ namespace JG
 			}
 			mUIViewPool[type]        = CreateUniquePtr<UIViewType>();
 		}
-		template<class ModalUIViewType>
-		void RegisterModalUIView()
+		template<class UIPopupViewType>
+		void RegisterPopupUIView()
 		{
-			Type type = Type(TypeID<ModalUIViewType>());
+			Type type = Type(TypeID<UIPopupViewType>());
 			std::lock_guard<std::shared_mutex> lock(mMutex);
 
-			if (mModalUIViewPool.find(type) != mModalUIViewPool.end())
+			if (mPopupUIViewPool.find(type) != mPopupUIViewPool.end())
 			{
 				return;
 			}
-			mModalUIViewPool[type] = CreateUniquePtr<ModalUIViewType>();
+			mPopupUIViewPool[type] = CreateUniquePtr<UIPopupViewType>();
 		}
 
 		template<class UIViewType>
@@ -94,23 +94,23 @@ namespace JG
 			return static_cast<UIViewType*>(iter->second.get());
 		}
 
-		template<class UIModalViewType, class InitData>
-		void OpenModalUIView(const InitData& initData) const
+		template<class UIPopupViewType, class InitData>
+		void OpenPopupUIView(const InitData& initData) const
 		{
-			auto view = GetModalUIView<UIModalViewType>();
+			auto view = GetPopupUIView<UIPopupViewType>();
 			if (view != nullptr)
 			{
 				view->Open(initData);
 			}
 		}
 
-		template<class UIModalViewType>
-		bool OnModalUIView() const 
+		template<class UIPopupViewType>
+		bool OnContextUIView() const 
 		{
-			auto view = GetModalUIView<UIModalViewType>();
-			if (view != nullptr && view->IsOpen())
+			auto view = GetPopupUIView<UIPopupViewType>();
+			if (view != nullptr && view->IsOpen() && view->GetPopupType() == EPopupType::Context)
 			{
-				bool result = (static_cast<IModalUIView*>(view))->OnGUI();
+				bool result = (static_cast<IPopupUIView*>(view))->OnGUI();
 				if (result == false)
 				{
 					view->Close();
@@ -120,19 +120,19 @@ namespace JG
 			return false;
 		}
 
-		template<class UIModalViewType>
-		UIModalViewType* GetModalUIView() const 
+		template<class UIPopupViewType>
+		UIPopupViewType* GetPopupUIView() const
 		{
-			Type type = Type(TypeID<UIModalViewType>());
+			Type type = Type(TypeID<UIPopupViewType>());
 
 			std::shared_lock<std::shared_mutex> lock(mMutex);
-			auto iter = mModalUIViewPool.find(type);
-			if (iter == mModalUIViewPool.end())
+			auto iter = mPopupUIViewPool.find(type);
+			if (iter == mPopupUIViewPool.end())
 			{
 				JG_CORE_ERROR("Not Find UIModalViewType : {0}", type.GetName());
 				return nullptr;
 			}
-			return static_cast<UIModalViewType*>(iter->second.get());
+			return static_cast<UIPopupViewType*>(iter->second.get());
 		}
 
 

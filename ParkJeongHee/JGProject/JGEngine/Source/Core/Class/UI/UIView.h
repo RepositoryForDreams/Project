@@ -104,20 +104,28 @@ namespace JG
 	};
 
 
-	class IModalUIView : IJGObject
+	enum class EPopupType
+	{
+		Context,
+		Modal,
+	};
+
+	class IPopupUIView : IJGObject
 	{
 		friend class UIManager;
 	protected:
 		virtual bool OnGUI()      = 0;
 		virtual void OnEvent(IEvent& e) = 0;
+		virtual void Close() = 0;
+		virtual EPopupType GetPopupType() = 0;
 	protected:
 		virtual bool IsOpen() const = 0;
 	public:
-		virtual ~IModalUIView() = default;
+		virtual ~IPopupUIView() = default;
 	};
 
 	template<class PopupInitData>
-	class ModalUIView : public IModalUIView
+	class PopupUIView : public IPopupUIView
 	{
 		friend class UIManager;
 		bool mIsOpen = false;
@@ -136,7 +144,8 @@ namespace JG
 				Initialize(data);
 			}
 		}
-		virtual void Close()
+	public:
+		virtual void Close() override
 		{
 			if (mIsOpen == true)
 			{
@@ -144,11 +153,29 @@ namespace JG
 				Destroy();
 			}
 		}
+
 		virtual bool IsOpen() const
 		{
 			return mIsOpen;
 		}
 	public:
-		virtual ~ModalUIView() = default;
+		virtual ~PopupUIView() = default;
+	};
+
+
+	template<class ContextInitData>
+	class ContextUIView : public PopupUIView<ContextInitData>
+	{
+		JGCLASS
+	public:
+		virtual EPopupType GetPopupType() { return EPopupType::Context; }
+	};
+
+	template<class ModalInitData>
+	class ModalUIView : public PopupUIView<ModalInitData>
+	{
+		JGCLASS
+	public:
+		virtual EPopupType GetPopupType() { return EPopupType::Modal; }
 	};
 }

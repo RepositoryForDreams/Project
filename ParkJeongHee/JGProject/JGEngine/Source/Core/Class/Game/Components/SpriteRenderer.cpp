@@ -38,9 +38,9 @@ namespace JG
 	void SpriteRenderer::DeSerialize(FileStreamReader* reader) 
 	{
 		BaseRenderer::DeSerialize(reader);
-		Color color;
+		Color  color;
 		String sortingLayer;
-		i64 sortingOrder = 0;
+		i64    sortingOrder = 0;
 
 		reader->Read(&color);
 		reader->Read(&sortingLayer);
@@ -61,18 +61,14 @@ namespace JG
 
 	SharedPtr<IRenderItem> SpriteRenderer::PushRenderItem()
 	{
+		auto transform = GetOwner()->GetTransform();
+		mSpriteRI->WorldMatrix = transform->GetWorldMatrix();
 		return mSpriteRI;
 	}
 
 	void SpriteRenderer::OnChange(const ChangeData& data)
 	{
 		BaseRenderer::OnChange(data);
-
-		if (data.Type == JGTYPE(Transform))
-		{
-			auto transform = static_cast<Transform*>(data.Object);
-			mSpriteRI->WorldMatrix = transform->GetWorldMatrix();
-		}
 
 	}
 	void SpriteRenderer::OnInspectorGUI()

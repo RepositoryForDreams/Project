@@ -96,6 +96,16 @@ namespace JG
 				_pair.second->OnGUI();
 			}
 		}
+		for (auto& _pair : mPopupUIViewPool)
+		{
+			if (_pair.second->GetPopupType() != EPopupType::Context && _pair.second->IsOpen())
+			{
+				if (_pair.second->OnGUI() == false)
+				{
+					_pair.second->Close();
+				}
+			}
+		}
 	}
 	void UIManager::OnEvent(IEvent& e)
 	{
@@ -288,10 +298,10 @@ namespace JG
 	}
 	void UIManager::ExtractPathAndShortcut(const String& menuPath, String* out_path, String* out_shortCut)
 	{
-		u64 midPos = menuPath.find_first_of(TT(" "));
+		bool isShortCut = menuPath.find(CTRL_SHORTCUT_TOKEN) != String::npos || menuPath.find(SHIFT_SHORTCUT_TOKEN) != String::npos || menuPath.find(ALT_SHORTCUT_TOKEN) != String::npos;
 
-
-		if (midPos == String::npos)
+	
+		if (isShortCut == false)
 		{
 			if (out_path)
 			{
@@ -300,6 +310,7 @@ namespace JG
 		}
 		else
 		{
+			u64 midPos = menuPath.find_last_of(TT(" "));
 			if (out_path)
 			{
 				*out_path = menuPath.substr(0, midPos);

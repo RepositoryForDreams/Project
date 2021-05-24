@@ -12,7 +12,7 @@ namespace JG
 	};
 
 
-	class ComponentFinderModalView : public ModalUIView<ComponentFinderInitData>
+	class ComponentFinderContextView : public ContextUIView<ComponentFinderInitData>
 	{
 		JGCLASS
 	private:

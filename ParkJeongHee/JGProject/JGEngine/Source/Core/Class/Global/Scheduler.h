@@ -86,29 +86,45 @@ namespace JG
 		friend Application;
 		static const u64 SCHEDULE_NULL_ID = -1;
 	private:
-		struct SyncTaskByTick
+		class SyncTask
 		{
+		public:
 			SharedPtr<ScheduleHandle> Handle;
 			u64 ID = SCHEDULE_NULL_ID;
-			f32 Delay     = 0.0f;
-			f32 TickCycle = 0.0f;
-			i32 Repeat   = 0;
-			i32 Priority = 0;
-			SyncTaskFunction Function;
-			f32 Tick = 0.0f;
-			i32 CallCount = 0;
-		};
-		struct SyncTaskByFrame
-		{
-			SharedPtr<ScheduleHandle> Handle;
-			u64 ID = SCHEDULE_NULL_ID;
-			i32 Delay = 0;
-			i32 FrameCycle = 0;
 			i32 Repeat = 0;
 			i32 Priority = 0;
 			SyncTaskFunction Function;
-			i32 Frame = 0;
 			i32 CallCount = 0;
+		public:
+			virtual ~SyncTask() = default;
+		public:
+			virtual EScheduleType GetScheduleType() const = 0;
+		};
+		class SyncTaskByTick : public SyncTask
+		{
+		public:
+			f32 Delay     = 0.0f;
+			f32 TickCycle = 0.0f;
+			f32 Tick = 0.0f;
+		public:
+			virtual ~SyncTaskByTick() = default;
+			virtual EScheduleType GetScheduleType() const {
+				return EScheduleType::SyncByTick;
+			}
+		public:
+
+		};
+		class SyncTaskByFrame : public SyncTask
+		{
+		public:
+			i32 Delay = 0;
+			i32 FrameCycle = 0;
+			i32 Frame = 0;
+		public:
+			virtual ~SyncTaskByFrame() = default;
+			virtual EScheduleType GetScheduleType() const {
+				return EScheduleType::SyncByFrame;
+			}
 		};
 		struct AsyncTask
 		{
@@ -124,14 +140,17 @@ namespace JG
 		
 		SharedPtr<Timer> mScheduleTimer;
 		//
-		Dictionary<u64, SharedPtr<SyncTaskByTick>>  mSyncTaskByTickPool;
-		Dictionary<u64, SharedPtr<SyncTaskByFrame>> mSyncTaskByFramePool;
+		Dictionary<u64, SharedPtr<SyncTask>>  mSyncTaskPool;
+		SortedDictionary<i32, List<WeakPtr<SyncTask>>>  mSortedSyncTasks;
+		Queue<WeakPtr<SyncTask>> mReservedSyncTasks;
+		//Dictionary<u64, SharedPtr<SyncTaskByTick>>  mSyncTaskByTickPool;
+		//Dictionary<u64, SharedPtr<SyncTaskByFrame>> mSyncTaskByFramePool;
 		//
-		SortedDictionary<i32, List<WeakPtr<SyncTaskByTick>>>  mSortedSyncTaskByTicks;
-		SortedDictionary<i32, List<WeakPtr<SyncTaskByFrame>>> mSortedSyncTaskByFrames;
+		//SortedDictionary<i32, List<WeakPtr<SyncTaskByTick>>>  mSortedSyncTaskByTicks;
+		//SortedDictionary<i32, List<WeakPtr<SyncTaskByFrame>>> mSortedSyncTaskByFrames;
 		//
-		Queue<WeakPtr<SyncTaskByTick>> mReservedSyncTaskByTick;
-		Queue<WeakPtr<SyncTaskByFrame>> mReservedSyncTaskByFrame;
+		//Queue<WeakPtr<SyncTaskByTick>> mReservedSyncTaskByTick;
+		//Queue<WeakPtr<SyncTaskByFrame>> mReservedSyncTaskByFrame;
 
 		// Thread ฐüทร
 		Queue<SharedPtr<AsyncTask>> mAsyncTaskQueue;
@@ -156,10 +175,10 @@ namespace JG
 		const Timer* GetScheduleTimer() const;
 	private:
 		void Update();
-		void Update(SharedPtr<SyncTaskByTick> task);
-		void Update(SharedPtr<SyncTaskByFrame> task);
-		void ResultProcess(SharedPtr<SyncTaskByTick> task, EScheduleResult result);
-		void ResultProcess(SharedPtr<SyncTaskByFrame> task, EScheduleResult result);
+		void Update(SyncTaskByTick* task);
+		void Update(SyncTaskByFrame* task);
+		void ResultProcess(SyncTaskByTick* task, EScheduleResult result);
+		void ResultProcess(SyncTaskByFrame* task, EScheduleResult result);
 		void RemoveSchedule(const ScheduleHandle& handle);
 		u64 ReceiveScheduleID();
 	};

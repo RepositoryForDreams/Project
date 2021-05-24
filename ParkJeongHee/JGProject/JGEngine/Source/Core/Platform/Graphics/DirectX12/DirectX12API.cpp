@@ -14,8 +14,7 @@
 #include "Utill/CommandList.h"
 #include "Utill/ResourceStateTracker.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb/stb_image.h"
+
 namespace JG
 {
 
@@ -656,18 +655,18 @@ namespace JG
 	}
 	SharedPtr<ITexture> DirectX12API::CreateTextureFromFile(const String& path)
 	{
-		auto texture = CreateSharedPtr<DirectX12Texture>();
-		i32 w = 0; i32 h = 0; i32 channels = 0;
-		byte* pixels = stbi_load(ws2s(path).c_str(), &w, &h, &channels, 0);
-		if (pixels == nullptr)
-		{
-			return nullptr;
-		}
-		texture->CreateFromMemory(path, pixels, w, h, channels);
+		//auto texture = CreateSharedPtr<DirectX12Texture>();
+		//i32 w = 0; i32 h = 0; i32 channels = 0;
+		//byte* pixels = stbi_load(ws2s(path).c_str(), &w, &h, &channels, 0);
+		//if (pixels == nullptr)
+		//{
+		//	return nullptr;
+		//}
+		//texture->CreateFromMemory(path, pixels, w, h, channels);
 
-		stbi_image_free(pixels);
+		//stbi_image_free(pixels);
 
-		return texture;
+		return nullptr;
 	}
 
 

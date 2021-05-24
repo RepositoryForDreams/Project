@@ -12,7 +12,6 @@ namespace JG
 		List<GameSystem*>	    mWorldGameSystemList;
 		List<GlobalGameSystem*> mGlobalGameSystemList;
 
-		f32 mTickCycle = 0.08f;
 		SharedPtr<ScheduleHandle> mUpdateScheduleHandle;
 		SharedPtr<ScheduleHandle> mLateUpdateScheduleHandle;
 	public:
@@ -21,6 +20,9 @@ namespace JG
 		virtual void Update() override;
 		virtual void LateUpdate() override;
 		virtual void Destory() override;
+	protected:
+		virtual void Serialize(FileStreamWriter* writer)   const override;
+		virtual void DeSerialize(FileStreamReader* reader) override;
 	public:
 		virtual void SetParent(GameNode* node) override {}
 		virtual void OnInspectorGUI() override;
@@ -38,6 +40,7 @@ namespace JG
 		}
 		void AddGameSystem(const Type& type);
 		void Destroy(GameSystem* sys);
+		void Destroy(GameWorld* world);
 	private:
 		friend class GameLogicSystemLayer;
 		void SetGlobalGameSystemList(const List<GlobalGameSystem*>& systemList);

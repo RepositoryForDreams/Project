@@ -2,7 +2,7 @@
 #include "GameNode.h"
 #include "Components/Transform.h"
 #include "Class/UI/UIView/InspectorView.h"
-#include "Class/UI/ModalUI/ComponentFinderModalView.h"
+#include "Class/UI/ContextUI/ComponentFinderContextView.h"
 namespace JG
 {
 	void GameNode::Start()
@@ -29,7 +29,8 @@ namespace JG
 		writer->Write(mChilds.size());
 		for (auto& child : mChilds)
 		{
-			writer->Write(child);
+			writer->Write(child->GetName());
+			writer->Write(*child);
 		}
 
 	
@@ -39,24 +40,52 @@ namespace JG
 		writer->Write(mIsActive);
 		writer->Write(mTargetLayer);
 
-		// 
-		// ÀÚ½Ä °¹¼ö
-
 
 	}
 	void GameNode::DeSerialize(FileStreamReader* reader)
 	{
 		GameObject::DeSerialize(reader);
-		mChilds.clear();
-		mComponents.clear();
-
+		// Component
 		u64 comSize = 0;
+		reader->Read(&comSize);
+		for (u64 i = 0; i < comSize; ++i)
+		{
+			String typeName;
+			reader->Read(&typeName);
+			auto type = GameObjectFactory::GetInstance().GetGameObjectType(typeName);
+			bool isCom = GameObjectFactory::GetInstance().IsGameComponent(type);
+			if (isCom == false)
+			{
+				JG_CORE_ERROR("{0} is not Component Type in DeSerialize", typeName);
+				continue;
+			}
+			//
+			if (i == 0)
+			{
+				reader->Read(mTransform);
+			}
+			else
+			{
+				auto com = AddComponent(type);
+				reader->Read(com);
+			}
+		}
 
-		// TODO
+		u64 childCnt = 0;
+		reader->Read(&childCnt);
+		for (u64 i = 0; i < childCnt; ++i)
+		{
+			String nodeName;
+			reader->Read(&nodeName);
+			auto node = AddNode(nodeName);
+			reader->Read(node);
+		}
+		String targetLayer;
+		reader->Read(&mIsActiveSelf);
+		reader->Read(&mIsActive);
+		reader->Read(&targetLayer);
 
-
-
-
+		SetLayer(targetLayer);
 	}
 	void GameNode::Update()
 	{
@@ -183,12 +212,12 @@ namespace JG
 		auto padding = ImGui::GetStyle().FramePadding;
 		if (ImGui::Button("Add Component", ImVec2(ImGui::GetWindowSize().x - (padding.x * 4), 0)) == true)
 		{
-			UIManager::GetInstance().OpenModalUIView<ComponentFinderModalView>(ComponentFinderInitData());
+			UIManager::GetInstance().OpenPopupUIView<ComponentFinderContextView>(ComponentFinderInitData());
 		}
-		if (UIManager::GetInstance().OnModalUIView<ComponentFinderModalView>())
+		if (UIManager::GetInstance().OnContextUIView<ComponentFinderContextView>())
 		{
-			auto comFinder = UIManager::GetInstance().GetModalUIView<ComponentFinderModalView>();
-			auto selectedType = comFinder->GetSelectedComponent();
+			auto comFinder     = UIManager::GetInstance().GetPopupUIView<ComponentFinderContextView>();
+			auto selectedType  = comFinder->GetSelectedComponent();
 			auto inspectorView = UIManager::GetInstance().GetUIView<InspectorView>();
 			if (inspectorView)
 			{
@@ -237,26 +266,28 @@ namespace JG
 		obj->Awake();
 		return obj;
 	}
-	void GameNode::AddComponent(const Type& type)
+	GameComponent* GameNode::AddComponent(const Type& type)
 	{
 
 		bool isComponent = GameObjectFactory::GetInstance().IsGameComponent(type);
 		if (isComponent == false)
 		{
 			JG_CORE_ERROR("This Type({0}) is not Component Category.", type.GetName());
-			return;
+			return nullptr;
 		}
 		auto obj = GameObjectFactory::GetInstance().CreateObjectByType(type);
 		if (obj == nullptr)
 		{
 			JG_CORE_ERROR("This Type({0}) is not registered.", type.GetName());
-			return;
+			return nullptr;
 		}
 		auto com = static_cast<GameComponent*>(obj);
 		com->mOwnerNode = this;
 		com->mGameWorld = mGameWorld;
 		mComponents.push_back(com);
 		com->Awake();
+
+		return com;
 	}
 	void GameNode::Destroy(GameNode* node)
 	{

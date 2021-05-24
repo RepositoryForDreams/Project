@@ -315,7 +315,7 @@ namespace JG
 		JGCLASS
 	public:
 		Color  Color = Color::White();
-		String SortingLayer;
+		String SortingLayer = TT("Default");
 		i64    SortingOrder = 0;
 		SharedPtr<ITexture> Texture = nullptr;
 	public:

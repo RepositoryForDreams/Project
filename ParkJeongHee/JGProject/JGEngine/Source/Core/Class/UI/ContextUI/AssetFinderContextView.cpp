@@ -1,17 +1,17 @@
 #include "pch.h"
-#include "AssetFinderModalView.h"
+#include "AssetFinderContextView.h"
 
 namespace JG
 {
-	void AssetFinderModalView::Initialize(const AssetFinderInitData& data)
+	void AssetFinderContextView::Initialize(const AssetFinderInitData& data)
 	{
 		ImGui::OpenPopup(std::to_string(GetType().GetID()).c_str());
 	}
-	void AssetFinderModalView::Destroy()
+	void AssetFinderContextView::Destroy()
 	{
 
 	}
-	bool AssetFinderModalView::OnGUI()
+	bool AssetFinderContextView::OnGUI()
 	{
 		if (ImGui::BeginPopupContextWindow(std::to_string(GetType().GetID()).c_str()) == true)
 		{

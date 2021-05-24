@@ -17,6 +17,7 @@ namespace JG
 		Material,
 		Texture,
 		Directory,
+		GameWorld,
 	};
 
 	struct JGVertex

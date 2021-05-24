@@ -49,7 +49,7 @@ namespace JG
 			obj->Awake();
 			return obj;
 		}
-		void AddComponent(const Type& type);
+		GameComponent* AddComponent(const Type& type);
 		// 일단 이 클래스의 배열에서 제거하고, 
 		void Destroy(GameNode* node);
 		void Destroy(GameComponent* component);
@@ -61,6 +61,7 @@ namespace JG
 
 		void SendChangeData(const ChangeData& data, EChangeDataFlags flags = EChangeDataFlags::Default);
 
+		
 	public:
 		GameNode* FindNode(const String& name) const;
 		GameNode* FindNode(u32 index) const;
@@ -87,7 +88,7 @@ namespace JG
 		const String& GetLayer();
 
 		bool IsActive() const;
-	private:
+	protected:
 		void DestroyRecursive();
 	};
 

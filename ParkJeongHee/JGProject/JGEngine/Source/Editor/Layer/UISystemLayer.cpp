@@ -9,8 +9,10 @@
 #include "Class/UI/UIView/ContentsView.h"
 
 // PopupUI
-#include "Class/UI/ModalUI/ComponentFinderModalView.h"
-#include "Class/UI/ModalUI/AssetFinderModalView.h"
+#include "Class/UI/ContextUI/ComponentFinderContextView.h"
+#include "Class/UI/ContextUI/AssetFinderContextView.h"
+//
+#include "Class/UI/ModalUI/ProgressBarModalView.h"
 
 #include "Class/Game/GameWorld.h"
 namespace JG
@@ -46,9 +48,10 @@ namespace JG
 		UIManager::GetInstance().RegisterUIView<ContentsView>();
 
 		// PopupUI
-		UIManager::GetInstance().RegisterModalUIView<ComponentFinderModalView>();
-		UIManager::GetInstance().RegisterModalUIView<AssetFinderModalView>();
-
+		UIManager::GetInstance().RegisterPopupUIView<ComponentFinderContextView>();
+		UIManager::GetInstance().RegisterPopupUIView<AssetFinderContextView>();
+		// Modal
+		UIManager::GetInstance().RegisterPopupUIView<ProgressBarModalView>();
 		LoadUISettings(TT("JGUI.ini"));
 	}
 	void UISystemLayer::Destroy()

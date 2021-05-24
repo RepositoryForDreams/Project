@@ -57,13 +57,24 @@ namespace JG
 		mUpdateScheduleHandle = nullptr;
 		mLateUpdateScheduleHandle = nullptr;
 	}
+	void GameWorld::Serialize(FileStreamWriter* writer) const
+	{
+		GameNode::Serialize(writer);
+
+	}
+	void GameWorld::DeSerialize(FileStreamReader* reader)
+	{
+		GameNode::DeSerialize(reader);
+	}
 	void GameWorld::OnInspectorGUI()
 	{
 		ImGui::Dummy(ImVec2(0, 1.0f));
 
 		ImGui::AlignTextToFramePadding();
-		ImGui::Text("Name "); ImGui::SameLine();
-		ImGui::Text(ws2s(GetName()).c_str());
+		ImGui::Text("Name : "); ImGui::SameLine();
+		ImGui::Text(ws2s(GetName()).c_str()); ImGui::SameLine();
+		ImGui::Text("Instance : "); ImGui::SameLine();
+		ImGui::Text(std::to_string((u64)this).c_str());
 		ImGui::Dummy(ImVec2(0, 1.0f));
 		ImGui::Separator();
 
@@ -134,6 +145,15 @@ namespace JG
 		auto& end = mWorldGameSystemList.end();
 		mWorldGameSystemList.erase(std::remove(begin, end, sys), mWorldGameSystemList.end());
 		GameObjectFactory::GetInstance().DestroyObject(sys);
+	}
+	void GameWorld::Destroy(GameWorld* world)
+	{
+		world->DestroyRecursive();
+		for (auto& sys : mWorldGameSystemList)
+		{
+			Destroy(sys);
+		}
+
 	}
 	void GameWorld::SetGlobalGameSystemList(const List<GlobalGameSystem*>& systemList)
 	{

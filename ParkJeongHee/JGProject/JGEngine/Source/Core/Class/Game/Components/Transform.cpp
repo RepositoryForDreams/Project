@@ -7,9 +7,9 @@ namespace JG
 	void Transform::Serialize(FileStreamWriter* writer) const
 	{
 		GameComponent::Serialize(writer);
-		writer->Write(mLocation);
-		writer->Write(mRotation);
-		writer->Write(mScale);
+		writer->Write(GetLocalLocation());
+		writer->Write(GetLocalRotation());
+		writer->Write(GetScale());
 	}
 	void Transform::DeSerialize(FileStreamReader* reader)
 	{
@@ -21,6 +21,10 @@ namespace JG
 		reader->Read(&location);
 		reader->Read(&rotation);
 		reader->Read(&scale);
+
+		SetLocalLocation(location);
+		SetLocalRotation(rotation);
+		SetScale(scale);
 	}
 	void Transform::SetLocalLocation(const JVector3& location)
 	{

@@ -11,7 +11,7 @@ namespace JG
 
 	};
 
-	class AssetFinderModalView : public ModalUIView<AssetFinderInitData>
+	class AssetFinderContextView : public ContextUIView<AssetFinderInitData>
 	{
 		JGCLASS
 	protected:

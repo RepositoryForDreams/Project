@@ -4,7 +4,7 @@
 #include "Class/Game/GameObjectFactory.h"
 #include "Class/Game/GameNode.h"
 #include "Class/UI/UIModel/InspectorModel.h"
-#include "Class/UI/ModalUI/ComponentFinderModalView.h"
+#include "Class/UI/ContextUI/ComponentFinderContextView.h"
 
 namespace JG
 {
@@ -48,13 +48,13 @@ namespace JG
 				//		auto padding = ImGui::GetStyle().FramePadding;
 				//		if (ImGui::Button("Add Component", ImVec2(ImGui::GetWindowSize().x - (padding.x * 4), 0)) == true)
 				//		{
-				//			UIManager::GetInstance().OpenModalUIView<ComponentFinderModalView>(ComponentFinderInitData());
+				//			UIManager::GetInstance().OpenPopupUIView<ComponentFinderContextView>(ComponentFinderInitData());
 				//		}
 				//	}
 				//}
-				//if (UIManager::GetInstance().OnModalUIView<ComponentFinderModalView>())
+				//if (UIManager::GetInstance().OnContextUIView<ComponentFinderContextView>())
 				//{
-				//	auto comFinder = UIManager::GetInstance().GetModalUIView<ComponentFinderModalView>();
+				//	auto comFinder = UIManager::GetInstance().GetPopupUIView<ComponentFinderContextView>();
 				//	auto selectedType = comFinder->GetSelectedComponent();
 				//	mVm->SelectComponentType(selectedType);
 				//}
