@@ -4,9 +4,32 @@
 
 namespace JG
 {
+	void Transform::Serialize() const
+	{
+		GameComponent::Serialize();
+		SerializeVar(TT("Location"), GetLocalLocation());
+		SerializeVar(TT("Rotatoin"), GetLocalRotation());
+		SerializeVar(TT("Scale"), GetScale());
+	}
 	void Transform::DeSerialize()
 	{
 		GameComponent::DeSerialize();
+		JVector3 location;
+		JVector3 rotation;
+		JVector3 scale;
+
+		if (DeSerializeVar(TT("Location"), &location) == true)
+		{
+			SetLocalLocation(location);
+		}
+		if(DeSerializeVar(TT("Rotatoin"), &rotation) == true)
+		{
+			SetLocalRotation(rotation);
+		}
+		if (DeSerializeVar(TT("Scale"), &scale) == true)
+		{
+			SetScale(scale);
+		}
 	}
 	void Transform::SetLocalLocation(const JVector3& location)
 	{

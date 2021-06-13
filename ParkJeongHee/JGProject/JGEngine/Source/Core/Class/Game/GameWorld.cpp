@@ -24,23 +24,11 @@ namespace JG
 	}
 	void GameWorld::Update()
 	{
-		ForEach([&](GameNode* node) {
-			
-			if (node->IsActive())
-			{
-				node->Update();
-			}
-		});
+		GameNode::Update();
 	}
 	void GameWorld::LateUpdate()
 	{
-		ForEach([&](GameNode* node) {
-
-			if (node->IsActive())
-			{
-				node->LateUpdate();
-			}
-		});
+		GameNode::LateUpdate();
 	}
 	void GameWorld::Destory()
 	{

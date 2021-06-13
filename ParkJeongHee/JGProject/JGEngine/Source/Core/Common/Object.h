@@ -37,16 +37,18 @@ private: \
 		};
 		using JGMetaDataMap = Dictionary<String, JGMetaData>;
 	private:
-		Dictionary<String, JGMetaData> mMetaDatas;
+		mutable Dictionary<String, JGMetaData> mMetaDatas;
 	public:
 		virtual Type GetType() const  = 0;
 		virtual const String& GetName() const 
 		{
 			return GetType().GetName();
 		}
-	private:
+	protected:
 		virtual void Serialize(FileStreamWriter* writer)   const override
 		{
+			mMetaDatas.clear();
+
 			Serialize();
 			writer->Write(mMetaDatas.size());
 			for (auto& _pair : mMetaDatas)
@@ -75,19 +77,29 @@ private: \
 		}
 	protected:
 		template<class T>
-		void SerializeVar(const String& key, T& data) const
+		void SerializeVar(const String& key,const T& data) const
 		{
-			MetaData meta;
+			JGMetaData meta;
 			meta.Type = JGTYPE(T).GetName();
 			meta.Data.resize(sizeof(T));
 			memcpy(&meta.Data[0], &data, sizeof(T));
 			mMetaDatas.emplace(key, meta);
 		}
+		template<>
+		void SerializeVar(const String& key,const String& data) const 
+		{
+			JGMetaData meta;
+			meta.Type = JGTYPE(String).GetName();
+			meta.Data.resize(data.length());
+			memcpy(&meta.Data[0], data.data(), data.length());
+			mMetaDatas.emplace(key, meta);
+		}
+
 		template<class T>
 		bool DeSerializeVar(const String& key, T* pData)
 		{
 			auto iter = mMetaDatas.find(key);
-			if (iter == mMetaDatas.find(key).end())
+			if (iter == mMetaDatas.end())
 			{
 				return false;
 			}
@@ -98,6 +110,24 @@ private: \
 			}
 
 			memcpy(pData, iter->second.Data.data(), iter->second.Data.size());
+			return true;
+		}
+		template<>
+		bool DeSerializeVar(const String& key, String* pData)
+		{
+			auto iter = mMetaDatas.find(key);
+			if (iter == mMetaDatas.end())
+			{
+				return false;
+			}
+
+			if (iter->second.Type != JGTYPE(String).GetName())
+			{
+				return false;
+			}
+			pData->resize(iter->second.Data.size());
+			memcpy(pData->data(), iter->second.Data.data(), iter->second.Data.size());
+
 			return true;
 		}
 

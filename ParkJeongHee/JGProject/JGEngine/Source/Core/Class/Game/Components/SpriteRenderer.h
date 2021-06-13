@@ -16,6 +16,7 @@ namespace JG
 		virtual void Start() override;
 		virtual void Destory() override;
 	protected:
+		virtual void Serialize() const override;
 		virtual void DeSerialize() override;
 	protected:
 		virtual void Update() override;

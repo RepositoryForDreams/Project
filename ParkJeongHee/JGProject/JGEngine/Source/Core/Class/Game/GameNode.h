@@ -17,6 +17,7 @@ namespace JG
 
 		bool mIsActiveSelf = true;
 		bool mIsActive     = true;
+		bool mIsRunAwake = false;
 		bool mIsRunStart = false;
 		Transform* mTransform = nullptr;
 		String mTargetLayer = GameLayer::DEFAULT_LAYER;
@@ -24,6 +25,8 @@ namespace JG
 		virtual void Start() override;
 		virtual void Destory() override;
 	protected:
+		virtual void Serialize(FileStreamWriter* writer)   const override;
+		virtual void Serialize() const override;
 		virtual void DeSerialize() override;
 	public: 
 		virtual void Update() override;

@@ -31,18 +31,6 @@ namespace JG
 	}
 	void Camera::Serialize() const
 	{
-		/*
-		JVector2 mResolution;
-		//
-		f32 mNearZ = 0.0f;
-		f32 mFarZ = 0.0f;
-		f32 mFov = 0.0f;
-		//
-		i64 mDepth = 0;
-		u64 mCullingLayerMask = JG_U64_MAX;
-		//
-		bool mIsOrthographic = false;
-		*/
 		GameComponent::Serialize();
 		SerializeVar(TT("NearZ"), mNearZ);
 		SerializeVar(TT("FarZ"), mFarZ);

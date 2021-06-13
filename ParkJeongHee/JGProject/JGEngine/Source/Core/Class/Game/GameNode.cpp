@@ -14,6 +14,17 @@ namespace JG
 		GameObject::Destory();
 		SetParent(nullptr);
 	}
+	void GameNode::Serialize(FileStreamWriter* writer) const
+	{
+		GameObject::Serialize();
+		GameObject::Serialize(writer);
+	}
+	void GameNode::Serialize() const
+	{
+		GameObject::Serialize();
+		SerializeVar(TT("Component Count"), mComponents.size());
+		SerializeVar(TT("Child Count"), mChilds.size());
+	}
 	void GameNode::DeSerialize()
 	{
 		GameObject::DeSerialize();
@@ -21,13 +32,13 @@ namespace JG
 	}
 	void GameNode::Update()
 	{
-		if (mIsRunStart == false)
-		{
-			mIsRunStart = true;
-			Start();
-		}
 		for (auto& com : mComponents)
 		{
+			if (com->mIsRunAwake == false)
+			{
+				com->mIsRunAwake = true;
+				com->Awake();
+			}
 			if (com->IsActive())
 			{
 				if (com->mIsRunStart == false)
@@ -41,8 +52,18 @@ namespace JG
 
 		for (auto& child : mChilds)
 		{
+			if (child->mIsRunAwake == false)
+			{
+				child->mIsRunAwake = true;
+				child->Awake();
+			}
 			if (child->IsActive())
 			{
+				if (child->mIsRunStart == false)
+				{
+					child->mIsRunStart = true;
+					child->Start();
+				}
 				child->Update();
 			}
 		}
@@ -195,7 +216,6 @@ namespace JG
 		obj->SetName(name);
 		obj->SetParent(this);
 		obj->mGameWorld = mGameWorld;
-		obj->Awake();
 		return obj;
 	}
 	GameComponent* GameNode::AddComponent(const Type& type)
@@ -217,7 +237,6 @@ namespace JG
 		com->mOwnerNode = this;
 		com->mGameWorld = mGameWorld;
 		mComponents.push_back(com);
-		com->Awake();
 
 		return com;
 	}

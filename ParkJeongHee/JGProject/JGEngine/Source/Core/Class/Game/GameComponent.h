@@ -19,6 +19,7 @@ namespace JG
 		GameNode*  mOwnerNode = nullptr;
 		GameWorld* mGameWorld = nullptr;
 		bool mIsActive = true;
+		bool mIsRunAwake = false;
 		bool mIsRunStart = false;
 	protected:
 		virtual void Start() override;
