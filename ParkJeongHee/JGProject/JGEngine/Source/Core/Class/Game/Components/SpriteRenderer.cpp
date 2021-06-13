@@ -27,28 +27,9 @@ namespace JG
 	{
 		BaseRenderer::Destory();
 	}
-	void SpriteRenderer::Serialize(FileStreamWriter* writer)   const
+	void SpriteRenderer::DeSerialize()
 	{
-		BaseRenderer::Serialize(writer);
-		writer->Write(mSpriteRI->Color);
-		writer->Write(mSpriteRI->SortingLayer);
-		writer->Write(mSpriteRI->SortingOrder);
-		// Texture -> 텍스쳐 경로
-	}
-	void SpriteRenderer::DeSerialize(FileStreamReader* reader) 
-	{
-		BaseRenderer::DeSerialize(reader);
-		Color  color;
-		String sortingLayer;
-		i64    sortingOrder = 0;
-
-		reader->Read(&color);
-		reader->Read(&sortingLayer);
-		reader->Read(&sortingOrder);
-
-		mSpriteRI->Color = color;
-		mSpriteRI->SortingLayer = sortingLayer;
-		mSpriteRI->SortingOrder = sortingOrder;
+		BaseRenderer::DeSerialize();
 	}
 	void SpriteRenderer::Update()
 	{

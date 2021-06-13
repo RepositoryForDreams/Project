@@ -14,15 +14,13 @@ namespace JG
 		GameObject::Destory();
 		mOwnerNode = nullptr;
 	}
-	void GameComponent::Serialize(FileStreamWriter* writer) const
+	void GameComponent::Serialize() const
 	{
-		GameObject::Serialize(writer);
-		writer->Write(mIsActive);
+		GameObject::Serialize();
 	}
-	void GameComponent::DeSerialize(FileStreamReader* reader)
+	void GameComponent::DeSerialize()
 	{
-		GameObject::DeSerialize(reader);
-		reader->Read(&mIsActive);
+		GameObject::DeSerialize();
 	}
 	GameNode* GameComponent::GetOwner() const
 	{

@@ -5,6 +5,11 @@ using UnityEngine;
 
 public class UnitManager : GlobalSingletone<UnitManager>
 {
+    
+    [SerializeField]
+    private IControllable _targetControllUnit = null;
+
+   
     Dictionary<EUnitCategory, HashSet<Unit>> mUnitPool = new Dictionary<EUnitCategory, HashSet<Unit>>();
 
 
@@ -13,6 +18,16 @@ public class UnitManager : GlobalSingletone<UnitManager>
     Queue<(Unit unit, IUnitCommand command)> mCommandQueue = new Queue<(Unit unit, IUnitCommand command)>();
     List<(Unit unit, IUnitCommand command)> mPendingCommandList = new List<(Unit unit, IUnitCommand command)>(); 
     bool mIsCommandRun = false;
+
+    private void Awake()
+    {
+        TaskScheduler.Instance.ScheduleByFrame(Flush, 0, 0, -1, (int)ETaskPriority.UnitManager);
+    }
+    public IControllable TargetControllUnit
+    {
+        get { return _targetControllUnit; }
+        set { _targetControllUnit = value; }
+    }
     public void RegisterUnit(Unit unit)
     {
         if(mUnitPool.ContainsKey(unit.Category) == false)
@@ -56,6 +71,8 @@ public class UnitManager : GlobalSingletone<UnitManager>
         }
         return mUnitPool[category].ToList();
     }
+
+
     public HashSet<Unit> GetUnitSet(EUnitCategory category)
     {
         if (mUnitPool.ContainsKey(category) == false)
@@ -65,7 +82,10 @@ public class UnitManager : GlobalSingletone<UnitManager>
         return mUnitPool[category];
     }
 
-    private void Update()
+
+
+
+    private ETaskResult Flush()
     {
         mIsCommandRun = true;
         while (mCommandQueue.Count > 0)
@@ -88,7 +108,25 @@ public class UnitManager : GlobalSingletone<UnitManager>
             mPendingCommandList.Clear();
         }
 
-      
+
+        if (_targetControllUnit == null)
+        {
+            var set = UnitManager.Instance.GetUnitSet(EUnitCategory.Playable);
+            foreach (var unit in set)
+            {
+                if (unit is IControllable)
+                {
+                    _targetControllUnit = unit as IControllable;
+                    break;
+                }
+            }
+        }
+        if (TargetControllUnit != null)
+        {
+            TargetControllUnit.Controll();
+        }
+
+        return ETaskResult.Continue;
     }
 
 }

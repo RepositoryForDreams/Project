@@ -57,14 +57,9 @@ namespace JG
 		mUpdateScheduleHandle = nullptr;
 		mLateUpdateScheduleHandle = nullptr;
 	}
-	void GameWorld::Serialize(FileStreamWriter* writer) const
+	void GameWorld::DeSerialize()
 	{
-		GameNode::Serialize(writer);
-
-	}
-	void GameWorld::DeSerialize(FileStreamReader* reader)
-	{
-		GameNode::DeSerialize(reader);
+		GameNode::DeSerialize();
 	}
 	void GameWorld::OnInspectorGUI()
 	{

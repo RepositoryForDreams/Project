@@ -29,43 +29,70 @@ namespace JG
 		e.SharedCamera = this;
 		SendEvent(e);
 	}
-	void Camera::Serialize(FileStreamWriter* writer) const
+	void Camera::Serialize() const
 	{
-		GameComponent::Serialize(writer);
-		writer->Write(GetResolution());
-		writer->Write(GetNearZ());
-		writer->Write(GetFarZ());
-		writer->Write(GetFOV());
-		writer->Write(GetDepth());
-		writer->Write(GetCullingLayerMask());
-		writer->Write(IsOrthographic());
+		/*
+		JVector2 mResolution;
+		//
+		f32 mNearZ = 0.0f;
+		f32 mFarZ = 0.0f;
+		f32 mFov = 0.0f;
+		//
+		i64 mDepth = 0;
+		u64 mCullingLayerMask = JG_U64_MAX;
+		//
+		bool mIsOrthographic = false;
+		*/
+		GameComponent::Serialize();
+		SerializeVar(TT("NearZ"), mNearZ);
+		SerializeVar(TT("FarZ"), mFarZ);
+		SerializeVar(TT("FOV"), mFov);
+		SerializeVar(TT("Depth"), mDepth);
+		SerializeVar(TT("CullingLayerMask"), mCullingLayerMask);
+		SerializeVar(TT("IsOrthographic"), mIsOrthographic);
 	}
-	void Camera::DeSerialize(FileStreamReader* reader)
+	void Camera::DeSerialize()
 	{
-		JVector2 resolution;
+		GameComponent::DeSerialize();
+	
+
+	
 		f32 nearZ = 0.0f;
+		if (DeSerializeVar(TT("NearZ"), &nearZ) == true)
+		{
+			SetNearZ(nearZ);
+		}
+
 		f32 farZ = 0.0f;
+		if (DeSerializeVar(TT("FarZ"), &farZ) == true)
+		{
+			SetFarZ(farZ);
+		}
 		f32 fov = 0.0f;
-		i64 depth = 0;
-		u64 cullingLayerMask = JG_U64_MAX;
-		bool isOrthographic = false;
 
-		GameComponent::DeSerialize(reader);
-		reader->Read(&resolution);
-		reader->Read(&nearZ);
-		reader->Read(&farZ);
-		reader->Read(&fov);
-		reader->Read(&depth);
-		reader->Read(&cullingLayerMask);
-		reader->Read(&isOrthographic);
+		if (DeSerializeVar(TT("FOV"), &fov) == true)
+		{
+			SetFOV(fov);
+		}
 
-		SetResolution(resolution);
-		SetNearZ(nearZ);
-		SetFarZ(farZ);
-		SetFOV(fov);
-		SetDepth(depth);
-		SetCullingLayerMask(cullingLayerMask);
-		SetOrthographic(isOrthographic);
+		f32 depth = 0.0f;
+		if (DeSerializeVar(TT("Depth"), &depth) == true)
+		{
+			SetDepth(depth);
+		}
+
+		u64 cullingLayerMask = 0;
+		if (DeSerializeVar(TT("CullingLayerMask"), &cullingLayerMask) == true)
+		{
+			SetCullingLayerMask(cullingLayerMask);
+		}
+
+		bool isorgh = false;
+		if (DeSerializeVar(TT("IsOrthographic"), &isorgh) == true)
+		{
+			SetOrthographic(isorgh);
+		}
+			
 	}
 	void Camera::SetFOV(f32 fov)
 	{

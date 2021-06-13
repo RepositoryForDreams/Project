@@ -205,7 +205,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &215974074
 MonoBehaviour:
@@ -333,17 +333,13 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1073578904243671911, guid: c1f8959b79f640a4ba6597661dee63c6, type: 3}
-      propertyPath: _camera
-      value: 
-      objectReference: {fileID: 519420031}
     - target: {fileID: 2102962151401996737, guid: c1f8959b79f640a4ba6597661dee63c6, type: 3}
       propertyPath: m_Name
       value: GlobalInstaller
       objectReference: {fileID: 0}
     - target: {fileID: 2532349077921968617, guid: c1f8959b79f640a4ba6597661dee63c6, type: 3}
       propertyPath: m_RootOrder
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2532349077921968617, guid: c1f8959b79f640a4ba6597661dee63c6, type: 3}
       propertyPath: m_LocalPosition.x

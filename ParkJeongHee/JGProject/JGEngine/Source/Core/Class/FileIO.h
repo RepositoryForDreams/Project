@@ -1,11 +1,22 @@
 #pragma once
-#include "JGCore.h"
 #include <fstream>
-
+#include "Common/Define.h"
 
 
 namespace JG
 {
+	class ISerializable
+	{
+		friend class FileStreamWriter;
+		friend class FileStreamReader;
+	protected:
+		virtual void Serialize(FileStreamWriter* writer)   const = 0;
+		virtual void DeSerialize(FileStreamReader* reader) = 0;
+	public:
+		virtual ~ISerializable() = default;
+	};
+
+
 	class FileStreamWriter
 	{
 
@@ -13,8 +24,6 @@ namespace JG
 	public:
 		FileStreamWriter();
 		~FileStreamWriter();
-
-
 	public:
 		bool Open(const String& path, bool isAppend = false);
 		void Close();

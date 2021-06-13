@@ -1,6 +1,6 @@
 #pragma once
 #include "JGCore.h"
-#include <Common/Type.h>
+#include "Common/Type.h"
 #include <shared_mutex>
 
 namespace JG

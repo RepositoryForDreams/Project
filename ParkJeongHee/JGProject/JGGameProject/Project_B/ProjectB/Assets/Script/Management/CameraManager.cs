@@ -20,9 +20,9 @@ public class CameraManager : GlobalSingletone<CameraManager>
         }
         else 
         {
-            if(GameManager.Instance.TargetControllUnit != null)
+            if(UnitManager.Instance.TargetControllUnit != null)
             {
-                var newPos = GameManager.Instance.TargetControllUnit.GetTransform().transform.position;
+                var newPos = UnitManager.Instance.TargetControllUnit.GetTransform().transform.position;
                 newPos.z = _camera.transform.position.z; ;
                 _camera.transform.position = newPos;
             }

@@ -14,78 +14,10 @@ namespace JG
 		GameObject::Destory();
 		SetParent(nullptr);
 	}
-	void GameNode::Serialize(FileStreamWriter* writer) const
+	void GameNode::DeSerialize()
 	{
-		GameObject::Serialize(writer);
+		GameObject::DeSerialize();
 		
-		// ÄÄÆ÷³ÍÆ® °¹¼ö
-		writer->Write(mComponents.size());
-		for (auto& com : mComponents)
-		{
-			writer->Write(com->GetType().GetName());
-			writer->Write(*com);
-		}
-
-		writer->Write(mChilds.size());
-		for (auto& child : mChilds)
-		{
-			writer->Write(child->GetName());
-			writer->Write(*child);
-		}
-
-	
-
-		//
-		writer->Write(mIsActiveSelf);
-		writer->Write(mIsActive);
-		writer->Write(mTargetLayer);
-
-
-	}
-	void GameNode::DeSerialize(FileStreamReader* reader)
-	{
-		GameObject::DeSerialize(reader);
-		// Component
-		u64 comSize = 0;
-		reader->Read(&comSize);
-		for (u64 i = 0; i < comSize; ++i)
-		{
-			String typeName;
-			reader->Read(&typeName);
-			auto type = GameObjectFactory::GetInstance().GetGameObjectType(typeName);
-			bool isCom = GameObjectFactory::GetInstance().IsGameComponent(type);
-			if (isCom == false)
-			{
-				JG_CORE_ERROR("{0} is not Component Type in DeSerialize", typeName);
-				continue;
-			}
-			//
-			if (i == 0)
-			{
-				reader->Read(mTransform);
-			}
-			else
-			{
-				auto com = AddComponent(type);
-				reader->Read(com);
-			}
-		}
-
-		u64 childCnt = 0;
-		reader->Read(&childCnt);
-		for (u64 i = 0; i < childCnt; ++i)
-		{
-			String nodeName;
-			reader->Read(&nodeName);
-			auto node = AddNode(nodeName);
-			reader->Read(node);
-		}
-		String targetLayer;
-		reader->Read(&mIsActiveSelf);
-		reader->Read(&mIsActive);
-		reader->Read(&targetLayer);
-
-		SetLayer(targetLayer);
 	}
 	void GameNode::Update()
 	{

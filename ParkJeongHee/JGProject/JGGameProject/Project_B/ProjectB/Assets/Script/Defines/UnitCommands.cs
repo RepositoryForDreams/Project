@@ -1,8 +1,79 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 // 설정한 애니메이션
+
+
+public class UnitAttackCommand : IUnitCommand
+{
+    // 어떤 공격인가 ?
+    public void Execute(Unit unit)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+
+
+public class UnitMoveCommand : IUnitCommand
+{
+    public Vector2 Force = new Vector2();
+    public void Execute(Unit unit)
+    {
+        Vector3 force = new Vector3(Force.x, Force.y, 0.0f);
+        force = Vector3.Normalize(force);
+        unit.transform.position += (force * Time.deltaTime * unit.Speed);
+
+        UnitAnimCommand command = new UnitAnimCommand();
+        if (force.sqrMagnitude <= 0.00001f)
+        {
+            command.RequestAnimState = EUnitAnimState.Idle;
+        }
+        else
+        {
+            command.RequestAnimState = EUnitAnimState.Walk;
+        }
+        float xForce = Math.Abs(force.x);
+        float yForce = Math.Abs(force.y);
+        if (force.x > 0.0f && force.y > 0.0f)
+        {
+            command.RequestDirection = (xForce >= yForce) ? EUnitDirection.Right : EUnitDirection.Front;
+        }
+        else if (force.x > 0.0f && force.y < 0.0f)
+        {
+            command.RequestDirection = (xForce >= yForce) ? EUnitDirection.Right : EUnitDirection.Back;
+        }
+        else if (force.x < 0.0f && force.y > 0.0f)
+        {
+            command.RequestDirection = (xForce >= yForce) ? EUnitDirection.Left : EUnitDirection.Front;
+        }
+        else if (force.x < 0.0f && force.y > 0.0f)
+        {
+            command.RequestDirection = (xForce >= yForce) ? EUnitDirection.Left : EUnitDirection.Back;
+        }
+        else
+        {
+            if (xForce > 0.0f && yForce <= 0.0f)
+            {
+                if (force.x > 0.0f) command.RequestDirection = EUnitDirection.Right;
+                else if (force.x < 0.0f) command.RequestDirection = EUnitDirection.Left;
+            }
+            else if (xForce <= 0.0f && yForce > 0.0f)
+            {
+                if (force.y > 0.0f) command.RequestDirection = EUnitDirection.Front;
+                else if (force.y < 0.0f) command.RequestDirection = EUnitDirection.Back;
+            }
+        }
+        UnitManager.Instance.PushUnitCommand(unit, command);
+    }
+}
+
+
+
+
+
 public class UnitAnimCommand : IUnitCommand
 {
     public EUnitAnimState RequestAnimState = EUnitAnimState.None;
