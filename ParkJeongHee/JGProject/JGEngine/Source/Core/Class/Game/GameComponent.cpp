@@ -14,14 +14,6 @@ namespace JG
 		GameObject::Destory();
 		mOwnerNode = nullptr;
 	}
-	void GameComponent::Serialize() const
-	{
-		GameObject::Serialize();
-	}
-	void GameComponent::DeSerialize()
-	{
-		GameObject::DeSerialize();
-	}
 	GameNode* GameComponent::GetOwner() const
 	{
 		return mOwnerNode;

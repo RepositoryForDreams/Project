@@ -29,59 +29,6 @@ namespace JG
 		e.SharedCamera = this;
 		SendEvent(e);
 	}
-	void Camera::Serialize() const
-	{
-		GameComponent::Serialize();
-		SerializeVar(TT("NearZ"), mNearZ);
-		SerializeVar(TT("FarZ"), mFarZ);
-		SerializeVar(TT("FOV"), mFov);
-		SerializeVar(TT("Depth"), mDepth);
-		SerializeVar(TT("CullingLayerMask"), mCullingLayerMask);
-		SerializeVar(TT("IsOrthographic"), mIsOrthographic);
-	}
-	void Camera::DeSerialize()
-	{
-		GameComponent::DeSerialize();
-	
-
-	
-		f32 nearZ = 0.0f;
-		if (DeSerializeVar(TT("NearZ"), &nearZ) == true)
-		{
-			SetNearZ(nearZ);
-		}
-
-		f32 farZ = 0.0f;
-		if (DeSerializeVar(TT("FarZ"), &farZ) == true)
-		{
-			SetFarZ(farZ);
-		}
-		f32 fov = 0.0f;
-
-		if (DeSerializeVar(TT("FOV"), &fov) == true)
-		{
-			SetFOV(fov);
-		}
-
-		f32 depth = 0.0f;
-		if (DeSerializeVar(TT("Depth"), &depth) == true)
-		{
-			SetDepth(depth);
-		}
-
-		u64 cullingLayerMask = 0;
-		if (DeSerializeVar(TT("CullingLayerMask"), &cullingLayerMask) == true)
-		{
-			SetCullingLayerMask(cullingLayerMask);
-		}
-
-		bool isorgh = false;
-		if (DeSerializeVar(TT("IsOrthographic"), &isorgh) == true)
-		{
-			SetOrthographic(isorgh);
-		}
-			
-	}
 	void Camera::SetFOV(f32 fov)
 	{
 		f32 convertFOV = Math::ConvertToRadians(fov);

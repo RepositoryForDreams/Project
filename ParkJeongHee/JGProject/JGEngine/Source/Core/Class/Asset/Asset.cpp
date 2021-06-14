@@ -6,37 +6,37 @@ namespace JG
 {
 	void TextureAssetStock::Serialize(FileStreamWriter* writer) const
 	{
-		writer->Write(Name);
-		writer->Write(Width);
-		writer->Write(Height);
-		writer->Write(Channels);
-		writer->Write(Pixels);
+		writer->Write<String>(TT("Name"), Name);
+		writer->Write<i32>(TT("Width"), Width);
+		writer->Write<i32>(TT("Height"), Height);
+		writer->Write<i32>(TT("Channels"), Channels);
+		writer->Write(TT("Pixels"), Pixels);
 	}
 
 	void TextureAssetStock::DeSerialize(FileStreamReader* reader)
 	{
-		reader->Read(&Name);
-		reader->Read(&Width);
-		reader->Read(&Height);
-		reader->Read(&Channels);
-		reader->Read(&Pixels);
+		reader->Read(TT("Name"), &Name);
+		reader->Read(TT("Width"), &Width);
+		reader->Read(TT("Height"), &Height);
+		reader->Read(TT("Channels"), &Channels);
+		reader->Read(TT("Pixels"), &Pixels);
 	}
 
 
 	void StaticMeshAssetStock::Serialize(FileStreamWriter* writer) const {
-		writer->Write(Name);
-		writer->Write(IsSkinned);
-		writer->Write(SubMeshNames);
-		writer->Write(Vertices);
-		writer->Write(Indices);
+		writer->Write(TT("Name"), Name);
+		writer->Write<bool>(TT("IsSkinned"), IsSkinned);
+		writer->Write(TT("SubMeshNames"), SubMeshNames);
+		writer->Write(TT("Vertices"), Vertices);
+		writer->Write(TT("Indices"), Indices);
 
 	}
 	void StaticMeshAssetStock::DeSerialize(FileStreamReader* reader) {
-		reader->Read(&Name);
-		reader->Read(&IsSkinned);
-		reader->Read(&SubMeshNames);
-		reader->Read(&Vertices);
-		reader->Read(&Indices);
+		reader->Read(TT("Name"), &Name);
+		reader->Read(TT("IsSkinned") , &IsSkinned);
+		reader->Read(TT("SubMeshNames"), &SubMeshNames);
+		reader->Read(TT("Vertices"), &Vertices);
+		reader->Read(TT("Indices"), &Indices);
 
 	}
 	AssetDataBase::AssetDataBase()

@@ -37,9 +37,6 @@ namespace JG
 		virtual void Awake() override;
 		virtual void Start() override;
 		virtual void Destory() override;
-	protected:
-		virtual void Serialize() const override;
-		virtual void DeSerialize() override;
 	public:
 		void SetFOV(f32 fov);
 		void SetFarZ(f32 farZ);

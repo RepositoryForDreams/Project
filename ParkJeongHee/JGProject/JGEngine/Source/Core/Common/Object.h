@@ -29,15 +29,6 @@ private: \
 
 	class IJGObject : public IInspectorGUI, public ISubscriber, public ISerializable
 	{
-	protected:
-		struct JGMetaData
-		{
-			String Type;
-			List<jbyte>  Data;
-		};
-		using JGMetaDataMap = Dictionary<String, JGMetaData>;
-	private:
-		mutable Dictionary<String, JGMetaData> mMetaDatas;
 	public:
 		virtual Type GetType() const  = 0;
 		virtual const String& GetName() const 
@@ -45,95 +36,8 @@ private: \
 			return GetType().GetName();
 		}
 	protected:
-		virtual void Serialize(FileStreamWriter* writer)   const override
-		{
-			mMetaDatas.clear();
-
-			Serialize();
-			writer->Write(mMetaDatas.size());
-			for (auto& _pair : mMetaDatas)
-			{
-				writer->Write(_pair.first);
-				writer->Write(_pair.second.Type);
-				writer->Write(_pair.second.Data);
-			}
-		}
-		virtual void DeSerialize(FileStreamReader* reader) override
-		{
-			u64 size = 0;
-			reader->Read(&size);
-
-			for (u64 i = 0; i < size; ++i)
-			{
-				JGMetaData meta;
-				String name;
-				reader->Read(&name);
-				reader->Read(&(meta.Type));
-				reader->Read(&(meta.Data));
-				mMetaDatas.emplace(name, meta);
-			}
-			DeSerialize();
-			mMetaDatas.clear();
-		}
-	protected:
-		template<class T>
-		void SerializeVar(const String& key,const T& data) const
-		{
-			JGMetaData meta;
-			meta.Type = JGTYPE(T).GetName();
-			meta.Data.resize(sizeof(T));
-			memcpy(&meta.Data[0], &data, sizeof(T));
-			mMetaDatas.emplace(key, meta);
-		}
-		template<>
-		void SerializeVar(const String& key,const String& data) const 
-		{
-			JGMetaData meta;
-			meta.Type = JGTYPE(String).GetName();
-			meta.Data.resize(data.length());
-			memcpy(&meta.Data[0], data.data(), data.length());
-			mMetaDatas.emplace(key, meta);
-		}
-
-		template<class T>
-		bool DeSerializeVar(const String& key, T* pData)
-		{
-			auto iter = mMetaDatas.find(key);
-			if (iter == mMetaDatas.end())
-			{
-				return false;
-			}
-
-			if (iter->second.Type != JGTYPE(T).GetName())
-			{
-				return false;
-			}
-
-			memcpy(pData, iter->second.Data.data(), iter->second.Data.size());
-			return true;
-		}
-		template<>
-		bool DeSerializeVar(const String& key, String* pData)
-		{
-			auto iter = mMetaDatas.find(key);
-			if (iter == mMetaDatas.end())
-			{
-				return false;
-			}
-
-			if (iter->second.Type != JGTYPE(String).GetName())
-			{
-				return false;
-			}
-			pData->resize(iter->second.Data.size());
-			memcpy(pData->data(), iter->second.Data.data(), iter->second.Data.size());
-
-			return true;
-		}
-
-
-		virtual void Serialize() const {};
-		virtual void DeSerialize() {}
+		virtual void Serialize(FileStreamWriter* writer)   const override {}
+		virtual void DeSerialize(FileStreamReader* reader) override {}
 	public:
 		virtual void OnInspectorGUI() override {}
 		virtual ~IJGObject() = default;

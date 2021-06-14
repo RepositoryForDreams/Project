@@ -136,14 +136,14 @@ namespace JG
 		FileStreamReader reader;
 		if (reader.Open(assetPath) == true)
 		{
-			reader.Read(&assetFormat);
+			reader.Read(JG_ASSET_FORMAT_KEY , &assetFormat);
 
 			switch (assetFormat)
 			{
 			case EAssetFormat::Texture:
 			{
 				TextureAssetStock stock;
-				reader.Read(&stock);
+				reader.Read(JG_TEXTURE_ASSET_KEY , &stock);
 
 				// TODO
 				// LoadTexture
@@ -152,7 +152,7 @@ namespace JG
 			case EAssetFormat::Mesh:
 			{
 				StaticMeshAssetStock stock;
-				reader.Read(&stock);
+				reader.Read(JG_STATIC_MESH_ASSET_KEY , &stock);
 				// Load Mesh
 			}
 				break;

@@ -74,7 +74,7 @@ namespace JG
 		FileStreamReader fileReader;
 		if (fileReader.Open(fileName) == true)
 		{
-			fileReader.Read(&IsOpen);
+			fileReader.Read(TT("IsOpen") , &IsOpen);
 			fileReader.Close();
 		}
 		if (IsOpen.empty() == false)
@@ -110,7 +110,7 @@ namespace JG
 				IsOpen.emplace(view->GetType().GetName(), view->IsOpen());
 			});
 
-			fileWriter.Write(IsOpen);
+			fileWriter.Write(TT("IsOpen"), IsOpen);
 			fileWriter.Close();
 		}
 		

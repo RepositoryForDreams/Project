@@ -415,7 +415,7 @@ namespace JG
 				FileStreamReader reader;
 				if (reader.Open(filePath.wstring()) == true)
 				{
-					reader.Read(&fileFormat);
+					reader.Read(JG_ASSET_FORMAT_KEY, &fileFormat);
 					reader.Close();
 				}
 

@@ -26,8 +26,6 @@ namespace JG
 		virtual void Destory() override;
 	protected:
 		virtual void Serialize(FileStreamWriter* writer)   const override;
-		virtual void Serialize() const override;
-		virtual void DeSerialize() override;
 	public: 
 		virtual void Update() override;
 		virtual void LateUpdate() override;

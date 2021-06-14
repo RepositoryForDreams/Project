@@ -27,21 +27,6 @@ namespace JG
 	{
 		BaseRenderer::Destory();
 	}
-	void SpriteRenderer::Serialize() const
-	{
-		BaseRenderer::Serialize();
-		SerializeVar(TT("Color"), mSpriteRI->Color);
-		SerializeVar(TT("SortingLayer"), mSpriteRI->SortingLayer);
-		SerializeVar(TT("SortingOrder"), mSpriteRI->SortingOrder);
-	}
-	void SpriteRenderer::DeSerialize()
-	{
-		BaseRenderer::DeSerialize();
-		DeSerializeVar(TT("Color"), &(mSpriteRI->Color));
-		DeSerializeVar(TT("SortingLayer"), &(mSpriteRI->SortingLayer));
-		DeSerializeVar(TT("SortingOrder"), &(mSpriteRI->SortingOrder));
-
-	}
 	void SpriteRenderer::Update()
 	{
 	}

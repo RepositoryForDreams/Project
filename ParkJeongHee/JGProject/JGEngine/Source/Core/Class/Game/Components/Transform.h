@@ -18,8 +18,7 @@ namespace JG
 		mutable JMatrix mLocalMatrix;
 		mutable bool mIsDirty = true;
 	protected:
-		virtual void Serialize() const override;
-		virtual void DeSerialize() override;
+
 	public:
 
 		void SetLocalLocation(const JVector3& location);

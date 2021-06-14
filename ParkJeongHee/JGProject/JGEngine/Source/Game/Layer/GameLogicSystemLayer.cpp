@@ -112,8 +112,8 @@ namespace JG
 					FileStreamWriter writer;
 					if (writer.Open(savePath))
 					{
-						writer.Write(EAssetFormat::GameWorld);
-						writer.Write(*mGameWorld);
+						writer.Write(JG_ASSET_FORMAT_KEY, EAssetFormat::GameWorld);
+						writer.Write(JG_GAMEWORLD_ASSET_KEY , *mGameWorld);
 						writer.Close();
 					}
 				});
@@ -173,13 +173,13 @@ namespace JG
 					if (reader.Open(loadPath))
 					{
 						EAssetFormat assetFormat;
-						reader.Read(&assetFormat);
+						reader.Read(JG_ASSET_FORMAT_KEY , &assetFormat);
 						if (assetFormat == EAssetFormat::GameWorld)
 						{
 							newGameWorld = GameObjectFactory::GetInstance().CreateObject<GameWorld>();
 							newGameWorld->SetGlobalGameSystemList(mGameSystemList);
 							is_LoadSucess = true;
-							reader.Read(newGameWorld);
+							reader.Read(JG_GAMEWORLD_ASSET_KEY, newGameWorld);
 						}
 						reader.Close();
 					}

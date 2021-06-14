@@ -6,6 +6,10 @@
 #include "Class/FileIO.h"
 namespace JG
 {
+#define JG_ASSET_FORMAT_KEY TT("@AssetKey_AssetFormat")
+#define JG_TEXTURE_ASSET_KEY TT("@AssetKey_TextureAssetStock")
+#define JG_STATIC_MESH_ASSET_KEY TT("@AssetKey_StaticMeshAssetStock")
+#define JG_GAMEWORLD_ASSET_KEY TT("@AssetKey_GameWorld")
 #define JG_ASSET_FORMAT TT(".jgasset")
 #define ASSET_MESH_FORMAT TT(".mesh")
 

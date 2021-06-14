@@ -1,5 +1,3 @@
-#include "GameWorld.h"
-#include "GameWorld.h"
 #include "pch.h"
 #include "GameWorld.h"
 #include "Class/Asset/Asset.h"
@@ -44,10 +42,6 @@ namespace JG
 
 		mUpdateScheduleHandle = nullptr;
 		mLateUpdateScheduleHandle = nullptr;
-	}
-	void GameWorld::DeSerialize()
-	{
-		GameNode::DeSerialize();
 	}
 	void GameWorld::OnInspectorGUI()
 	{

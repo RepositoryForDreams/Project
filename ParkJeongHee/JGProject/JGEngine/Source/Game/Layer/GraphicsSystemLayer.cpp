@@ -43,7 +43,7 @@ namespace JG
 		for (auto& iter : fs::recursive_directory_iterator(rawAssetPath))
 		{
 			auto extenstion = iter.path().extension().wstring();
-			if (extenstion == TT("fbx"))
+			if (extenstion == TT(".fbx"))
 			{
 				FBXAssetImportSettings settings;
 				settings.AssetPath = iter.path();
@@ -58,7 +58,7 @@ namespace JG
 					JG_CORE_INFO("Fail Import {0}", iter.path().wstring());
 				}
 			}
-			if (extenstion == TT("png") || extenstion == TT("jpg") || extenstion == TT("TGA"))
+			if (extenstion == TT(".png") || extenstion == TT(".jpg") || extenstion == TT(".TGA"))
 			{
 				TextureAssetImportSettings settings;
 				settings.AssetPath = iter.path();

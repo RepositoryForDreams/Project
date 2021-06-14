@@ -176,8 +176,8 @@ namespace JG
 
 		if (writer.Open(filePath) == true)
 		{
-			writer.Write(EAssetFormat::Mesh);
-			writer.Write(info);
+			writer.Write(JG_ASSET_FORMAT_KEY, EAssetFormat::Mesh);
+			writer.Write(JG_STATIC_MESH_ASSET_KEY, info);
 			writer.Close();
 		}
 	}
@@ -189,8 +189,8 @@ namespace JG
 
 		if (writer.Open(filePath) == true)
 		{
-			writer.Write(EAssetFormat::Texture);
-			writer.Write(stock);
+			writer.Write(JG_ASSET_FORMAT_KEY, EAssetFormat::Texture);
+			writer.Write(JG_TEXTURE_ASSET_KEY, stock);
 			writer.Close();
 		}
 

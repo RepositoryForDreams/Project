@@ -15,21 +15,58 @@ namespace JG
 	public:
 		virtual ~ISerializable() = default;
 	};
-
-
-	class FileStreamWriter
+	class FileStream
 	{
+		
+	public:
+		class Header
+		{
+		public:
+			Dictionary<String, u64> DataMap;
+			u64 Offset = 0;
+		public:
+			void Write(std::ofstream& fout);
+			void Read(std::ifstream& fin);
+		public:
+			u64 GetOffset() const;
+			u64 CalcSize() const;
+		};
 
+		class Data
+		{
+		public:
+			List<jbyte> ByteData;
+		};
+	protected:
+		Header     mHeader;
+		List<Data> mDatas;
+	public:
+		virtual ~FileStream() = default;
+	};
+
+	class FileStreamWriter : public FileStream
+	{
+	private:
 		std::ofstream mFout;
+		u64 mOffset = 0;
 	public:
 		FileStreamWriter();
-		~FileStreamWriter();
+		virtual ~FileStreamWriter();
 	public:
 		bool Open(const String& path, bool isAppend = false);
 		void Close();
 		bool IsOpen() const {
 			return mFout.is_open();
 		}
+
+		template<class T>
+		void Write(const String& key, const T& data)
+		{
+			mHeader.DataMap[key] = mOffset;
+			Write(data);
+		}
+
+	private:
 		template<class T>
 		void Write(const T& data)
 		{
@@ -114,9 +151,11 @@ namespace JG
 		void Write(const void* data, u64 size);
 	};
 
-	class FileStreamReader
+	class FileStreamReader : public FileStream
 	{
 		std::ifstream mFin;
+	public:
+		virtual ~FileStreamReader() = default;
 	public:
 		bool Open(const String& path);
 		void Close();
@@ -124,6 +163,20 @@ namespace JG
 			return mFin.is_open();
 		}
 
+		template<class T>
+		void Read(const String& key, T* data)
+		{
+			auto& iter = mHeader.DataMap.find(key);
+			if (iter == mHeader.DataMap.end())
+			{
+				data = nullptr;
+				return;
+			}
+			u64 pos = iter->second + mHeader.GetOffset();
+			mFin.seekg(pos, std::ios_base::beg);
+			Read(data);
+		}
+	private:
 		template<class T>
 		void Read(T* data)
 		{

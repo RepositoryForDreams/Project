@@ -24,9 +24,6 @@ namespace JG
 	protected:
 		virtual void Start() override;
 		virtual void Destory() override;
-	protected:
-		virtual void Serialize() const override;
-		virtual void DeSerialize() override;
 	public:
 		GameNode*  GetOwner() const;
 		GameWorld* GetGameWorld() const;

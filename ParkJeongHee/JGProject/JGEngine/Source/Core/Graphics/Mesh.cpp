@@ -24,7 +24,7 @@ namespace JG
         if (reader.Open(path) == true)
         {
             StaticMeshAssetStock meshAsset;
-            reader.Read(&meshAsset);
+            reader.Read(JG_STATIC_MESH_ASSET_KEY, &meshAsset);
 
             auto mesh = IMesh::Create(path);
             if (mesh != nullptr)

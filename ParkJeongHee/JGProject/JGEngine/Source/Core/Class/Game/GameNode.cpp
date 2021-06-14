@@ -16,20 +16,10 @@ namespace JG
 	}
 	void GameNode::Serialize(FileStreamWriter* writer) const
 	{
-		GameObject::Serialize();
 		GameObject::Serialize(writer);
+
 	}
-	void GameNode::Serialize() const
-	{
-		GameObject::Serialize();
-		SerializeVar(TT("Component Count"), mComponents.size());
-		SerializeVar(TT("Child Count"), mChilds.size());
-	}
-	void GameNode::DeSerialize()
-	{
-		GameObject::DeSerialize();
-		
-	}
+
 	void GameNode::Update()
 	{
 		for (auto& com : mComponents)

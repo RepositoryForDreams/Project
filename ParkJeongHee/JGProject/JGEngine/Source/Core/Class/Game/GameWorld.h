@@ -20,8 +20,6 @@ namespace JG
 		virtual void Update() override;
 		virtual void LateUpdate() override;
 		virtual void Destory() override;
-	protected:
-		virtual void DeSerialize() override;
 	public:
 		virtual void SetParent(GameNode* node) override {}
 		virtual void OnInspectorGUI() override;
