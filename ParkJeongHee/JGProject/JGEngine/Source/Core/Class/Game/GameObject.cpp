@@ -44,6 +44,19 @@ namespace JG
 	{
 		return Scheduler::GetInstance().ScheduleAsync(task);
 	}
+	void GameObject::MakeJson(SharedPtr<JsonData> jsonData) const
+	{
+		jsonData->AddMember("Name", GetName());
+
+	}
+	void GameObject::LoadJson(SharedPtr<JsonData> jsonData)
+	{
+		auto val = jsonData->GetMember("Name");
+		if (val)
+		{
+			SetName(val->GetString());
+		}
+	}
 	const String& GameObject::GetName() const
 	{
 		if (mName.empty())

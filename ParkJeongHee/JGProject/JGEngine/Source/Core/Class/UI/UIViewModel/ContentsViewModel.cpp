@@ -412,12 +412,12 @@ namespace JG
 			else if (filePath.extension() == JG_ASSET_FORMAT)
 			{
 				EAssetFormat fileFormat = EAssetFormat::None;
-				FileStreamReader reader;
-				if (reader.Open(filePath.wstring()) == true)
-				{
-					reader.Read(JG_ASSET_FORMAT_KEY, &fileFormat);
-					reader.Close();
-				}
+				//FileStreamReader reader;
+				//if (reader.Open(filePath.wstring()) == true)
+				//{
+				//	reader.Read(JG_ASSET_FORMAT_KEY, &fileFormat);
+				//	reader.Close();
+				//}
 
 				// 관리받고있는 에셋이라면
 				Async_CreateContentsFileInfo(filePath.filename().wstring(), filePath.wstring(), fileFormat, currentFileInfo, false);

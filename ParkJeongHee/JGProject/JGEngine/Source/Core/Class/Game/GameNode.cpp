@@ -14,11 +14,6 @@ namespace JG
 		GameObject::Destory();
 		SetParent(nullptr);
 	}
-	void GameNode::Serialize(FileStreamWriter* writer) const
-	{
-		GameObject::Serialize(writer);
-
-	}
 
 	void GameNode::Update()
 	{
@@ -83,6 +78,79 @@ namespace JG
 	GameNode::GameNode(GameWorld* gameWorld) : GameNode()
 	{
 		mGameWorld = gameWorld;
+	}
+	void GameNode::MakeJson(SharedPtr<JsonData> jsonData) const
+	{
+		GameObject::MakeJson(jsonData);
+
+		{
+			auto comListJson = jsonData->CreateJsonData();
+			comListJson->GetValue().SetArray();
+
+			for (auto& com : mComponents)
+			{
+				auto comJson = jsonData->CreateJsonData();
+				comJson->AddMember("ComponentType", com->GetType().GetName());
+				com->MakeJson(comJson);
+				comListJson->GetValue().PushBack(comJson->GetValue(), jsonData->GetJsonAllocator());
+			}
+
+			jsonData->AddMember("Components", comListJson);
+		}
+		{
+			auto childListJson = jsonData->CreateJsonData();
+			childListJson->GetValue().SetArray();
+
+			for (auto& child : mChilds)
+			{
+				auto childJson = jsonData->CreateJsonData();
+				child->MakeJson(childJson);
+				childListJson->GetValue().PushBack(childJson->GetValue(), jsonData->GetJsonAllocator());
+			}
+
+			jsonData->AddMember("Childs", childListJson);
+
+		}
+	}
+	void GameNode::LoadJson(SharedPtr<JsonData> jsonData)
+	{
+		GameObject::LoadJson(jsonData);
+
+		auto comListVal = jsonData->GetMember("Components");
+		if (comListVal)
+		{
+			auto comCnt = comListVal->GetSize();
+			for (u64 i = 0; i < comCnt; ++i)
+			{
+				auto comVal = comListVal->GetJsonDataFromIndex(i);
+				if (i == 0)
+				{
+					mTransform->LoadJson(comVal);
+				}
+				else
+				{
+					auto comTypeName = comVal->GetMember("ComponentType")->GetString();
+					auto comType = GameObjectFactory::GetInstance().GetGameObjectType(comTypeName);
+					auto com = AddComponent(comType);
+					com->LoadJson(comVal);
+				}
+			}
+		}
+
+
+		auto childListVal = jsonData->GetMember("Childs");
+		if (childListVal)
+		{
+			auto childCnt = childListVal->GetSize();
+			for (auto i = 0; i < childCnt; ++i)
+			{
+				auto childVal = childListVal->GetJsonDataFromIndex(i);
+				auto node = AddNode(std::to_wstring(i));
+				node->LoadJson(childVal);
+
+			}
+		}
+
 	}
 	void GameNode::OnInspectorGUI() 
 	{

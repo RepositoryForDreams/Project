@@ -38,7 +38,16 @@ namespace JG
 			default: return TT("None");
 		}
 	}
-	
+	enum class EAssetFormat
+	{
+		None,
+		Mesh,
+		Skeletal,
+		Material,
+		Texture,
+		Directory,
+		GameWorld,
+	};
 
 	enum class EKeyCode
 	{

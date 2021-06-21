@@ -91,6 +91,8 @@ namespace JG
 		delete pixels;
 		pixels = nullptr;
 
+
+		WriteTexture(settings.OutputPath, stock);
 		return EAssetImportResult::Success;
 	}
 	void AssetImporter::ReadMesh(aiMesh* mesh, StaticMeshAssetStock* output)
@@ -164,36 +166,36 @@ namespace JG
 
 		}
 	}
-	void AssetImporter::WriteMesh(const String& outputPath, StaticMeshAssetStock& info)
+	void AssetImporter::WriteMesh(const String& outputPath, StaticMeshAssetStock& stock)
 	{
-		if (info.Name.empty() == true)
+		if (stock.Name.empty() == true)
 		{
-			info.Name = info.SubMeshNames[0];
+			stock.Name = stock.SubMeshNames[0];
 		}
 
-		auto filePath = CombinePath(outputPath, info.Name) + JG_ASSET_FORMAT;
-		FileStreamWriter writer;
+		auto filePath = CombinePath(outputPath, stock.Name) + JG_ASSET_FORMAT;
+		auto json = CreateSharedPtr<Json>();
+		json->AddMember(JG_ASSET_FORMAT_KEY, (u64)EAssetFormat::Mesh);
+		json->AddMember(JG_ASSET_KEY, stock);
 
-		if (writer.Open(filePath) == true)
+		if (Json::Write(filePath, json) == false)
 		{
-			writer.Write(JG_ASSET_FORMAT_KEY, EAssetFormat::Mesh);
-			writer.Write(JG_STATIC_MESH_ASSET_KEY, info);
-			writer.Close();
+			JG_CORE_ERROR("Fail Write Mesh : {0} ", outputPath);
 		}
 	}
 
 	void AssetImporter::WriteTexture(const String& outputPath, TextureAssetStock& stock)
 	{
 		auto filePath = CombinePath(outputPath, stock.Name) + JG_ASSET_FORMAT;
-		FileStreamWriter writer;
 
-		if (writer.Open(filePath) == true)
+		auto json = CreateSharedPtr<Json>();
+		json->AddMember(JG_ASSET_FORMAT_KEY, (u64)EAssetFormat::Texture);
+		json->AddMember(JG_ASSET_KEY, stock);
+
+		if (Json::Write(filePath, json) == false)
 		{
-			writer.Write(JG_ASSET_FORMAT_KEY, EAssetFormat::Texture);
-			writer.Write(JG_TEXTURE_ASSET_KEY, stock);
-			writer.Close();
+			JG_CORE_ERROR("Fail Write Texture : {0} ", outputPath);
 		}
-
 	}
 
 }

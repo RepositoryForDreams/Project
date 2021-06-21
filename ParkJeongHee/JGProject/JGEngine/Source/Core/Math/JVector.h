@@ -53,7 +53,7 @@ namespace JG
 	using JVector3Uint = JVector3Template<uint32_t>;
 	using JVector4Uint = JVector4Template<uint32_t>;
 
-	class JVector2
+	class JVector2 
 	{
 	public:
 		float x, y;

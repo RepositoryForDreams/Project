@@ -14,6 +14,20 @@ namespace JG
 		GameObject::Destory();
 		mOwnerNode = nullptr;
 	}
+	void GameComponent::MakeJson(SharedPtr<JsonData> jsonData) const
+	{
+		GameObject::MakeJson(jsonData);
+		jsonData->AddMember("IsActive", IsActive());
+	}
+	void GameComponent::LoadJson(SharedPtr<JsonData> jsonData)
+	{
+		GameObject::LoadJson(jsonData);
+		auto val = jsonData->GetMember("IsActive");
+		if (val)
+		{
+			SetActive(val->IsBool());
+		}
+	}
 	GameNode* GameComponent::GetOwner() const
 	{
 		return mOwnerNode;
@@ -21,6 +35,10 @@ namespace JG
 	GameWorld* GameComponent::GetGameWorld() const
 	{
 		return mGameWorld;
+	}
+	void GameComponent::SetActive(bool isActive)
+	{
+		mIsActive = isActive;
 	}
 	bool GameComponent::IsActive() const
 	{

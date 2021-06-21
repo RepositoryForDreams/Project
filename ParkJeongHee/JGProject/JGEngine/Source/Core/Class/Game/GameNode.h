@@ -24,8 +24,6 @@ namespace JG
 	protected:
 		virtual void Start() override;
 		virtual void Destory() override;
-	protected:
-		virtual void Serialize(FileStreamWriter* writer)   const override;
 	public: 
 		virtual void Update() override;
 		virtual void LateUpdate() override;
@@ -33,6 +31,9 @@ namespace JG
 		GameNode();
 		GameNode(GameWorld* gameWorld);
 		virtual ~GameNode() = default;
+	public:
+		virtual void MakeJson(SharedPtr<JsonData> jsonData)   const override;
+		virtual void LoadJson(SharedPtr<JsonData> jsonData) override;
 	public:
 		virtual void OnInspectorGUI() override;
 		virtual SharedPtr<IRenderItem> PushRenderItem() override;

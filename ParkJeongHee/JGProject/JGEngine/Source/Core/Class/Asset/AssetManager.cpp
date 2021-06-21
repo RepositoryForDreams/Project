@@ -133,34 +133,34 @@ namespace JG
 			return nullptr;
 		}
 		EAssetFormat assetFormat = EAssetFormat::None;
-		FileStreamReader reader;
-		if (reader.Open(assetPath) == true)
-		{
-			reader.Read(JG_ASSET_FORMAT_KEY , &assetFormat);
+		//FileStreamReader reader;
+		//if (reader.Open(assetPath) == true)
+		//{
+		//	reader.Read(JG_ASSET_FORMAT_KEY , &assetFormat);
 
-			switch (assetFormat)
-			{
-			case EAssetFormat::Texture:
-			{
-				TextureAssetStock stock;
-				reader.Read(JG_TEXTURE_ASSET_KEY , &stock);
+		//	switch (assetFormat)
+		//	{
+		//	case EAssetFormat::Texture:
+		//	{
+		//		TextureAssetStock stock;
+		//		reader.Read(JG_TEXTURE_ASSET_KEY , &stock);
 
-				// TODO
-				// LoadTexture
-			}
-				break;
-			case EAssetFormat::Mesh:
-			{
-				StaticMeshAssetStock stock;
-				reader.Read(JG_STATIC_MESH_ASSET_KEY , &stock);
-				// Load Mesh
-			}
-				break;
-			default:
-				return nullptr;
-			}
-			reader.Close();
-		}
+		//		// TODO
+		//		// LoadTexture
+		//	}
+		//		break;
+		//	case EAssetFormat::Mesh:
+		//	{
+		//		StaticMeshAssetStock stock;
+		//		reader.Read(JG_STATIC_MESH_ASSET_KEY , &stock);
+		//		// Load Mesh
+		//	}
+		//		break;
+		//	default:
+		//		return nullptr;
+		//	}
+		//	reader.Close();
+		//}
 
 		return nullptr;
 		//if (assetPath.extension() == ASSET_MESH_FORMAT)

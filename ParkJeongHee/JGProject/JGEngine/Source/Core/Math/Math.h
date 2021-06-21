@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Common/Define.h"
 #define ERROR_RANGE 0.00000005f
 #define JG_PI 3.14159265359f
 

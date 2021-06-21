@@ -11,6 +11,10 @@
 #include <unordered_set>
 #include <memory>
 #include <utility>
+#include <rapidjson/rapidjson.h>
+#include <rapidjson/document.h>
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/reader.h>
 
 #define _KB   1024
 #define _2KB  2048
@@ -39,6 +43,17 @@
 
 #define TT(x) L##x
 
+
+
+#define JG_ASSET_FORMAT_KEY "AssetFormat"
+#define JG_ASSET_KEY        "Asset"
+
+
+#define JG_TEXTURE_ASSET_KEY     "@AssetKey_TextureAssetStock"
+#define JG_STATIC_MESH_ASSET_KEY "@AssetKey_StaticMeshAssetStock"
+#define JG_GAMEWORLD_ASSET_KEY "@AssetKey_GameWorld"
+#define JG_ASSET_FORMAT TT(".jgasset")
+#define ASSET_MESH_FORMAT TT(".mesh")
 
 namespace JG
 {
@@ -117,6 +132,16 @@ namespace JG
 	// String
 	using String = std::wstring;
 	using wchar  = wchar_t;
+
+	class JsonData;
+	class IJson
+	{
+	public:
+		virtual void MakeJson(SharedPtr<JsonData> jsonData) const = 0;
+		virtual void LoadJson(SharedPtr<JsonData> jsonData)       = 0;
+	public:
+		virtual ~IJson() = default;
+	};
 }
 
 

@@ -26,8 +26,7 @@ private: \
 
 
 	
-
-	class IJGObject : public IInspectorGUI, public ISubscriber, public ISerializable
+	class IJGObject : public IInspectorGUI, public ISubscriber, public IJson
 	{
 	public:
 		virtual Type GetType() const  = 0;
@@ -35,9 +34,9 @@ private: \
 		{
 			return GetType().GetName();
 		}
-	protected:
-		virtual void Serialize(FileStreamWriter* writer)   const override {}
-		virtual void DeSerialize(FileStreamReader* reader) override {}
+	public:
+		virtual void MakeJson(SharedPtr<JsonData> jsonData)   const override {}
+		virtual void LoadJson(SharedPtr<JsonData> jsonData) override {}
 	public:
 		virtual void OnInspectorGUI() override {}
 		virtual ~IJGObject() = default;

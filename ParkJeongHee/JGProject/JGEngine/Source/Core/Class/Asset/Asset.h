@@ -1,4 +1,6 @@
 #pragma once
+#include "Common/Define.h"
+#include "Common/Enum.h"
 #include "Common/Abstract.h"
 #include "Common/Type.h"
 #include "Graphics/Resource.h"
@@ -6,25 +8,7 @@
 #include "Class/FileIO.h"
 namespace JG
 {
-#define JG_ASSET_FORMAT_KEY TT("@AssetKey_AssetFormat")
-#define JG_TEXTURE_ASSET_KEY TT("@AssetKey_TextureAssetStock")
-#define JG_STATIC_MESH_ASSET_KEY TT("@AssetKey_StaticMeshAssetStock")
-#define JG_GAMEWORLD_ASSET_KEY TT("@AssetKey_GameWorld")
-#define JG_ASSET_FORMAT TT(".jgasset")
-#define ASSET_MESH_FORMAT TT(".mesh")
-
-	enum class EAssetFormat
-	{
-		None,
-		Mesh,
-		Skeletal,
-		Material,
-		Texture,
-		Directory,
-		GameWorld,
-	};
-
-	struct JGVertex
+	struct JGVertex : public IJson
 	{
 		JVector3 Position;
 		JVector2 Texcoord;
@@ -42,9 +26,60 @@ namespace JG
 			inputLayout->Add(EShaderDataType::_float2, "TEXCOORD", 0);
 			return inputLayout;
 		}
+
+	public:
+		virtual void MakeJson(SharedPtr<JsonData> jsonData) const override
+		{
+			auto& val = jsonData->GetValue();
+			val.SetArray();
+			val.PushBack(Position.x, jsonData->GetJsonAllocator());
+			val.PushBack(Position.y, jsonData->GetJsonAllocator());
+			val.PushBack(Position.z, jsonData->GetJsonAllocator());
+			val.PushBack(Texcoord.x, jsonData->GetJsonAllocator());
+			val.PushBack(Texcoord.y, jsonData->GetJsonAllocator());
+			val.PushBack(Normal.x, jsonData->GetJsonAllocator());
+			val.PushBack(Normal.y, jsonData->GetJsonAllocator());
+			val.PushBack(Normal.z, jsonData->GetJsonAllocator());
+			val.PushBack(Tangent.x, jsonData->GetJsonAllocator());
+			val.PushBack(Tangent.y, jsonData->GetJsonAllocator());
+			val.PushBack(Tangent.z, jsonData->GetJsonAllocator());
+			val.PushBack(Bitangent.x, jsonData->GetJsonAllocator());
+			val.PushBack(Bitangent.y, jsonData->GetJsonAllocator());
+			val.PushBack(Bitangent.z, jsonData->GetJsonAllocator());
+		}
+		virtual void LoadJson(SharedPtr<JsonData> jsonData) override
+		{
+			auto& val = jsonData->GetValue();
+			i32 index = 0;
+			for (auto& value : val.GetArray())
+			{
+				f32 f = value.GetFloat();
+				if (index < 3)
+				{
+					Position[index] = f;
+				}
+				else if (index < 5)
+				{
+					Texcoord[index - 3] = f;
+				}
+				else if (index < 8)
+				{
+					Normal[index - 5] = f;
+				}
+				else if (index < 11)
+				{
+					Tangent[index - 8] = f;
+				}
+				else
+				{
+					Bitangent[index - 11] = f;
+				}
+				++index;
+			}
+		}
 	};
 
-	struct JGQuadVertex
+	struct JGQuadVertex : public IJson
 	{
 		JVector3 Position;
 		JVector2 Texcoord;
@@ -56,6 +91,25 @@ namespace JG
 			inputLayout->Add(EShaderDataType::_float2, "TEXCOORD", 0);
 			return inputLayout;
 		}
+	public:
+		virtual void MakeJson(SharedPtr<JsonData> jsonData) const override
+		{
+			jsonData->AddMember("Position", Position);
+			jsonData->AddMember("Texcoord", Texcoord);
+		}
+		virtual void LoadJson(SharedPtr<JsonData> jsonData) override
+		{
+			auto val = jsonData->GetMember("Position");
+			if (val)
+			{
+				Position = val->GetVector3();
+			}
+			val = jsonData->GetMember("Texcoord");
+			if (val)
+			{
+				Texcoord = val->GetVector2();
+			}
+		}
 	};
 
 
@@ -66,30 +120,34 @@ namespace JG
 	};
 
 
-	class IAssetStock
+	class IAssetStock : public IJson
 	{
 	public:
 		virtual ~IAssetStock() = default;
+		virtual EAssetFormat GetAssetFormat() const = 0;
 	};
 
-	class TextureAssetStock : public IAssetStock, public ISerializable
+	class TextureAssetStock :  public IAssetStock
 	{
 	public:
 		String Name;
 		i32 Width    = 0;
 		i32 Height   = 0;
 		i32 Channels = 0;
-		List<byte> Pixels;
-
+		List<jbyte> Pixels;
+	public:
+		virtual void MakeJson(SharedPtr<JsonData> jsonData) const override;
+		virtual void LoadJson(SharedPtr<JsonData> jsonData) override;
 	public:
 		virtual ~TextureAssetStock() = default;
-	protected:
-		virtual void Serialize(FileStreamWriter * writer) const override;
-		virtual void DeSerialize(FileStreamReader * reader) override;
+	public:
+		virtual EAssetFormat GetAssetFormat() const  override {
+			return EAssetFormat::Texture;
+		}
 	};
 
 
-	class StaticMeshAssetStock : public IAssetStock, public ISerializable
+	class StaticMeshAssetStock : public IAssetStock
 	{
 	public:
 		String Name;
@@ -98,10 +156,14 @@ namespace JG
 		List<List<JGVertex>>   Vertices;
 		List<u32>		       Indices;
 	public:
+		virtual void MakeJson(SharedPtr<JsonData> jsonData) const override;
+		virtual void LoadJson(SharedPtr<JsonData> jsonData) override;
+	public:
 		virtual ~StaticMeshAssetStock() = default;
-	protected:
-		virtual void Serialize(FileStreamWriter* writer) const override;
-		virtual void DeSerialize(FileStreamReader* reader) override;
+	public:
+		virtual EAssetFormat GetAssetFormat() const override {
+			return EAssetFormat::Mesh;
+		}
 	};
 
 	

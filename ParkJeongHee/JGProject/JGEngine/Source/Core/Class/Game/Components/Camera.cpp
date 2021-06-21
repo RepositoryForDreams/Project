@@ -29,6 +29,57 @@ namespace JG
 		e.SharedCamera = this;
 		SendEvent(e);
 	}
+	void Camera::MakeJson(SharedPtr<JsonData> jsonData) const
+	{
+		GameComponent::MakeJson(jsonData);
+		jsonData->AddMember("Resolution", GetResolution());
+		jsonData->AddMember("NearZ", GetNearZ());
+		jsonData->AddMember("FarZ", GetFarZ());
+		jsonData->AddMember("FOV", GetFOV());
+		jsonData->AddMember("Depth", GetFOV());
+		jsonData->AddMember("CullingLayerMask", GetCullingLayerMask());
+		jsonData->AddMember("IsOrthographic", IsOrthographic());
+
+	}
+	void Camera::LoadJson(SharedPtr<JsonData> jsonData)
+	{
+		GameComponent::LoadJson(jsonData);
+		auto val = jsonData->GetMember("Resolution");
+		if (val)
+		{
+			SetResolution(val->GetVector2());
+		}
+		val = jsonData->GetMember("NearZ");
+		if (val)
+		{
+			SetNearZ(val->GetFloat());
+		}
+		val = jsonData->GetMember("FarZ");
+		if (val)
+		{
+			SetFarZ(val->GetFloat());
+		}
+		val = jsonData->GetMember("FOV");
+		if (val)
+		{
+			SetFOV(val->GetFloat());
+		}
+		val = jsonData->GetMember("Depth");
+		if (val)
+		{
+			SetDepth(val->GetInt64());
+		}
+		val = jsonData->GetMember("CullingLayerMask");
+		if (val)
+		{
+			SetCullingLayerMask(val->GetUint64());
+		}
+		val = jsonData->GetMember("IsOrthographic");
+		if (val)
+		{
+			SetOrthographic(val->GetBool());
+		}
+	}
 	void Camera::SetFOV(f32 fov)
 	{
 		f32 convertFOV = Math::ConvertToRadians(fov);

@@ -17,8 +17,6 @@ namespace JG
 		mutable JMatrix mWorldMatrix;
 		mutable JMatrix mLocalMatrix;
 		mutable bool mIsDirty = true;
-	protected:
-
 	public:
 
 		void SetLocalLocation(const JVector3& location);
@@ -33,6 +31,9 @@ namespace JG
 		const JVector3& GetScale() const;
 
 		const JMatrix& GetWorldMatrix() const;
+	public:
+		virtual void MakeJson(SharedPtr<JsonData> jsonData)   const override;
+		virtual void LoadJson(SharedPtr<JsonData> jsonData) override;
 	private:
 		void UpdateWorldMatrix() const;
 	public:

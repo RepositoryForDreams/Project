@@ -1,6 +1,6 @@
 #pragma once
 #include "Define.h"
-
+#include "Math/JVector.h"
 
 
 
@@ -17,7 +17,7 @@ namespace JG
 	public:
 		Color() = default;
 		Color(f32 r, f32 g, f32 b, f32 a) : R(r), G(g), B(b), A(a) {}
-
+		Color(const JVector4& v) : R(v.x), G(v.y), B(v.z), A(v.w) {}
 	public:
 		static Color White() { return Color(1.0f, 1.0f, 1.0f, 1.0f); }
 		static Color Black() { return Color(0.0f,0.0f,0.0f,1.0f); }

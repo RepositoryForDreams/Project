@@ -109,13 +109,26 @@ namespace JG
 				handle = Scheduler::GetInstance().ScheduleAsync([&](void* data)
 				{
 					auto savePath = CombinePath(Application::GetAssetPath(), TT("testGameWorld")) + JG_ASSET_FORMAT;
-					FileStreamWriter writer;
+				
+					if (mGameWorld != nullptr)
+					{
+						//auto entry = JGAssetFile::GetEntryJson();
+						////mGameWorld->MakeJson(entry);
+						//JGAssetFile::Write(savePath, EAssetFormat::GameWorld, entry);
+					}
+					else
+					{
+						JG_CORE_ERROR("Failed Save GameWorld : GameWorld is null");
+					}
+
+
+					/*FileStreamWriter writer;
 					if (writer.Open(savePath))
 					{
 						writer.Write(JG_ASSET_FORMAT_KEY, EAssetFormat::GameWorld);
 						writer.Write(JG_GAMEWORLD_ASSET_KEY , *mGameWorld);
 						writer.Close();
-					}
+					}*/
 				});
 			}
 			Scheduler::GetInstance().Schedule(1.0f, 0.2f, -1, 0,  [&]()->EScheduleResult
@@ -169,20 +182,20 @@ namespace JG
 				handle = Scheduler::GetInstance().ScheduleAsync([&](void* data)
 				{
 					auto loadPath = CombinePath(Application::GetAssetPath(), TT("testGameWorld")) + JG_ASSET_FORMAT;
-					FileStreamReader reader;
-					if (reader.Open(loadPath))
-					{
-						EAssetFormat assetFormat;
-						reader.Read(JG_ASSET_FORMAT_KEY , &assetFormat);
-						if (assetFormat == EAssetFormat::GameWorld)
-						{
-							newGameWorld = GameObjectFactory::GetInstance().CreateObject<GameWorld>();
-							newGameWorld->SetGlobalGameSystemList(mGameSystemList);
-							is_LoadSucess = true;
-							reader.Read(JG_GAMEWORLD_ASSET_KEY, newGameWorld);
-						}
-						reader.Close();
-					}
+					//FileStreamReader reader;
+					//if (reader.Open(loadPath))
+					//{
+					//	EAssetFormat assetFormat;
+					//	reader.Read(JG_ASSET_FORMAT_KEY , &assetFormat);
+					//	if (assetFormat == EAssetFormat::GameWorld)
+					//	{
+					//		newGameWorld = GameObjectFactory::GetInstance().CreateObject<GameWorld>();
+					//		newGameWorld->SetGlobalGameSystemList(mGameSystemList);
+					//		is_LoadSucess = true;
+					//		reader.Read(JG_GAMEWORLD_ASSET_KEY, newGameWorld);
+					//	}
+					//	reader.Close();
+					//}
 				});
 			}
 			Scheduler::GetInstance().Schedule(1.0f, 0.2f, -1, 0, [&]()->EScheduleResult

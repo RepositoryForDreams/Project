@@ -31,12 +31,14 @@ namespace JG
 		//
 		List<SharedPtr<ITexture>> mTargetTextures;
 		SharedPtr<ITexture>       mTargetDepthTexture;
-		// RenderingPath
-		// Default 
+
 	protected:
 		virtual void Awake() override;
 		virtual void Start() override;
 		virtual void Destory() override;
+	public:
+		virtual void MakeJson(SharedPtr<JsonData> jsonData)   const override;
+		virtual void LoadJson(SharedPtr<JsonData> jsonData) override;
 	public:
 		void SetFOV(f32 fov);
 		void SetFarZ(f32 farZ);

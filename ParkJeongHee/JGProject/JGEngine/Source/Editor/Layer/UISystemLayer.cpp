@@ -71,12 +71,21 @@ namespace JG
 	{
 		Dictionary<String, bool> IsOpen;
 
-		FileStreamReader fileReader;
-		if (fileReader.Open(fileName) == true)
+		auto json = CreateSharedPtr<Json>();
+		Json::Read(fileName, json);
+
+		UIManager::GetInstance().ForEach([&](IUIView* view)
 		{
-			fileReader.Read(TT("IsOpen") , &IsOpen);
-			fileReader.Close();
-		}
+			auto key = view->GetType().GetName();
+			auto member = json->GetMember(key);
+			if (member != nullptr)
+			{
+				bool isOpen = member->GetBool();
+				if (isOpen == true) view->Open();
+				else view->Close();
+			}
+		});
+
 		if (IsOpen.empty() == false)
 		{
 			UIManager::GetInstance().ForEach([&](IUIView* view)
@@ -102,18 +111,16 @@ namespace JG
 	{
 
 		Dictionary<String, bool> IsOpen;
-		FileStreamWriter fileWriter;
-		if (fileWriter.Open(fileName) == true)
-		{
-			UIManager::GetInstance().ForEach([&](IUIView* view)
-			{
-				IsOpen.emplace(view->GetType().GetName(), view->IsOpen());
-			});
 
-			fileWriter.Write(TT("IsOpen"), IsOpen);
-			fileWriter.Close();
-		}
+		auto json = CreateSharedPtr<Json>();
+
 		
+		UIManager::GetInstance().ForEach([&](IUIView* view)
+		{
+			json->AddMember<bool>(view->GetType().GetName(), view->IsOpen());
+		});
+
+		Json::Write(fileName, json);
 	}
 
 	EScheduleResult UISystemLayer::MenuUpdate()

@@ -1,288 +1,629 @@
 #pragma once
 #include <fstream>
+#include "Common/Enum.h"
 #include "Common/Define.h"
-
+#include "Common/String.h"
+#include "Math/JVector.h"
+#include "Math/JMatrix.h"
+#include <rapidjson/ostreamwrapper.h>
+#include <rapidjson/istreamwrapper.h>
+#include <rapidjson/writer.h>
 
 namespace JG
 {
-	class ISerializable
+	class Json;
+	class JsonData
 	{
-		friend class FileStreamWriter;
-		friend class FileStreamReader;
-	protected:
-		virtual void Serialize(FileStreamWriter* writer)   const = 0;
-		virtual void DeSerialize(FileStreamReader* reader) = 0;
+	private:
+		bool mIsRoot = false;
+		Json* mJson = nullptr;
+		rapidjson::Value mValue = rapidjson::Value(rapidjson::kObjectType);
 	public:
-		virtual ~ISerializable() = default;
-	};
-	class FileStream
-	{
+		JsonData(Json* json, bool isRoot = false) : mJson(json), mIsRoot(isRoot) {}
+	public:
+		SharedPtr<JsonData> CreateJsonData() const {
+			return CreateSharedPtr<JsonData>(mJson);
+		}
+		rapidjson::Document::AllocatorType& GetJsonAllocator();
+	public:
+		template<class T>
+		void AddMember(const String& key, const T& value) {
+			AddMember(ws2s(key), value);
+		}
+		template<class T>
+		void AddMember(const std::string& key, const T& value);
+
+		template<>
+		void AddMember(const std::string& key, const SharedPtr<JsonData>& value) {
+			AddMember_Base(key, value->GetValue());
+		}
+	private:
+		template<class T>
+		rapidjson::Value MakeJsonValue(const T& value)
+		{
+			return rapidjson::Value(value);
+		}
+		template<>
+		rapidjson::Value MakeJsonValue(const String& value);
+		template<>
+		rapidjson::Value MakeJsonValue(const JVector2& value);
+		template<>
+		rapidjson::Value MakeJsonValue(const JVector3& value);
+		template<>
+		rapidjson::Value MakeJsonValue(const JVector4& value);
+		template<>
+		rapidjson::Value MakeJsonValue(const JMatrix& value);
+
+		template<class T>
+		rapidjson::Value MakeJsonValue(const List<T>& valueList);
+
+		template<>
+		rapidjson::Value MakeJsonValue(const List<jbyte>& value);
+	private:
+		template<class T>
+		void AddMember_Base(const std::string& key, T& val)
+		{
+			rapidjson::Value keyVal;
+			keyVal.SetString(key.c_str(), (rapidjson::SizeType)key.length(), mJson->GetAllocator());
+			if (mIsRoot == true)
+			{
+				mJson->GetDocument().AddMember(keyVal, val, mJson->GetAllocator());
+			}
+			else
+			{
+				mValue.AddMember(keyVal, val, mJson->GetAllocator());
+			}
+		}
+	public:
+		u64  GetSize() const { return mValue.Size(); }
+		bool GetBool() const { return mValue.GetBool(); }
+		i32  GetInt32() const { return mValue.GetInt(); }
+		i64  GetInt64() const { return mValue.GetInt64(); }
+		u32  GetUint32() const { return mValue.GetUint(); }
+		u64  GetUint64() const { return mValue.GetUint64(); }
+		f32  GetFloat() const { return mValue.GetFloat(); }
+		f64  GetDouble() const { return mValue.GetDouble(); }
+		String GetString() const { auto str = mValue.GetString(); return s2ws(str); }
+		SharedPtr<JsonData> GetJsonDataFromIndex(i32 index)  {
+			auto cnt = (u64)mValue.Size();
+			if (cnt <= index)
+			{
+				return nullptr;
+			}
+			auto jsonData = CreateSharedPtr<JsonData>(mJson);
+			jsonData->mValue = (mValue.Begin())[cnt];
+			return jsonData;
+		}
+
+		List<jbyte> GetByteList() const {
+			auto rawData = mValue.GetString();
+			auto len = strlen(rawData);
+			List<jbyte> result;
+			result.resize(len);
+			memcpy(result.data(), rawData, len);
+			return std::move(result);
+		}
+		JVector2 GetVector2() const {
+			JVector2 result;
+			i32 index = 0;
+			for (auto& v : mValue.GetArray())
+			{
+				result[index++] = v.GetFloat();
+			}
+			return result;
+		}
+		JVector3 GetVector3() const {
+			JVector3 result;
+			i32 index = 0;
+			for (auto& v : mValue.GetArray())
+			{
+				result[index++] = v.GetFloat();
+			}
+			return result;
+		}
+		JVector4 GetVector4() const {
+			JVector4 result;
+			i32 index = 0;
+			for (auto& v : mValue.GetArray())
+			{
+				result[index++] = v.GetFloat();
+			}
+			return result;
+		}
+		JMatrix GetMatrix() const {
+			JMatrix result;
+			i32 col = 0; i32 row = 0;
+			for (auto& v : mValue.GetArray())
+			{
+				result.Get(col++, row) = v.GetFloat();
+				if (col >= 4)
+				{
+					col = 0;
+					row++;
+				}
+			}
+			return result;
+		}
+	public:
+		bool IsBool() const { return mValue.IsBool(); }
+		bool IsInt32() const { return mValue.IsInt(); }
+		bool IsInt64() const { return mValue.IsInt64(); }
+		bool IsUint32() const { return mValue.IsUint(); }
+		bool IsUint64() const { return mValue.IsUint64(); }
+		bool IsFloat() const { return mValue.IsFloat(); }
+		bool IsDouble() const { return mValue.IsDouble(); }
+		bool IsObject() const { return mValue.IsObject(); }
+		bool IsString() const { return mValue.IsString(); }
+		bool IsByteList() const { return IsString(); }
+	public:
+		SharedPtr<JsonData> GetMember(const String& key)
+		{
+			return GetMember(ws2s(key));
+		}
+		SharedPtr<JsonData> GetMember(const std::string& key);
 		
 	public:
-		class Header
-		{
-		public:
-			Dictionary<String, u64> DataMap;
-			u64 Offset = 0;
-		public:
-			void Write(std::ofstream& fout);
-			void Read(std::ifstream& fin);
-		public:
-			u64 GetOffset() const;
-			u64 CalcSize() const;
-		};
-
-		class Data
-		{
-		public:
-			List<jbyte> ByteData;
-		};
-	protected:
-		Header     mHeader;
-		List<Data> mDatas;
-	public:
-		virtual ~FileStream() = default;
+		rapidjson::Value& GetValue() {
+			return mValue;
+		}
 	};
-
-	class FileStreamWriter : public FileStream
+	class Json : public JsonData
 	{
 	private:
-		std::ofstream mFout;
-		u64 mOffset = 0;
+		rapidjson::Document mDoc = rapidjson::Document(rapidjson::kObjectType);
+
 	public:
-		FileStreamWriter();
-		virtual ~FileStreamWriter();
+		Json() : JsonData(this, true) {}
+		rapidjson::Document::AllocatorType& GetAllocator() {
+			return mDoc.GetAllocator();
+		}
+		rapidjson::Document& GetDocument() {
+			return mDoc;
+		}
 	public:
-		bool Open(const String& path, bool isAppend = false);
-		void Close();
-		bool IsOpen() const {
-			return mFout.is_open();
-		}
-
-		template<class T>
-		void Write(const String& key, const T& data)
+		static bool Write(const String& path, SharedPtr<Json> json)
 		{
-			mHeader.DataMap[key] = mOffset;
-			Write(data);
-		}
+			auto& doc = json->GetDocument();
+			
+			rapidjson::StringBuffer buffer;
+			rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
 
-	private:
-		template<class T>
-		void Write(const T& data)
+
+			if (doc.Accept(writer) == false)
+			{
+				return false;
+			}
+
+			std::ofstream fout(path);
+			if (fout.is_open() == false)
+			{
+				return false;
+			}
+			
+			fout.write(buffer.GetString(), buffer.GetSize());
+
+			fout.close();
+
+			return true;
+		}
+		static bool Read(const String& path, SharedPtr<Json> json)
 		{
-			if (IsOpen() == true)
+			auto& doc = json->GetDocument();
+			
+
+			std::ifstream fin(path);
+			if (fin.is_open() == false)
 			{
-				if constexpr (std::is_base_of<ISerializable, T>::value == true)
-				{
-					static_cast<const ISerializable*>(&data)->Serialize(this);
-				}
-				else
-				{
-					Write(&data, sizeof(T));
-				}
+				return false;
 			}
+			u64 len = 0;
+			fin.seekg(0, std::ios::end);
+			len = fin.tellg();
+
+			fin.seekg(0, std::ios::beg);
+
+			std::string jsonStr;
+			jsonStr.resize(len);
+			fin.read(jsonStr.data(), len);
+
+			fin.close();
+
+			doc.Parse(jsonStr.c_str(), len);
+			return true;
 		}
-
-		template<>
-		void Write(const String& data)
-		{
-			if (IsOpen() == true)
-			{
-				Write(data.length());
-				Write((void*)data.c_str(), sizeof(wchar_t) * data.length());
-			}
-
-		}
-
-		template<class T>
-		void Write(const List<T>& dataList)
-		{
-			if (dataList.empty() == true)
-			{
-				return;
-			}
-			if (IsOpen() == true)
-			{
-				Write(dataList.size());
-				for (auto& data : dataList)
-				{
-					Write(data);
-				}
-			}
-
-		}
-
-		template<class T1, class T2>
-		void Write(const Dictionary<T1, T2>& dic)
-		{
-			if (dic.empty() == true)
-			{
-				return;
-			}
-			if (IsOpen() == true)
-			{
-				Write(dic.size());
-				for (auto& _pair : dic)
-				{
-					Write(_pair.first);
-					Write(_pair.second);
-				}
-			}
-		}
-
-		template<class T1, class T2>
-		void Write(const SortedDictionary<T1, T2>& dic)
-		{
-			if (dic.empty() == true)
-			{
-				return;
-			}
-			if (IsOpen() == true)
-			{
-				Write(dic.size());
-				for (auto& _pair : dic)
-				{
-					Write(_pair.first);
-					Write(_pair.second);
-				}
-			}
-		}
-	private:
-		void Write(const void* data, u64 size);
 	};
-
-	class FileStreamReader : public FileStream
+	inline rapidjson::Document::AllocatorType& JsonData::GetJsonAllocator()
 	{
-		std::ifstream mFin;
-	public:
-		virtual ~FileStreamReader() = default;
-	public:
-		bool Open(const String& path);
-		void Close();
-		bool IsOpen() const {
-			return mFin.is_open();
-		}
-
-		template<class T>
-		void Read(const String& key, T* data)
+		return mJson->GetAllocator();
+	}
+	template<class T>
+	inline void JsonData::AddMember(const std::string& key, const T& value)
+	{
+		if (mJson == nullptr)
 		{
-			auto& iter = mHeader.DataMap.find(key);
-			if (iter == mHeader.DataMap.end())
-			{
-				data = nullptr;
-				return;
-			}
-			u64 pos = iter->second + mHeader.GetOffset();
-			mFin.seekg(pos, std::ios_base::beg);
-			Read(data);
+			return;
 		}
-	private:
-		template<class T>
-		void Read(T* data)
+		auto jsonData = CreateSharedPtr<JsonData>(mJson);
+
+		if constexpr (std::is_base_of<IJson, T>::value == true)
 		{
-			if (data == nullptr)
-			{
-				return;
-			}
-			if (IsOpen() == true)
-			{
-				if constexpr (std::is_base_of<ISerializable, T>::value == true)
-				{
-					static_cast<ISerializable*>(data)->DeSerialize(this);
-				}
-				else
-				{
-					Read((void*)data, sizeof(T));
-				}
-			}
+			static_cast<const IJson*>(&value)->MakeJson(jsonData);
+			AddMember_Base(key, jsonData->GetValue());
 		}
-		template<>
-		void Read(String* data)
+		else
 		{
-			if (data == nullptr)
-			{
-				return;
-			}
-			if (IsOpen() == true)
-			{
-				u64 length = 0;
-				Read(&length);
-				data->resize(length);
-				Read(&(*data)[0], length * sizeof((*data)[0]));
-			}
-
-
+			AddMember_Base(key, MakeJsonValue(value));
 		}
+	}
 
-		template<class T>
-		void Read(List<T>* dataList)
+	template<>
+	rapidjson::Value JsonData::MakeJsonValue(const String& value)
+	{
+		rapidjson::Value val;
+		auto convert = ws2s(value);
+		val.SetString(convert.c_str(), (rapidjson::SizeType)convert.length(), mJson->GetAllocator());
+		return val;
+	}
+	template<>
+	rapidjson::Value JsonData::MakeJsonValue(const JVector2& value)
+	{
+		rapidjson::Value val;
+		val.SetArray();
+		val.PushBack(value.x, mJson->GetAllocator());
+		val.PushBack(value.y, mJson->GetAllocator());
+		return val;
+	}
+	template<>
+	inline rapidjson::Value JsonData::MakeJsonValue(const JVector3& value)
+	{
+		rapidjson::Value val;
+		val.SetArray();
+		val.PushBack(value.x, mJson->GetAllocator());
+		val.PushBack(value.y, mJson->GetAllocator());
+		val.PushBack(value.z, mJson->GetAllocator());
+
+		return val;
+	}
+	template<>
+	inline rapidjson::Value JsonData::MakeJsonValue(const JVector4& value)
+	{
+		rapidjson::Value val;
+		val.SetArray();
+		val.PushBack(value.x, mJson->GetAllocator());
+		val.PushBack(value.y, mJson->GetAllocator());
+		val.PushBack(value.z, mJson->GetAllocator());
+		val.PushBack(value.w, mJson->GetAllocator());
+		return val;
+	}
+	template<>
+	inline rapidjson::Value JsonData::MakeJsonValue(const JMatrix& value)
+	{
+		rapidjson::Value val;
+		val.SetArray();
+		for (i32 r = 0; r < 4; ++r)
 		{
-			if (dataList == nullptr)
+			for (i32 c = 0; c < 4; ++c)
 			{
-				return;
-			}
-			if (IsOpen() == true)
-			{
-				u64 size = 0;
-				Read(&size);
-				dataList->resize(size);
-				for (u64 i = 0; i < size; ++i)
-				{
-					Read(&(*dataList)[i]);
-				}
+				f32 f = value.Get_C(c, r);
+				val.PushBack(f, mJson->GetAllocator());
 			}
 		}
-
-		template<class T1, class T2>
-		void Read(Dictionary<T1, T2>* dic)
+		return val;
+	}
+	template<class T>
+	rapidjson::Value JsonData::MakeJsonValue(const List<T>& valueList)
+	{
+		rapidjson::Value valArr; valArr.SetArray();
+		for (auto& value : valueList)
 		{
-			if (dic == nullptr)
+			rapidjson::Value val;
+			if constexpr (std::is_base_of<IJson, T>::value == true)
 			{
-				return;
+				auto jsonData = CreateSharedPtr<JsonData>(mJson);
+				static_cast<const IJson*>(&value)->MakeJson(jsonData);
+				val = jsonData->GetValue();
 			}
-			if (IsOpen() == true)
+			else
 			{
-				u64 size = 0;
-				Read(&size);
-				for (u64 i = 0; i < size; ++i)
-				{
-					T1 key;
-					T2 value;
-					Read(&key);
-					Read(&value);
-					dic->emplace(key, value);
-				}
+				val = MakeJsonValue(value);
 			}
+			valArr.PushBack(val, mJson->GetAllocator());
 		}
+		return valArr;
+	}
+	template<>
+	rapidjson::Value JsonData::MakeJsonValue(const List<jbyte>& value)
+	{
+		rapidjson::Value val;
+		val.SetString(value.data(), (rapidjson::SizeType)value.size(), mJson->GetAllocator());
+		return val;
+	}
+	inline SharedPtr<JsonData> JsonData::GetMember(const std::string& key) 
+	{
+		bool isFind = (mIsRoot) ?
+			mJson->GetDocument().FindMember(key.c_str()) != mJson->GetDocument().MemberEnd() :
+			mValue.FindMember(key.c_str()) != mValue.MemberEnd();
 
-		template<class T1, class T2>
-		void Read(SortedDictionary<T1, T2>* dic)
+		if (isFind == false)
 		{
-			if (dic == nullptr)
-			{
-				return;
-			}
-			if (IsOpen() == true)
-			{
-				u64 size = 0;
-				Read(&size);
-
-				for (u64 i = 0; i < size; ++i)
-				{
-					T1 key;
-					T2 value;
-					Read(&key);
-					Read(&value);
-					dic->emplace(key, value);
-				}
-			}
+			return nullptr;
 		}
-	private:
-		void Read(void* data, u64 size);
+		auto jsonData = CreateSharedPtr<JsonData>(mJson);
+		jsonData->mValue = (mIsRoot) ? mJson->GetDocument()[key.c_str()] : mValue[key.c_str()];
+		return jsonData;
+	}
+
+	//class FileStream
+	//{
+	//	
+	//public:
+	//	class Header
+	//	{
+	//	public:
+	//		Dictionary<String, u64> DataMap;
+	//		u64 Offset = 0;
+	//	public:
+	//		void Write(std::ofstream& fout);
+	//		void Read(std::ifstream& fin);
+	//	public:
+	//		u64 GetOffset() const;
+	//		u64 CalcSize() const;
+	//	};
+
+	//	class Data
+	//	{
+	//	public:
+	//		List<jbyte> ByteData;
+	//	};
+
+	//protected:
+	//	Header     mHeader;
+	//	List<Data> mDatas;
+	//public:
+	//	virtual ~FileStream() = default;
+	//};
+
+	//class FileStreamWriter : public FileStream
+	//{
+	//private:
+	//	std::ofstream mFout;
+	//	u64 mOffset = 0;
+	//public:
+	//	FileStreamWriter();
+	//	virtual ~FileStreamWriter();
+	//public:
+	//	bool Open(const String& path, bool isAppend = false);
+	//	void Close();
+	//	bool IsOpen() const {
+	//		return mFout.is_open();
+	//	}
+
+	//	template<class T>
+	//	void Write(const String& key, const T& data)
+	//	{
+	//		mHeader.DataMap[key] = mOffset;
+	//		Write(data);
+	//	}
+
+	//private:
+	//	template<class T>
+	//	void Write(const T& data)
+	//	{
+	//		if (IsOpen() == true)
+	//		{
+	//			if constexpr (std::is_base_of<IJson, T>::value == true)
+	//			{
+	//				static_cast<const IJson*>(&data)->Serialize(this);
+	//			}
+	//			else
+	//			{
+	//				Write(&data, sizeof(T));
+	//			}
+	//		}
+	//	}
+
+	//	template<>
+	//	void Write(const String& data)
+	//	{
+	//		if (IsOpen() == true)
+	//		{
+	//			Write(data.length());
+	//			Write((void*)data.c_str(), sizeof(wchar_t) * data.length());
+	//		}
+
+	//	}
+
+	//	template<class T>
+	//	void Write(const List<T>& dataList)
+	//	{
+	//		if (dataList.empty() == true)
+	//		{
+	//			return;
+	//		}
+	//		if (IsOpen() == true)
+	//		{
+	//			Write(dataList.size());
+	//			for (auto& data : dataList)
+	//			{
+	//				Write(data);
+	//			}
+	//		}
+
+	//	}
+
+	//	template<class T1, class T2>
+	//	void Write(const Dictionary<T1, T2>& dic)
+	//	{
+	//		if (dic.empty() == true)
+	//		{
+	//			return;
+	//		}
+	//		if (IsOpen() == true)
+	//		{
+	//			Write(dic.size());
+	//			for (auto& _pair : dic)
+	//			{
+	//				Write(_pair.first);
+	//				Write(_pair.second);
+	//			}
+	//		}
+	//	}
+
+	//	template<class T1, class T2>
+	//	void Write(const SortedDictionary<T1, T2>& dic)
+	//	{
+	//		if (dic.empty() == true)
+	//		{
+	//			return;
+	//		}
+	//		if (IsOpen() == true)
+	//		{
+	//			Write(dic.size());
+	//			for (auto& _pair : dic)
+	//			{
+	//				Write(_pair.first);
+	//				Write(_pair.second);
+	//			}
+	//		}
+	//	}
+	//private:
+	//	void Write(const void* data, u64 size);
+	//};
+
+	//class FileStreamReader : public FileStream
+	//{
+	//	std::ifstream mFin;
+	//public:
+	//	virtual ~FileStreamReader() = default;
+	//public:
+	//	bool Open(const String& path);
+	//	void Close();
+	//	bool IsOpen() const {
+	//		return mFin.is_open();
+	//	}
+
+	//	template<class T>
+	//	void Read(const String& key, T* data)
+	//	{
+	//		auto& iter = mHeader.DataMap.find(key);
+	//		if (iter == mHeader.DataMap.end())
+	//		{
+	//			data = nullptr;
+	//			return;
+	//		}
+	//		u64 pos = iter->second + mHeader.GetOffset();
+	//		mFin.seekg(pos, std::ios_base::beg);
+	//		Read(data);
+	//	}
+	//private:
+	//	template<class T>
+	//	void Read(T* data)
+	//	{
+	//		if (data == nullptr)
+	//		{
+	//			return;
+	//		}
+	//		if (IsOpen() == true)
+	//		{
+	//			if constexpr (std::is_base_of<IJson, T>::value == true)
+	//			{
+	//				static_cast<IJson*>(data)->DeSerialize(this);
+	//			}
+	//			else
+	//			{
+	//				Read((void*)data, sizeof(T));
+	//			}
+	//		}
+	//	}
+	//	template<>
+	//	void Read(String* data)
+	//	{
+	//		if (data == nullptr)
+	//		{
+	//			return;
+	//		}
+	//		if (IsOpen() == true)
+	//		{
+	//			u64 length = 0;
+	//			Read(&length);
+	//			data->resize(length);
+	//			Read(&(*data)[0], length * sizeof((*data)[0]));
+	//		}
+
+
+	//	}
+
+	//	template<class T>
+	//	void Read(List<T>* dataList)
+	//	{
+	//		if (dataList == nullptr)
+	//		{
+	//			return;
+	//		}
+	//		if (IsOpen() == true)
+	//		{
+	//			u64 size = 0;
+	//			Read(&size);
+	//			dataList->resize(size);
+	//			for (u64 i = 0; i < size; ++i)
+	//			{
+	//				Read(&(*dataList)[i]);
+	//			}
+	//		}
+	//	}
+
+	//	template<class T1, class T2>
+	//	void Read(Dictionary<T1, T2>* dic)
+	//	{
+	//		if (dic == nullptr)
+	//		{
+	//			return;
+	//		}
+	//		if (IsOpen() == true)
+	//		{
+	//			u64 size = 0;
+	//			Read(&size);
+	//			for (u64 i = 0; i < size; ++i)
+	//			{
+	//				T1 key;
+	//				T2 value;
+	//				Read(&key);
+	//				Read(&value);
+	//				dic->emplace(key, value);
+	//			}
+	//		}
+	//	}
+
+	//	template<class T1, class T2>
+	//	void Read(SortedDictionary<T1, T2>* dic)
+	//	{
+	//		if (dic == nullptr)
+	//		{
+	//			return;
+	//		}
+	//		if (IsOpen() == true)
+	//		{
+	//			u64 size = 0;
+	//			Read(&size);
+
+	//			for (u64 i = 0; i < size; ++i)
+	//			{
+	//				T1 key;
+	//				T2 value;
+	//				Read(&key);
+	//				Read(&value);
+	//				dic->emplace(key, value);
+	//			}
+	//		}
+	//	}
+	//private:
+	//	void Read(void* data, u64 size);
 
 
 
 
 
-	};
+
+
+//};
 }

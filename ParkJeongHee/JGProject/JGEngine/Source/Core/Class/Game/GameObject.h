@@ -81,7 +81,9 @@ namespace JG
 		{
 			Application::GetInstance().SendEventImmediate(e);
 		}
-
+	public:
+		virtual void MakeJson(SharedPtr<JsonData> jsonData)   const override;
+		virtual void LoadJson(SharedPtr<JsonData> jsonData) override;
 
 	public:
 		virtual const String& GetName() const override;

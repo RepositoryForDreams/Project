@@ -56,6 +56,34 @@ namespace JG
 		UpdateWorldMatrix();
 		return mWorldMatrix;
 	}
+	void Transform::MakeJson(SharedPtr<JsonData> jsonData) const
+	{
+		GameComponent::MakeJson(jsonData);
+		jsonData->AddMember("Location", GetLocalLocation());
+		jsonData->AddMember("Rotation", GetLocalRotation());
+		jsonData->AddMember("Scale", GetScale());
+
+	}
+	void Transform::LoadJson(SharedPtr<JsonData> jsonData)
+	{
+		GameComponent::LoadJson(jsonData);
+
+		auto val = jsonData->GetMember("Location");
+		if (val)
+		{
+			SetLocalLocation(val->GetVector3());
+		}
+		val = jsonData->GetMember("Rotation");
+		if (val)
+		{
+			SetLocalRotation(val->GetVector3());
+		}
+		val = jsonData->GetMember("Scale");
+		if (val)
+		{
+			SetScale(val->GetVector3());
+		}
+	}
 	void Transform::UpdateWorldMatrix() const
 	{
 		if (mIsDirty == false)

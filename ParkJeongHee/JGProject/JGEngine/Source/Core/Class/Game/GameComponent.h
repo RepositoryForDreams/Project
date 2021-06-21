@@ -25,9 +25,13 @@ namespace JG
 		virtual void Start() override;
 		virtual void Destory() override;
 	public:
+		virtual void MakeJson(SharedPtr<JsonData> jsonData)   const override;
+		virtual void LoadJson(SharedPtr<JsonData> jsonData) override;
+	public:
 		GameNode*  GetOwner() const;
 		GameWorld* GetGameWorld() const;
 	public:
+		void SetActive(bool isActive);
 		bool IsActive() const;
 	};
 }

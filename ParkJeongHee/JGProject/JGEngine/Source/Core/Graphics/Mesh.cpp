@@ -20,7 +20,7 @@ namespace JG
     }
     SharedPtr<IMesh> IMesh::CreateFromFile(const String& path)
     {
-        FileStreamReader reader;
+       /* FileStreamReader reader;
         if (reader.Open(path) == true)
         {
             StaticMeshAssetStock meshAsset;
@@ -47,7 +47,7 @@ namespace JG
             reader.Close();
 
             return mesh;
-        }
+        }*/
         return nullptr;
     }
 }
