@@ -5,6 +5,7 @@
 
 namespace JG
 {
+	class Camera;
 	class SceneModel : public UIModel
 	{
 		SharedPtr<ITexture> mSceneTexture;

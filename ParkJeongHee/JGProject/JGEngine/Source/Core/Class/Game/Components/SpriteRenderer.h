@@ -11,6 +11,8 @@ namespace JG
 		SharedPtr<Standard2DRenderItem> mSpriteRI;
 	public:
 		virtual ~SpriteRenderer() = default;
+	public:
+		SpriteRenderer();
 	protected:
 		virtual void Awake() override;
 		virtual void Start() override;

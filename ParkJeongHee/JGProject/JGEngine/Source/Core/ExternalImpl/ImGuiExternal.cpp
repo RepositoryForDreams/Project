@@ -45,7 +45,7 @@ namespace ImGui
 		ImGui::PopItemWidth();
 		ImGui::Spacing();
 	}
-	void OnGui(const char* label, JG::i64* v, float label_spacing)
+	void OnGui(const char* label, JG::i32* v, float label_spacing)
 	{
 		std::string id = "##" + std::string(label) + "Int64";
 

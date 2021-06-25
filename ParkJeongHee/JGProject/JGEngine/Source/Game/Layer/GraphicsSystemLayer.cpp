@@ -84,7 +84,6 @@ namespace JG
 		mRenderer2D.reset();
 		mRegisteredCameras.clear();
 		mPushedRenderItems.clear();
-		
 	}
 
 	void GraphicsSystemLayer::OnEvent(IEvent& e)
@@ -168,8 +167,6 @@ namespace JG
 		{
 			// Not Supported
 		}
-		
-		// 렌더링 하는곳
 	}
 	GraphicsSystemLayer::CameraItem GraphicsSystemLayer::CreateLayerCamera(Camera* camera)
 	{

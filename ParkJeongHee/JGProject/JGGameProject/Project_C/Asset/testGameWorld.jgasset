@@ -1,0 +1,213 @@
+{
+    "AssetFormat": 6,
+    "Asset": {
+        "Name": "GameWorld",
+        "Components": [
+            {
+                "ComponentType": "JG::Transform",
+                "Name": "Transform",
+                "IsActive": true,
+                "Location": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
+        ],
+        "Childs": [
+            {
+                "Name": "Camera",
+                "Components": [
+                    {
+                        "ComponentType": "JG::Transform",
+                        "Name": "Transform",
+                        "IsActive": true,
+                        "Location": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "Rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "Scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    {
+                        "ComponentType": "JG::Camera",
+                        "Name": "Camera",
+                        "IsActive": true,
+                        "Resolution": [
+                            800.0,
+                            600.0
+                        ],
+                        "NearZ": 0.0010000000474974514,
+                        "FarZ": 10000.0,
+                        "FOV": 90.0,
+                        "Depth": 0,
+                        "CullingLayerMask": 18446744073709551615,
+                        "IsOrthographic": true
+                    }
+                ],
+                "Childs": []
+            },
+            {
+                "Name": "Quads",
+                "Components": [
+                    {
+                        "ComponentType": "JG::Transform",
+                        "Name": "Transform",
+                        "IsActive": true,
+                        "Location": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "Rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "Scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    }
+                ],
+                "Childs": [
+                    {
+                        "Name": "Quad",
+                        "Components": [
+                            {
+                                "ComponentType": "JG::Transform",
+                                "Name": "Transform",
+                                "IsActive": true,
+                                "Location": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "Rotation": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "Scale": [
+                                    100.0,
+                                    100.0,
+                                    1.0
+                                ]
+                            },
+                            {
+                                "ComponentType": "JG::SpriteRenderer",
+                                "Name": "SpriteRenderer",
+                                "IsActive": true,
+                                "Color": [
+                                    1.0,
+                                    1.0,
+                                    0.843137264251709,
+                                    1.0
+                                ]
+                            }
+                        ],
+                        "Childs": []
+                    },
+                    {
+                        "Name": "Quad2",
+                        "Components": [
+                            {
+                                "ComponentType": "JG::Transform",
+                                "Name": "Transform",
+                                "IsActive": true,
+                                "Location": [
+                                    200.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "Rotation": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "Scale": [
+                                    150.0,
+                                    150.0,
+                                    1.0
+                                ]
+                            },
+                            {
+                                "ComponentType": "JG::SpriteRenderer",
+                                "Name": "SpriteRenderer",
+                                "IsActive": true,
+                                "Color": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    0.9372549057006836
+                                ]
+                            }
+                        ],
+                        "Childs": []
+                    }
+                ]
+            },
+            {
+                "Name": "SubCamera",
+                "Components": [
+                    {
+                        "ComponentType": "JG::Transform",
+                        "Name": "Transform",
+                        "IsActive": true,
+                        "Location": [
+                            150.0,
+                            200.0,
+                            -250.0
+                        ],
+                        "Rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "Scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    },
+                    {
+                        "ComponentType": "JG::Camera",
+                        "Name": "Camera",
+                        "IsActive": true,
+                        "Resolution": [
+                            800.0,
+                            600.0
+                        ],
+                        "NearZ": 0.0010000000474974514,
+                        "FarZ": 10000.0,
+                        "FOV": 90.0,
+                        "Depth": 1,
+                        "CullingLayerMask": 18446744073709551615,
+                        "IsOrthographic": true
+                    }
+                ],
+                "Childs": []
+            }
+        ]
+    }
+}

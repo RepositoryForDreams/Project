@@ -27,7 +27,7 @@ namespace JG
 	void GameLogicSystemLayer::Begin()
 	{
 		static bool testopen = false;
-		UIManager::GetInstance().RegisterMainMenuItem(TT("File/Save World"), 0, [&]() {
+		UIManager::GetInstance().RegisterMainMenuItem(TT("File/Save World %_S"), 0, [&]() {
 			SaveGameWorld();
 		}, nullptr);
 
@@ -112,23 +112,17 @@ namespace JG
 				
 					if (mGameWorld != nullptr)
 					{
-						//auto entry = JGAssetFile::GetEntryJson();
-						////mGameWorld->MakeJson(entry);
-						//JGAssetFile::Write(savePath, EAssetFormat::GameWorld, entry);
+						auto json = CreateSharedPtr<Json>();
+						json->AddMember(JG_ASSET_FORMAT_KEY, (u64)EAssetFormat::GameWorld);
+						auto assetJson = json->CreateJsonData();
+						mGameWorld->MakeJson(assetJson);
+						json->AddMember(JG_ASSET_KEY, assetJson);
+						Json::Write(savePath, json);
 					}
 					else
 					{
 						JG_CORE_ERROR("Failed Save GameWorld : GameWorld is null");
 					}
-
-
-					/*FileStreamWriter writer;
-					if (writer.Open(savePath))
-					{
-						writer.Write(JG_ASSET_FORMAT_KEY, EAssetFormat::GameWorld);
-						writer.Write(JG_GAMEWORLD_ASSET_KEY , *mGameWorld);
-						writer.Close();
-					}*/
 				});
 			}
 			Scheduler::GetInstance().Schedule(1.0f, 0.2f, -1, 0,  [&]()->EScheduleResult
@@ -182,20 +176,28 @@ namespace JG
 				handle = Scheduler::GetInstance().ScheduleAsync([&](void* data)
 				{
 					auto loadPath = CombinePath(Application::GetAssetPath(), TT("testGameWorld")) + JG_ASSET_FORMAT;
-					//FileStreamReader reader;
-					//if (reader.Open(loadPath))
-					//{
-					//	EAssetFormat assetFormat;
-					//	reader.Read(JG_ASSET_FORMAT_KEY , &assetFormat);
-					//	if (assetFormat == EAssetFormat::GameWorld)
-					//	{
-					//		newGameWorld = GameObjectFactory::GetInstance().CreateObject<GameWorld>();
-					//		newGameWorld->SetGlobalGameSystemList(mGameSystemList);
-					//		is_LoadSucess = true;
-					//		reader.Read(JG_GAMEWORLD_ASSET_KEY, newGameWorld);
-					//	}
-					//	reader.Close();
-					//}
+					auto json = CreateSharedPtr<Json>();
+					if (Json::Read(loadPath, json) == true)
+					{
+						EAssetFormat assetFormat = EAssetFormat::None;
+						auto assetFormatVal = json->GetMember(JG_ASSET_FORMAT_KEY);
+						if (assetFormatVal)
+						{
+							assetFormat = (EAssetFormat)assetFormatVal->GetUint64();
+						}
+
+						if (EAssetFormat::GameWorld == assetFormat)
+						{
+							auto assetVal = json->GetMember(JG_ASSET_KEY);
+							if (assetVal)
+							{
+								newGameWorld = GameObjectFactory::GetInstance().CreateObject<GameWorld>();
+								newGameWorld->SetGlobalGameSystemList(mGameSystemList);
+								newGameWorld->LoadJson(assetVal);
+								is_LoadSucess = true;
+							}
+						}
+					}
 				});
 			}
 			Scheduler::GetInstance().Schedule(1.0f, 0.2f, -1, 0, [&]()->EScheduleResult

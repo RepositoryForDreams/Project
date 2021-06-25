@@ -139,6 +139,8 @@ private: \
 		}
 	};
 
+	//class Notify
+
 
 
 	//

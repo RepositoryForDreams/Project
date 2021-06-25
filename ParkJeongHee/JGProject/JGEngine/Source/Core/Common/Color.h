@@ -24,5 +24,12 @@ namespace JG
 		static Color Red()   { return Color(1.0f, 0.0f, 0.0f, 1.0f); }
 		static Color Blue()  { return Color(0.0f, 0.0f, 1.0f, 1.0f); }
 		static Color Green() { return Color(0.0f, 1.0f, 0.0f, 1.0f); }
+	public:
+		bool operator==(const Color& c) {
+			return R == c.R && G == c.G && B == c.B && A == c.A;
+		}
+		bool operator!=(const Color& c) {
+			return !operator==(c);
+		}
 	};
 }

@@ -27,14 +27,16 @@ namespace JG
 		i64 mDepth = 0;
 		u64 mCullingLayerMask = JG_U64_MAX;
 		//
-		bool mIsOrthographic = false;
+		bool mIsOrthographic  = false;
 		//
 		List<SharedPtr<ITexture>> mTargetTextures;
 		SharedPtr<ITexture>       mTargetDepthTexture;
-
+	public:
+		Camera();
 	protected:
 		virtual void Awake() override;
 		virtual void Start() override;
+		virtual void Update() override;
 		virtual void Destory() override;
 	public:
 		virtual void MakeJson(SharedPtr<JsonData> jsonData)   const override;

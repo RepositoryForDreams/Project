@@ -17,15 +17,12 @@ namespace JG
 	{
 
 	}
-
 	void SceneView::Initialize()
 	{
 		auto viewModel = GetViewModel();
 		viewModel->SetMinSize(JVector2(820, 620));
 
 	}
-
-
 	void SceneView::OnGUI()
 	{
 		auto viewModel = GetViewModel();

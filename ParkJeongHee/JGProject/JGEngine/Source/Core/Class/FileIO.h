@@ -91,7 +91,7 @@ namespace JG
 				return nullptr;
 			}
 			auto jsonData = CreateSharedPtr<JsonData>(mJson);
-			jsonData->mValue = (mValue.Begin())[cnt];
+			jsonData->mValue = mValue[(rapidjson::SizeType)index];
 			return jsonData;
 		}
 

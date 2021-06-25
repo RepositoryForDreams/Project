@@ -88,7 +88,7 @@ namespace JG
 		MainCamera  mMainCamera;
 		SharedPtr<Renderer2D> mRenderer2D;
 		// 이카메라로 컬링 또는 
-		Dictionary<Camera*, CameraItem> mRegisteredCameras;
+		Dictionary<Camera*, CameraItem>   mRegisteredCameras;
 		SortedDictionary<i64, CameraItem> mSortedLayerCameraList;
 		Dictionary<Type, u64> mRenderItemPriority;
 		SortedDictionary<u64, Dictionary<Type, List<SharedPtr<IRenderItem>>>> mPushedRenderItems;
@@ -103,7 +103,6 @@ namespace JG
 		virtual void Destroy() override;
 
 		virtual void OnEvent(IEvent& e) override;
-
 		virtual String GetLayerName() override;
 	private:
 		bool ResponsePushRenderItem(RequestPushRenderItemEvent& e);

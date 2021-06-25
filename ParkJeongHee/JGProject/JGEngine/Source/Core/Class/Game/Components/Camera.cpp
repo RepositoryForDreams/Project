@@ -7,7 +7,7 @@
 #include "Graphics/Resource.h"
 namespace JG
 {
-	void Camera::Awake()
+	Camera::Camera()
 	{
 		mTargetTextures.resize(MAX_RENDERTARGET, nullptr);
 		SetFOV(90);
@@ -16,12 +16,20 @@ namespace JG
 		SetOrthographic(true);
 		SetResolution(GameSettings::GetResolution());
 	}
+	void Camera::Awake()
+	{
+
+	}
 
 	void Camera::Start()
 	{
 		RequestRegisterCameraEvent e;
 		e.SharedCamera = this;
 		SendEvent(e);
+	}
+	void Camera::Update()
+	{
+
 	}
 	void Camera::Destory()
 	{
@@ -36,7 +44,7 @@ namespace JG
 		jsonData->AddMember("NearZ", GetNearZ());
 		jsonData->AddMember("FarZ", GetFarZ());
 		jsonData->AddMember("FOV", GetFOV());
-		jsonData->AddMember("Depth", GetFOV());
+		jsonData->AddMember("Depth", GetDepth());
 		jsonData->AddMember("CullingLayerMask", GetCullingLayerMask());
 		jsonData->AddMember("IsOrthographic", IsOrthographic());
 
@@ -55,7 +63,7 @@ namespace JG
 			SetNearZ(val->GetFloat());
 		}
 		val = jsonData->GetMember("FarZ");
-		if (val)
+		if (val )
 		{
 			SetFarZ(val->GetFloat());
 		}
@@ -134,6 +142,17 @@ namespace JG
 		info.Width  = mResolution.x;
 		info.Height = mResolution.y;
 		info.MipLevel = 1;
+		static bool isaa = false;
+		if (isaa == false)
+		{
+			info.ClearColor.A = 1.0f;
+			isaa = true;
+		}
+		else
+		{
+			info.ClearColor.A = 0.0f;
+		}
+		
 		mTargetTextures[0] = (ITexture::Create(GetName() + TT("_CameraTexture"), info));
 
 
@@ -295,26 +314,21 @@ namespace JG
 		if (data.Type == JGTYPE(Transform))
 		{
 			mIsViewDirty = true;
-			//auto transform = static_cast<Transform*>(data.Object);
-			//mCamera->SetLocation(transform->GetWorldLocation());
-			//mCamera->SetRotation(transform->GetWorldRotation());
 		}
 	}
 	void Camera::OnInspectorGUI()
 	{
-		f32 fov = mFov;
-		i64 depth = mDepth;
-		f32 nearZ = mNearZ;
-		f32 farZ = mFarZ;
-		bool isOrth = mIsOrthographic;
-
+		f32 fov   = GetFOV();
+		int depth = GetDepth();
+		f32 nearZ = GetNearZ();
+		f32 farZ  = GetFarZ();
+		bool isOrth = IsOrthographic();
 
 
 		ImGui::OnGui("Field of View", &fov);
 		ImGui::OnGui("Depth", &depth);
 		ImGui::OnGui("NearZ", &nearZ);
 		ImGui::OnGui("FarZ", &farZ);
-
 		ImGui::Checkbox("Orthographic", &isOrth);
 
 

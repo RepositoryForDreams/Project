@@ -11,12 +11,15 @@
 #include "Class/Asset/Asset.h"
 namespace JG
 {
-	void SpriteRenderer::Awake()
+	SpriteRenderer::SpriteRenderer()
 	{
 		mSpriteRI = CreateUniquePtr<Standard2DRenderItem>();
-		mSpriteRI->TargetLayer = GetOwner()->GetLayer();
 		mSpriteRI->WorldMatrix = JMatrix::Identity();
 		mSpriteRI->Color = Color::White();
+	}
+	void SpriteRenderer::Awake()
+	{
+		mSpriteRI->TargetLayer = GetOwner()->GetLayer();
 	}
 	void SpriteRenderer::Start()
 	{

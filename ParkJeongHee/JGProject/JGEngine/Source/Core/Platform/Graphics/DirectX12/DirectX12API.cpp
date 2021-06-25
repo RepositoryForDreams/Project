@@ -257,8 +257,8 @@ namespace JG
 			desc.SrcBlend       = D3D12_BLEND_SRC_ALPHA;
 			desc.DestBlend      = D3D12_BLEND_INV_SRC_ALPHA;
 			desc.BlendOp        = D3D12_BLEND_OP_ADD;
-			desc.SrcBlendAlpha  = D3D12_BLEND_ONE;
-			desc.DestBlendAlpha = D3D12_BLEND_ZERO;
+			desc.SrcBlendAlpha  = D3D12_BLEND_INV_DEST_ALPHA;
+			desc.DestBlendAlpha = D3D12_BLEND_ONE;
 			desc.BlendOpAlpha   = D3D12_BLEND_OP_ADD;
 			desc.RenderTargetWriteMask = 0x0f;
 			break;
