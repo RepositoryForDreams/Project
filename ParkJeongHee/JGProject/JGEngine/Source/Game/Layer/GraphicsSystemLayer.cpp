@@ -10,6 +10,7 @@
 #include "Class/Game/Components/Camera.h"
 #include "Class/Asset/AssetImporter.h"
 
+#include "Imgui/ImGuizmo.h"
 
 
 namespace JG
@@ -28,7 +29,7 @@ namespace JG
 
 	void GraphicsSystemLayer::Begin()
 	{
-		Scheduler::GetInstance().Schedule(0, 0.02f, -1, SchedulePriority::EndSystem, SCHEDULE_BIND_FN(&GraphicsSystemLayer::Update));
+		Scheduler::GetInstance().Schedule(0, 0.0f, -1, SchedulePriority::EndSystem, SCHEDULE_BIND_FN(&GraphicsSystemLayer::Update));
 
 		mMainCamera = MainCamera(GameSettings::GetResolution());
 		mRenderer2D = CreateSharedPtr<Renderer2D>();
@@ -230,6 +231,8 @@ namespace JG
 				}
 				mRenderer2D->End();
 			}
+			
+			mRenderingState = ERenderingState::ReadyCompelete;
 		}
 			mRenderingState = ERenderingState::ReadyCompelete;
 			return EScheduleResult::Continue;

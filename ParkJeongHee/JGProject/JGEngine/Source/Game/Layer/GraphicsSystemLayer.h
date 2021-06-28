@@ -33,6 +33,8 @@ namespace JG
 		private:
 			JVector2 mResolution;
 			JMatrix  mViewProj;
+			JMatrix mView;
+			JMatrix mProj;
 			SharedPtr<ITexture> mTargetTexture;
 		public:
 			MainCamera() = default;
@@ -43,7 +45,8 @@ namespace JG
 				auto proj = JMatrix::OrthographicLH(resolution.x, resolution.y, 0.1f, 1000.0f);
 				auto view = JMatrix::LookAtLH(JVector3(0, 0, -1.0f), JVector3(0.0f, 0.0f, 1.0f), JVector3(0.0f, 1.0f, 0.0f));
 				mViewProj = view * proj;
-
+				mView = view;
+				mProj = proj;
 
 				TextureInfo info = {};
 				info.ArraySize = 1; info.Flags = ETextureFlags::Allow_RenderTarget;
@@ -63,6 +66,12 @@ namespace JG
 			}
 			const JMatrix& GetViewProj() const {
 				return mViewProj;
+			}
+			const JMatrix& GetView() const {
+				return mView;
+			}
+			const JMatrix& GetProj() const {
+				return mProj;
 			}
 			const JVector2& GetResolution() const {
 				return mResolution;
