@@ -99,145 +99,60 @@ private: \
 	};
 
 
+#define CREATE_EVENT(category, className) \
+	class className : public IEvent \
+	{ \
+		EVENTCLASS(##category)\
+	public:\
+		virtual ~##className() = default; \
+		virtual String ToString() const override\
+		{\
+			return TT(#className);\
+		}\
+	};\
+
+#define CREATE_EVENT_ONE_ARG(category, className, argType_1, argName_1) \
+	class className : public IEvent \
+	{ \
+		EVENTCLASS(##category)\
+	public: \
+		argType_1 argName_1; \
+	public:\
+		virtual ~##className() = default; \
+		virtual String ToString() const override\
+		{\
+			return TT(#className);\
+		}\
+	};\
+
+
+
+
+#define NOTIFY_EVENT(className) CREATE_EVENT(EEventCategory::Notify, className)
+#define NOTIFY_ONE_ARG_EVENT(className, argType_1, argName_2) CREATE_EVENT_ONE_ARG(EEventCategory::Notify, className, argType_1, argName_2)
+#define REQUEST_ONE_ARG_EVENT(className, argType_1, argName_2) CREATE_EVENT_ONE_ARG(EEventCategory::Request, className, argType_1, argName_2)
+
+
+
+
 	// Notify
 	class ITexture;
-	class NotifyChangeMainSceneTextureEvent : public IEvent
-	{
-		EVENTCLASS(EEventCategory::Notify)
-	public:
-		SharedPtr<ITexture> SceneTexture;
-	public:
-		virtual ~NotifyChangeMainSceneTextureEvent() = default;
-		virtual String ToString() const override
-		{
-			return TT("NotifyChangeMainSceneTextureEvent");
-		}
-	};
-
-	class NotifyChangeGameWorldEvent : public IEvent
-	{
-		EVENTCLASS(EEventCategory::Notify)
-	public:
-		class GameWorld* GameWorld = nullptr;
-	public:
-		virtual ~NotifyChangeGameWorldEvent() = default;
-		virtual String ToString() const override
-		{
-			return TT("NotifyChangeGameWorldEvent");
-		}
-	};
-
-
-	class NotifyRenderingReadyCompeleteEvent : public IEvent
-	{
-		EVENTCLASS(EEventCategory::Notify)
-	public:
-		virtual ~NotifyRenderingReadyCompeleteEvent() = default;
-		virtual String ToString() const override
-		{
-			return TT("NotifyRenderingReadyCompeleteEvent");
-		}
-	};
-
-	//class Notify
-
-
-
-	//
-	// Request Event
-	class RequestGetGameWorldEvent : public IEvent
-	{
-		EVENTCLASS(EEventCategory::Request)
-	public:
-		class GameWorld* GameWorld = nullptr;
-	public:
-		virtual ~RequestGetGameWorldEvent() = default;
-		virtual String ToString() const override
-		{
-			return TT("RequestGetGameWorldEvent");
-		}
-	};
-
-	class ITexture;
-	class RequestGetMainSceneTextureEvent : public IEvent
-	{
-		EVENTCLASS(EEventCategory::Request)
-	public:
-		SharedPtr<ITexture> SceneTexture;
-	public:
-		virtual ~RequestGetMainSceneTextureEvent() = default;
-		virtual String ToString() const override
-		{
-			return TT("RequestGetMainSceneTextureEvent");
-		}
-	};
-
+	class GameWorld;
 	class IRenderItem;
-	class RequestPushRenderItemEvent : public IEvent
-	{
-		EVENTCLASS(EEventCategory::Request)
-	public:
-		SharedPtr<IRenderItem> RenderItem;
-	public:
-		virtual ~RequestPushRenderItemEvent() = default;
-		virtual String ToString() const override
-		{
-			return TT("PushRenderItemEvent");
-		}
-	};
-
-
-	class RequestResolutionResizeEvent : public IEvent
-	{
-		EVENTCLASS(EEventCategory::Request)
-	public:
-		JVector2 Resolution;
-	public:
-		virtual ~RequestResolutionResizeEvent() = default;
-		virtual String ToString() const override
-		{
-			return TT("RequestResolutionResizeEvent : X : ") + std::to_wstring(Resolution.x) + TT(", Y : ") + std::to_wstring(Resolution.y);
-		}
-	};
-
-
-
 	class Camera;
-	class RequestRegisterCameraEvent : public IEvent
-	{
-		EVENTCLASS(EEventCategory::Request)
-	public:
-		Camera* SharedCamera;
-	public:
-		virtual ~RequestRegisterCameraEvent() = default;
-		virtual String ToString() const override
-		{
-			return TT("RequestRegisterCameraEvent");
-		}
-	};
-
-
-	class RequestUnRegisterCameraEvent : public IEvent
-	{
-		EVENTCLASS(EEventCategory::Request)
-	public:
-		Camera* SharedCamera;
-	public:
-		virtual ~RequestUnRegisterCameraEvent() = default;
-		virtual String ToString() const override
-		{
-			return TT("RequestUnRegisterCameraEvent");
-		}
-	};
+	class GameNode;
+	NOTIFY_EVENT(NotifyRenderingReadyCompeleteEvent)
+	NOTIFY_ONE_ARG_EVENT(NotifyChangeMainSceneTextureEvent, SharedPtr<ITexture>, SceneTexture)
+	NOTIFY_ONE_ARG_EVENT(NotifyChangeGameWorldEvent, GameWorld*, GameWorld)
+	NOTIFY_ONE_ARG_EVENT(NotifyEditorSceneOnClickEvent, JVector2, ClickPos)
+	NOTIFY_ONE_ARG_EVENT(NotifySelectedGameNodeInEditor, GameNode*, SelectedGameNode)
 
 
 
-
-
-
-
-
-
-
-
+	REQUEST_ONE_ARG_EVENT(RequestGetGameWorldEvent, GameWorld*, GameWorld)
+	REQUEST_ONE_ARG_EVENT(RequestPushRenderItemEvent, SharedPtr<IRenderItem>, RenderItem)
+	REQUEST_ONE_ARG_EVENT(RequestRegisterCameraEvent, Camera*, pCamera)
+	REQUEST_ONE_ARG_EVENT(RequestUnRegisterCameraEvent, Camera*, pCamera)
+	REQUEST_ONE_ARG_EVENT(RequestRegisterMainCameraEvent, Camera*, MainCamera)
+	REQUEST_ONE_ARG_EVENT(RequestUnRegisterMainCameraEvent, Camera*, MainCamera)
 }

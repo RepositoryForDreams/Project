@@ -48,7 +48,9 @@ namespace JG
 		Queue<String> mWaitingLoadAsset;
 		std::shared_mutex mMutex;
 		bool mIsResetting = false;
+
 	public:
+	
 		AssetID  AsyncLoadAsset(const String& path);
 		AssetID  RequestReadWriteAsset(const String& path);
 		void Reset();

@@ -195,6 +195,7 @@ namespace JG
 		virtual TextureID          GetTextureID() const override;
 		virtual const TextureInfo& GetTextureInfo() const override;
 		virtual void SetTextureInfo(const TextureInfo& info) override;
+		virtual void SetClearColor(const Color& clearColor) override;
 		virtual bool IsValid() const override;
 	public:
 		void Create(const String& name, const TextureInfo& info);

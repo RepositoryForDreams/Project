@@ -75,7 +75,7 @@ namespace JG
 		
 		auto fileName = fs::path(settings.AssetPath).filename().wstring();
 		u64 extentionPos = fileName.find_last_of(TT("."));
-		stock.Name = fileName.substr(0, extentionPos - 1);
+		stock.Name = fileName.substr(0, extentionPos);
 		
 		
 		byte* pixels = stbi_load(ws2s(settings.AssetPath).c_str(), &stock.Width, &stock.Height, &stock.Channels, 0);

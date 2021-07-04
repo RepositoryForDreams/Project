@@ -38,6 +38,10 @@ namespace JG
 
 		JMatrix(const JMatrix& copy) = default;
 		JMatrix(JMatrix&& rhs) = default;
+
+		float* GetFloatPtr() const {
+			return (float*)m_Data.m;
+		}
 	public: // ¿¬»êÀÚ
 		JMatrix& operator=(const JMatrix& rhs) = default;
 		JMatrix& operator=(JMatrix&& rhs) = default;

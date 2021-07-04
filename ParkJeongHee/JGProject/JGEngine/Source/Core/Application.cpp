@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "Application.h"
+#include "Common/Assert.h"
 #include "Class/Asset/Asset.h"
 
 
@@ -73,7 +74,6 @@ namespace JG
 			JG_CORE_INFO("Successed Create Window");
 			mGraphcisAPI->Create();
 			ShaderLibrary::Create();
-			Renderer::Create();
 
 			
 			mIsRunning = true;
@@ -134,7 +134,6 @@ namespace JG
 		mGraphcisAPI->Flush();
 		UIManager::Destroy();
 		mLayerStack.reset();
-		Renderer::Destroy();
 		GameLayerManager::Destroy();
 		AssetDataBase::Destroy();
 		ShaderLibrary::Destroy();

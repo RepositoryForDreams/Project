@@ -682,6 +682,10 @@ namespace JG
 		mD3DResource->SetName(GetName().c_str());
 		ResourceStateTracker::RegisterResource(GetName(), mD3DResource.Get(), D3D12_RESOURCE_STATE_COMMON);
 	}
+	void DirectX12Texture::SetClearColor(const Color& clearColor)
+	{
+		mTextureInfo.ClearColor = clearColor;
+	}
 	bool DirectX12Texture::IsValid() const
 	{
 		

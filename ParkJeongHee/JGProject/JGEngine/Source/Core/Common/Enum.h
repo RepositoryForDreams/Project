@@ -49,6 +49,12 @@ namespace JG
 		GameWorld,
 	};
 
+	enum class ERendererPath
+	{
+		Foward,
+		Deferred,
+	};
+
 	enum class EKeyCode
 	{
 		Unknown = 0,

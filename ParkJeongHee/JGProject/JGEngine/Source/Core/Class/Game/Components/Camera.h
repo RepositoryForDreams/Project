@@ -7,30 +7,34 @@ namespace JG
 {
 	class Camera : public GameComponent
 	{
+		static Camera* smMainCamera;
+	public:
+		static Camera* GetMainCamera();
 	private:
 		friend class GraphicsSystemLayer;
 	private:
 		JGCLASS
 		mutable bool mIsViewDirty = true;
 		mutable bool mIsProjDirty = true;
+	
 		//
 		mutable JMatrix  mProjMatrix;
 		mutable JMatrix  mViewMatrix;
 		mutable JMatrix  mViewProjMatrix;
 		//
 		JVector2 mResolution;
+		Color    mClearColor;
 		//
 		f32 mNearZ = 0.0f;
-		f32 mFarZ = 0.0f;
-		f32 mFov = 0.0f;
+		f32 mFarZ  = 0.0f;
+		f32 mFov   = 0.0f;
 		//
-		i64 mDepth = 0;
 		u64 mCullingLayerMask = JG_U64_MAX;
 		//
 		bool mIsOrthographic  = false;
-		//
-		List<SharedPtr<ITexture>> mTargetTextures;
-		SharedPtr<ITexture>       mTargetDepthTexture;
+		bool mIsMainCamera    = false;
+
+		ERendererPath mRendererPath = ERendererPath::Foward;
 	public:
 		Camera();
 	protected:
@@ -49,7 +53,8 @@ namespace JG
 		void SetOrthographic(bool isOrthographic);
 		void SetResolution(const JVector2& resolution);
 		void SetCullingLayerMask(u64 mask);
-		void SetDepth(i64 depth);
+		void SetClearColor(const Color& color);
+		void SetRendererPath(ERendererPath rendererPath);
 	public:
 		const JMatrix& GetViewProjMatrix() const;
 		const JMatrix& GetViewMatrix() const;
@@ -66,12 +71,10 @@ namespace JG
 		bool IsOrthographic() const;
 		float GetAspectRatio() const;
 		const JVector2& GetResolution() const;
-		SharedPtr<ITexture> GetTargetTexture(u8 slot = 0) const;
-		const List<SharedPtr<ITexture>>& GetTargetTextures() const;
-		SharedPtr<ITexture> GetTargetDepthTexture() const;
+		const Color& GetClearColor() const;
 
 		u64 GetCullingLayerMask() const;
-		i64 GetDepth() const;
+		ERendererPath GetRendererPath() const;
 	private:
 		bool UpdateProj() const;
 		bool UpdateView() const;

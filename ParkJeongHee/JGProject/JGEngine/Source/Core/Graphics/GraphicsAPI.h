@@ -25,14 +25,14 @@ namespace JG
 	{
 	public:
 		virtual EGraphicsAPI GetAPI() const = 0;
+		virtual u64 GetBufferCount() const = 0;
+	
 	protected:
 		friend class Application;
 		virtual bool Create() = 0;
 		virtual void Destroy() = 0;
 
-		
-		friend class Renderer2D;
-		friend class Renderer;
+	public:
 		virtual void Begin() = 0;
 		virtual void End()	 = 0;
 		virtual void Flush() = 0;
@@ -50,15 +50,7 @@ namespace JG
 
 
 		// Create Resource
-		friend IVertexBuffer;
-		friend IIndexBuffer;
-		friend IShader;
-		friend IFrameBuffer;
-		friend ITexture;
-		friend IMesh;
-		friend IMaterial;
-		friend IComputeBuffer;
-		friend IComputer;
+
 
 		virtual SharedPtr<IFrameBuffer>   CreateFrameBuffer(const FrameBufferInfo& settings) = 0;
 		virtual SharedPtr<IVertexBuffer>  CreateVertexBuffer(const String& name, EBufferLoadMethod method) = 0;
@@ -70,7 +62,6 @@ namespace JG
 		virtual SharedPtr<IMesh>          CreateMesh(const String& name) = 0;
 		virtual SharedPtr<ITexture>       CreateTexture(const String& name, const TextureInfo& info) = 0;
 		virtual SharedPtr<ITexture>       CreateTextureFromFile(const String& path) = 0;
-	public:
 		virtual void ClearTexture(SharedPtr<ITexture> texture);
 	public:
 		static UniquePtr<IGraphicsAPI> Create(EGraphicsAPI api);

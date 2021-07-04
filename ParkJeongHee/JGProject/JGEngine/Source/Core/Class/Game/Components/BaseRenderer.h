@@ -9,11 +9,8 @@ namespace JG
 {
 	class BaseRenderer : public GameComponent
 	{
-
-
 	public:
-		~BaseRenderer() = default;
-
+		virtual ~BaseRenderer() = default;
 	};
 
 

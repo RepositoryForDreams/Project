@@ -71,8 +71,7 @@ namespace JG
 				if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
 					continue;
 
-				if (desc.DedicatedVideoMemory > maxSize &&
-					SUCCEEDED(D3D12CreateDevice(pAdapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&pDevice))))
+				if (desc.DedicatedVideoMemory > maxSize && SUCCEEDED(D3D12CreateDevice(pAdapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&pDevice))))
 				{
 					pAdapter->GetDesc1(&desc);
 					maxSize = desc.DedicatedVideoMemory;
@@ -88,7 +87,28 @@ namespace JG
 			{
 				return nullptr;
 			}
+#ifdef _DEBUG
+			if (pDevice)
+			{
 
+				ComPtr<ID3D12InfoQueue> infoQueue;
+				pDevice.As(&infoQueue);
+
+				D3D12_MESSAGE_ID denyIds[] = {
+				  D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE,
+				};
+				D3D12_MESSAGE_SEVERITY severities[] = {
+				  D3D12_MESSAGE_SEVERITY_INFO
+				};
+				D3D12_INFO_QUEUE_FILTER filter{};
+				filter.DenyList.NumIDs = _countof(denyIds);
+				filter.DenyList.pIDList = denyIds;
+				filter.DenyList.NumSeverities = _countof(severities);
+				filter.DenyList.pSeverityList = severities;
+
+				infoQueue->PushStorageFilter(&filter);
+			}
+#endif
 			return pDevice;
 		}
 	}

@@ -34,6 +34,7 @@ namespace JG
 		{
 			std::lock_guard<std::shared_mutex> lock(mMutex);
 			mLoadingAssetPool.emplace(path, CreateSharedPtr<LoadingData>());
+			mLoadingAssetPool[path]->Path = path;
 		}
 		
 		
@@ -55,7 +56,7 @@ namespace JG
 				mLoadingAssetPool.erase(loadingData->Path);
 			}
 		}, mLoadingAssetPool[path].get());
-
+		//mLoadingAssetPool[path].get(), sizeof(LoadingData));
 		return AssetID();
 	}
 
@@ -133,6 +134,17 @@ namespace JG
 			return nullptr;
 		}
 		EAssetFormat assetFormat = EAssetFormat::None;
+
+		auto json = CreateSharedPtr<Json>();
+		if (Json::Read(assetPath, json) == false)
+		{
+			JG_CORE_ERROR("Fail Load Asset : {0}", assetPath);
+			return nullptr;
+		}
+		
+		//TextureAssetStock stock;
+		//stock.LoadJson()
+
 		//FileStreamReader reader;
 		//if (reader.Open(assetPath) == true)
 		//{

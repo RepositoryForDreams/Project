@@ -8,8 +8,6 @@ namespace JG
 	class ITexture;
 	class IMaterial 
 	{
-		friend class Renderer2D;
-		friend class Renderer;
 	public:
 		virtual bool SetFloat(const String& name, float value) = 0;
 		virtual bool SetFloat2(const String& name, const JVector2& value) = 0;
@@ -71,6 +69,7 @@ namespace JG
 		virtual const String& GetName() const = 0;
 	protected:
 		virtual void Init(SharedPtr<IShader> shader) = 0;
+	public:
 		virtual bool Bind() = 0;
 	public:
 		virtual ~IMaterial() = default;

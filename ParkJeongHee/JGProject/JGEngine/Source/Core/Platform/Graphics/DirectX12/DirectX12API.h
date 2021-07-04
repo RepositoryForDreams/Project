@@ -28,6 +28,7 @@ namespace JG
 	{
 	public:
 		virtual EGraphicsAPI GetAPI()const override;
+		virtual u64 GetBufferCount() const override;
 	public:
 		static IDXGIFactory4* GetDXGIFactory();
 		static ID3D12Device*  GetD3DDevice();

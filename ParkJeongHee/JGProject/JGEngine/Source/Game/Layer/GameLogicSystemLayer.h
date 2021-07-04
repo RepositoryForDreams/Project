@@ -27,6 +27,7 @@ namespace JG
 	public:
 		bool ResponseGetGameWorld(RequestGetGameWorldEvent& e);
 		bool ResponseNotfyRenderingReadyCompelete(NotifyRenderingReadyCompeleteEvent& e);
+		bool ResponseEditorSceneOnClickEvent(NotifyEditorSceneOnClickEvent& e);
 	private:
 		void RegisterGlobalGameSystem();
 		void RegisterGameObjectType();

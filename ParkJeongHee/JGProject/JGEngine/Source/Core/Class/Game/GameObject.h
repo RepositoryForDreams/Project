@@ -22,6 +22,7 @@ namespace JG
 		virtual void Start()   = 0;
 		virtual void Destory() = 0;
 	public:
+		virtual const String& GetName() const = 0;
 		virtual void  SetName(const String& name) = 0;
 	};
 

@@ -40,6 +40,8 @@ namespace JG
 		RegisterGlobalGameSystem();
 		mGameWorld = GameObjectFactory::GetInstance().CreateObject<GameWorld>();
 		mGameWorld->SetGlobalGameSystemList(mGameSystemList); 
+
+		LoadGameWrold();
 	}
 	void GameLogicSystemLayer::Destroy()
 	{
@@ -71,6 +73,17 @@ namespace JG
 				e.RenderItem = item;
 				Application::GetInstance().SendEvent(e);
 			}
+		}
+		return true;
+	}
+	bool GameLogicSystemLayer::ResponseEditorSceneOnClickEvent(NotifyEditorSceneOnClickEvent& e)
+	{
+		if (mGameWorld != nullptr)
+		{
+
+
+
+
 		}
 		return true;
 	}

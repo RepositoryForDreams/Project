@@ -11,117 +11,131 @@
 
 namespace JG
 {
-	/* Renderer State
-	* 
-	
-	*/
-	enum class ERendererState
+	bool IRenderer::BeginBatch(const RenderInfo& info, List<SharedPtr<IRenderBatch>> batchList)
 	{
-		Wait,
-		Run
-	};
-	struct RendererState
-	{
-		static std::atomic<ERendererState> mState;
-		static std::mutex mMutex;
-
-	public:
-		static void SetState(ERendererState state)
+		bool result = true;
+		mBatchList = batchList;
+		if (mBatchList.empty() == false)
 		{
-			mState = state;
+			for (auto& batch : mBatchList)
+			{
+				batch->ConnectRenderer(this);
+				if (batch->Begin(info) == false)
+				{
+					result = false;
+				}
+			}
 		}
-		static ERendererState GetState() {
-			return mState;
-		}
-
-		static bool IsRunable() {
-			return mState == ERendererState::Wait;
-		}
-
-	};
-
-	std::atomic<ERendererState> RendererState::mState = ERendererState::Wait;
-
-	bool Renderer::Create()
-	{
-		return true;
+		return result;
 	}
-	void Renderer::Destroy()
-	{
 
-	}
-	bool Renderer::Begin(SharedPtr<Camera> camera)
+	void IRenderer::EndBatch()
 	{
-		if (RendererState::IsRunable() == false)
+		for (auto& batch : mBatchList)
+		{
+			batch->End();
+		}
+		mBatchList.clear();
+	}
+
+
+	bool FowardRenderer::Begin(const RenderInfo& info, List<SharedPtr<IRenderBatch>> batchList)
+	{
+		if (mIsRun == true)
 		{
 			return false;
 		}
-
-		auto api = Application::GetInstance().GetGraphicsAPI();
-		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
-
-		if (camera == nullptr)
-		{
-			return false;
-		}
-		RendererState::SetState(ERendererState::Run);
-		// TODO Camera 
-		auto targetTextures = camera->GetTargetTextures();
-		auto depthTargetTexture = camera->GetTargetDepthTexture();
-
-
-		auto resolution = camera->GetResolution();
-		api->SetViewports({ Viewport(resolution.x, resolution.y) });
-		api->SetScissorRects({ ScissorRect(0,0, resolution.x,resolution.y) });
-		api->ClearRenderTarget(targetTextures, depthTargetTexture);
-		api->SetRenderTarget(targetTextures, depthTargetTexture);
-		return true;
-	}
-
-	void Renderer::DrawCall(SharedPtr<IMesh> mesh, SharedPtr<IMaterial> material)
-	{
 		auto api = Application::GetInstance().GetGraphicsAPI();
 		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
 
 
-		if (material->Bind() == false)
+		if (info.TargetTexture == nullptr)
+		{
+			return false;
+		}
+		if (mRenderTarges.empty())
+		{
+			mRenderTarges.resize(MAX_RENDERTARGET, nullptr);
+		}
+
+		mRenderTarges[0] = info.TargetTexture;
+
+		api->SetViewports({ Viewport(info.Resolutoin.x, info.Resolutoin.y) });
+		api->SetScissorRects({ ScissorRect(0,0, info.Resolutoin.x,info.Resolutoin.y) });
+		api->ClearRenderTarget(mRenderTarges, info.TargetDepthTexture);
+		api->SetRenderTarget(mRenderTarges, info.TargetDepthTexture);
+
+
+		return BeginBatch(info, batchList);
+	}
+	void FowardRenderer::DrawCall(SharedPtr<IMesh> mesh, SharedPtr<IMaterial> material)
+	{
+		if (mesh == nullptr || material == nullptr)
 		{
 			return;
 		}
+
 		if (mesh->Bind() == false)
 		{
-			return;
+			JG_CORE_ERROR("{0} : Fail Mesh Bind", mesh->GetName());
 		}
-
+		if (material->Bind() == false)
+		{
+			JG_CORE_INFO("{0} : Fail Material Bind", material->GetName());
+		}
+		auto api = Application::GetInstance().GetGraphicsAPI();
+		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
 		api->DrawIndexed(mesh->GetIndexCount());
 	}
-
-	void Renderer::End()
+	void FowardRenderer::End()
 	{
-		RendererState::SetState(ERendererState::Wait);
+		EndBatch();
 	}
 
-
-
-
-	Renderer2D::Renderer2D()
+	Render2DBatch::Render2DBatch()
 	{
-		mQuadMesh = IMesh::Create(TT("Renderer2D_QuadMesh"));
-		
+		auto bufferCnt = Application::GetInstance().GetGraphicsAPI()->GetBufferCount();
+		mFrameResources.resize(bufferCnt);
+
 		auto inputLayout = InputLayout::Create();
 		inputLayout->Add(EShaderDataType::_float3, "POSITION", 0);
 		inputLayout->Add(EShaderDataType::_float2, "TEXCOORD", 0);
 		inputLayout->Add(EShaderDataType::_float4, "COLOR", 0);
 		inputLayout->Add(EShaderDataType::_int, "TEXTUREINDEX", 0);
-		mQuadMesh->SetInputLayout(inputLayout);
-		
-		mQuadVBuffer = IVertexBuffer::Create(TT("Renderer2D_VBuffer"), EBufferLoadMethod::CPULoad);
-		mQuadIBuffer = IIndexBuffer::Create(TT("Renderer2D_IBuffer"), EBufferLoadMethod::CPULoad);
-		mQuadMesh->AddVertexBuffer(mQuadVBuffer);
-		mQuadMesh->SetIndexBuffer(mQuadIBuffer);
-		
-		mStandard2DShader = ShaderLibrary::GetInstance().Get(ShaderScript::Standard2DShader);
-		mStandard2DMaterial = IMaterial::Create(TT("Standard2DMaterial"), mStandard2DShader);
+
+		auto _2dShader = ShaderLibrary::GetInstance().Get(ShaderScript::Standard2DShader);
+
+		TextureInfo textureInfo;
+		textureInfo.Width = 1; textureInfo.Height = 1; 	textureInfo.MipLevel = 1; 	textureInfo.ArraySize = 1;
+		textureInfo.ClearColor = Color::White();
+		textureInfo.Format = ETextureFormat::R8G8B8A8_Unorm; textureInfo.Flags = ETextureFlags::Allow_RenderTarget;
+		mWhiteTexture = ITexture::Create(TT("WhiteTexture"), textureInfo);
+
+		for (i32 i = 0; i < bufferCnt; ++i)
+		{
+			FrameResource rsc;
+			rsc.QuadMesh = IMesh::Create(TT("Renderer2D_QuadMesh"));
+			rsc.QuadMesh->SetInputLayout(inputLayout);
+
+			rsc.QuadVBuffer = IVertexBuffer::Create(TT("Renderer2D_VBuffer"), EBufferLoadMethod::CPULoad);
+			rsc.QuadIBuffer = IIndexBuffer::Create(TT("Renderer2D_IBuffer"), EBufferLoadMethod::CPULoad);
+
+			rsc.QuadMesh->AddVertexBuffer(rsc.QuadVBuffer);
+			rsc.QuadMesh->SetIndexBuffer(rsc.QuadIBuffer);
+
+			rsc.Standard2DMaterial = IMaterial::Create(TT("Standard2DMaterial"), _2dShader);
+
+			if (rsc.Standard2DMaterial->SetTexture(TT("gTexture"), 0, mWhiteTexture) == false)
+			{
+				JG_CORE_ERROR("Failed Set Texture in WhiteTexture");
+				return;
+			}
+			rsc.Standard2DMaterial->SetDepthStencilState(EDepthStencilStateTemplate::NoDepth);
+			rsc.Standard2DMaterial->SetBlendState(0, EBlendStateTemplate::Transparent_Default);
+
+			mFrameResources[i] = rsc;
+		}
+
 		mStandardQuadPosition[0] = JVector3(-0.5f, -0.5f, 0.0f);
 		mStandardQuadPosition[1] = JVector3(-0.5f, +0.5f, 0.0f);
 		mStandardQuadPosition[2] = JVector3(+0.5f, +0.5f, 0.0f);
@@ -146,69 +160,43 @@ namespace JG
 			offset += QuadVertexCount;
 		}
 		mTextureArray.resize(MaxTextureCount, nullptr);
-
-
-		TextureInfo textureInfo;
-		textureInfo.Width = 1; textureInfo.Height = 1; 	textureInfo.MipLevel = 1; 	textureInfo.ArraySize = 1;
-		textureInfo.ClearColor = Color::White();
-		textureInfo.Format = ETextureFormat::R8G8B8A8_Unorm; textureInfo.Flags = ETextureFlags::Allow_RenderTarget;
-		mWhiteTexture = ITexture::Create(TT("WhiteTexture"), textureInfo);
 		mTextureArray[0] = mWhiteTexture;
 
 		auto api = Application::GetInstance().GetGraphicsAPI();
 		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
 		api->ClearRenderTarget({ mWhiteTexture }, nullptr);
 
-
-		if (mStandard2DMaterial->SetTexture(TT("gTexture"), 0, mWhiteTexture) == false)
-		{
-			JG_CORE_ERROR("Failed Set Texture in WhiteTexture");
-			return;
-		}
-		mStandard2DMaterial->SetDepthStencilState(EDepthStencilStateTemplate::NoDepth);
-		mStandard2DMaterial->SetBlendState(0, EBlendStateTemplate::Transparent_Default);
-
 		StartBatch();
 	}
 
-	Renderer2D::~Renderer2D()
+	Render2DBatch::~Render2DBatch()
 	{
-
+	
 	}
 
-	bool Renderer2D::Begin(SharedPtr<Camera> camera)
+	bool Render2DBatch::Begin(const RenderInfo& info)
 	{
-		if (camera == nullptr)
+		if (GetConnectedRenderer() == nullptr)
 		{
 			return false;
 		}
-		return Begin(camera->GetResolution(), camera->GetViewProjMatrix(), camera->GetTargetTexture());
-	}
-	bool Renderer2D::Begin(const JVector2& resolution, const JMatrix& viewProj, SharedPtr<ITexture> targetTexture)
-	{
-		auto api = Application::GetInstance().GetGraphicsAPI();
-		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
-
-		api->SetViewports({ Viewport(resolution.x, resolution.y) });
-		api->SetScissorRects({ ScissorRect(0,0, resolution.x,resolution.y) });
-		api->ClearRenderTarget({ targetTexture }, nullptr);
-		api->SetRenderTarget({ targetTexture }, nullptr);
-
-		auto transposedViewProj = JMatrix::Transpose(viewProj);
-		if (mStandard2DMaterial->SetFloat4x4(ShaderScript::Standard2D::ViewProj, transposedViewProj) == false)
+		mCurrFrameResource = &mFrameResources[info.CurrentBufferIndex];
+		auto transposedViewProj = JMatrix::Transpose(info.ViewProj);
+		if (mCurrFrameResource->Standard2DMaterial->SetFloat4x4(ShaderScript::Standard2D::ViewProj, transposedViewProj) == false)
 		{
 			JG_CORE_ERROR("Failed Set ViewProjMatrix in Renderer2D");
 			return false;
 		}
 		return true;
 	}
-	void Renderer2D::End()
+
+	void Render2DBatch::End()
 	{
 		NextBatch();
 	}
 
 
-	void Renderer2D::DrawCall(const JMatrix& transform, SharedPtr<ITexture> texture, const Color& color)
+	void Render2DBatch::DrawCall(const JMatrix& transform, SharedPtr<ITexture> texture, const Color& color)
 	{
 		if (mQuadCount >= MaxQuadCount || mTextureCount >= MaxTextureCount)
 		{
@@ -223,7 +211,7 @@ namespace JG
 				{
 					mTextureCount++;
 					mTextureArray[textureIndex] = texture;
-					if (mStandard2DMaterial->SetTexture(ShaderScript::Standard2D::Texture, textureIndex, mTextureArray[textureIndex]) == false)
+					if (mCurrFrameResource->Standard2DMaterial->SetTexture(ShaderScript::Standard2D::Texture, textureIndex, mTextureArray[textureIndex]) == false)
 					{
 						JG_CORE_ERROR("Failed Set Texture Slot : {0}", textureIndex);
 					}
@@ -244,43 +232,44 @@ namespace JG
 		}
 		mQuadCount++;
 	}
-	void Renderer2D::DrawCall(const JVector2& Pos, const JVector2& Size, float rotation, SharedPtr<ITexture> texture, const Color& color)
+	void Render2DBatch::DrawCall(const JVector2& Pos, const JVector2& Size, float rotation, SharedPtr<ITexture> texture, const Color& color)
 	{
 		JMatrix transform =
 		JMatrix::Scaling(JVector3(Size, 1.0f)) * JMatrix::Rotation(JVector3(0.0f, 0.0f, Math::ConvertToRadians(rotation))) * JMatrix::Translation(JVector3(Pos, 0.0f));
 		DrawCall(transform, texture, color);
 	}
-	void Renderer2D::DrawCall(const JVector2& Pos, const JVector2& Size, float rotation, const Color& color)
+	void Render2DBatch::DrawCall(const JVector2& Pos, const JVector2& Size, float rotation, const Color& color)
 	{
 		DrawCall(Pos, Size, rotation, nullptr, color);
 	}
-	void Renderer2D::DrawCall(const JVector2& Pos, const JVector2& Size, float rotation, SharedPtr<ITexture> texture)
+	void Render2DBatch::DrawCall(const JVector2& Pos, const JVector2& Size, float rotation, SharedPtr<ITexture> texture)
 	{
 		DrawCall(Pos, Size, rotation, texture, Color::White());
 	}
-	void Renderer2D::DrawCall(const JVector2& Pos, const JVector2& Size, const Color& color)
+	void Render2DBatch::DrawCall(const JVector2& Pos, const JVector2& Size, const Color& color)
 	{
 		DrawCall(Pos, Size, 0, color);
 	}
-	void Renderer2D::DrawCall(const JVector2& Pos, const JVector2& Size, SharedPtr<ITexture> texture)
+	void Render2DBatch::DrawCall(const JVector2& Pos, const JVector2& Size, SharedPtr<ITexture> texture)
 	{
 		DrawCall(Pos, Size, 0, texture);
 	}
 
-	void Renderer2D::StartBatch()
+
+	void Render2DBatch::StartBatch()
 	{
 		mQuadCount = 0;
 		mTextureCount = 1;
 	}
 
-	void Renderer2D::NextBatch()
+	void Render2DBatch::NextBatch()
 	{
 		if (mQuadCount == 0) return;
 		
 		auto api = Application::GetInstance().GetGraphicsAPI();
 		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
 
-		if (mStandard2DMaterial->Bind() == false)
+		if (mCurrFrameResource->Standard2DMaterial->Bind() == false)
 		{
 			JG_CORE_ERROR("Failed Bind StandardMaterial");
 			StartBatch();
@@ -291,9 +280,9 @@ namespace JG
 		u32 quadIndexCount = mQuadCount * QuadIndexCount;
 		
 		
-		mQuadVBuffer->SetData(mVertices.data(), sizeof(QuadVertex), quadVertexCount);
-		mQuadIBuffer->SetData(mIndices.data(), quadIndexCount);
-		if (mQuadMesh->Bind() == false)
+		mCurrFrameResource->QuadVBuffer->SetData(mVertices.data(), sizeof(QuadVertex), quadVertexCount);
+		mCurrFrameResource->QuadIBuffer->SetData(mIndices.data(), quadIndexCount);
+		if (mCurrFrameResource->QuadMesh->Bind() == false)
 		{
 			JG_CORE_ERROR("Failed Bind QuadMesh");
 			StartBatch();
@@ -304,4 +293,7 @@ namespace JG
 		api->DrawIndexed(quadIndexCount);
 		StartBatch();
 	}
+
+
+
 }

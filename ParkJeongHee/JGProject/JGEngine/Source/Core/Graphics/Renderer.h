@@ -13,29 +13,76 @@ namespace JG
 	class Camera;
 	class IVertexBuffer;
 	class IIndexBuffer;
+	class IRenderBatch;
 
 
-	class Renderer
+
+	struct RenderInfo
 	{
-		friend Application;
-	public:
-		struct Statistics
-		{
-			u32 DrawCalls = 0;
-		};
-	private:
-		static bool Create();
-		static void Destroy();
-	public:
-		static bool Begin(SharedPtr<Camera> camera);
-		static void DrawCall(SharedPtr<IMesh> mesh, SharedPtr<IMaterial> material);
-		static void End();
+		SharedPtr<ITexture> TargetTexture;
+		SharedPtr<ITexture> TargetDepthTexture;
+		JVector2 Resolutoin;
+		JMatrix  ViewProj;
+		u64 CurrentBufferIndex = 0;
 	};
 
 
+	class IRenderer
+	{
+	private:
+		List<SharedPtr<IRenderBatch>> mBatchList;
+	public:
+		IRenderer() = default;
+		virtual ~IRenderer() = default;
+	public:
+		virtual bool Begin(const RenderInfo& info, List<SharedPtr<IRenderBatch>> batchList) = 0;
+		virtual void DrawCall(SharedPtr<IMesh> mesh, SharedPtr<IMaterial> material) = 0;
+		virtual void End() = 0;
+
+		virtual ERendererPath GetRendererPath() const = 0;
+
+	protected:
+		bool BeginBatch(const RenderInfo& info, List<SharedPtr<IRenderBatch>> batchList);
+		void EndBatch();
+	};
+
+	class FowardRenderer : public IRenderer
+	{
+	private:
+		bool mIsRun = false;
+		List<SharedPtr<ITexture>> mRenderTarges;
+	public:
+		FowardRenderer() = default;
+		virtual ~FowardRenderer() = default;
+	public:
+		virtual bool Begin(const RenderInfo& info, List<SharedPtr<IRenderBatch>> batchList) override;
+		virtual void DrawCall(SharedPtr<IMesh> mesh, SharedPtr<IMaterial> material) override;
+		virtual void End() override;
+		virtual ERendererPath GetRendererPath() const override { return ERendererPath::Foward; }
+	};
+
+	class IRenderBatch
+	{
+		IRenderer* mConnectedRenderer = nullptr;
+	public:
+		IRenderBatch() = default;
+		virtual ~IRenderBatch() = default;
+	public:
+		void ConnectRenderer(IRenderer* renderer) {
+			mConnectedRenderer = renderer;
+		}
+		IRenderer* GetConnectedRenderer() const {
+			return mConnectedRenderer;
+		}
+
+	protected:
+		friend IRenderer;
+		virtual bool Begin(const RenderInfo& info) = 0;
+		virtual void End() = 0;
+	};
 
 
-	class Renderer2D
+	class Render2DBatch : public IRenderBatch
 	{
 		struct QuadVertex
 		{
@@ -49,6 +96,13 @@ namespace JG
 				: Pos(pos), Tex(tex), _Color(color), TextureIndex(textureIndex) {}
 		};
 
+		struct FrameResource
+		{
+			SharedPtr<IMesh> QuadMesh;
+			SharedPtr<IVertexBuffer> QuadVBuffer;
+			SharedPtr<IIndexBuffer> QuadIBuffer;
+			SharedPtr<IMaterial> Standard2DMaterial;
+		};
 	private:
 		static const u32 MaxQuadCount    = 1200;
 		static const u32 MaxVertexCount  = MaxQuadCount * 4;
@@ -60,13 +114,7 @@ namespace JG
 	private:
 		JVector3 mStandardQuadPosition[4];
 		JVector2 mStandardQuadTexcoord[4];
-
-		SharedPtr<IMesh> mQuadMesh; 
-		SharedPtr<IVertexBuffer> mQuadVBuffer;
-		SharedPtr<IIndexBuffer>  mQuadIBuffer;
-
-		SharedPtr<IShader>   mStandard2DShader;
-		SharedPtr<IMaterial> mStandard2DMaterial; // Bind
+		List<FrameResource> mFrameResources;
 		List<QuadVertex> mVertices;
 		List<u32>        mIndices;
 		List<SharedPtr<ITexture>> mTextureArray;
@@ -74,14 +122,16 @@ namespace JG
 
 		u64 mQuadCount = 0;
 		u64 mTextureCount = 0;
-	public:
-		Renderer2D();
-		~Renderer2D();
-	public:
-		bool Begin(SharedPtr<Camera> camera);
-		bool Begin(const JVector2& resolutoin, const JMatrix& viewProj, SharedPtr<ITexture> targetTexture);
-		void End();
 
+		FrameResource* mCurrFrameResource = nullptr;
+		List<SharedPtr<ITexture>> mRenderTarges;
+	public:
+		Render2DBatch();
+		virtual ~Render2DBatch();
+	private:
+		virtual bool Begin(const RenderInfo& info) override;
+		virtual void End() override;
+	public:
 		void DrawCall(const JMatrix& transform, SharedPtr<ITexture> texture, const Color& color);
 		void DrawCall(const JVector2& Pos, const JVector2& Size, float rotation, SharedPtr<ITexture> texture, const Color& color);
 		void DrawCall(const JVector2& Pos, const JVector2& Size, float rotation, const Color& color);

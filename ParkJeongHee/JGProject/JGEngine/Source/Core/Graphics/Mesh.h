@@ -22,7 +22,6 @@ namespace JG
 		virtual void SetName(const String& name) = 0;
 		virtual const String& GetName() = 0;
 		virtual u32 GetIndexCount() const = 0;
-	protected:
 		virtual bool Bind() = 0;
 	public:
 		static SharedPtr<IMesh> Create(const String& name);

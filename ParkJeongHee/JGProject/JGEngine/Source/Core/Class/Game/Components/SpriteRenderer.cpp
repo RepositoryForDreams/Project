@@ -24,7 +24,9 @@ namespace JG
 	void SpriteRenderer::Start()
 	{
 		BaseRenderer::Start();
-
+		auto assetPath = Application::GetAssetPath();
+		assetPath = CombinePath(assetPath, TT("Resources/NullTexture.jgasset"));
+		GetGameWorld()->GetAssetManager()->AsyncLoadAsset(assetPath);
 	}
 	void SpriteRenderer::Destory()
 	{

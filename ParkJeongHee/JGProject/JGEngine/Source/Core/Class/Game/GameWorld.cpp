@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "GameWorld.h"
 #include "Class/Asset/Asset.h"
-
+#include "Components/Camera.h"
 
 namespace JG
 {
@@ -131,6 +131,18 @@ namespace JG
 			Destroy(sys);
 		}
 
+	}
+	GameNode* GameWorld::Picking(const JVector2& screenPos)
+	{
+		auto mainCam = Camera::GetMainCamera();
+		if (mainCam == nullptr)
+		{
+			return nullptr;
+		}
+
+
+
+		return nullptr;
 	}
 	void GameWorld::SetGlobalGameSystemList(const List<GlobalGameSystem*>& systemList)
 	{

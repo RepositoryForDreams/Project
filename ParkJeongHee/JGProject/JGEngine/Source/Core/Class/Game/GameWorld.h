@@ -38,6 +38,10 @@ namespace JG
 		void AddGameSystem(const Type& type);
 		void Destroy(GameSystem* sys);
 		void Destroy(GameWorld* world);
+	public:
+		GameNode* Picking(const JVector2& screenPos);
+		// 에디터 카메라 컬링
+		// 
 	private:
 		friend class GameLogicSystemLayer;
 		void SetGlobalGameSystemList(const List<GlobalGameSystem*>& systemList);

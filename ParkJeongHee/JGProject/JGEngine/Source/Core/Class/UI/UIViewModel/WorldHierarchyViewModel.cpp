@@ -109,7 +109,9 @@ namespace JG
 				inspectorVm->SetTargetObject(mCurrentSelectedNodeInInspector);
 			}
 		}
-
+		NotifySelectedGameNodeInEditor e;
+		e.SelectedGameNode = node;
+		SendEvent(e);
 
 	}
 

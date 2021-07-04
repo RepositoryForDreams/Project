@@ -200,22 +200,24 @@ namespace JG
 		if (Node->MenuItem != nullptr && Node->MenuItem->ShortCut.empty() == false)
 		{
 			auto shortCut = Node->MenuItem->ShortCut;
-			bool isCtrl  = shortCut.find(UIManager::CTRL_SHORTCUT_TOKEN) != String::npos;
-			bool isShift = shortCut.find(UIManager::SHIFT_SHORTCUT_TOKEN) != String::npos;
-			bool isAlt   = shortCut.find(UIManager::ALT_SHORTCUT_TOKEN) != String::npos;
+			bool isCtrl  = shortCut.find(TT("Ctrl")) != String::npos;
+			bool isShift = shortCut.find(TT("Shift")) != String::npos;
+			bool isAlt   = shortCut.find(TT("Alt")) != String::npos;
 			shortCut = ReplaceAll(shortCut, TT("Ctrl"), TT(""));
 			shortCut = ReplaceAll(shortCut, TT("Shift"), TT(""));
 			shortCut = ReplaceAll(shortCut, TT("Alt"), TT(""));
 			shortCut = ReplaceAll(shortCut, TT(" "), TT(""));
 			shortCut = ReplaceAll(shortCut, TT("+"), TT(""));
 
-			bool isPressed = true;
-			if (isCtrl)  isPressed   &= ImGui::IsKeyPressed((int)EKeyCode::Ctrl);
-			if (isShift) isPressed   &= ImGui::IsKeyPressed((int)EKeyCode::Shift);
-			if (isAlt)   isPressed   &= ImGui::IsKeyPressed((int)EKeyCode::Alt);
+			bool isPressed = false;
+			bool isSubPressed = false;
 			
-			isPressed &= ImGui::IsKeyPressed((int)StringToKeyCode(shortCut));
-			if (isPressed == true)
+			if (isCtrl)  isSubPressed |= ImGui::IsKeyDown((int)EKeyCode::Ctrl);
+			if (isShift) isSubPressed |= ImGui::IsKeyDown((int)EKeyCode::Shift);
+			if (isAlt)   isSubPressed |= ImGui::IsKeyDown((int)EKeyCode::Alt);
+			
+			isPressed = ImGui::IsKeyPressed((int)StringToKeyCode(shortCut));
+			if ((isPressed && isSubPressed )== true)
 			{
 				Node->MenuItem->Action();
 			}

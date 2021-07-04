@@ -143,6 +143,7 @@ namespace JG
 		virtual TextureID          GetTextureID()   const = 0;
 		virtual const TextureInfo& GetTextureInfo() const = 0;
 		virtual void  SetTextureInfo(const TextureInfo& info) = 0;
+		virtual void  SetClearColor(const Color& clearColor) = 0;
 	private:
 		ITexture(const ITexture& texture) = delete;
 		const ITexture& operator=(const ITexture& texture) = delete;

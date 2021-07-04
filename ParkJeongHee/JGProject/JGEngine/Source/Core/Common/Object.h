@@ -30,10 +30,7 @@ private: \
 	{
 	public:
 		virtual Type GetType() const  = 0;
-		virtual const String& GetName() const 
-		{
-			return GetType().GetName();
-		}
+		//virtual const String& GetName() const = 0;
 	public:
 		virtual void MakeJson(SharedPtr<JsonData> jsonData)   const override {}
 		virtual void LoadJson(SharedPtr<JsonData> jsonData) override {}

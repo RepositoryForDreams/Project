@@ -10,6 +10,9 @@ namespace JG
 	class SceneViewModel : public UIViewModel
 	{
 		class SceneModel* mSceneMdoel = nullptr;
+		class GameNode*   mSelectGameNode = nullptr;
+	public:
+		UniquePtr<Command<GameNode*>> ShowGizmo;
 	public:
 		virtual ~SceneViewModel() = default;
 	protected:
@@ -24,7 +27,13 @@ namespace JG
 
 		void SetSceneTexture(SharedPtr<ITexture> sceneTexture);
 		SharedPtr<ITexture> GetSceneTexture() const;
+
+		GameNode* GetSelectedGameNode() const;
+	public:
+		void OnClick(const JVector2& pos, int mouseBt);
+		//void OnClick(JVector2 pos);
 	private:
+		bool ResponseSelectedGameNodeInEditor(NotifySelectedGameNodeInEditor& e);
 		bool NotifyChangeMainSceneTexture(NotifyChangeMainSceneTextureEvent& e);
 	};
 }

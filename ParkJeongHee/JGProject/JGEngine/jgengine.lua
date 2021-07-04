@@ -124,7 +124,7 @@ workspace "JGEngine"
                 links {
                     "Imgui",
                     "stb",
-                    "Publish/%{cfg.buildcfg}/assimp-vc142-mtd",
+                    "Publish/%{cfg.buildcfg}/assimp-vc142-mt",
                 }
                 pchheader (PCH_HEADER)
                 pchsource (PCH_CPP_PATH)

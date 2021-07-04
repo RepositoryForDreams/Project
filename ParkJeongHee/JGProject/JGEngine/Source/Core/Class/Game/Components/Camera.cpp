@@ -1,4 +1,6 @@
 #include "Camera.h"
+#include "Camera.h"
+#include "Camera.h"
 #include "pch.h"
 #include "Camera.h"
 #include "Transform.h"
@@ -7,9 +9,13 @@
 #include "Graphics/Resource.h"
 namespace JG
 {
+	Camera* Camera::smMainCamera = nullptr;
+	Camera* Camera::GetMainCamera()
+	{
+		return smMainCamera;
+	}
 	Camera::Camera()
 	{
-		mTargetTextures.resize(MAX_RENDERTARGET, nullptr);
 		SetFOV(90);
 		SetNearZ(0.001f);
 		SetFarZ(10000.0f);
@@ -18,24 +24,37 @@ namespace JG
 	}
 	void Camera::Awake()
 	{
-
+		if (smMainCamera == nullptr)
+		{
+			RequestRegisterMainCameraEvent e;
+			e.MainCamera = this;
+			SendEvent(e);
+		}
 	}
 
 	void Camera::Start()
 	{
-		RequestRegisterCameraEvent e;
-		e.SharedCamera = this;
-		SendEvent(e);
+
 	}
 	void Camera::Update()
 	{
-
+		if (smMainCamera == nullptr)
+		{
+			RequestRegisterMainCameraEvent e;
+			e.MainCamera = this;
+			SendEvent(e);
+			smMainCamera = this;
+		}
 	}
 	void Camera::Destory()
 	{
-		RequestUnRegisterCameraEvent e;
-		e.SharedCamera = this;
-		SendEvent(e);
+		if (smMainCamera == this)
+		{
+			smMainCamera = nullptr;
+			RequestUnRegisterMainCameraEvent e;
+			e.MainCamera = this;
+			SendEvent(e);
+		}
 	}
 	void Camera::MakeJson(SharedPtr<JsonData> jsonData) const
 	{
@@ -44,7 +63,7 @@ namespace JG
 		jsonData->AddMember("NearZ", GetNearZ());
 		jsonData->AddMember("FarZ", GetFarZ());
 		jsonData->AddMember("FOV", GetFOV());
-		jsonData->AddMember("Depth", GetDepth());
+		jsonData->AddMember("ClearColor", JVector4(GetClearColor()));
 		jsonData->AddMember("CullingLayerMask", GetCullingLayerMask());
 		jsonData->AddMember("IsOrthographic", IsOrthographic());
 
@@ -72,10 +91,10 @@ namespace JG
 		{
 			SetFOV(val->GetFloat());
 		}
-		val = jsonData->GetMember("Depth");
+		val = jsonData->GetMember("ClearColor");
 		if (val)
 		{
-			SetDepth(val->GetInt64());
+			SetClearColor(val->GetVector4());
 		}
 		val = jsonData->GetMember("CullingLayerMask");
 		if (val)
@@ -134,40 +153,20 @@ namespace JG
 		}
 		mIsProjDirty = true;
 		mResolution = resolution;
-
-		// CreateTexture;
-		TextureInfo info = {};
-		info.ArraySize = 1; info.Flags = ETextureFlags::Allow_RenderTarget;
-		info.Format = ETextureFormat::R8G8B8A8_Unorm;
-		info.Width  = mResolution.x;
-		info.Height = mResolution.y;
-		info.MipLevel = 1;
-		static bool isaa = false;
-		if (isaa == false)
-		{
-			info.ClearColor.A = 1.0f;
-			isaa = true;
-		}
-		else
-		{
-			info.ClearColor.A = 0.0f;
-		}
-		
-		mTargetTextures[0] = (ITexture::Create(GetName() + TT("_CameraTexture"), info));
-
-
-
-		auto api = Application::GetInstance().GetGraphicsAPI();
-		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
-		api->ClearTexture(mTargetTextures[0]);
+		mResolution.x = std::max<f32>(1.0f, mResolution.x);
+		mResolution.y = std::max<f32>(1.0f, mResolution.y);
+	}
+	void Camera::SetRendererPath(ERendererPath rendererPath)
+	{
+		mRendererPath = rendererPath;
 	}
 	void Camera::SetCullingLayerMask(u64 mask)
 	{
 		mCullingLayerMask = mask;
 	}
-	void Camera::SetDepth(i64 depth)
+	void Camera::SetClearColor(const Color& color)
 	{
-		mDepth = depth;
+		mClearColor = color;
 	}
 	const JMatrix& Camera::GetViewProjMatrix() const
 	{
@@ -244,29 +243,17 @@ namespace JG
 	{
 		return mResolution;
 	}
-	SharedPtr<ITexture> Camera::GetTargetTexture(u8 slot) const
+	ERendererPath Camera::GetRendererPath() const
 	{
-		if (slot >= MAX_RENDERTARGET)
-		{
-			return nullptr;
-		}
-		return mTargetTextures[slot];
+		return mRendererPath;
 	}
-	const List<SharedPtr<ITexture>>& Camera::GetTargetTextures() const
+	const Color& Camera::GetClearColor() const
 	{
-		return mTargetTextures;
-	}
-	SharedPtr<ITexture> Camera::GetTargetDepthTexture() const
-	{
-		return mTargetDepthTexture;
+		return mClearColor;
 	}
 	u64 Camera::GetCullingLayerMask() const
 	{
 		return mCullingLayerMask;
-	}
-	i64 Camera::GetDepth() const
-	{
-		return mDepth;
 	}
 	bool Camera::UpdateProj() const
 	{
@@ -318,24 +305,26 @@ namespace JG
 	}
 	void Camera::OnInspectorGUI()
 	{
+		JVector2 resolution = GetResolution();
 		f32 fov   = GetFOV();
-		int depth = GetDepth();
+		Color color = GetClearColor();
 		f32 nearZ = GetNearZ();
 		f32 farZ  = GetFarZ();
 		bool isOrth = IsOrthographic();
 
-
+		ImGui::OnGui("Resolution", &resolution);
 		ImGui::OnGui("Field of View", &fov);
-		ImGui::OnGui("Depth", &depth);
 		ImGui::OnGui("NearZ", &nearZ);
 		ImGui::OnGui("FarZ", &farZ);
 		ImGui::Checkbox("Orthographic", &isOrth);
+		ImGui::ColorEdit4("ClearColor", (float*)&color);
 
 
 		SetFOV(fov);
-		SetDepth(depth);
+		SetClearColor(color);
 		SetFarZ(farZ);
 		SetNearZ(nearZ);
 		SetOrthographic(isOrth);
+		SetResolution(resolution);
 	}
 }

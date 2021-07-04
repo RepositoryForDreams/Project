@@ -21,87 +21,42 @@ namespace JG
 	class IVertexBuffer;
 	class IIndexBuffer;
 	class IMaterial;
+	class IRenderer;
+	class Render2DBatch;
 	class GraphicsSystemLayer : public ISystemLayer
 	{
-		struct CameraItem
+		class CameraItem
 		{
-			Camera* Camera = nullptr;
-			SharedPtr<Renderer2D> Renderer2D;
-		};
-		class MainCamera
-		{
-		private:
-			JVector2 mResolution;
-			JMatrix  mViewProj;
-			JMatrix mView;
-			JMatrix mProj;
-			SharedPtr<ITexture> mTargetTexture;
 		public:
-			MainCamera() = default;
-			MainCamera(const JVector2& resolution) {
+			Camera* pCamera = nullptr;
+		
+			JVector2 Resolution;
+			bool IsResizeDirty = false;
+			List<SharedPtr<ITexture>> TargetTextures;
+			List<SharedPtr<ITexture>> TargetDepthTextures;
+			u64 CurrentIndex = 0;
 
-				if (mResolution == resolution) return;
-				mResolution = resolution;
-				auto proj = JMatrix::OrthographicLH(resolution.x, resolution.y, 0.1f, 1000.0f);
-				auto view = JMatrix::LookAtLH(JVector3(0, 0, -1.0f), JVector3(0.0f, 0.0f, 1.0f), JVector3(0.0f, 1.0f, 0.0f));
-				mViewProj = view * proj;
-				mView = view;
-				mProj = proj;
+			SharedPtr<IRenderer>  Renderer;
+			SharedPtr<Render2DBatch> _2DBatch;
+			Queue<SharedPtr<IRenderer>> PendingRendererQueue;
 
-				TextureInfo info = {};
-				info.ArraySize = 1; info.Flags = ETextureFlags::Allow_RenderTarget;
-				info.Format = ETextureFormat::R8G8B8A8_Unorm;
-				info.Width  = resolution.x;
-				info.Height = resolution.y;
-				info.MipLevel = 1;
-				mTargetTexture = ITexture::Create(TT("MainTexture"), info);
-			}
-			void Clear()
-			{
-				mTargetTexture.reset();
-			}
 
-			SharedPtr<ITexture> GetTargetTexture() const {
-				return mTargetTexture;
-			}
-			const JMatrix& GetViewProj() const {
-				return mViewProj;
-			}
-			const JMatrix& GetView() const {
-				return mView;
-			}
-			const JMatrix& GetProj() const {
-				return mProj;
-			}
-			const JVector2& GetResolution() const {
-				return mResolution;
-			}
+			CameraItem() = default;
+			CameraItem(Camera* cam);
+
+			bool IsValid() const;
+			void ChangeRenderer();
 		};
-
-
-
-		enum class ERenderingState
+		enum class ERenderItemPriority
 		{
-			Wait,
-			ReadyCompelete,
-			RenderRegisteredCamera,
-			RenderMainCamera,
-		};
-		enum class ERenderItemPriority : u64
-		{
-			Default = 0,
-			_2D = 100,
+			_2D,
 		};
 	private:
-		// 이것도 컬링 가능
-		MainCamera  mMainCamera;
-		SharedPtr<Renderer2D> mRenderer2D;
-		// 이카메라로 컬링 또는 
-		Dictionary<Camera*, CameraItem>   mRegisteredCameras;
-		SortedDictionary<i64, CameraItem> mSortedLayerCameraList;
+		UniquePtr<CameraItem> mMainCamera;
+		Dictionary<Camera*, UniquePtr<CameraItem>> mRegisteredRenderCameras;
+
 		Dictionary<Type, u64> mRenderItemPriority;
 		SortedDictionary<u64, Dictionary<Type, List<SharedPtr<IRenderItem>>>> mPushedRenderItems;
-		ERenderingState mRenderingState = ERenderingState::Wait;
 	public:
 		virtual ~GraphicsSystemLayer() {}
 	public:
@@ -115,13 +70,14 @@ namespace JG
 		virtual String GetLayerName() override;
 	private:
 		bool ResponsePushRenderItem(RequestPushRenderItemEvent& e);
-		bool ResponseGetMainSceneTexture(RequestGetMainSceneTextureEvent& e);
 
 		bool ResponseRegisterCamera(RequestRegisterCameraEvent& e);
 		bool ResponseUnRegisterCamera(RequestUnRegisterCameraEvent& e);
+
+		bool ResponseRegisterMainCamera(RequestRegisterMainCameraEvent& e);
+		bool ResponseUnRegisterMainCamera(RequestUnRegisterMainCameraEvent& e);
 	private:
-		void Rendering(const CameraItem& cameraItem, Type type, const List<SharedPtr<IRenderItem>>& renderItemList);
-		GraphicsSystemLayer::CameraItem CreateLayerCamera(Camera* camera);
+		void Rendering(CameraItem* cameraItem, Type type, const List<SharedPtr<IRenderItem>>& renderItemList);
 	private:
 		EScheduleResult Update();
 	private:

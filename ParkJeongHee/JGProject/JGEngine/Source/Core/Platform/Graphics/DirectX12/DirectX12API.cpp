@@ -54,6 +54,10 @@ namespace JG
 	{
 		return EGraphicsAPI::DirectX12;
 	}
+	u64 DirectX12API::GetBufferCount() const
+	{
+		return GetFrameBufferCount();
+	}
 	IDXGIFactory4* DirectX12API::GetDXGIFactory()
 	{
 		return gFactory.Get();

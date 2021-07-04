@@ -13,6 +13,8 @@
 } \
 
 #define JGASSERT(msg)	assert(msg);
-
-
+#else
+#define JGASSERT_IF
+#define JGASSERT(msg)
 #endif
+
