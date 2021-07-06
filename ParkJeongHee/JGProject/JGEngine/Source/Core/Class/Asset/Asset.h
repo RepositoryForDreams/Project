@@ -78,7 +78,6 @@ namespace JG
 			}
 		}
 	};
-
 	struct JGQuadVertex : public IJson
 	{
 		JVector3 Position;
@@ -111,9 +110,6 @@ namespace JG
 			}
 		}
 	};
-
-
-
 	struct JGBone
 	{
 
@@ -169,6 +165,30 @@ namespace JG
 	
 
 #define ASSET_NULL_ID -1
+
+	class AssetID
+	{
+		friend class AssetManager;
+	private:
+		u64  Origin = ASSET_NULL_ID;
+		u64  ID = ASSET_NULL_ID;
+		bool ReadWrite = false;
+	public:
+		u64 GetID() const {
+			return ID;
+		}
+		u64 GetOriginID() const {
+			return Origin;
+		}
+		bool IsReadWrite() const {
+			return ReadWrite;
+		}
+		bool IsValid() const {
+			return ID != ASSET_NULL_ID;
+		}
+	};
+
+
 	class IAsset : public IJGObject
 	{
 	public:
@@ -193,6 +213,19 @@ namespace JG
 		String mName;
 
 		SharedPtr<T> mData = nullptr;
+
+	public:
+		Asset(const String& assetPath)
+		{
+			fs::path p(assetPath);
+			fs::path contentsPath = fs::absolute(Application::GetAssetPath()).wstring();
+			mAssetID = (u64)this;
+			mAssetFullPath = fs::absolute(assetPath).wstring();
+			mAssetPath = ReplaceAll(mAssetFullPath, contentsPath, TT(""));
+			mExtension = p.extension();
+			mName = ReplaceAll(p.wstring() ,mExtension, TT(""));
+
+		}
 	public:
 		virtual u64 GetAssetID() const override
 		{
@@ -210,18 +243,12 @@ namespace JG
 		{
 			return mName;
 		}
-		virtual const String& GetName() const override
-		{
-			return mName;
-		}
 		virtual const String& GetExtension() const override
 		{
 			return mExtension;
 		}
-
-		T* Get() const
-		{
-			mData.get();
+		SharedPtr<T> Get() const {
+			return mData;
 		}
 	public:
 		virtual ~Asset() = default;

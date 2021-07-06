@@ -15,6 +15,9 @@ namespace JG
 		{
 			Open();
 		}, nullptr);
+
+		mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+		mCurrentGizmoMode = ImGuizmo::LOCAL;
 	}
 	void SceneView::Load()
 	{
@@ -24,23 +27,16 @@ namespace JG
 	{
 		auto viewModel = GetViewModel();
 		viewModel->SetMinSize(JVector2(820, 620));
-
-
 		viewModel->ShowGizmo->Subscribe(viewModel, [&](GameNode* node)
 		{
-		
-			static ImGuizmo::OPERATION CurrentGizmoOperation(ImGuizmo::TRANSLATE);
-			static ImGuizmo::MODE CurrentGizmoMode(ImGuizmo::LOCAL);
-
-
 			auto mainCam = Camera::GetMainCamera();
 
 			if (ImGui::IsKeyPressed((int)EKeyCode::Q))
-				CurrentGizmoOperation = ImGuizmo::TRANSLATE;
+				mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
 			if (ImGui::IsKeyPressed((int)EKeyCode::W))
-				CurrentGizmoOperation = ImGuizmo::ROTATE;
+				mCurrentGizmoOperation = ImGuizmo::ROTATE;
 			if (ImGui::IsKeyPressed((int)EKeyCode::E)) 
-				CurrentGizmoOperation = ImGuizmo::SCALE;
+				mCurrentGizmoOperation = ImGuizmo::SCALE;
 
 
 			if (mainCam == nullptr) return;
@@ -52,7 +48,7 @@ namespace JG
 
 			auto view = mainCam->GetViewMatrix();
 			auto proj = mainCam->GetProjMatrix();
-			ImGuizmo::Manipulate(view.GetFloatPtr(), proj.GetFloatPtr(), CurrentGizmoOperation, CurrentGizmoMode, worldMat.GetFloatPtr(), NULL, NULL);
+			ImGuizmo::Manipulate(view.GetFloatPtr(), proj.GetFloatPtr(), (ImGuizmo::OPERATION)mCurrentGizmoOperation, (ImGuizmo::MODE)mCurrentGizmoMode, worldMat.GetFloatPtr(), NULL, NULL);
 			JVector3 matrixTranslation, matrixRotation, matrixScale;
 			ImGuizmo::DecomposeMatrixToComponents(worldMat.GetFloatPtr(), (float*)&matrixTranslation, (float*)&matrixRotation, (float*)&matrixScale);
 			node->GetTransform()->SetLocalLocation(matrixTranslation);
@@ -68,6 +64,8 @@ namespace JG
 	
 		ImGui::Begin("SceneView", &mOpenGUI);
 
+		
+
 		auto minSize = viewModel->GetMinSize();
 		auto currSize = ImGui::GetWindowSize();
 
@@ -75,6 +73,56 @@ namespace JG
 		{
 			ImGui::SetWindowSize(ImVec2(minSize.x, minSize.y));
 		}
+
+
+		auto mainCam = Camera::GetMainCamera();
+
+
+		// trans // ro // scale //  local,world  //  2d/3d   // snap
+
+		
+
+		ImGui::Text("Translate"); ImGui::SameLine(); 
+		if (ImGui::RadioButton("##TranslateRadioButton", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
+		{
+			mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+		}ImGui::SameLine();
+
+		ImGui::Text("Rotate"); ImGui::SameLine();
+		if (ImGui::RadioButton("##RotateRadioButton", mCurrentGizmoOperation == ImGuizmo::ROTATE))
+		{
+			mCurrentGizmoOperation = ImGuizmo::ROTATE;
+		}ImGui::SameLine();
+
+		ImGui::Text("Scaling"); ImGui::SameLine();
+		if (ImGui::RadioButton("##ScalingRadioButton", mCurrentGizmoOperation == ImGuizmo::SCALE))
+		{
+			mCurrentGizmoOperation = ImGuizmo::SCALE;
+		}ImGui::SameLine();
+
+		
+		std::string name = "";
+		if (mCurrentGizmoMode == ImGuizmo::LOCAL) name = "Local";
+		else name = "World";
+
+		if (ImGui::Button(name.c_str()) == true)
+		{
+			mCurrentGizmoMode = !mCurrentGizmoMode;
+		}ImGui::SameLine();
+
+
+		if (mCurrentCameraMode == 0) name = "2D";
+		else name = "3D";
+
+		if (ImGui::Button(name.c_str()) == true)
+		{
+			mCurrentCameraMode = !mCurrentCameraMode;
+		}
+
+
+
+
+
 		auto sceneTexture = viewModel->GetSceneTexture();
 
 		if (sceneTexture != nullptr && sceneTexture->IsValid())
@@ -107,5 +155,7 @@ namespace JG
 
 	void SceneView::Destroy()
 	{
+		auto viewModel = GetViewModel();
+		viewModel->ShowGizmo->UnSubscribe(viewModel);
 	}
 }

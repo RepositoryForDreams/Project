@@ -4,7 +4,7 @@
 
 
 #include "Platform/Graphics/DirectX12/DirectX12Resource.h"
-
+#include "Class/Asset/Asset.h"
 
 namespace JG
 {
@@ -45,12 +45,12 @@ namespace JG
 		return api->CreateTexture(name, info);
 	}
 
-	SharedPtr<ITexture> ITexture::CreateFromFile(const String& path)
+	SharedPtr<ITexture> ITexture::Create(const TextureAssetStock& stock)
 	{
 		auto api = Application::GetInstance().GetGraphicsAPI();
 		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
 
-		return api->CreateTextureFromFile(path);
+		return api->CreateTexture(stock);
 	}
 
 

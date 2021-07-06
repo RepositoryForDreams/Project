@@ -9,6 +9,11 @@ namespace JG
 	{
 		JGCLASS
 		bool mOpenGUI = true;
+
+
+		i32 mCurrentGizmoOperation = 0;
+		i32 mCurrentGizmoMode = 0;
+		i32 mCurrentCameraMode = 0;
 	public:
 		SceneView();
 		virtual ~SceneView() = default;

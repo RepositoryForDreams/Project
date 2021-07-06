@@ -117,7 +117,7 @@ namespace JG
 
 	}
 
-	void CommandList::CopyTextrueFromMemory(ID3D12Resource* resource, void* pixels, i32 width, i32 height, i32 channels)
+	void CommandList::CopyTextrueFromMemory(ID3D12Resource* resource,const void* pixels, i32 width, i32 height, i32 channels)
 	{
 		if (resource == nullptr)
 		{

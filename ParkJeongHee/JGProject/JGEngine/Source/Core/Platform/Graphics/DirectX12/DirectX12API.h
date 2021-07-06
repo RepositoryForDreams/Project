@@ -24,6 +24,9 @@ namespace JG
 	class GraphicsPipelineState;
 	class ComputePipelineState;
 
+
+	class TextureAssetStock;
+
 	class DirectX12API : public IGraphicsAPI
 	{
 	public:
@@ -83,7 +86,7 @@ namespace JG
 		virtual SharedPtr<IMaterial>	  CreateMaterial(const String& name, SharedPtr<IShader> shader) override;
 		virtual SharedPtr<IMesh>		  CreateMesh(const String& name) override;
 		virtual SharedPtr<ITexture>       CreateTexture(const String& name, const TextureInfo& info) override;
-		virtual SharedPtr<ITexture>       CreateTextureFromFile(const String& path) override;
+		virtual SharedPtr<ITexture>       CreateTexture(const TextureAssetStock& stock) override;
 	};
 }
  

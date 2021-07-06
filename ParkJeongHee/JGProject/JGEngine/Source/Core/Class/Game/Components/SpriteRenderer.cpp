@@ -6,9 +6,8 @@
 #include "Graphics/Shader.h"
 #include "Graphics/Resource.h"
 #include "Graphics/Mesh.h"
-
 #include "Class/Game/GameWorld.h"
-#include "Class/Asset/Asset.h"
+
 namespace JG
 {
 	SpriteRenderer::SpriteRenderer()
@@ -25,8 +24,7 @@ namespace JG
 	{
 		BaseRenderer::Start();
 		auto assetPath = Application::GetAssetPath();
-		assetPath = CombinePath(assetPath, TT("Resources/NullTexture.jgasset"));
-		GetGameWorld()->GetAssetManager()->AsyncLoadAsset(assetPath);
+		mSpritePath = CombinePath(assetPath, TT("Resources/NullTexture.jgasset"));
 	}
 	void SpriteRenderer::Destory()
 	{
@@ -34,6 +32,11 @@ namespace JG
 	}
 	void SpriteRenderer::Update()
 	{
+		if (mSpriteID.IsValid() == false)
+		{
+			mSpriteID = GetGameWorld()->GetAssetManager()->AsyncLoadAsset(mSpritePath);
+			mAsset = GetGameWorld()->GetAssetManager()->GetAsset<ITexture>(mSpriteID);
+		}
 	}
 
 	void SpriteRenderer::LateUpdate()
@@ -61,6 +64,13 @@ namespace JG
 	{
 		auto transform = GetOwner()->GetTransform();
 		mSpriteRI->WorldMatrix = transform->GetWorldMatrix();
+
+		if (mAsset != nullptr)
+		{
+			auto info = mAsset->Get()->GetTextureInfo();
+			mSpriteRI->Texture = mAsset->Get();
+			mSpriteRI->WorldMatrix = JMatrix::Scaling(JVector3(info.Width, info.Height, 1)) * mSpriteRI->WorldMatrix;
+		}
 		return mSpriteRI;
 	}
 

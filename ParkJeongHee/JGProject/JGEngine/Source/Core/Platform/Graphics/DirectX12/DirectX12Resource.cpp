@@ -699,7 +699,7 @@ namespace JG
 		mIsEnd = true;
 	}
 
-	void DirectX12Texture::CreateFromMemory(const String& name, byte* pixels, i32 width, i32 height, i32 channels)
+	void DirectX12Texture::CreateFromMemory(const String& name, const byte* pixels, i32 width, i32 height, i32 channels)
 	{
 		TextureInfo info;
 		info.ArraySize = 1;

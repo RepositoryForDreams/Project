@@ -1,14 +1,19 @@
 #pragma once
 #include "BaseRenderer.h"
-
-
+#include "Class/Asset/Asset.h"
 namespace JG
 {
+	
 	class SpriteRenderer : public BaseRenderer
 	{
 		JGCLASS
 	private:
 		SharedPtr<Standard2DRenderItem> mSpriteRI;
+
+
+		String  mSpritePath;
+		AssetID mSpriteID;
+		Asset<ITexture>* mAsset = nullptr;
 	public:
 		virtual ~SpriteRenderer() = default;
 	public:

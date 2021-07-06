@@ -21,6 +21,8 @@ namespace JG
 	class IComputer;
 	struct TextureInfo;
 	struct FrameBufferInfo;
+
+	class TextureAssetStock;
 	class IGraphicsAPI 
 	{
 	public:
@@ -61,7 +63,7 @@ namespace JG
 		virtual SharedPtr<IMaterial>	  CreateMaterial(const String& name, SharedPtr<IShader> shader) = 0;
 		virtual SharedPtr<IMesh>          CreateMesh(const String& name) = 0;
 		virtual SharedPtr<ITexture>       CreateTexture(const String& name, const TextureInfo& info) = 0;
-		virtual SharedPtr<ITexture>       CreateTextureFromFile(const String& path) = 0;
+		virtual SharedPtr<ITexture>       CreateTexture(const TextureAssetStock& stock) = 0;
 		virtual void ClearTexture(SharedPtr<ITexture> texture);
 	public:
 		static UniquePtr<IGraphicsAPI> Create(EGraphicsAPI api);

@@ -49,7 +49,7 @@ namespace JG
 		void FlushResourceBarrier();
 
 		void CopyResource(ID3D12Resource* dest, ID3D12Resource* src);
-		void CopyTextrueFromMemory(ID3D12Resource* resource, void* pixels, i32 width, i32 height, i32 channels);
+		void CopyTextrueFromMemory(ID3D12Resource* resource, const void* pixels, i32 width, i32 height, i32 channels);
 		void CopyBuffer(ID3D12Resource* buffer, void* data, u64 elementSize, u64 elementCount);
 		void CopyBufferRegion(ID3D12Resource* dest, u64 destOffset,  ID3D12Resource* src, u64 srcOffset, u64 byteSize);
 	};

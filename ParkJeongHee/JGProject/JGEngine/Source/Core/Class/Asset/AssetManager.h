@@ -3,24 +3,6 @@
 #include "Asset.h"
 namespace JG
 {
-	class AssetID
-	{
-		friend class AssetManager;
-	private:
-		u64  Origin = ASSET_NULL_ID;
-		u64  ID = ASSET_NULL_ID;
-		bool ReadWrite = false;
-	public:
-		u64 GetID() const {
-			return ID;
-		}
-		u64 GetOriginID() const {
-			return Origin;
-		}
-		bool IsReadWrite() const {
-			return ReadWrite;
-		}
-	};
 	class AssetManager
 	{
 		struct LoadingData
@@ -50,14 +32,13 @@ namespace JG
 		bool mIsResetting = false;
 
 	public:
-	
 		AssetID  AsyncLoadAsset(const String& path);
 		AssetID  RequestReadWriteAsset(const String& path);
 		void Reset();
 		bool IsResetting() const;
 	public:
 		template<class T>
-		SharedPtr<T> GetAsset(AssetID id)
+		Asset<T>* GetAsset(AssetID id)
 		{
 			std::shared_lock<std::shared_mutex> lock(mMutex);
 
@@ -69,7 +50,7 @@ namespace JG
 					return nullptr;
 				}
 
-				return iter->second;
+				return static_cast<Asset<T>*>(iter->second.get());
 			}
 			else
 			{
@@ -79,12 +60,12 @@ namespace JG
 					return nullptr;
 				}
 
-				return iter->second;
+				return static_cast<Asset<T>*>(iter->second.get());
 			}
 		}
 
 		template<class T>
-		SharedPtr<T> GetOriginAsset(AssetID id)
+		Asset<T>* GetOriginAsset(AssetID id)
 		{
 			std::shared_lock<std::shared_mutex> lock(mMutex);
 
@@ -94,7 +75,7 @@ namespace JG
 				return nullptr;
 			}
 
-			return iter->second;
+			return static_cast<Asset<T>*>(iter->second.get());
 		}
 
 		template<class T>

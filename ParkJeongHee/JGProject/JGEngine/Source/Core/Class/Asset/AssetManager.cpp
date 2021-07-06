@@ -51,12 +51,10 @@ namespace JG
 					mAssetPool.emplace(loadingData->Path, loadingData->Asset);
 					mAssetPoolByID.emplace(loadingData->Asset->GetAssetID(), loadingData->Asset);
 					mAssetIDPool.emplace(loadingData->Path, loadingData->Asset->GetAssetID());
-
 				}
 				mLoadingAssetPool.erase(loadingData->Path);
 			}
 		}, mLoadingAssetPool[path].get());
-		//mLoadingAssetPool[path].get(), sizeof(LoadingData));
 		return AssetID();
 	}
 
@@ -127,8 +125,6 @@ namespace JG
 	SharedPtr<IAsset> AssetManager::LoadAsset(const String path)
 	{
 		fs::path assetPath = path;
-		fs::path contentsPath = Application::GetAssetPath();
-
 		if (fs::exists(assetPath) == false)
 		{
 			return nullptr;
@@ -138,66 +134,32 @@ namespace JG
 		auto json = CreateSharedPtr<Json>();
 		if (Json::Read(assetPath, json) == false)
 		{
-			JG_CORE_ERROR("Fail Load Asset : {0}", assetPath);
+			JG_CORE_ERROR("Fail Load Asset : {0}", assetPath.wstring());
 			return nullptr;
 		}
-		
-		//TextureAssetStock stock;
-		//stock.LoadJson()
-
-		//FileStreamReader reader;
-		//if (reader.Open(assetPath) == true)
-		//{
-		//	reader.Read(JG_ASSET_FORMAT_KEY , &assetFormat);
-
-		//	switch (assetFormat)
-		//	{
-		//	case EAssetFormat::Texture:
-		//	{
-		//		TextureAssetStock stock;
-		//		reader.Read(JG_TEXTURE_ASSET_KEY , &stock);
-
-		//		// TODO
-		//		// LoadTexture
-		//	}
-		//		break;
-		//	case EAssetFormat::Mesh:
-		//	{
-		//		StaticMeshAssetStock stock;
-		//		reader.Read(JG_STATIC_MESH_ASSET_KEY , &stock);
-		//		// Load Mesh
-		//	}
-		//		break;
-		//	default:
-		//		return nullptr;
-		//	}
-		//	reader.Close();
-		//}
-
-		return nullptr;
-		//if (assetPath.extension() == ASSET_MESH_FORMAT)
-		//{
-		//	auto asset = CreateSharedPtr<Asset<IMesh>>();
-		//	asset->mData = IMesh::CreateFromFile(path);
-		//	if (asset->mData == nullptr)
-		//	{
-		//		JG_CORE_ERROR("Failed Load Mesh : {0} ", path);
-		//		return nullptr;
-		//	}
-		//	asset->mAssetFullPath = assetPath;
-		//	asset->mAssetPath = ReplaceAll(assetPath, contentsPath, TT(""));
-		//	asset->mName      = assetPath.filename();
-		//	asset->mExtension = assetPath.extension();
-		//	asset->mAssetID	  = (u64)asset.get();
-
-		//	return asset;
-		//}
-		//else
-		//{
-		//	JG_CORE_ERROR("is not supported file format : {0} ", assetPath.extension().string());
-		//	return nullptr;
-		//}
-
-
+		auto assetFormatVal = json->GetMember(JG_ASSET_FORMAT_KEY);
+		if (assetFormatVal)
+		{
+			assetFormat = (EAssetFormat)assetFormatVal->GetUint64();
+		}
+		auto assetVal = json->GetMember(JG_ASSET_KEY);
+		if (assetVal == nullptr)
+		{
+			return nullptr;
+		}
+		switch (assetFormat)
+		{
+		case EAssetFormat::Texture:
+		{
+			TextureAssetStock stock;
+			stock.LoadJson(assetVal);
+			auto textureAsset = CreateSharedPtr<Asset<ITexture>>(assetPath);
+			textureAsset->mData = ITexture::Create(stock);
+			return textureAsset;
+		}
+		default:
+			JG_CORE_ERROR("{0} AssetFormat is not supported in LoadAsset", (int)assetFormat);
+			return nullptr;
+		}
 	}
 }

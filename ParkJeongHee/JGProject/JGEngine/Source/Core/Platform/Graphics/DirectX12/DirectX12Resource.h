@@ -199,7 +199,7 @@ namespace JG
 		virtual bool IsValid() const override;
 	public:
 		void Create(const String& name, const TextureInfo& info);
-		void CreateFromMemory(const String& name, byte* pixels, i32 width, i32 height, i32 comp);
+		void CreateFromMemory(const String& name, const byte* pixels, i32 width, i32 height, i32 comp);
 		void Reset();
 
 

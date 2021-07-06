@@ -133,7 +133,7 @@ namespace JG
 
 
 	
-	
+	class TextureAssetStock;
 	class ITexture : public IResource
 	{
 	public:
@@ -149,7 +149,7 @@ namespace JG
 		const ITexture& operator=(const ITexture& texture) = delete;
 	public:
 		static SharedPtr<ITexture> Create(const String& name, const TextureInfo& info);
-		static SharedPtr<ITexture> CreateFromFile(const String& path);
+		static SharedPtr<ITexture> Create(const TextureAssetStock& stock);
 	};
 }
 

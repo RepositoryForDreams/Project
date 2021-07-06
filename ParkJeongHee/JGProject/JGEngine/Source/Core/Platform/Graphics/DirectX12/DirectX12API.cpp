@@ -13,7 +13,7 @@
 #include "Utill/PipelineState.h"
 #include "Utill/CommandList.h"
 #include "Utill/ResourceStateTracker.h"
-
+#include "Class/Asset/Asset.h"
 
 namespace JG
 {
@@ -657,20 +657,11 @@ namespace JG
 
 		return texture;
 	}
-	SharedPtr<ITexture> DirectX12API::CreateTextureFromFile(const String& path)
+	SharedPtr<ITexture> DirectX12API::CreateTexture(const TextureAssetStock& stock)
 	{
-		//auto texture = CreateSharedPtr<DirectX12Texture>();
-		//i32 w = 0; i32 h = 0; i32 channels = 0;
-		//byte* pixels = stbi_load(ws2s(path).c_str(), &w, &h, &channels, 0);
-		//if (pixels == nullptr)
-		//{
-		//	return nullptr;
-		//}
-		//texture->CreateFromMemory(path, pixels, w, h, channels);
-
-		//stbi_image_free(pixels);
-
-		return nullptr;
+		auto texture = CreateSharedPtr<DirectX12Texture>();
+		texture->CreateFromMemory(stock.Name, (const byte*)stock.Pixels.data(), stock.Width, stock.Height, stock.Channels);
+		return texture;
 	}
 
 
