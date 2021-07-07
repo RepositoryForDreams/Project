@@ -47,7 +47,7 @@ namespace JG
 			obj->mOwnerNode = this;
 			obj->mGameWorld = mGameWorld;
 			mComponents.push_back(obj);
-			obj->Awake();
+			static_cast<IGameObject*>(obj)->Awake();
 			return obj;
 		}
 		GameComponent* AddComponent(const Type& type);

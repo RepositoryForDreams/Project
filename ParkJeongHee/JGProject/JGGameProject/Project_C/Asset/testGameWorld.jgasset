@@ -26,53 +26,7 @@
         ],
         "Childs": [
             {
-                "Name": "MainCamera",
-                "Components": [
-                    {
-                        "ComponentType": "JG::Transform",
-                        "Name": "Transform",
-                        "IsActive": true,
-                        "Location": [
-                            0.0,
-                            0.0,
-                            -100.0
-                        ],
-                        "Rotation": [
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        "Scale": [
-                            1.0,
-                            1.0,
-                            1.0
-                        ]
-                    },
-                    {
-                        "ComponentType": "JG::Camera",
-                        "Name": "Camera",
-                        "IsActive": true,
-                        "Resolution": [
-                            800.0,
-                            600.0
-                        ],
-                        "NearZ": 0.0010000000474974514,
-                        "FarZ": 10000.0,
-                        "FOV": 90.0,
-                        "ClearColor": [
-                            0.9705784916877747,
-                            0.970588207244873,
-                            0.970584511756897,
-                            0.7450980544090271
-                        ],
-                        "CullingLayerMask": 18446744073709551615,
-                        "IsOrthographic": true
-                    }
-                ],
-                "Childs": []
-            },
-            {
-                "Name": "QuadList",
+                "Name": "EditorCamera",
                 "Components": [
                     {
                         "ComponentType": "JG::Transform",
@@ -93,47 +47,29 @@
                             1.0,
                             1.0
                         ]
+                    },
+                    {
+                        "ComponentType": "JG::EditorCamera",
+                        "Name": "EditorCamera",
+                        "IsActive": true,
+                        "Resolution": [
+                            800.0,
+                            600.0
+                        ],
+                        "NearZ": 0.0010000000474974514,
+                        "FarZ": 10000.0,
+                        "FOV": 90.0,
+                        "ClearColor": [
+                            1.0,
+                            1.0,
+                            1.0,
+                            0.0
+                        ],
+                        "CullingLayerMask": 18446744073709551615,
+                        "IsOrthographic": true
                     }
                 ],
-                "Childs": [
-                    {
-                        "Name": "2",
-                        "Components": [
-                            {
-                                "ComponentType": "JG::Transform",
-                                "Name": "Transform",
-                                "IsActive": true,
-                                "Location": [
-                                    -150.0,
-                                    0.0,
-                                    0.0
-                                ],
-                                "Rotation": [
-                                    0.0,
-                                    -0.0,
-                                    0.0
-                                ],
-                                "Scale": [
-                                    1.0,
-                                    1.0,
-                                    1.0
-                                ]
-                            },
-                            {
-                                "ComponentType": "JG::SpriteRenderer",
-                                "Name": "SpriteRenderer",
-                                "IsActive": true,
-                                "Color": [
-                                    0.2973856031894684,
-                                    0.437333881855011,
-                                    0.8921568393707275,
-                                    1.0
-                                ]
-                            }
-                        ],
-                        "Childs": []
-                    }
-                ]
+                "Childs": []
             }
         ]
     }

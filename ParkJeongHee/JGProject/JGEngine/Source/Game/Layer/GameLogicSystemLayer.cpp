@@ -40,7 +40,9 @@ namespace JG
 		RegisterGlobalGameSystem();
 		mGameWorld = GameObjectFactory::GetInstance().CreateObject<GameWorld>();
 		mGameWorld->SetGlobalGameSystemList(mGameSystemList); 
-
+		auto camNode = mGameWorld->AddNode(TT("EditorCamera"));
+		auto editorCam = camNode->AddComponent<EditorCamera>();
+		Camera::SetMainCamera(editorCam);
 		LoadGameWrold();
 	}
 	void GameLogicSystemLayer::Destroy()
@@ -102,7 +104,9 @@ namespace JG
 		// GameComponent
 		GameObjectFactory::GetInstance().RegisterComponentType<Transform>();
 		GameObjectFactory::GetInstance().RegisterComponentType<Camera>();
+		GameObjectFactory::GetInstance().RegisterComponentType<EditorCamera>();
 		GameObjectFactory::GetInstance().RegisterComponentType<SpriteRenderer>();
+
 	}
 	void GameLogicSystemLayer::SaveGameWorld()
 	{

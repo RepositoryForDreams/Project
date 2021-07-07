@@ -164,7 +164,12 @@ namespace JG
 			{
 
 			}
-
+			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+			{
+				ImGui::SetDragDropPayload(ws2s(fileInfo->Name).c_str(), fileInfo, 200);
+				ImGui::TextUnformatted(ws2s(fileInfo->Name).c_str());
+				ImGui::EndDragDropSource();
+			}
 		});
 		ImGui::PopStyleVar();
 	}

@@ -10,6 +10,7 @@ namespace JG
 		static Camera* smMainCamera;
 	public:
 		static Camera* GetMainCamera();
+		static void SetMainCamera(Camera* mainCamera);
 	private:
 		friend class GraphicsSystemLayer;
 	private:
@@ -84,5 +85,11 @@ namespace JG
 		virtual void OnChange(const ChangeData& data) override;
 		virtual void OnInspectorGUI() override;
 
+	};
+
+	class EditorCamera : public Camera
+	{
+	private:
+		JGCLASS
 	};
 }

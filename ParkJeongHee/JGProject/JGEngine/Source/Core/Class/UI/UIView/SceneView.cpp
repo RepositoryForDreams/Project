@@ -39,6 +39,9 @@ namespace JG
 				mCurrentGizmoOperation = ImGuizmo::SCALE;
 
 
+
+			
+		
 			if (mainCam == nullptr) return;
 			if (node == nullptr || node->GetType() != JGTYPE(GameNode)) return;
 			auto worldMat = node->GetTransform()->GetWorldMatrix();
@@ -77,11 +80,6 @@ namespace JG
 
 		auto mainCam = Camera::GetMainCamera();
 
-
-		// trans // ro // scale //  local,world  //  2d/3d   // snap
-
-		
-
 		ImGui::Text("Translate"); ImGui::SameLine(); 
 		if (ImGui::RadioButton("##TranslateRadioButton", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
 		{
@@ -110,13 +108,21 @@ namespace JG
 			mCurrentGizmoMode = !mCurrentGizmoMode;
 		}ImGui::SameLine();
 
-
+		if (mainCam != nullptr)
+		{
+			mCurrentCameraMode = !mainCam->IsOrthographic();
+		}
 		if (mCurrentCameraMode == 0) name = "2D";
 		else name = "3D";
 
 		if (ImGui::Button(name.c_str()) == true)
 		{
 			mCurrentCameraMode = !mCurrentCameraMode;
+			auto mainCam = Camera::GetMainCamera();
+			if (mainCam != nullptr)
+			{
+				mainCam->SetOrthographic(!mCurrentCameraMode);
+			}
 		}
 
 

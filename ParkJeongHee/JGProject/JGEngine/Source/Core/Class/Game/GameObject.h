@@ -17,7 +17,7 @@ namespace JG
 	private:
 		friend class GameObjectFactory;
 		friend class GameLogicSystemLayer;
-	protected:
+	public:
 		virtual void Awake() = 0;
 		virtual void Start()   = 0;
 		virtual void Destory() = 0;

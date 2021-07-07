@@ -14,6 +14,17 @@ namespace JG
 	{
 		return smMainCamera;
 	}
+	void Camera::SetMainCamera(Camera* mainCamera)
+	{
+		if (mainCamera == nullptr)
+		{
+			return;
+		}
+		smMainCamera = mainCamera;
+		RequestRegisterMainCameraEvent e;
+		e.MainCamera = mainCamera;
+		mainCamera->SendEvent(e);
+	}
 	Camera::Camera()
 	{
 		SetFOV(90);
@@ -26,9 +37,7 @@ namespace JG
 	{
 		if (smMainCamera == nullptr)
 		{
-			RequestRegisterMainCameraEvent e;
-			e.MainCamera = this;
-			SendEvent(e);
+			SetMainCamera(this);
 		}
 	}
 
@@ -40,10 +49,7 @@ namespace JG
 	{
 		if (smMainCamera == nullptr)
 		{
-			RequestRegisterMainCameraEvent e;
-			e.MainCamera = this;
-			SendEvent(e);
-			smMainCamera = this;
+			SetMainCamera(this);
 		}
 	}
 	void Camera::Destory()
