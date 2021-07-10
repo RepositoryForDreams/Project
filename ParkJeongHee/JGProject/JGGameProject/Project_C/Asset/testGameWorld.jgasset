@@ -35,7 +35,7 @@
                         "Location": [
                             0.0,
                             0.0,
-                            0.0
+                            -10.0
                         ],
                         "Rotation": [
                             0.0,
@@ -70,6 +70,70 @@
                     }
                 ],
                 "Childs": []
+            },
+            {
+                "Name": "QuadList",
+                "Components": [
+                    {
+                        "ComponentType": "JG::Transform",
+                        "Name": "Transform",
+                        "IsActive": true,
+                        "Location": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "Rotation": [
+                            0.0,
+                            -0.0,
+                            0.0
+                        ],
+                        "Scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    }
+                ],
+                "Childs": [
+                    {
+                        "Name": "Quad",
+                        "Components": [
+                            {
+                                "ComponentType": "JG::Transform",
+                                "Name": "Transform",
+                                "IsActive": true,
+                                "Location": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "Rotation": [
+                                    0.0,
+                                    -0.0,
+                                    0.0
+                                ],
+                                "Scale": [
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            },
+                            {
+                                "ComponentType": "JG::SpriteRenderer",
+                                "Name": "SpriteRenderer",
+                                "IsActive": true,
+                                "Color": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ]
+                            }
+                        ],
+                        "Childs": []
+                    }
+                ]
             }
         ]
     }

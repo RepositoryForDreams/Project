@@ -51,7 +51,7 @@ namespace JG
 
 			auto view = mainCam->GetViewMatrix();
 			auto proj = mainCam->GetProjMatrix();
-			ImGuizmo::Manipulate(view.GetFloatPtr(), proj.GetFloatPtr(), (ImGuizmo::OPERATION)mCurrentGizmoOperation, (ImGuizmo::MODE)mCurrentGizmoMode, worldMat.GetFloatPtr(), NULL, NULL);
+			bool result = ImGuizmo::Manipulate(view.GetFloatPtr(), proj.GetFloatPtr(), (ImGuizmo::OPERATION)mCurrentGizmoOperation, (ImGuizmo::MODE)mCurrentGizmoMode, worldMat.GetFloatPtr(), NULL, NULL);
 			JVector3 matrixTranslation, matrixRotation, matrixScale;
 			ImGuizmo::DecomposeMatrixToComponents(worldMat.GetFloatPtr(), (float*)&matrixTranslation, (float*)&matrixRotation, (float*)&matrixScale);
 			node->GetTransform()->SetLocalLocation(matrixTranslation);
@@ -124,10 +124,6 @@ namespace JG
 				mainCam->SetOrthographic(!mCurrentCameraMode);
 			}
 		}
-
-
-
-
 
 		auto sceneTexture = viewModel->GetSceneTexture();
 

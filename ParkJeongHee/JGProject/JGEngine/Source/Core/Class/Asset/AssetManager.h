@@ -22,17 +22,14 @@ namespace JG
 		Dictionary<String, u64>				    mAssetIDPool;
 
 		Dictionary<u64, SharedPtr<IAsset>> mRWAssetPool;
-		
-
-
-
 		Dictionary<String, SharedPtr<LoadingData>> mLoadingAssetPool;
-		Queue<String> mWaitingLoadAsset;
-		std::shared_mutex mMutex;
-		bool mIsResetting = false;
 
+		Queue<String> mWaitingLoadAsset;
+		bool mIsResetting = false;
 	public:
-		AssetID  AsyncLoadAsset(const String& path);
+		AssetManager();
+	public:
+		AssetID  LoadAsset(const String& path);
 		AssetID  RequestReadWriteAsset(const String& path);
 		void Reset();
 		bool IsResetting() const;
@@ -40,8 +37,6 @@ namespace JG
 		template<class T>
 		Asset<T>* GetAsset(AssetID id)
 		{
-			std::shared_lock<std::shared_mutex> lock(mMutex);
-
 			if (id.IsReadWrite() == false)
 			{
 				auto iter = mAssetPoolByID.find(id.GetID());
@@ -67,8 +62,6 @@ namespace JG
 		template<class T>
 		Asset<T>* GetOriginAsset(AssetID id)
 		{
-			std::shared_lock<std::shared_mutex> lock(mMutex);
-
 			auto iter = mAssetPoolByID.find(id.GetOriginID());
 			if (iter == mAssetPoolByID.end())
 			{
@@ -81,8 +74,6 @@ namespace JG
 		template<class T>
 		AssetID GetOriginAssetID(const String& path)
 		{
-			std::shared_lock<std::shared_mutex> lock(mMutex);
-
 			auto iter = mAssetIDPool.find(id.GetOriginID());
 			if (iter == mAssetIDPool.end())
 			{
@@ -95,6 +86,6 @@ namespace JG
 			return id;
 		}
 	private:
-		SharedPtr<IAsset> LoadAsset(const String path);
+		SharedPtr<IAsset> LoadAssetInternal(const String path);
 	};
 }

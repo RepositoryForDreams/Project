@@ -58,6 +58,10 @@ namespace JG
 	{
 		return GetFrameBufferCount();
 	}
+	u64 DirectX12API::GetBufferIndex() const 
+	{
+		return GetFrameBufferIndex();
+	}
 	IDXGIFactory4* DirectX12API::GetDXGIFactory()
 	{
 		return gFactory.Get();
@@ -659,6 +663,7 @@ namespace JG
 	}
 	SharedPtr<ITexture> DirectX12API::CreateTexture(const TextureAssetStock& stock)
 	{
+		if (stock.Pixels.empty()) return nullptr;
 		auto texture = CreateSharedPtr<DirectX12Texture>();
 		texture->CreateFromMemory(stock.Name, (const byte*)stock.Pixels.data(), stock.Width, stock.Height, stock.Channels);
 		return texture;

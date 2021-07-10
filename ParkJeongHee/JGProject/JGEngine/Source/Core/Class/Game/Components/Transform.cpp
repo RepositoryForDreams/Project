@@ -26,6 +26,9 @@ namespace JG
 	{
 		bool isDirty = mScale != scale;
 		mScale = scale;
+		mScale.x = std::max<float>(0.0000001f, scale.x);
+		mScale.y = std::max<float>(0.0000001f, scale.y);
+		mScale.z = std::max<float>(0.0000001f, scale.z);
 		if (isDirty)
 		{
 			SendDirty();

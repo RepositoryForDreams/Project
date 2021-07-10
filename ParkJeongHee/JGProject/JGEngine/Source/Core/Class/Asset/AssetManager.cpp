@@ -5,56 +5,50 @@
 #include "Graphics/Mesh.h"
 namespace JG
 {
-	AssetID AssetManager::AsyncLoadAsset(const String& path)
+	AssetManager::AssetManager()
 	{
-		if (mIsResetting == true)
+		Scheduler::GetInstance().ScheduleByFrame(0, 0, -1, 0, [&]()-> EScheduleResult
 		{
-			mWaitingLoadAsset.push(path);
-		}
-
-
-		{
-			std::shared_lock<std::shared_mutex> lock(mMutex);
-			if (mAssetPool.find(path) != mAssetPool.end())
+			for (auto& _pair : mLoadingAssetPool)
 			{
-				AssetID id;
-				id.Origin    = mAssetIDPool[path];
-				id.ID        = id.Origin;
-				id.ReadWrite = false;
-				return id;
-			}
-		}
-
-		// 로딩 중이라면 false
-		if (mLoadingAssetPool.find(path) != mLoadingAssetPool.end())
-		{
-			return AssetID();
-		}
-
-		{
-			std::lock_guard<std::shared_mutex> lock(mMutex);
-			mLoadingAssetPool.emplace(path, CreateSharedPtr<LoadingData>());
-			mLoadingAssetPool[path]->Path = path;
-		}
-		
-		
-		Scheduler::GetInstance().ScheduleAsync(
-			[&](void* userData)
-		{
-			LoadingData* loadingData = (LoadingData*)userData;
-			loadingData->Asset = LoadAsset(loadingData->Path);
-			
-			{
-				std::lock_guard<std::shared_mutex> lock(mMutex);
+				LoadingData* loadingData = _pair.second.get();
+				loadingData->Asset = LoadAssetInternal(loadingData->Path);
 				if (loadingData->Asset != nullptr)
 				{
 					mAssetPool.emplace(loadingData->Path, loadingData->Asset);
 					mAssetPoolByID.emplace(loadingData->Asset->GetAssetID(), loadingData->Asset);
 					mAssetIDPool.emplace(loadingData->Path, loadingData->Asset->GetAssetID());
 				}
-				mLoadingAssetPool.erase(loadingData->Path);
 			}
-		}, mLoadingAssetPool[path].get());
+			mLoadingAssetPool.clear();
+
+			return EScheduleResult::Continue;
+		});
+	}
+	AssetID AssetManager::LoadAsset(const String& path)
+	{
+		if (mIsResetting == true)
+		{
+			mWaitingLoadAsset.push(path);
+		}
+
+		if (mAssetPool.find(path) != mAssetPool.end())
+		{
+			AssetID id;
+			id.Origin = mAssetIDPool[path];
+			id.ID = id.Origin;
+			id.ReadWrite = false;
+			return id;
+		}
+
+		if (mLoadingAssetPool.find(path) != mLoadingAssetPool.end())
+		{
+			return AssetID();
+		}
+		mLoadingAssetPool.emplace(path, CreateSharedPtr<LoadingData>());
+		mLoadingAssetPool[path]->Path = path;
+		
+
 		return AssetID();
 	}
 
@@ -83,8 +77,7 @@ namespace JG
 		{
 			// 로딩중인 에셋이 모두끝날때까지 대기
 			while (mLoadingAssetPool.empty() == false) {}
-			
-			std::lock_guard<std::shared_mutex> lock(mMutex);
+		
 			mAssetPool.clear();
 			mAssetPoolByID.clear();
 			mAssetIDPool.clear();
@@ -108,7 +101,7 @@ namespace JG
 					break;
 				}
 				auto path = mWaitingLoadAsset.front(); mWaitingLoadAsset.pop();
-				AsyncLoadAsset(path);
+				LoadAsset(path);
 				++count;
 			}
 			
@@ -122,7 +115,7 @@ namespace JG
 			}
 		});
 	}
-	SharedPtr<IAsset> AssetManager::LoadAsset(const String path)
+	SharedPtr<IAsset> AssetManager::LoadAssetInternal(const String path)
 	{
 		fs::path assetPath = path;
 		if (fs::exists(assetPath) == false)

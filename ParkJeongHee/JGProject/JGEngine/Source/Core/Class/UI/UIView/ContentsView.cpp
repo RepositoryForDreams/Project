@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "ContentsView.h"
-
+#include "Common/DragAndDrop.h"
 
 namespace JG
 {
@@ -164,9 +164,11 @@ namespace JG
 			{
 
 			}
-			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+			if (ImGui::BeginDragDropSource())
 			{
-				ImGui::SetDragDropPayload(ws2s(fileInfo->Name).c_str(), fileInfo, 200);
+				DDDContentsFile ddd;
+				ddd.pFileInfoPtr = fileInfo;
+				ImGui::SetDragDropPayload(ws2s(ddd.GetType().GetName()).c_str(), &ddd, 200);
 				ImGui::TextUnformatted(ws2s(fileInfo->Name).c_str());
 				ImGui::EndDragDropSource();
 			}

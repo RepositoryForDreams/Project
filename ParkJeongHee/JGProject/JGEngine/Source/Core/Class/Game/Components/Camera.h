@@ -91,5 +91,7 @@ namespace JG
 	{
 	private:
 		JGCLASS
+	public:
+		EditorCamera() : Camera() {}
 	};
 }

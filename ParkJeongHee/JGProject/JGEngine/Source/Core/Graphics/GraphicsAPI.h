@@ -28,7 +28,7 @@ namespace JG
 	public:
 		virtual EGraphicsAPI GetAPI() const = 0;
 		virtual u64 GetBufferCount() const = 0;
-	
+		virtual u64 GetBufferIndex() const = 0;
 	protected:
 		friend class Application;
 		virtual bool Create() = 0;

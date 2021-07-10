@@ -7,7 +7,8 @@
 #include "Graphics/Resource.h"
 #include "Graphics/Mesh.h"
 #include "Class/Game/GameWorld.h"
-
+#include "Class/UI/UIViewModel/ContentsViewModel.h"
+#include "Common/DragAndDrop.h"
 namespace JG
 {
 	SpriteRenderer::SpriteRenderer()
@@ -34,7 +35,7 @@ namespace JG
 	{
 		if (mSpriteID.IsValid() == false)
 		{
-			mSpriteID = GetGameWorld()->GetAssetManager()->AsyncLoadAsset(mSpritePath);
+			mSpriteID = GetGameWorld()->GetAssetManager()->LoadAsset(mSpritePath);
 			mAsset = GetGameWorld()->GetAssetManager()->GetAsset<ITexture>(mSpriteID);
 		}
 	}
@@ -60,12 +61,19 @@ namespace JG
 		}
 	}
 
+	void SpriteRenderer::SetSprite(const String& path)
+	{
+		mAsset = nullptr;
+		mSpriteID = AssetID();
+		mSpritePath = path;
+	}
+
 	SharedPtr<IRenderItem> SpriteRenderer::PushRenderItem()
 	{
 		auto transform = GetOwner()->GetTransform();
 		mSpriteRI->WorldMatrix = transform->GetWorldMatrix();
 
-		if (mAsset != nullptr)
+		if (mAsset != nullptr && mAsset->Get())
 		{
 			auto info = mAsset->Get()->GetTextureInfo();
 			mSpriteRI->Texture = mAsset->Get();
@@ -84,6 +92,28 @@ namespace JG
 		BaseRenderer::OnInspectorGUI();
 		
 		ImGui::ColorEdit4("Color", (float*)(&mSpriteRI->Color));
+		
+		auto path = ws2s(mSpritePath);
+		ImGui::InputText("Texture", path.data(), ImGuiInputTextFlags_ReadOnly);
 
+
+
+
+		
+		if (ImGui::BeginDragDropTarget() && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+		{
+			auto payLoad = ImGui::GetDragDropPayload();
+			if (payLoad != nullptr)
+			{
+				IDragAndDropData* ddd = (IDragAndDropData*)payLoad->Data;
+				if (ddd->GetType() == JGTYPE(DDDContentsFile))
+				{
+					auto dddContentsFile = (DDDContentsFile*)ddd;
+					auto fileInfo = (ContentsFileInfo*)(dddContentsFile->pFileInfoPtr);
+					SetSprite(fileInfo->Path);
+				}
+			}
+			ImGui::EndDragDropTarget();
+		}
 	}
 }

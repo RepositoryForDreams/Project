@@ -97,7 +97,7 @@ namespace JG
 
 		List<jbyte> GetByteList() const {
 			auto rawData = mValue.GetString();
-			auto len = strlen(rawData);
+			auto len = mValue.GetStringLength();
 			List<jbyte> result;
 			result.resize(len);
 			memcpy(result.data(), rawData, len);

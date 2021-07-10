@@ -12,7 +12,6 @@ namespace JG
 		class Directory {};
 
 
-
 		ContentsViewModel* mVm = nullptr;
 	private:
 		bool mOpenGUI = true;
