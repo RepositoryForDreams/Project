@@ -104,8 +104,8 @@
                                 "Name": "Transform",
                                 "IsActive": true,
                                 "Location": [
-                                    0.0,
-                                    0.0,
+                                    -18.99993896484375,
+                                    34.000057220458987,
                                     0.0
                                 ],
                                 "Rotation": [
@@ -128,7 +128,37 @@
                                     1.0,
                                     1.0,
                                     1.0
+                                ],
+                                "SpritePath": "../../../JGGameProject/Project_C/Asset\\Resources\\uvTest2_noalpha.jgasset"
+                            }
+                        ],
+                        "Childs": []
+                    },
+                    {
+                        "Name": "Empty",
+                        "Components": [
+                            {
+                                "ComponentType": "JG::Transform",
+                                "Name": "Transform",
+                                "IsActive": true,
+                                "Location": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "Rotation": [
+                                    0.0,
+                                    -0.0,
+                                    0.0
+                                ],
+                                "Scale": [
+                                    1.0,
+                                    1.0,
+                                    1.0
                                 ]
+                            },
+                            {
+                                "ComponentType": "JG::StaticMeshRenderer"
                             }
                         ],
                         "Childs": []

@@ -78,19 +78,18 @@ namespace JG
 		stock.Name = fileName.substr(0, extentionPos);
 		
 		
-		byte* pixels = stbi_load(ws2s(settings.AssetPath).c_str(), &stock.Width, &stock.Height, &stock.Channels, 0);
+		byte* pixels = stbi_load(ws2s(settings.AssetPath).c_str(), &stock.Width, &stock.Height, &stock.Channels, STBI_rgb_alpha);
 		if (pixels == nullptr)
 		{
 			return EAssetImportResult::Fail;
 		}
-
+		stock.Channels = 4;
 		u64 size = (u64)stock.Width * (u64)stock.Height * (u64)stock.Channels;
 		stock.Pixels.resize(size);
 		memcpy(&stock.Pixels[0], pixels, size);
 
-		delete pixels;
-		pixels = nullptr;
 
+		stbi_image_free(pixels);
 
 		WriteTexture(settings.OutputPath, stock);
 		return EAssetImportResult::Success;

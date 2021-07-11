@@ -16,6 +16,8 @@ namespace JG
 		mSpriteRI = CreateUniquePtr<Standard2DRenderItem>();
 		mSpriteRI->WorldMatrix = JMatrix::Identity();
 		mSpriteRI->Color = Color::White();
+		auto assetPath = Application::GetAssetPath();
+		mSpritePath = CombinePath(assetPath, TT("Resources/NullTexture.jgasset"));
 	}
 	void SpriteRenderer::Awake()
 	{
@@ -24,8 +26,8 @@ namespace JG
 	void SpriteRenderer::Start()
 	{
 		BaseRenderer::Start();
-		auto assetPath = Application::GetAssetPath();
-		mSpritePath = CombinePath(assetPath, TT("Resources/NullTexture.jgasset"));
+	
+
 	}
 	void SpriteRenderer::Destory()
 	{
@@ -49,6 +51,8 @@ namespace JG
 	{
 		BaseRenderer::MakeJson(jsonData);
 		jsonData->AddMember("Color", JVector4(mSpriteRI->Color));
+		jsonData->AddMember("SpritePath", mSpritePath);
+
 	}
 
 	void SpriteRenderer::LoadJson(SharedPtr<JsonData> jsonData)
@@ -58,6 +62,11 @@ namespace JG
 		if (val)
 		{
 			mSpriteRI->Color = Color(val->GetVector4());
+		}
+		val = jsonData->GetMember("SpritePath");
+		if (val && val->IsString())
+		{
+			SetSprite(val->GetString());
 		}
 	}
 
@@ -77,7 +86,8 @@ namespace JG
 		{
 			auto info = mAsset->Get()->GetTextureInfo();
 			mSpriteRI->Texture = mAsset->Get();
-			mSpriteRI->WorldMatrix = JMatrix::Scaling(JVector3(info.Width, info.Height, 1)) * mSpriteRI->WorldMatrix;
+			f32 adjust = (f32)info.PixelPerUnit / (f32)GameSettings::GetUnitSize();
+			mSpriteRI->WorldMatrix = JMatrix::Scaling(JVector3(info.Width * adjust, info.Height * adjust, 1)) * mSpriteRI->WorldMatrix;
 		}
 		return mSpriteRI;
 	}
@@ -94,12 +104,9 @@ namespace JG
 		ImGui::ColorEdit4("Color", (float*)(&mSpriteRI->Color));
 		
 		auto path = ws2s(mSpritePath);
-		ImGui::InputText("Texture", path.data(), ImGuiInputTextFlags_ReadOnly);
+		fs::path p = path;
 
-
-
-
-		
+		ImGui::InputText("Texture", p.filename().string().data(), ImGuiInputTextFlags_ReadOnly);
 		if (ImGui::BeginDragDropTarget() && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
 		{
 			auto payLoad = ImGui::GetDragDropPayload();

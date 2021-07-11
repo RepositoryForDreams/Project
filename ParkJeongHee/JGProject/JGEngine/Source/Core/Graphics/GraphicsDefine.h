@@ -63,11 +63,12 @@ namespace JG
 
 	struct TextureInfo
 	{
-		u32 Width = 0;
+		u32 Width  = 0;
 		u32 Height = 0;
+		u32 PixelPerUnit = 1;
 		ETextureFormat Format = ETextureFormat::None;
 		ETextureFlags  Flags = ETextureFlags::None;
-		u16 MipLevel = 0;
+		u16 MipLevel  = 0;
 		u16 ArraySize = 1;
 
 
@@ -322,14 +323,21 @@ namespace JG
 		virtual ~Standard2DRenderItem() = default;
 	};
 
+	class StandardStaticMeshRenderItem : public IRenderItem
+	{
+		JGCLASS
+	public:
+		SharedPtr<IMesh> Mesh = nullptr;
+		List<SharedPtr<IMaterial>> Materials;
+	};
 
-	//class MeshRenderItem : public IRenderItem
-	//{
-	//	JGCLASS
-	//public:
-	//	virtual ~MeshRenderItem() = default;
-	//};
-
+	class StandardSkeletonMeshRenderItem : public IRenderItem
+	{
+		JGCLASS
+	public:
+		SharedPtr<IMesh> Mesh = nullptr;
+		List<SharedPtr<IMaterial>> Materials;
+	};
 
 	namespace ShaderScript
 	{

@@ -16,6 +16,7 @@ namespace JG
 	class DirectX12VertexBuffer : public IVertexBuffer
 	{
 		friend class DirectX12Mesh;
+		friend class DirectX12SubMesh;
 	private:
 		u64   mElementSize  = 0;
 		u64   mElementCount = 0;
@@ -51,6 +52,7 @@ namespace JG
 	class DirectX12IndexBuffer : public IIndexBuffer
 	{
 		friend class DirectX12Mesh;
+		friend class DirectX12SubMesh;
 	private:
 		u32* mCPUData    = nullptr;
 		u32  mIndexCount = 0;
@@ -199,7 +201,7 @@ namespace JG
 		virtual bool IsValid() const override;
 	public:
 		void Create(const String& name, const TextureInfo& info);
-		void CreateFromMemory(const String& name, const byte* pixels, i32 width, i32 height, i32 comp);
+		void CreateFromMemory(const String& name, const byte* pixels, i32 width, i32 height, i32 comp, u32 pixelPerUnit = 1);
 		void Reset();
 
 

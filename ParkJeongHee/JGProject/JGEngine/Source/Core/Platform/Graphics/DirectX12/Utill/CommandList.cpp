@@ -141,7 +141,7 @@ namespace JG
 
 		D3D12_SUBRESOURCE_DATA subResourceData = {};
 		subResourceData.pData      = pixels;
-		subResourceData.RowPitch = width * channels;
+		subResourceData.RowPitch   = width * channels;
 		subResourceData.SlicePitch = subResourceData.RowPitch * height;
 
 		TransitionBarrier(resource, D3D12_RESOURCE_STATE_COPY_DEST);

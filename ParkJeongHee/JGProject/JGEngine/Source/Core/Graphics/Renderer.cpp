@@ -68,24 +68,44 @@ namespace JG
 
 		return BeginBatch(info, batchList);
 	}
-	void FowardRenderer::DrawCall(SharedPtr<IMesh> mesh, SharedPtr<IMaterial> material)
+	void FowardRenderer::DrawCall(SharedPtr<IMesh> mesh, List<SharedPtr<IMaterial>> materialList)
 	{
-		if (mesh == nullptr || material == nullptr)
+		if (mesh == nullptr || materialList.empty())
 		{
 			return;
 		}
-
+		auto api = Application::GetInstance().GetGraphicsAPI();
+		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
 		if (mesh->Bind() == false)
 		{
 			JG_CORE_ERROR("{0} : Fail Mesh Bind", mesh->GetName());
 		}
-		if (material->Bind() == false)
+		for (u64 i = 0; i < mesh->GetSubMeshCount(); ++i)
 		{
-			JG_CORE_INFO("{0} : Fail Material Bind", material->GetName());
+			if (mesh->GetSubMesh(i)->Bind() == false)
+			{
+				JG_CORE_ERROR("{0} : Fail Mesh Bind", mesh->GetSubMesh(0)->GetName());
+				continue;
+			}
+			SharedPtr<IMaterial> material = nullptr;
+			if (materialList.size() <= i)
+			{
+				material = materialList[0];
+			}
+			else
+			{
+				material = materialList[i];
+			}
+			if (material->Bind() == false)
+			{
+				JG_CORE_INFO("{0} : Fail Material Bind", material->GetName());
+				continue;
+			}
+			api->DrawIndexed(mesh->GetSubMesh(i)->GetIndexCount());
 		}
-		auto api = Application::GetInstance().GetGraphicsAPI();
-		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
-		api->DrawIndexed(mesh->GetIndexCount());
+		
+		
+
 	}
 	void FowardRenderer::End()
 	{
@@ -116,12 +136,15 @@ namespace JG
 			FrameResource rsc;
 			rsc.QuadMesh = IMesh::Create(TT("Renderer2D_QuadMesh"));
 			rsc.QuadMesh->SetInputLayout(inputLayout);
+			rsc.QuadMesh->AddMesh(ISubMesh::Create(TT("Renderer2D_QuadSubMesh")));
+
+
 
 			rsc.QuadVBuffer = IVertexBuffer::Create(TT("Renderer2D_VBuffer"), EBufferLoadMethod::CPULoad);
 			rsc.QuadIBuffer = IIndexBuffer::Create(TT("Renderer2D_IBuffer"), EBufferLoadMethod::CPULoad);
 
-			rsc.QuadMesh->AddVertexBuffer(rsc.QuadVBuffer);
-			rsc.QuadMesh->SetIndexBuffer(rsc.QuadIBuffer);
+			rsc.QuadMesh->GetSubMesh(0)->SetVertexBuffer(rsc.QuadVBuffer);
+			rsc.QuadMesh->GetSubMesh(0)->SetIndexBuffer(rsc.QuadIBuffer);
 
 			rsc.Standard2DMaterial = IMaterial::Create(TT("Standard2DMaterial"), _2dShader);
 
@@ -288,7 +311,12 @@ namespace JG
 			StartBatch();
 			return;
 		}
-		
+		if (mCurrFrameResource->QuadMesh->GetSubMesh(0)->Bind() == false)
+		{
+			JG_CORE_ERROR("Failed Bind QuadMesh");
+			StartBatch();
+			return;
+		}
 		
 		api->DrawIndexed(quadIndexCount);
 		StartBatch();

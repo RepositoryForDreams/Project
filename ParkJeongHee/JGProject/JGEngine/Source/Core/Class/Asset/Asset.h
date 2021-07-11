@@ -130,6 +130,7 @@ namespace JG
 		i32 Width    = 0;
 		i32 Height   = 0;
 		i32 Channels = 0;
+		u32 PixelPerUnit = 100;
 		List<jbyte> Pixels;
 	public:
 		virtual void MakeJson(SharedPtr<JsonData> jsonData) const override;
@@ -213,7 +214,6 @@ namespace JG
 		String mName;
 
 		SharedPtr<T> mData = nullptr;
-
 	public:
 		Asset(const String& assetPath)
 		{
@@ -224,7 +224,6 @@ namespace JG
 			mAssetPath = ReplaceAll(mAssetFullPath, contentsPath, TT(""));
 			mExtension = p.extension();
 			mName = ReplaceAll(p.wstring() ,mExtension, TT(""));
-
 		}
 	public:
 		virtual u64 GetAssetID() const override

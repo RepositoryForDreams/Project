@@ -19,6 +19,7 @@ namespace JG
 	class IMesh;
 	class IComputeBuffer;
 	class IComputer;
+	class ISubMesh;
 	struct TextureInfo;
 	struct FrameBufferInfo;
 
@@ -62,6 +63,7 @@ namespace JG
 		virtual SharedPtr<IShader>        CreateShader(const String& name, const String& sourceCode, EShaderFlags flags) = 0;
 		virtual SharedPtr<IMaterial>	  CreateMaterial(const String& name, SharedPtr<IShader> shader) = 0;
 		virtual SharedPtr<IMesh>          CreateMesh(const String& name) = 0;
+		virtual SharedPtr<ISubMesh>       CreateSubMesh(const String& name) = 0;
 		virtual SharedPtr<ITexture>       CreateTexture(const String& name, const TextureInfo& info) = 0;
 		virtual SharedPtr<ITexture>       CreateTexture(const TextureAssetStock& stock) = 0;
 		virtual void ClearTexture(SharedPtr<ITexture> texture);

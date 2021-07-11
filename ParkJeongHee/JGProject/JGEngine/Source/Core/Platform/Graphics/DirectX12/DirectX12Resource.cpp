@@ -699,7 +699,7 @@ namespace JG
 		mIsEnd = true;
 	}
 
-	void DirectX12Texture::CreateFromMemory(const String& name, const byte* pixels, i32 width, i32 height, i32 channels)
+	void DirectX12Texture::CreateFromMemory(const String& name, const byte* pixels, i32 width, i32 height, i32 channels, u32 pixelPerUnit)
 	{
 		TextureInfo info;
 		info.ArraySize = 1;
@@ -708,7 +708,7 @@ namespace JG
 		info.Width     = (u32)width;
 		info.Height    = (u32)height;
 		info.Format    = ETextureFormat::R8G8B8A8_Unorm;
-		
+		info.PixelPerUnit = pixelPerUnit;
 		SetName(name);
 		SetTextureInfo(info);
 		auto commandList = DirectX12API::GetCopyCommandList();

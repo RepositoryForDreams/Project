@@ -653,6 +653,12 @@ namespace JG
 		mesh->SetName(name);
 		return mesh;
 	}
+	SharedPtr<ISubMesh> DirectX12API::CreateSubMesh(const String& name)
+	{
+		auto mesh = CreateSharedPtr<DirectX12SubMesh>();
+		mesh->SetName(name);
+		return mesh;
+	}
 	SharedPtr<ITexture> DirectX12API::CreateTexture(const String& name, const TextureInfo& info)
 	{
 
@@ -665,7 +671,7 @@ namespace JG
 	{
 		if (stock.Pixels.empty()) return nullptr;
 		auto texture = CreateSharedPtr<DirectX12Texture>();
-		texture->CreateFromMemory(stock.Name, (const byte*)stock.Pixels.data(), stock.Width, stock.Height, stock.Channels);
+		texture->CreateFromMemory(stock.Name, (const byte*)stock.Pixels.data(), stock.Width, stock.Height, stock.Channels, stock.PixelPerUnit);
 		return texture;
 	}
 

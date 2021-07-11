@@ -36,7 +36,7 @@ namespace JG
 		virtual ~IRenderer() = default;
 	public:
 		virtual bool Begin(const RenderInfo& info, List<SharedPtr<IRenderBatch>> batchList) = 0;
-		virtual void DrawCall(SharedPtr<IMesh> mesh, SharedPtr<IMaterial> material) = 0;
+		virtual void DrawCall(SharedPtr<IMesh> mesh, List<SharedPtr<IMaterial>> materialList) = 0;
 		virtual void End() = 0;
 
 		virtual ERendererPath GetRendererPath() const = 0;
@@ -56,7 +56,7 @@ namespace JG
 		virtual ~FowardRenderer() = default;
 	public:
 		virtual bool Begin(const RenderInfo& info, List<SharedPtr<IRenderBatch>> batchList) override;
-		virtual void DrawCall(SharedPtr<IMesh> mesh, SharedPtr<IMaterial> material) override;
+		virtual void DrawCall(SharedPtr<IMesh> mesh, List<SharedPtr<IMaterial>> materialList) override;
 		virtual void End() override;
 		virtual ERendererPath GetRendererPath() const override { return ERendererPath::Foward; }
 	};
@@ -98,7 +98,7 @@ namespace JG
 
 		struct FrameResource
 		{
-			SharedPtr<IMesh> QuadMesh;
+			SharedPtr<IMesh>    QuadMesh;
 			SharedPtr<IVertexBuffer> QuadVBuffer;
 			SharedPtr<IIndexBuffer> QuadIBuffer;
 			SharedPtr<IMaterial> Standard2DMaterial;

@@ -9,6 +9,7 @@ namespace JG
 		jsonData->AddMember("Width", Width);
 		jsonData->AddMember("Height", Height);
 		jsonData->AddMember("Channels", Channels);
+		jsonData->AddMember("PixelPerUnit", PixelPerUnit);
 		jsonData->AddMember("Pixels", Pixels);
 
 	}
@@ -35,6 +36,12 @@ namespace JG
 		{
 			Channels = Val->GetInt32();
 		}
+		Val = jsonData->GetMember("PixelPerUnit");
+		if (Val && Val->GetUint32())
+		{
+			PixelPerUnit = Val->GetUint32();
+		}
+
 		Val = jsonData->GetMember("Pixels");
 		if (Val && Val->IsByteList())
 		{

@@ -10,6 +10,7 @@
 #include "Class/Game/Components/Transform.h"
 #include "Class/Game/Components/Camera.h"
 #include "Class/Game/Components/SpriteRenderer.h"
+#include "Class/Game/Components/StaticMeshRenderer.h"
 
 #include "Class/Asset/Asset.h"
 
@@ -106,7 +107,7 @@ namespace JG
 		GameObjectFactory::GetInstance().RegisterComponentType<Camera>();
 		GameObjectFactory::GetInstance().RegisterComponentType<EditorCamera>();
 		GameObjectFactory::GetInstance().RegisterComponentType<SpriteRenderer>();
-
+		GameObjectFactory::GetInstance().RegisterComponentType<StaticMeshRenderer>();
 	}
 	void GameLogicSystemLayer::SaveGameWorld()
 	{
