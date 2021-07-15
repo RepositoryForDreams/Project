@@ -36,11 +36,10 @@ namespace JG
 		virtual ~IRenderer() = default;
 	public:
 		virtual bool Begin(const RenderInfo& info, List<SharedPtr<IRenderBatch>> batchList) = 0;
-		virtual void DrawCall(SharedPtr<IMesh> mesh, List<SharedPtr<IMaterial>> materialList) = 0;
+		virtual void DrawCall(const JMatrix& worldMatrix, SharedPtr<IMesh> mesh, List<SharedPtr<IMaterial>> materialList) = 0;
 		virtual void End() = 0;
 
 		virtual ERendererPath GetRendererPath() const = 0;
-
 	protected:
 		bool BeginBatch(const RenderInfo& info, List<SharedPtr<IRenderBatch>> batchList);
 		void EndBatch();
@@ -51,12 +50,13 @@ namespace JG
 	private:
 		bool mIsRun = false;
 		List<SharedPtr<ITexture>> mRenderTarges;
+		RenderInfo mCurrentRenderInfo;
 	public:
 		FowardRenderer() = default;
 		virtual ~FowardRenderer() = default;
 	public:
 		virtual bool Begin(const RenderInfo& info, List<SharedPtr<IRenderBatch>> batchList) override;
-		virtual void DrawCall(SharedPtr<IMesh> mesh, List<SharedPtr<IMaterial>> materialList) override;
+		virtual void DrawCall(const JMatrix& worldMatrix, SharedPtr<IMesh> mesh, List<SharedPtr<IMaterial>> materialList) override;
 		virtual void End() override;
 		virtual ERendererPath GetRendererPath() const override { return ERendererPath::Foward; }
 	};
@@ -84,6 +84,7 @@ namespace JG
 
 	class Render2DBatch : public IRenderBatch
 	{
+	public:
 		struct QuadVertex
 		{
 			JVector3 Pos;

@@ -8,7 +8,7 @@
 #include "Class/FileIO.h"
 namespace JG
 {
-	struct JGVertex : public IJson
+	struct JGVertex
 	{
 		JVector3 Position;
 		JVector2 Texcoord;
@@ -20,15 +20,14 @@ namespace JG
 		static SharedPtr<InputLayout> GetInputLayout() {
 			auto inputLayout = InputLayout::Create();
 			inputLayout->Add(EShaderDataType::_float3, "POSITION", 0);
+			inputLayout->Add(EShaderDataType::_float2, "TEXCOORD", 0);
 			inputLayout->Add(EShaderDataType::_float3, "NORMAL", 0);
 			inputLayout->Add(EShaderDataType::_float3, "TANGENT", 0);
 			inputLayout->Add(EShaderDataType::_float3, "BITANGENT", 0);
-			inputLayout->Add(EShaderDataType::_float2, "TEXCOORD", 0);
 			return inputLayout;
 		}
-
 	public:
-		virtual void MakeJson(SharedPtr<JsonData> jsonData) const override
+		void MakeJson(SharedPtr<JsonData> jsonData) const 
 		{
 			auto& val = jsonData->GetValue();
 			val.SetArray();
@@ -47,7 +46,7 @@ namespace JG
 			val.PushBack(Bitangent.y, jsonData->GetJsonAllocator());
 			val.PushBack(Bitangent.z, jsonData->GetJsonAllocator());
 		}
-		virtual void LoadJson(SharedPtr<JsonData> jsonData) override
+		void LoadJson(SharedPtr<JsonData> jsonData)
 		{
 			auto& val = jsonData->GetValue();
 			i32 index = 0;
@@ -78,7 +77,7 @@ namespace JG
 			}
 		}
 	};
-	struct JGQuadVertex : public IJson
+	struct JGQuadVertex
 	{
 		JVector3 Position;
 		JVector2 Texcoord;
@@ -91,12 +90,12 @@ namespace JG
 			return inputLayout;
 		}
 	public:
-		virtual void MakeJson(SharedPtr<JsonData> jsonData) const override
+		void MakeJson(SharedPtr<JsonData> jsonData) const 
 		{
 			jsonData->AddMember("Position", Position);
 			jsonData->AddMember("Texcoord", Texcoord);
 		}
-		virtual void LoadJson(SharedPtr<JsonData> jsonData) override
+		void LoadJson(SharedPtr<JsonData> jsonData)
 		{
 			auto val = jsonData->GetMember("Position");
 			if (val)
@@ -151,7 +150,7 @@ namespace JG
 		bool   IsSkinned = false;
 		List<String>           SubMeshNames;
 		List<List<JGVertex>>   Vertices;
-		List<u32>		       Indices;
+		List<List<u32>>		   Indices;
 	public:
 		virtual void MakeJson(SharedPtr<JsonData> jsonData) const override;
 		virtual void LoadJson(SharedPtr<JsonData> jsonData) override;
@@ -162,6 +161,15 @@ namespace JG
 			return EAssetFormat::Mesh;
 		}
 	};
+
+
+	class MaterialAssetStock : public IAssetStock
+	{
+	public:
+		String Name;
+		// ShaderScript
+	};
+
 
 	
 

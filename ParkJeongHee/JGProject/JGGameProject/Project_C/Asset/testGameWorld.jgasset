@@ -66,7 +66,7 @@
                             0.0
                         ],
                         "CullingLayerMask": 18446744073709551615,
-                        "IsOrthographic": true
+                        "IsOrthographic": false
                     }
                 ],
                 "Childs": []
@@ -104,8 +104,8 @@
                                 "Name": "Transform",
                                 "IsActive": true,
                                 "Location": [
-                                    -18.99993896484375,
-                                    34.000057220458987,
+                                    -140.99996948242188,
+                                    114.00000762939453,
                                     0.0
                                 ],
                                 "Rotation": [
@@ -142,8 +142,40 @@
                                 "Name": "Transform",
                                 "IsActive": true,
                                 "Location": [
-                                    0.0,
-                                    0.0,
+                                    0.7183883786201477,
+                                    0.10312771797180176,
+                                    -5.0
+                                ],
+                                "Rotation": [
+                                    6212.36181640625,
+                                    1957.3876953125,
+                                    -5914.50439453125
+                                ],
+                                "Scale": [
+                                    0.9999982714653015,
+                                    0.9999986290931702,
+                                    0.9999976754188538
+                                ]
+                            },
+                            {
+                                "ComponentType": "JG::StaticMeshRenderer",
+                                "Name": "StaticMeshRenderer",
+                                "IsActive": true,
+                                "MeshPath": "../../../JGGameProject/Project_C/Asset\\Resources\\Cube.001.jgasset"
+                            }
+                        ],
+                        "Childs": []
+                    },
+                    {
+                        "Name": "Quad2",
+                        "Components": [
+                            {
+                                "ComponentType": "JG::Transform",
+                                "Name": "Transform",
+                                "IsActive": true,
+                                "Location": [
+                                    31.99999237060547,
+                                    206.0,
                                     0.0
                                 ],
                                 "Rotation": [
@@ -158,7 +190,48 @@
                                 ]
                             },
                             {
-                                "ComponentType": "JG::StaticMeshRenderer"
+                                "ComponentType": "JG::SpriteRenderer",
+                                "Name": "SpriteRenderer",
+                                "IsActive": true,
+                                "Color": [
+                                    1.0,
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                ],
+                                "SpritePath": "../../../JGGameProject/Project_C/Asset/Resources/NullTexture.jgasset"
+                            }
+                        ],
+                        "Childs": []
+                    },
+                    {
+                        "Name": "Empty",
+                        "Components": [
+                            {
+                                "ComponentType": "JG::Transform",
+                                "Name": "Transform",
+                                "IsActive": true,
+                                "Location": [
+                                    -0.45045945048332217,
+                                    -0.03335118293762207,
+                                    -5.0
+                                ],
+                                "Rotation": [
+                                    0.0,
+                                    -0.0,
+                                    0.0
+                                ],
+                                "Scale": [
+                                    0.9999995231628418,
+                                    0.9999995231628418,
+                                    0.9999901652336121
+                                ]
+                            },
+                            {
+                                "ComponentType": "JG::StaticMeshRenderer",
+                                "Name": "StaticMeshRenderer",
+                                "IsActive": true,
+                                "MeshPath": "../../../JGGameProject/Project_C/Asset\\Resources\\Sphere.001.jgasset"
                             }
                         ],
                         "Childs": []

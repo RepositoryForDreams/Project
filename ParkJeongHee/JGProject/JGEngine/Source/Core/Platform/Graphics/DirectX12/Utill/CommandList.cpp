@@ -154,7 +154,7 @@ namespace JG
 		BackupResource(uploadBuffer.Get());
 	}
 
-	void CommandList::CopyBuffer(ID3D12Resource* buffer, void* data, u64 elementSize, u64 elementCount)
+	void CommandList::CopyBuffer(ID3D12Resource* buffer, const void* data, u64 elementSize, u64 elementCount)
 	{
 		if (buffer == nullptr)
 		{
@@ -405,6 +405,7 @@ namespace JG
 	void GraphicsCommandList::FlushVertexBuffer()
 	{
 		mD3DCommandList->IASetVertexBuffers(0, mVertexViews.size(), mVertexViews.data());
+		mVertexViews.clear();
 	}
 
 

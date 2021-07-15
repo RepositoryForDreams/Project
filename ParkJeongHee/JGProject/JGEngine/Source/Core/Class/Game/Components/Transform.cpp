@@ -15,6 +15,7 @@ namespace JG
 	}
 	void Transform::SetLocalRotation(const JVector3& rotation)
 	{
+
 		bool isDirty = mRotation != rotation;
 		mRotation = rotation;
 		if (isDirty)
@@ -94,13 +95,67 @@ namespace JG
 			return;
 		}
 		mIsDirty = true;
+		
+		auto toRadian = Math::ConvertToRadians(mRotation);
+		CheckLimitRadian(toRadian);
 
-		mLocalMatrix = JMatrix::Scaling(mScale) * JMatrix::Rotation(JQuaternion::ToQuaternion(
-			JVector3(Math::ConvertToRadians(mRotation.x),
-				Math::ConvertToRadians(mRotation.y),
-				Math::ConvertToRadians(mRotation.z)))) * JMatrix::Translation(mLocation);
+		mLocalMatrix = JMatrix::Scaling(mScale) * JMatrix::Rotation(JQuaternion::ToQuaternion(toRadian)) * JMatrix::Translation(mLocation);
 
 		mWorldMatrix = mLocalMatrix;
+	}
+	void Transform::CheckLimitRadian(JVector3& toRadian) const
+	{
+		while (toRadian.x <= 0.0f)
+		{
+			toRadian.x += JG_2PI;
+		}
+		while (toRadian.x >= JG_2PI)
+		{
+			toRadian.x -= JG_2PI;
+		}
+		while (toRadian.y <= 0.0f)
+		{
+			toRadian.y += JG_2PI;
+		}
+		while (toRadian.y >= JG_2PI)
+		{
+			toRadian.y -= JG_2PI;
+		}
+		while (toRadian.z <= 0.0f)
+		{
+			toRadian.z += JG_2PI;
+		}
+		while (toRadian.z >= JG_2PI)
+		{
+			toRadian.z -= JG_2PI;
+		}
+	}
+	void Transform::CheckLimitRotation(JVector3& toDegree)
+	{
+		while (toDegree.x <= 0.0f)
+		{
+			toDegree.x += 360.0f;
+		}
+		while (toDegree.x >= 360.0f)
+		{
+			toDegree.x -= 360.0f;
+		}
+		while (toDegree.y <= 0.0f)
+		{
+			toDegree.y += 360.0f;
+		}
+		while (toDegree.y >= 360.0f)
+		{
+			toDegree.y -= 360.0f;
+		}
+		while (toDegree.z <= 0.0f)
+		{
+			toDegree.z += 360.0f;
+		}
+		while (toDegree.z >= 360.0f)
+		{
+			toDegree.z -= 360.0f;
+		}
 	}
 	void Transform::OnInspectorGUI()
 	{

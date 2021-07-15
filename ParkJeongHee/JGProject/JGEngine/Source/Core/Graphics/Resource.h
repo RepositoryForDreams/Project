@@ -37,7 +37,7 @@ namespace JG
 	protected:
 		virtual void SetBufferLoadMethod(EBufferLoadMethod method) = 0;
 	public:
-		virtual bool SetData(void* datas, u64 elementSize, u64 elementCount) = 0;
+		virtual bool SetData(const void* datas, u64 elementSize, u64 elementCount) = 0;
 		virtual EBufferLoadMethod GetBufferLoadMethod() const = 0;
 	protected:
 		virtual void Bind() = 0;
@@ -52,7 +52,7 @@ namespace JG
 	protected:
 		virtual void SetBufferLoadMethod(EBufferLoadMethod method) = 0;
 	public:
-		virtual bool SetData(u32* datas, u64 count) = 0;
+		virtual bool SetData(const u32* datas, u64 count) = 0;
 		virtual EBufferLoadMethod GetBufferLoadMethod() const = 0;
 		virtual u32 GetIndexCount() const = 0;
 	protected:

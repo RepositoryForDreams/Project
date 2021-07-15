@@ -37,6 +37,15 @@ namespace JG
 		void AddMember(const std::string& key, const SharedPtr<JsonData>& value) {
 			AddMember_Base(key, value->GetValue());
 		}
+
+		void AddMember(const SharedPtr<JsonData>& value) {
+			if (mValue.GetType() != rapidjson::kArrayType)
+			{
+				mValue.SetArray();
+			}
+		
+			mValue.PushBack(value->mValue, GetJsonAllocator());
+		}
 	private:
 		template<class T>
 		rapidjson::Value MakeJsonValue(const T& value)
@@ -84,7 +93,8 @@ namespace JG
 		f32  GetFloat() const { return mValue.GetFloat(); }
 		f64  GetDouble() const { return mValue.GetDouble(); }
 		String GetString() const { auto str = mValue.GetString(); return s2ws(str); }
-		SharedPtr<JsonData> GetJsonDataFromIndex(i32 index)  {
+		SharedPtr<JsonData> GetJsonDataFromIndex(i32 index) 
+		{
 			auto cnt = (u64)mValue.Size();
 			if (cnt <= index)
 			{
@@ -94,8 +104,18 @@ namespace JG
 			jsonData->mValue = mValue[(rapidjson::SizeType)index];
 			return jsonData;
 		}
+		String GetJsonDataKeyFromIndex(i32 index)
+		{
+			auto cnt = (u64)mValue.Size();
+			if (cnt <= index)
+			{
+				return TT("");
+			}
+			return s2ws((mValue.MemberBegin() + index)->name.GetString());
+		}
 
-		List<jbyte> GetByteList() const {
+		List<jbyte> GetByteList() const
+		{
 			auto rawData = mValue.GetString();
 			auto len = mValue.GetStringLength();
 			List<jbyte> result;
@@ -103,7 +123,8 @@ namespace JG
 			memcpy(result.data(), rawData, len);
 			return std::move(result);
 		}
-		JVector2 GetVector2() const {
+		JVector2 GetVector2() const 
+		{
 			JVector2 result;
 			i32 index = 0;
 			for (auto& v : mValue.GetArray())
@@ -112,7 +133,8 @@ namespace JG
 			}
 			return result;
 		}
-		JVector3 GetVector3() const {
+		JVector3 GetVector3() const 
+		{
 			JVector3 result;
 			i32 index = 0;
 			for (auto& v : mValue.GetArray())
@@ -121,7 +143,8 @@ namespace JG
 			}
 			return result;
 		}
-		JVector4 GetVector4() const {
+		JVector4 GetVector4() const
+		{
 			JVector4 result;
 			i32 index = 0;
 			for (auto& v : mValue.GetArray())
@@ -130,7 +153,8 @@ namespace JG
 			}
 			return result;
 		}
-		JMatrix GetMatrix() const {
+		JMatrix GetMatrix() const 
+		{
 			JMatrix result;
 			i32 col = 0; i32 row = 0;
 			for (auto& v : mValue.GetArray())
@@ -230,6 +254,21 @@ namespace JG
 
 			doc.Parse(jsonStr.c_str(), len);
 			return true;
+		}
+		static EAssetFormat GetAssetFormat(const String& path)
+		{
+			EAssetFormat assetFormat = EAssetFormat::None;
+			auto json = CreateSharedPtr<Json>();
+			if (Json::Read(path, json) == true)
+			{
+				
+				auto assetFormatVal = json->GetMember(JG_ASSET_FORMAT_KEY);
+				if (assetFormatVal)
+				{
+					assetFormat = (EAssetFormat)assetFormatVal->GetUint64();
+				}
+			}
+			return assetFormat;
 		}
 	};
 	inline rapidjson::Document::AllocatorType& JsonData::GetJsonAllocator()

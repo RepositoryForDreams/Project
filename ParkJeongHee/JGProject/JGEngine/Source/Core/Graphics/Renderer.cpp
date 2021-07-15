@@ -3,6 +3,7 @@
 #include "Application.h"
 
 #include "Class/Game/Components/Camera.h"
+#include "Class/Asset/Asset.h"
 #include "Graphics/Resource.h"
 #include "Graphics/Mesh.h"
 #include "Graphics/Shader.h"
@@ -48,7 +49,7 @@ namespace JG
 		auto api = Application::GetInstance().GetGraphicsAPI();
 		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
 
-
+		mCurrentRenderInfo = info;
 		if (info.TargetTexture == nullptr)
 		{
 			return false;
@@ -64,11 +65,11 @@ namespace JG
 		api->SetScissorRects({ ScissorRect(0,0, info.Resolutoin.x,info.Resolutoin.y) });
 		api->ClearRenderTarget(mRenderTarges, info.TargetDepthTexture);
 		api->SetRenderTarget(mRenderTarges, info.TargetDepthTexture);
-
+		
 
 		return BeginBatch(info, batchList);
 	}
-	void FowardRenderer::DrawCall(SharedPtr<IMesh> mesh, List<SharedPtr<IMaterial>> materialList)
+	void FowardRenderer::DrawCall(const JMatrix& worldMatrix, SharedPtr<IMesh> mesh, List<SharedPtr<IMaterial>> materialList)
 	{
 		if (mesh == nullptr || materialList.empty())
 		{
@@ -80,6 +81,7 @@ namespace JG
 		{
 			JG_CORE_ERROR("{0} : Fail Mesh Bind", mesh->GetName());
 		}
+		auto transposedViewProj = JMatrix::Transpose(mCurrentRenderInfo.ViewProj);
 		for (u64 i = 0; i < mesh->GetSubMeshCount(); ++i)
 		{
 			if (mesh->GetSubMesh(i)->Bind() == false)
@@ -96,6 +98,18 @@ namespace JG
 			{
 				material = materialList[i];
 			}
+			auto transposedWorld = JMatrix::Transpose(worldMatrix);
+			if (material->SetFloat4x4(ShaderScript::Standard3D::ViewProj, transposedViewProj) == false)
+			{
+				JG_CORE_INFO("{0} : Fail SetViewProjMatrix in ObjectParams", material->GetName());
+				continue;
+			}
+			if (material->SetFloat4x4(ShaderScript::Standard3D::World, transposedWorld) == false)
+			{
+				JG_CORE_INFO("{0} : Fail SetWorldMatrix in ObjectParams", material->GetName());
+				continue;
+			}
+
 			if (material->Bind() == false)
 			{
 				JG_CORE_INFO("{0} : Fail Material Bind", material->GetName());
@@ -317,7 +331,7 @@ namespace JG
 			StartBatch();
 			return;
 		}
-		
+
 		api->DrawIndexed(quadIndexCount);
 		StartBatch();
 	}

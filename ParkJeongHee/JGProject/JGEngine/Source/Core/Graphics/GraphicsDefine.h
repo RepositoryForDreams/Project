@@ -342,19 +342,21 @@ namespace JG
 	namespace ShaderScript
 	{
 		constexpr wchar* Standard2DShader = TT("Standard2DShader");
+		constexpr wchar* Standard3DShader = TT("Standard3DShader");
 		namespace Standard2D
 		{
 			constexpr wchar* ViewProj = TT("gViewProj");
 			constexpr wchar* Texture  = TT("gTexture");
 		}
+		namespace Standard3D
+		{
+			constexpr wchar* ViewProj = TT("gViewProj");
+			constexpr wchar* World    = TT("gWorld");
+		}
 
 	}
-
-
 	namespace HLSL
 	{
-		
-
 		using token = wchar;
 		namespace Token
 		{
@@ -367,8 +369,6 @@ namespace JG
 			constexpr token* SamplerState           = TT("SamplerState ");
 			constexpr token* SamplerComparisonState = TT("SamplerComparisonState ");
 			
-
-
 			namespace SamplerStateElement
 			{
 				constexpr token* Template = TT("Template");

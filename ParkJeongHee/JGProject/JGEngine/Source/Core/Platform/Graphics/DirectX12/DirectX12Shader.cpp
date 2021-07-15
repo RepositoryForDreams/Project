@@ -53,11 +53,17 @@ namespace JG
 
 		if (mFlags & EShaderFlags::Allow_ComputeShader)
 		{
-			ComputeCompile(code, error);
+			if (ComputeCompile(code, error) == false)
+			{
+				return false;
+			}
 		}
 		else
 		{
-			GraphicsCompile(code, error);
+			if (GraphicsCompile(code, error) == false)
+			{
+				return false;
+			}
 		}
 
 

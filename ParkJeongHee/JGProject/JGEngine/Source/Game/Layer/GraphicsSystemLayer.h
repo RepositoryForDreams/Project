@@ -57,6 +57,8 @@ namespace JG
 
 		Dictionary<Type, u64> mRenderItemPriority;
 		SortedDictionary<u64, Dictionary<Type, List<SharedPtr<IRenderItem>>>> mPushedRenderItems;
+
+		SharedPtr<IMaterial> mStandardDefaultMaterial;
 	public:
 		virtual ~GraphicsSystemLayer() {}
 	public:

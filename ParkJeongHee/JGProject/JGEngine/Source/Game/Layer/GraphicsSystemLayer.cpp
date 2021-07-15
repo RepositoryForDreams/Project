@@ -94,6 +94,8 @@ namespace JG
 
 
 		mRenderItemPriority[JGTYPE(Standard2DRenderItem)] = (u64)ERenderItemPriority::_2D;
+		mStandardDefaultMaterial = IMaterial::Create(TT("DefaultMaterial"), ShaderLibrary::Get(ShaderScript::Standard3DShader));
+
 
 		// юс╫ц
 		String rawAssetPath = CombinePath(Application::GetAssetPath(), TT("RawResources"));
@@ -232,6 +234,23 @@ namespace JG
 				cameraItem->_2DBatch->DrawCall(_2dItem->WorldMatrix, _2dItem->Texture, _2dItem->Color);
 			}
 		}
+		if (type == JGTYPE(StandardStaticMeshRenderItem))
+		{
+
+			u64 layerMask = cameraItem->pCamera->GetCullingLayerMask();
+			for (auto& item : renderItemList)
+			{
+				auto itemMask = GameLayer::GetMask(item->TargetLayer);
+				if ((itemMask & layerMask) == false) continue;
+
+				auto _3dItem = static_cast<StandardStaticMeshRenderItem*>(item.get());
+				if (_3dItem->Materials.empty())
+				{
+					_3dItem->Materials.push_back(mStandardDefaultMaterial);
+				}
+				cameraItem->Renderer->DrawCall(_3dItem->WorldMatrix, _3dItem->Mesh, _3dItem->Materials);
+			}
+		}
 		else
 		{
 			// Not Supported
@@ -331,10 +350,6 @@ namespace JG
 			mPushedRenderItems.clear();
 			
 		}
-
-
-
-
 		return EScheduleResult::Continue;
 	}
 	void GraphicsSystemLayer::LoadShaderScript()
@@ -387,7 +402,93 @@ namespace JG
 			ShaderLibrary::RegisterShader(shader);
 			
 		}
+		{
+			auto shader = IShader::Create(ShaderScript::Standard3DShader,
+				TT(R"(
+		SamplerState gPointSampler
+		{
+			Template = Point_Wrap
+		};
+
+		cbuffer Camera
+		{
+			float4x4 gViewProj;
+		};
+		cbuffer ObjectParams
+		{
+			float4x4 gWorld;
+		}
+
+		struct VS_IN
+		{
+			float3 posL : POSITION;
+			float2 tex : TEXCOORD;
+			float3 normalL : NORMAL;
+			float3 tanL : TANGENT;
+			float3 bitL : BITANGENT;
+		};
+		struct VS_OUT
+		{
+			float4 posH    : SV_POSITION;
+			float3 posW    : POSITION;
+			float3 normalW : NORMAL;
+			float2 tex     : TEXCOORD;
+		};
+		struct PS_MATERIAL_OUTPUT
+		{
+			float4 albedo;
+		};
+		struct PS_MATERIAL_INPUT
+		{
+
+		};
+
+		PS_MATERIAL_OUTPUT PS_MATERIAL_FUNCTION(PS_MATERIAL_INPUT _input)
+		{
+			PS_MATERIAL_OUTPUT _output;
+			_output.albedo = float4(1.0f,1.0f,1.0f,1.0f);
+
+
+			//PS_MATERIAL_FUNCTION_SCRIPT
+			return _output;
+		};
 		
+		
+		VS_OUT vs_main(VS_IN vin)
+		{
+			VS_OUT vout;
+		    
+			float3 posW = mul(float4(vin.posL, 1.0f), gWorld);
+			float3 normalW = mul(float4(vin.normalL, 1.0f), gWorld);
+			float3 tanW =  mul(float4(vin.tanL, 1.0f), gWorld);
+			float3 bitW =  mul(float4(vin.bitL, 1.0f), gWorld);
+			//vout.posH = mul(float4(vin.posL, 1.0f), gViewProj);
+			vout.posH = mul(float4(posW, 1.0f), gViewProj);
+			vout.posW = posW;
+			vout.normalW = normalize(normalW);
+			vout.tex   = vin.tex;
+			return vout;
+		}
+		float4 ps_main(VS_OUT pin) : SV_TARGET
+		{
+			PS_MATERIAL_INPUT input;
+			PS_MATERIAL_OUTPUT output = PS_MATERIAL_FUNCTION(input);
+
+			float3 dirLightColor = float3(0.9f, 0.95f, 1.0f);
+			float3 dirLight = float3(0.0f, -1.0f, 1.0f);
+
+			float4 ambientLight = float4(0.2f, 0.2f, 0.25f, 1.0f);
+
+			float3 N = normalize(pin.normalW);
+			float3 L = normalize(-dirLight);
+			float NdotL = saturate(dot(N,L));
+
+
+			return saturate(output.albedo * NdotL + ambientLight);
+		}
+		)"), EShaderFlags::Allow_VertexShader | EShaderFlags::Allow_PixelShader);
+			ShaderLibrary::RegisterShader(shader);
+		}
 	}
 
 }

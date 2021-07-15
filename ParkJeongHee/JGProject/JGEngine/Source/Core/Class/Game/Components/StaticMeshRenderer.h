@@ -1,10 +1,10 @@
 #pragma once
-#include "Class/Game/GameComponent.h"
+#include "Class/Game/Components/BaseRenderer.h"
 #include "Class/Asset/Asset.h"
 
 namespace JG
 {
-	class StaticMeshRenderer : public GameComponent
+	class StaticMeshRenderer : public BaseRenderer
 	{
 		JGCLASS
 	private:

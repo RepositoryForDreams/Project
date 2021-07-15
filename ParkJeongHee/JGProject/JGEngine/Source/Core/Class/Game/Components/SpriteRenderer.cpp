@@ -72,6 +72,10 @@ namespace JG
 
 	void SpriteRenderer::SetSprite(const String& path)
 	{
+		if (Json::GetAssetFormat(path) != EAssetFormat::Texture)
+		{
+			return;
+		}
 		mAsset = nullptr;
 		mSpriteID = AssetID();
 		mSpritePath = path;
@@ -103,10 +107,10 @@ namespace JG
 		
 		ImGui::ColorEdit4("Color", (float*)(&mSpriteRI->Color));
 		
-		auto path = ws2s(mSpritePath);
-		fs::path p = path;
-
-		ImGui::InputText("Texture", p.filename().string().data(), ImGuiInputTextFlags_ReadOnly);
+		auto fileName = ws2s(mSpritePath);
+		fs::path p = fileName;
+		fileName = p.filename().string();
+		ImGui::InputText("Texture", fileName.data(), ImGuiInputTextFlags_ReadOnly);
 		if (ImGui::BeginDragDropTarget() && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
 		{
 			auto payLoad = ImGui::GetDragDropPayload();
@@ -116,8 +120,7 @@ namespace JG
 				if (ddd->GetType() == JGTYPE(DDDContentsFile))
 				{
 					auto dddContentsFile = (DDDContentsFile*)ddd;
-					auto fileInfo = (ContentsFileInfo*)(dddContentsFile->pFileInfoPtr);
-					SetSprite(fileInfo->Path);
+					SetSprite(dddContentsFile->FilePath);
 				}
 			}
 			ImGui::EndDragDropTarget();

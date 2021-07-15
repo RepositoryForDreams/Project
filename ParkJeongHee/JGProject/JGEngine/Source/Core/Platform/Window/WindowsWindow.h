@@ -25,7 +25,7 @@ namespace JG
 
 		virtual EWindowPlatform GetPlatform() const override;
 		virtual handle GetHandle() const override;
-
+		virtual JVector2Int GetPosition() const override;
 		static void AddWindowProcCallBack(const WindowProcCallBack& callBack);
 	private:
 		friend 	LRESULT WndProc(HWND hWnd, uint32_t msg, WPARAM wParam, LPARAM lParam);

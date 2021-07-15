@@ -16,7 +16,7 @@ namespace JG
 	}
 
 
-	bool DirectX12VertexBuffer::SetData(void* datas, u64 elementSize, u64 elementCount)
+	bool DirectX12VertexBuffer::SetData(const void* datas, u64 elementSize, u64 elementCount)
 	{
 		u64 originBtSize = mElementSize * mElementCount;
 		mElementSize = elementSize; mElementCount = elementCount;
@@ -134,7 +134,7 @@ namespace JG
 		Reset();
 	}
 
-	bool DirectX12IndexBuffer::SetData(u32* datas, u64 count)
+	bool DirectX12IndexBuffer::SetData(const u32* datas, u64 count)
 	{
 		u64 originBtSize = sizeof(u32) * mIndexCount;
 		mIndexCount = count;

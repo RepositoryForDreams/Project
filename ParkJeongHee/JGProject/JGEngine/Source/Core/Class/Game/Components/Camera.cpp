@@ -176,11 +176,12 @@ namespace JG
 	}
 	const JMatrix& Camera::GetViewProjMatrix() const
 	{
-		bool isUpdateView = UpdateView();
-		bool isUpdateProj = UpdateProj();
-		if (isUpdateView || isUpdateProj)
+		UpdateView();
+		UpdateProj();
+		if (mIsViewProjDirty)
 		{
 			mViewProjMatrix = mViewMatrix * mProjMatrix;
+			mIsViewProjDirty = false;
 		}
 		return mViewProjMatrix;
 	}
@@ -261,11 +262,11 @@ namespace JG
 	{
 		return mCullingLayerMask;
 	}
-	bool Camera::UpdateProj() const
+	void Camera::UpdateProj() const
 	{
 		if (mIsProjDirty == false)
 		{
-			return false;
+			return;
 		}
 		mIsProjDirty = false;
 
@@ -279,14 +280,14 @@ namespace JG
 			mProjMatrix = JMatrix::PerspectiveFovLH(mFov, GetAspectRatio(), mNearZ, mFarZ);
 		}
 
-		return true;
+		mIsViewProjDirty = true;
 	}
 
-	bool Camera::UpdateView() const
+	void Camera::UpdateView() const
 	{
 		if (mIsViewDirty == false)
 		{
-			return false;
+			return;
 		}
 		mIsViewDirty = false;
 
@@ -300,7 +301,8 @@ namespace JG
 		target = JMatrix::Rotation(rotation).TransformVector(target);
 		mViewMatrix = JMatrix::LookAtLH(location, location + target, JVector3(0, 1, 0));
 
-		return true;
+
+		mIsViewProjDirty = true;
 	}
 	void Camera::OnChange(const ChangeData& data)
 	{

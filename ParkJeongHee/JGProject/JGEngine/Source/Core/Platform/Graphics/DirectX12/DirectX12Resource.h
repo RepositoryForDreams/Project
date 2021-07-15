@@ -27,7 +27,7 @@ namespace JG
 		DirectX12VertexBuffer() = default;
 		virtual ~DirectX12VertexBuffer();
 	public:
-		virtual bool  SetData(void* datas, u64 elementSize, u64 elementCount) override;
+		virtual bool  SetData(const void* datas, u64 elementSize, u64 elementCount) override;
 		virtual bool  IsValid() const override;
 		virtual void SetBufferLoadMethod(EBufferLoadMethod type) override;
 		virtual EBufferLoadMethod GetBufferLoadMethod() const override;
@@ -62,7 +62,7 @@ namespace JG
 		DirectX12IndexBuffer() = default;
 		virtual ~DirectX12IndexBuffer();
 	public:
-		virtual bool SetData(u32* datas, u64 count) override;
+		virtual bool SetData(const u32* datas, u64 count) override;
 		virtual bool IsValid() const override;
 
 		virtual void SetBufferLoadMethod(EBufferLoadMethod method) override;

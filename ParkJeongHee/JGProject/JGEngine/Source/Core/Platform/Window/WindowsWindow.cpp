@@ -85,6 +85,13 @@ namespace JG
 		return (handle)mHandle;
 	}
 
+	JVector2Int WindowsWindow::GetPosition() const
+	{
+		RECT rect;
+		::GetWindowRect(mHandle, &rect);
+		return JVector2Int(rect.left, rect.top);
+	}
+
 	void WindowsWindow::AddWindowProcCallBack(const WindowProcCallBack& callBack)
 	{
 		smCallBackList.push_back(callBack);

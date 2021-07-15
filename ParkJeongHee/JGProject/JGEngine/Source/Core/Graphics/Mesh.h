@@ -8,7 +8,7 @@ namespace JG
 {
 	class IVertexBuffer;
 	class IIndexBuffer;
-
+	class StaticMeshAssetStock;
 
 	class ISubMesh
 	{
@@ -41,6 +41,6 @@ namespace JG
 		virtual bool Bind() = 0;
 	public:
 		static SharedPtr<IMesh> Create(const String& name);
-		static SharedPtr<IMesh> CreateFromFile(const String& path);
+		static SharedPtr<IMesh> Create(const StaticMeshAssetStock& stock);
 	};
 }

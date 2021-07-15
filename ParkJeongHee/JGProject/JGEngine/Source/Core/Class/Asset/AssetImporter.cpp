@@ -101,11 +101,11 @@ namespace JG
 			return;
 		}
 		List<JGVertex> vertices;
-		List<u32>&   indices = output->Indices;
+		List<u32>   indices;
 		output->SubMeshNames.push_back(s2ws(mesh->mName.C_Str()));
 
 		vertices.resize(mesh->mNumVertices);
-		
+
 		for (u32 i = 0; i < mesh->mNumVertices; ++i)
 		{
 			JGVertex v;
@@ -146,7 +146,6 @@ namespace JG
 
 		output->Vertices.push_back(vertices);
 
-
 		if (mesh->HasFaces() == true)
 		{
 			for (u32 i = 0; i < mesh->mNumFaces; ++i)
@@ -159,6 +158,8 @@ namespace JG
 				}
 			}
 		}
+		output->Indices.push_back(indices);
+
 
 		if (mesh->HasBones() == true)
 		{

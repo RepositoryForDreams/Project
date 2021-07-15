@@ -44,7 +44,13 @@ namespace JG
 		
 			if (mainCam == nullptr) return;
 			if (node == nullptr || node->GetType() != JGTYPE(GameNode)) return;
-			auto worldMat = node->GetTransform()->GetWorldMatrix();
+
+
+			JVector3 location = node->GetTransform()->GetLocalLocation();
+			JVector3 rotation = Math::ConvertToRadians(node->GetTransform()->GetLocalRotation());
+			JVector3 scale = node->GetTransform()->GetScale();
+			JMatrix worldMat;
+			ImGuizmo::RecomposeMatrixFromComponents((float*)&location, (float*)&rotation, (float*)&scale, worldMat.GetFloatPtr());
 			auto itemMin = ImGui::GetItemRectMin();
 			auto itemSize = ImGui::GetItemRectSize();
 			ImGuizmo::SetRect(itemMin.x, itemMin.y, itemSize.x, itemSize.y);
@@ -55,7 +61,7 @@ namespace JG
 			JVector3 matrixTranslation, matrixRotation, matrixScale;
 			ImGuizmo::DecomposeMatrixToComponents(worldMat.GetFloatPtr(), (float*)&matrixTranslation, (float*)&matrixRotation, (float*)&matrixScale);
 			node->GetTransform()->SetLocalLocation(matrixTranslation);
-			node->GetTransform()->SetLocalRotation(matrixRotation);
+			node->GetTransform()->SetLocalRotation(Math::ConvertToDegrees(matrixRotation));
 			node->GetTransform()->SetScale(matrixScale);
 		});
 
@@ -143,6 +149,12 @@ namespace JG
 			auto standardPos = JVector2(mousePos.x, mousePos.y) - JVector2(winPos.x ,winPos.y);
 			viewModel->OnClick(standardPos, 0);
 			JG_CORE_INFO("Scene View MousePos : {0}, {1}", standardPos.x, standardPos.y);
+		}
+
+
+		if (ImGui::IsKeyPressed((i32)EKeyCode::Ctrl) == true)
+		{
+			// 카메라 이동 시작
 		}
 
 

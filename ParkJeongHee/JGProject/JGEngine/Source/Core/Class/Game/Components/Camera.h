@@ -17,6 +17,7 @@ namespace JG
 		JGCLASS
 		mutable bool mIsViewDirty = true;
 		mutable bool mIsProjDirty = true;
+		mutable bool mIsViewProjDirty = true;
 	
 		//
 		mutable JMatrix  mProjMatrix;
@@ -77,8 +78,8 @@ namespace JG
 		u64 GetCullingLayerMask() const;
 		ERendererPath GetRendererPath() const;
 	private:
-		bool UpdateProj() const;
-		bool UpdateView() const;
+		void UpdateProj() const;
+		void UpdateView() const;
 	public:
 		virtual ~Camera() = default;
 	protected:

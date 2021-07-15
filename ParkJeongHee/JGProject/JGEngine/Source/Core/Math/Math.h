@@ -7,11 +7,16 @@
 
 namespace JG
 {
+	class JVector3;
 	class Math
 	{
 	public:
 		inline constexpr static float ConvertToRadians(float fDegrees) { return fDegrees * (JG_PI / 180.0f); }
 		inline constexpr static float ConvertToDegrees(float fRadians) { return fRadians * (180.0f / JG_PI); }
+
+
+		static JVector3 ConvertToRadians(const JVector3& vDegrees);
+		static JVector3 ConvertToDegrees(const JVector3& vRadians);
 		/*
 		  FXMVECTOR V,
 	  float     ViewportX,

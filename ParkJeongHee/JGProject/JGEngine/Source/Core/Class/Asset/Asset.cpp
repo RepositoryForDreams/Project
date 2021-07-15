@@ -55,24 +55,34 @@ namespace JG
 		
 
 		auto meshJson = jsonData->CreateJsonData();
-
-		
-
-
 		auto cnt = SubMeshNames.size();
 		for (auto i = 0; i < cnt; ++i)
 		{
-			meshJson->AddMember(SubMeshNames[i], Vertices[i]);
-		}
+			auto viJson = meshJson->CreateJsonData();
+			viJson->AddMember("Name", SubMeshNames[i]);
 
-		jsonData->AddMember("Vertices", meshJson);
-		jsonData->AddMember("Indices", Indices);
+
+
+			auto vArrayJson = viJson->CreateJsonData();
+			for (auto& v : Vertices[i])
+			{
+				auto vertexJson = viJson->CreateJsonData();
+				v.MakeJson(vertexJson);
+				vArrayJson->AddMember(vertexJson);
+			}
+
+			viJson->AddMember("Vertices", vArrayJson);
+			viJson->AddMember("Indices", Indices[i]);
+			meshJson->AddMember(viJson);
+		}
+		jsonData->AddMember("SubMeshs", meshJson);
 	}
 
 	void StaticMeshAssetStock::LoadJson(SharedPtr<JsonData> jsonData)
 	{
 		SubMeshNames.clear();
 		Vertices.clear();
+		Indices.clear();
 		auto val = jsonData->GetMember("Name");
 		if (val)
 		{
@@ -84,25 +94,39 @@ namespace JG
 			IsSkinned = val->GetBool();
 		}
 
-		val = jsonData->GetMember("Vertices");
-		u64 size = val->GetSize();
-		SubMeshNames.resize(size);
-		Vertices.resize(size);
-		for (i32 i = 0; i < size; ++i)
+		val = jsonData->GetMember("SubMeshs");
+		if (val)
 		{
-			auto meshVal = val->GetJsonDataFromIndex(i);
-			auto nameVal = meshVal->GetJsonDataFromIndex(0);
-			auto versVal = meshVal->GetJsonDataFromIndex(1);
-
-			auto name = nameVal->GetString();
-			SubMeshNames[i] = name;
-			Vertices[i].resize(versVal->GetSize());
-			for (i32 j = 0; j < versVal->GetSize(); ++j)
+			auto cnt = val->GetSize();
+			Vertices.resize(cnt);
+			Indices.resize(cnt);
+			SubMeshNames.resize(cnt);
+			for (auto i = 0; i < cnt; ++i)
 			{
-				auto verVal = versVal->GetJsonDataFromIndex(j);
-				JGVertex v;
-				v.LoadJson(verVal);
-				Vertices[i].push_back(v);
+				auto meshJson = val->GetJsonDataFromIndex(i);
+
+				auto verticesJson = meshJson->GetMember("Vertices");
+				auto indicesJson  = meshJson->GetMember("Indices");
+				auto meshName     = meshJson->GetMember("Name");
+
+				SubMeshNames[i] = meshName->GetString();
+				Vertices[i].resize(verticesJson->GetSize());
+				Indices[i].resize(indicesJson->GetSize());
+				for (auto j = 0; j < verticesJson->GetSize(); ++j)
+				{
+					auto vJson = verticesJson->GetJsonDataFromIndex(j);
+					JGVertex v;
+					v.LoadJson(vJson);
+					Vertices[i][j] = v;
+				}
+				for (auto j = 0; j < indicesJson->GetSize(); ++j)
+				{
+					auto iJson = indicesJson->GetJsonDataFromIndex(j);
+					u32 index;
+					index = iJson->GetUint32();
+					Indices[i][j] = index;
+				}
+
 			}
 		}
 	}

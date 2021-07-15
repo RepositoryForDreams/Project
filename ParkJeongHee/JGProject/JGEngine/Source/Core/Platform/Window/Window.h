@@ -51,7 +51,7 @@ namespace JG
 
 		virtual EWindowPlatform GetPlatform() const = 0;
 		virtual handle GetHandle() const   = 0;
-		
+		virtual JVector2Int GetPosition() const = 0;
 		static void BindCallBackEventFn(const EventCallBackFn& eventCallBackFn)
 		{
 			WindowCallBackFn::EventCallBack = eventCallBackFn;

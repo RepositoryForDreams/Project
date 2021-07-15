@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "ProgressBarModalView.h"
-
+#include "Application.h"
 namespace JG
 {
 	void ProgressBarModalView::Initialize(const ProgressBarInitData& data)
@@ -18,7 +18,10 @@ namespace JG
 	{
 		auto id = ws2s(mTitle + TT("##") + std::to_wstring(GetType().GetID()));
 		auto displaySize = ImGui::GetIO().DisplaySize;
+		auto appPos = Application::GetInstance().GetWindow()->GetPosition();
 		auto winSize = ImVec2(500, 55);
+
+
 		if (mIsOpenPopup == false)
 		{
 			mIsOpenPopup = true;
@@ -26,7 +29,7 @@ namespace JG
 		}
 		
 		ImGui::SetNextWindowSize(winSize);
-		ImGui::SetNextWindowPos(ImVec2(displaySize.x * 0.5f - winSize.x * 0.5f, displaySize.y * 0.5f - winSize.y * 0.5f));
+		ImGui::SetNextWindowPos(ImVec2(appPos.x + displaySize.x * 0.5f - winSize.x * 0.5f, appPos.y + displaySize.y * 0.5f - winSize.y * 0.5f));
 		if (ImGui::BeginPopupModal(id.c_str(), nullptr, ImGuiWindowFlags_Modal | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize))
 		{
 			f32 padding = ImGui::GetStyle().FramePadding.x;

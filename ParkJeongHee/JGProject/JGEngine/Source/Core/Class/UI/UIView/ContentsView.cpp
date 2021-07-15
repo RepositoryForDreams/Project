@@ -167,8 +167,8 @@ namespace JG
 			if (ImGui::BeginDragDropSource())
 			{
 				DDDContentsFile ddd;
-				ddd.pFileInfoPtr = fileInfo;
-				ImGui::SetDragDropPayload(ws2s(ddd.GetType().GetName()).c_str(), &ddd, 200);
+				wcscpy(ddd.FilePath, fileInfo->Path.c_str());
+				ImGui::SetDragDropPayload(ws2s(ddd.GetType().GetName()).c_str(), &ddd, sizeof(DDDContentsFile));
 				ImGui::TextUnformatted(ws2s(fileInfo->Name).c_str());
 				ImGui::EndDragDropSource();
 			}

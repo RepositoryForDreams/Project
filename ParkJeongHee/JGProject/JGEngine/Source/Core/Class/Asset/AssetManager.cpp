@@ -150,6 +150,14 @@ namespace JG
 			textureAsset->mData = ITexture::Create(stock);
 			return textureAsset;
 		}
+		case EAssetFormat::Mesh:
+		{
+			StaticMeshAssetStock stock;
+			stock.LoadJson(assetVal);
+			auto meshAsset = CreateSharedPtr<Asset<IMesh>>(assetPath);
+			meshAsset->mData = IMesh::Create(stock);
+			return meshAsset;
+		}
 		default:
 			JG_CORE_ERROR("{0} AssetFormat is not supported in LoadAsset", (int)assetFormat);
 			return nullptr;

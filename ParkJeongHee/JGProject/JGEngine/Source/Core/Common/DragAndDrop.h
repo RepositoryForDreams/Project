@@ -16,7 +16,7 @@ namespace JG
 	{
 		JGCLASS
 	public:
-		void* pFileInfoPtr = nullptr;
+		wchar FilePath[256] = {};
 	};
 
 }

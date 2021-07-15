@@ -36,6 +36,8 @@ namespace JG
 		virtual void LoadJson(SharedPtr<JsonData> jsonData) override;
 	private:
 		void UpdateWorldMatrix() const;
+		void CheckLimitRadian(JVector3& toRadian) const;
+		void CheckLimitRotation(JVector3& toDegree);
 	public:
 		virtual void OnInspectorGUI() override;
 	private:
