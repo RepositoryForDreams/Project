@@ -106,33 +106,42 @@ namespace JG
 
 		
 		std::string name = "";
-		if (mCurrentGizmoMode == ImGuizmo::LOCAL) name = "Local";
-		else name = "World";
 
-		if (ImGui::Button(name.c_str()) == true)
-		{
-			mCurrentGizmoMode = !mCurrentGizmoMode;
-		}ImGui::SameLine();
 
-		if (mainCam != nullptr)
+		// Gizmo 모드
 		{
-			mCurrentCameraMode = !mainCam->IsOrthographic();
+			if (mCurrentGizmoMode == ImGuizmo::LOCAL) name = "Local";
+			else name = "World";
+
+			if (ImGui::Button(name.c_str()) == true)
+			{
+				mCurrentGizmoMode = !mCurrentGizmoMode;
+			}ImGui::SameLine();
 		}
-		if (mCurrentCameraMode == 0) name = "2D";
-		else name = "3D";
 
-		if (ImGui::Button(name.c_str()) == true)
+		// Gizmo Camera Mode
 		{
-			mCurrentCameraMode = !mCurrentCameraMode;
-			auto mainCam = Camera::GetMainCamera();
 			if (mainCam != nullptr)
 			{
-				mainCam->SetOrthographic(!mCurrentCameraMode);
+				mCurrentCameraMode = !mainCam->IsOrthographic();
+			}
+			if (mCurrentCameraMode == 0) name = "2D";
+			else name = "3D";
+
+			if (ImGui::Button(name.c_str()) == true)
+			{
+				mCurrentCameraMode = !mCurrentCameraMode;
+				auto mainCam = Camera::GetMainCamera();
+				if (mainCam != nullptr)
+				{
+					mainCam->SetOrthographic(!mCurrentCameraMode);
+				}
 			}
 		}
 
+		
+		// SceneTexture
 		auto sceneTexture = viewModel->GetSceneTexture();
-
 		if (sceneTexture != nullptr && sceneTexture->IsValid())
 		{
 			auto textureInfo = sceneTexture->GetTextureInfo();
@@ -141,6 +150,9 @@ namespace JG
 			viewModel->ShowGizmo->Execute(viewModel->GetSelectedGameNode());
 		}
 
+
+
+		// Picking & 2D & 이동 모드 일시 화면 이동
 		if (ImGui::IsMouseClicked(0) == true) 
 		{
 			auto winPos   = ImGui::GetItemRectMin();
@@ -152,12 +164,20 @@ namespace JG
 		}
 
 
+		// 3d 화면 이동
 		if (ImGui::IsKeyPressed((i32)EKeyCode::Ctrl) == true)
 		{
-			// 카메라 이동 시작
+			mEnableEditorCameraControll = !mEnableEditorCameraControll;
 		}
 
 
+
+
+		if (mEnableEditorCameraControll)
+		{
+			ControllEditorCamera();
+			
+		}
 
 		ImGui::End();
 		if (mOpenGUI == false)
@@ -171,5 +191,51 @@ namespace JG
 	{
 		auto viewModel = GetViewModel();
 		viewModel->ShowGizmo->UnSubscribe(viewModel);
+	}
+	void SceneView::ControllEditorCamera()
+	{
+		static JVector2 mousePos = JVector2(ImGui::GetIO().MousePos.x, ImGui::GetIO().MousePos.y);
+		static JVector2 prevMousePos = mousePos;
+
+		auto mainCam = Camera::GetMainCamera();
+		if (mainCam == nullptr)
+		{
+			return;
+		}
+		// 카메라 이동 시작
+		mousePos = JVector2(ImGui::GetIO().MousePos.x, ImGui::GetIO().MousePos.y);
+
+		JVector2 mouseDelta = JVector2(0.0f, 0.0f);
+		if (mousePos != prevMousePos)
+		{
+			mouseDelta = mousePos - prevMousePos;
+			prevMousePos = mousePos;
+		}
+
+		auto camTransform = mainCam->GetOwner()->GetTransform();
+		JVector3 rotation = camTransform->GetLocalRotation();
+		//rotation.x += mouseDelta.y * 0.001f;
+		rotation.y += mouseDelta.x * 0.00005f;
+		camTransform->SetLocalRotation(rotation);
+
+
+
+
+		if (ImGui::IsKeyDown((int)EKeyCode::W))
+		{
+			
+		}
+		if (ImGui::IsKeyDown((int)EKeyCode::S))
+		{
+
+		}
+		if (ImGui::IsKeyDown((int)EKeyCode::A))
+		{
+
+		}
+		if (ImGui::IsKeyDown((int)EKeyCode::D))
+		{
+
+		}
 	}
 }

@@ -143,7 +143,7 @@ namespace JG
 					}
 				});
 			}
-			Scheduler::GetInstance().Schedule(1.0f, 0.2f, -1, 0,  [&]()->EScheduleResult
+			Scheduler::GetInstance().Schedule(0.1f, 0.2f, -1, 0,  [&]()->EScheduleResult
 			{
 				// 완성했으면 
 				if (handle->GetState() == EScheduleState::Compelete)
@@ -156,7 +156,7 @@ namespace JG
 					handle = nullptr;
 
 					// 0.5f 뒤에 완료
-					Scheduler::GetInstance().ScheduleOnce(0.5f, 0, [&]()->EScheduleResult
+					Scheduler::GetInstance().ScheduleOnce(0.1f, 0, [&]()->EScheduleResult
 					{
 						auto progressBar = UIManager::GetInstance().GetPopupUIView<ProgressBarModalView>();
 						progressBar->Close();
@@ -218,7 +218,7 @@ namespace JG
 					}
 				});
 			}
-			Scheduler::GetInstance().Schedule(1.0f, 0.2f, -1, 0, [&]()->EScheduleResult
+			Scheduler::GetInstance().Schedule(0.1f, 0.2f, -1, 0, [&]()->EScheduleResult
 			{
 				
 				// 완성했으면 
@@ -240,7 +240,7 @@ namespace JG
 						newGameWorld = nullptr;
 
 						// 0.5f 뒤에 완료
-						Scheduler::GetInstance().ScheduleOnce(0.5f, 0, [&]()->EScheduleResult
+						Scheduler::GetInstance().ScheduleOnce(0.1f, 0, [&]()->EScheduleResult
 						{
 							auto progressBar = UIManager::GetInstance().GetPopupUIView<ProgressBarModalView>();
 							progressBar->Close();
@@ -261,7 +261,7 @@ namespace JG
 					{
 						auto progressBar = UIManager::GetInstance().GetPopupUIView<ProgressBarModalView>();
 						progressBar->Display(TT("Failed"), 1.0f);
-						Scheduler::GetInstance().ScheduleOnce(0.5f, 0, [&]()->EScheduleResult
+						Scheduler::GetInstance().ScheduleOnce(0.1f, 0, [&]()->EScheduleResult
 						{
 							auto progressBar = UIManager::GetInstance().GetPopupUIView<ProgressBarModalView>();
 							progressBar->Close();

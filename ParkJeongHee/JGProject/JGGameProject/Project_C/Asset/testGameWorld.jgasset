@@ -66,7 +66,7 @@
                             0.0
                         ],
                         "CullingLayerMask": 18446744073709551615,
-                        "IsOrthographic": false
+                        "IsOrthographic": true
                     }
                 ],
                 "Childs": []
@@ -104,14 +104,14 @@
                                 "Name": "Transform",
                                 "IsActive": true,
                                 "Location": [
-                                    -140.99996948242188,
-                                    114.00000762939453,
+                                    134.25360107421876,
+                                    -114.17681121826172,
                                     0.0
                                 ],
                                 "Rotation": [
                                     0.0,
                                     -0.0,
-                                    0.0
+                                    4746.75927734375
                                 ],
                                 "Scale": [
                                     1.0,
@@ -129,7 +129,7 @@
                                     1.0,
                                     1.0
                                 ],
-                                "SpritePath": "../../../JGGameProject/Project_C/Asset\\Resources\\uvTest2_noalpha.jgasset"
+                                "SpritePath": "../../../JGGameProject/Project_C/Asset\\Resources\\T_Wood_Pine_D.jgasset"
                             }
                         ],
                         "Childs": []
@@ -142,19 +142,19 @@
                                 "Name": "Transform",
                                 "IsActive": true,
                                 "Location": [
-                                    0.7183883786201477,
+                                    3.936389684677124,
                                     0.10312771797180176,
-                                    -5.0
+                                    0.0
                                 ],
                                 "Rotation": [
-                                    6212.36181640625,
-                                    1957.3876953125,
-                                    -5914.50439453125
+                                    0.0,
+                                    -0.0,
+                                    0.0
                                 ],
                                 "Scale": [
-                                    0.9999982714653015,
-                                    0.9999986290931702,
-                                    0.9999976754188538
+                                    1.0,
+                                    1.0,
+                                    1.0
                                 ]
                             },
                             {
@@ -174,8 +174,8 @@
                                 "Name": "Transform",
                                 "IsActive": true,
                                 "Location": [
-                                    31.99999237060547,
-                                    206.0,
+                                    18.000110626220704,
+                                    24.000022888183595,
                                     0.0
                                 ],
                                 "Rotation": [
@@ -232,6 +232,38 @@
                                 "Name": "StaticMeshRenderer",
                                 "IsActive": true,
                                 "MeshPath": "../../../JGGameProject/Project_C/Asset\\Resources\\Sphere.001.jgasset"
+                            }
+                        ],
+                        "Childs": []
+                    },
+                    {
+                        "Name": "object",
+                        "Components": [
+                            {
+                                "ComponentType": "JG::Transform",
+                                "Name": "Transform",
+                                "IsActive": true,
+                                "Location": [
+                                    5.216736316680908,
+                                    0.0,
+                                    -5.0
+                                ],
+                                "Rotation": [
+                                    -3286.52587890625,
+                                    -0.0,
+                                    0.0
+                                ],
+                                "Scale": [
+                                    1.0,
+                                    0.9999997615814209,
+                                    0.9999997615814209
+                                ]
+                            },
+                            {
+                                "ComponentType": "JG::StaticMeshRenderer",
+                                "Name": "StaticMeshRenderer",
+                                "IsActive": true,
+                                "MeshPath": "../../../JGGameProject/Project_C/Asset\\Resources\\Torus.jgasset"
                             }
                         ],
                         "Childs": []
