@@ -18,6 +18,7 @@ namespace JG
 
 		bool isDirty = mRotation != rotation;
 		mRotation = rotation;
+		CheckLimitRotation(mRotation);
 		if (isDirty)
 		{
 			SendDirty();
@@ -60,6 +61,11 @@ namespace JG
 		UpdateWorldMatrix();
 		return mWorldMatrix;
 	}
+	const JMatrix& Transform::GetInvWorldMatrix() const
+	{
+		UpdateInvWorldMatrix();
+		return mInvWorldMatrix;
+	}
 	void Transform::MakeJson(SharedPtr<JsonData> jsonData) const
 	{
 		GameComponent::MakeJson(jsonData);
@@ -94,14 +100,22 @@ namespace JG
 		{
 			return;
 		}
-		mIsDirty = true;
-		
+		mIsDirty = false;
+		mIsInvDirty = true;
 		auto toRadian = Math::ConvertToRadians(mRotation);
 		CheckLimitRadian(toRadian);
 
 		mLocalMatrix = JMatrix::Scaling(mScale) * JMatrix::Rotation(JQuaternion::ToQuaternion(toRadian)) * JMatrix::Translation(mLocation);
-
 		mWorldMatrix = mLocalMatrix;
+	}
+	void Transform::UpdateInvWorldMatrix() const
+	{
+		if (mIsInvDirty == false)
+		{
+			return;
+		}
+		mIsInvDirty = false;
+		mInvWorldMatrix = JMatrix::Inverse(GetWorldMatrix());
 	}
 	void Transform::CheckLimitRadian(JVector3& toRadian) const
 	{

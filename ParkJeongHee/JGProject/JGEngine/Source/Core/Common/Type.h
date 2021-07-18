@@ -1,5 +1,6 @@
 #pragma once
 #include <Common/Define.h>
+#include <Common/String.h>
 #include <atomic>
 #include <typeinfo>
 
@@ -30,21 +31,21 @@ namespace JG
 	class Type
 	{
 		u64    mID = TYPE_NULL_ID;
-		String mName;
+		std::string mName;
 	public:
 		Type()
 		{
 			mID   = TYPE_NULL_ID;
-			mName = TT("NULL");
+			mName = "null";
 		}
 
 		template<class T>
 		constexpr Type(const TypeID<T>& typeID)
 		{
 			mID = typeID.ID;
-			mName = s2ws(typeid(T).name());
-			u64 pos = mName.find(TT(" "), 0);
-			if (pos != String::npos)
+			mName = typeid(T).name();
+			u64 pos = mName.find(" ", 0);
+			if (pos != std::string::npos)
 			{
 				mName = mName.substr(pos + 1);
 			}
@@ -55,9 +56,9 @@ namespace JG
 		constexpr Type& operator=(const TypeID<T>& typeID)
 		{
 			mID = typeID.ID;
-			mName = s2ws(typeid(T).name());
+			mName = typeid(T).name();
 			u64 pos = mName.find(TT(" "), 0);
-			if (pos != String::npos)
+			if (pos != std::string::npos)
 			{
 				mName = mName.substr(pos + 1);
 			}

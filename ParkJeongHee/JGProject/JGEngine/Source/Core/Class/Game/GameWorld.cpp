@@ -49,7 +49,7 @@ namespace JG
 
 		ImGui::AlignTextToFramePadding();
 		ImGui::Text("Name : "); ImGui::SameLine();
-		ImGui::Text(ws2s(GetName()).c_str()); ImGui::SameLine();
+		ImGui::Text(GetName().c_str()); ImGui::SameLine();
 		ImGui::Text("Instance : "); ImGui::SameLine();
 		ImGui::Text(std::to_string((u64)this).c_str());
 		ImGui::Dummy(ImVec2(0, 1.0f));
@@ -59,10 +59,10 @@ namespace JG
 		{
 		
 			ImGui::Spacing();
-			String id = globalSystem->GetName() + TT("##") + std::to_wstring((ptraddr)globalSystem);
+			String id = globalSystem->GetName() + "##" + std::to_string((ptraddr)globalSystem);
 
 			if (ImGui::CollapsingHeader(
-				ws2s(id).c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader) == true)
+				id.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader) == true)
 			{
 				globalSystem->OnInspectorGUI();
 			}
@@ -74,9 +74,9 @@ namespace JG
 		{
 			bool is_open = true;
 			ImGui::Spacing();
-			String id = system->GetName() + TT("##") + std::to_wstring((ptraddr)system);
+			String id = system->GetName() + "##" + std::to_string((ptraddr)system);
 			if (ImGui::CollapsingHeader(
-				ws2s(id).c_str(), &is_open, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader) == true)
+				id.c_str(), &is_open, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader) == true)
 			{
 				system->OnInspectorGUI();
 			}
@@ -139,10 +139,18 @@ namespace JG
 		{
 			return nullptr;
 		}
-
-
-
-		return nullptr;
+		GameNode* pickingObject = nullptr;
+		if (mainCam->IsOrthographic() == false)
+		{
+			auto ray = mainCam->ScreenToWorldRay(JVector3(screenPos, 1.0f));
+			pickingObject = Picking3DRecursive(ray);
+		}
+		else
+		{
+			auto p = mainCam->ScreenToWorldPoint(JVector3(screenPos, 1.0f));
+			pickingObject = Picking2DRecursive(JVector2(p.x, p.y));
+		}
+		return pickingObject;
 	}
 	void GameWorld::SetGlobalGameSystemList(const List<GlobalGameSystem*>& systemList)
 	{

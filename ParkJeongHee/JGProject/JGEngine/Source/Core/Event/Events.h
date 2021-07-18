@@ -107,7 +107,7 @@ private: \
 		virtual ~##className() = default; \
 		virtual String ToString() const override\
 		{\
-			return TT(#className);\
+			return #className;\
 		}\
 	};\
 
@@ -121,7 +121,7 @@ private: \
 		virtual ~##className() = default; \
 		virtual String ToString() const override\
 		{\
-			return TT(#className);\
+			return #className;\
 		}\
 	};\
 
@@ -145,8 +145,7 @@ private: \
 	NOTIFY_ONE_ARG_EVENT(NotifyChangeMainSceneTextureEvent, SharedPtr<ITexture>, SceneTexture)
 	NOTIFY_ONE_ARG_EVENT(NotifyChangeGameWorldEvent, GameWorld*, GameWorld)
 	NOTIFY_ONE_ARG_EVENT(NotifyEditorSceneOnClickEvent, JVector2, ClickPos)
-	NOTIFY_ONE_ARG_EVENT(NotifySelectedGameNodeInEditor, GameNode*, SelectedGameNode)
-
+	NOTIFY_ONE_ARG_EVENT(NotifySelectedGameNodeInEditorEvent, GameNode*, SelectedGameNode)
 
 
 	REQUEST_ONE_ARG_EVENT(RequestGetGameWorldEvent, GameWorld*, GameWorld)

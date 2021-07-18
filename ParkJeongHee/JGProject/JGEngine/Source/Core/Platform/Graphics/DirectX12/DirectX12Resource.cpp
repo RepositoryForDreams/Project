@@ -613,7 +613,7 @@ namespace JG
 		ITexture::SetName(name);
 		if (mD3DResource != nullptr)
 		{
-			mD3DResource->SetName(name.c_str());
+			mD3DResource->SetName(s2ws(name).c_str());
 			ResourceStateTracker::SetResourceName(mD3DResource.Get(), name);
 		}
 	}
@@ -679,7 +679,7 @@ namespace JG
 			&rscDesc,
 			D3D12_RESOURCE_STATE_COMMON,
 			clearValue.get(), IID_PPV_ARGS(mD3DResource.GetAddressOf()));
-		mD3DResource->SetName(GetName().c_str());
+		mD3DResource->SetName(s2ws(GetName()).c_str());
 		ResourceStateTracker::RegisterResource(GetName(), mD3DResource.Get(), D3D12_RESOURCE_STATE_COMMON);
 	}
 	void DirectX12Texture::SetClearColor(const Color& clearColor)

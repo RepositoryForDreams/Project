@@ -7,7 +7,7 @@ namespace JG
 {
 	WorldHierarchyView::WorldHierarchyView()
 	{
-		UIManager::GetInstance().RegisterMainMenuItem(TT("Windows/WorldHierarchy"), 0, [&]()
+		UIManager::GetInstance().RegisterMainMenuItem("Windows/WorldHierarchy", 0, [&]()
 		{
 			Open();
 		}, nullptr);
@@ -16,12 +16,12 @@ namespace JG
 	{
 
 
-		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("Add/EmptyObject"), 0, [&]()
+		UIManager::GetInstance().RegisterContextMenuItem(GetType(), "Add/EmptyObject", 0, [&]()
 		{
 			mVm->AddEmptyObject->Execute(mVm->GetSelectdNodeInContextMenu());
 		}, nullptr);
 
-		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("Delete"), 0, 
+		UIManager::GetInstance().RegisterContextMenuItem(GetType(), "Delete", 0, 
 			[&]()
 		{
 			mVm->DeleteGameNode->Execute(mVm->GetSelectdNodeInContextMenu());
@@ -57,12 +57,12 @@ namespace JG
 
 			if (isRoot == true)
 			{
-				isOpen = ImGui::CollapsingHeader(ws2s(nodeData.Object->GetName() + TT("##GameWorld")).c_str());
+				isOpen = ImGui::CollapsingHeader((nodeData.Object->GetName() + "##GameWorld").c_str());
 				nodeData.IsTreePop = false;
 			}
 			else
 			{
-				isOpen = ImGui::TreeNodeEx((void*)nodeData.Object, nodeData.UserFlags, ws2s(nodeData.Object->GetName()).c_str());
+				isOpen = ImGui::TreeNodeEx((void*)nodeData.Object, nodeData.UserFlags, nodeData.Object->GetName().c_str());
 				nodeData.IsTreePop = isOpen;
 			}
 

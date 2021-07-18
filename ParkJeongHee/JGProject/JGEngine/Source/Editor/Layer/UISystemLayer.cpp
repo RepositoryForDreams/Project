@@ -52,11 +52,11 @@ namespace JG
 		UIManager::GetInstance().RegisterPopupUIView<AssetFinderContextView>();
 		// Modal
 		UIManager::GetInstance().RegisterPopupUIView<ProgressBarModalView>();
-		LoadUISettings(TT("JGUI.ini"));
+		LoadUISettings("JGUI.ini");
 	}
 	void UISystemLayer::Destroy()
 	{
-		SaveUISettings(TT("JGUI.ini"));
+		SaveUISettings("JGUI.ini");
 	}
 	void UISystemLayer::OnEvent(IEvent& e)
 	{
@@ -64,7 +64,7 @@ namespace JG
 	}
 	String UISystemLayer::GetLayerName()
 	{
-		return TT("UISystemLayer");
+		return "UISystemLayer";
 	}
 
 	void UISystemLayer::LoadUISettings(const String& fileName)
@@ -169,7 +169,7 @@ namespace JG
 				{
 					ImGui::Separator();
 				}
-				Node->IsOpen = ImGui::BeginMenu(ws2s(Node->Name).c_str());
+				Node->IsOpen = ImGui::BeginMenu(Node->Name.c_str());
 			}
 			else
 			{
@@ -187,7 +187,7 @@ namespace JG
 					ImGui::Separator();
 				}
 				bool isEnable = Node->MenuItem->EnableAction ? Node->MenuItem->EnableAction() : true;
-				if (ImGui::MenuItem(ws2s(Node->Name).c_str(), ws2s(Node->MenuItem->ShortCut).c_str(), nullptr, isEnable) == true)
+				if (ImGui::MenuItem(Node->Name.c_str(), Node->MenuItem->ShortCut.c_str(), nullptr, isEnable) == true)
 				{
 					if (Node->MenuItem->Action)
 					{
@@ -200,14 +200,14 @@ namespace JG
 		if (Node->MenuItem != nullptr && Node->MenuItem->ShortCut.empty() == false)
 		{
 			auto shortCut = Node->MenuItem->ShortCut;
-			bool isCtrl  = shortCut.find(TT("Ctrl")) != String::npos;
-			bool isShift = shortCut.find(TT("Shift")) != String::npos;
-			bool isAlt   = shortCut.find(TT("Alt")) != String::npos;
-			shortCut = ReplaceAll(shortCut, TT("Ctrl"), TT(""));
-			shortCut = ReplaceAll(shortCut, TT("Shift"), TT(""));
-			shortCut = ReplaceAll(shortCut, TT("Alt"), TT(""));
-			shortCut = ReplaceAll(shortCut, TT(" "), TT(""));
-			shortCut = ReplaceAll(shortCut, TT("+"), TT(""));
+			bool isCtrl  = shortCut.find("Ctrl") != String::npos;
+			bool isShift = shortCut.find("Shift") != String::npos;
+			bool isAlt   = shortCut.find("Alt") != String::npos;
+			shortCut = ReplaceAll(shortCut, "Ctrl", "");
+			shortCut = ReplaceAll(shortCut, "Shift", "");
+			shortCut = ReplaceAll(shortCut, "Alt", "");
+			shortCut = ReplaceAll(shortCut, " ", "");
+			shortCut = ReplaceAll(shortCut, "+", "");
 
 			bool isPressed = false;
 			bool isSubPressed = false;

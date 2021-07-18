@@ -7,8 +7,6 @@ namespace JG
 	{
 		mIsOpenPopup = false;
 		mTitle = data.Title;
-		auto id = ws2s(mTitle + TT("##") + std::to_wstring(GetType().GetID()));
-		
 	}
 	void ProgressBarModalView::Destroy()
 	{
@@ -16,7 +14,7 @@ namespace JG
 	}
 	bool ProgressBarModalView::OnGUI()
 	{
-		auto id = ws2s(mTitle + TT("##") + std::to_wstring(GetType().GetID()));
+		auto id = mTitle + "##" + std::to_string(GetType().GetID());
 		auto displaySize = ImGui::GetIO().DisplaySize;
 		auto appPos = Application::GetInstance().GetWindow()->GetPosition();
 		auto winSize = ImVec2(500, 55);
@@ -34,7 +32,7 @@ namespace JG
 		{
 			f32 padding = ImGui::GetStyle().FramePadding.x;
 
-			ImGui::ProgressBar(mCurrProgressRatio, ImVec2(winSize.x - padding * 4 ,0), ws2s(mContents).c_str());
+			ImGui::ProgressBar(mCurrProgressRatio, ImVec2(winSize.x - padding * 4 ,0), mContents.c_str());
 
 			ImGui::EndPopup();
 			return true;

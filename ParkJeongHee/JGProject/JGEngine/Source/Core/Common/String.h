@@ -38,13 +38,13 @@ namespace JG
 
 	inline String CombinePath(const String& dest, const String& src)
 	{
-		String result = TT("");
+		String result = "";
 		u64 lastIndex = dest.length() - 1;
-		if (src[0] != TT('/') && dest[lastIndex] != TT('/'))
+		if (src[0] != '/' && dest[lastIndex] != '/')
 		{
-			result = dest + TT('/') + src;
+			result = dest + '/' + src;
 		}
-		else if (src[0] == TT('/') && dest[lastIndex] == TT('/'))
+		else if (src[0] == '/' && dest[lastIndex] == '/')
 		{
 			result = dest.substr(0, lastIndex) + src;
 		}

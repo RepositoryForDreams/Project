@@ -45,7 +45,7 @@ namespace JG
 				{
 					mFilteredTypeList.insert(type.GetName());
 				}
-				auto originName = ReplaceAll(type.GetName(), TT("JG::"), TT(""));
+				auto originName = ReplaceAll(type.GetName(), "JG::", "");
 				auto filterName = filter;
 
 				u64 pos = originName.find(filterName);

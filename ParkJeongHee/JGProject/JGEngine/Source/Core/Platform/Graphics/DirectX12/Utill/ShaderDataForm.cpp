@@ -101,10 +101,10 @@ namespace JG
 		}
 
 
-		dataTokenStartPos = code.find_first_of(TT("{"), dataTokenStartPos) + 1;
+		dataTokenStartPos = code.find_first_of("{", dataTokenStartPos) + 1;
 		if (dataTokenStartPos != String::npos)
 		{
-			u64 dataTokenEndPos = code.find_first_of(TT("}"), dataTokenStartPos);
+			u64 dataTokenEndPos = code.find_first_of("}", dataTokenStartPos);
 			String dataCode = code.substr(dataTokenStartPos, dataTokenEndPos - dataTokenStartPos);
 
 			u64 pos = 0;
@@ -143,9 +143,9 @@ namespace JG
 		u64 endPos = String::npos;
 		if (dataTokenStartPos != String::npos)
 		{
-			endPos = code.find(TT("\n"), dataTokenStartPos);
+			endPos = code.find("\n", dataTokenStartPos);
 			if (endPos == String::npos) {
-				endPos = code.find(TT("{"), dataTokenStartPos);
+				endPos = code.find("{", dataTokenStartPos);
 			}
 			
 			String cbName;
@@ -167,10 +167,10 @@ namespace JG
 		}
 
 		// Var Ã³¸®
-		dataTokenStartPos = code.find_first_of(TT("{"), dataTokenStartPos) + 1;
+		dataTokenStartPos = code.find_first_of("{", dataTokenStartPos) + 1;
 		if (dataTokenStartPos != String::npos)
 		{
-			u64 dataTokenEndPos = code.find_first_of(TT("}"), dataTokenStartPos);
+			u64 dataTokenEndPos = code.find_first_of("}", dataTokenStartPos);
 			String dataCode = code.substr(dataTokenStartPos, dataTokenEndPos - dataTokenStartPos);
 
 			u64 pos = 0;
@@ -202,7 +202,7 @@ namespace JG
 		cBuffer->RootParm = RootParamOffset++;
 		cBuffer->RegisterNum = (u32)CBufferDataMap.size() - 1;
 
-		code.insert(endPos, TT(" : register(b") + std::to_wstring(CBufferRegisterNumberOffset++) + TT(")"));
+		code.insert(endPos, " : register(b" + std::to_string(CBufferRegisterNumberOffset++) + ")");
 
 		RootParamMap[cBuffer->RootParm] = cBuffer;
 		return startPos;
@@ -212,28 +212,28 @@ namespace JG
 		u64 dataTokenStartPos = code.find(HLSL::Token::StructuredBuffer, startPos);
 		if (dataTokenStartPos != String::npos && dataTokenStartPos >= 2)
 		{
-			String token = code.substr(dataTokenStartPos - 2, wcslen(HLSL::Token::RWStructuredBuffer));
+			String token = code.substr(dataTokenStartPos - 2, strlen(HLSL::Token::RWStructuredBuffer));
 			if (token == HLSL::Token::RWStructuredBuffer)
 			{
-				return code.find(TT(";"), dataTokenStartPos) + 1;
+				return code.find(";", dataTokenStartPos) + 1;
 			}
 		}
 
 		if (dataTokenStartPos != String::npos)
 		{
-			u64 endPos = code.find(TT(";"), dataTokenStartPos);
+			u64 endPos = code.find(";", dataTokenStartPos);
 
 			String dataCode = code.substr(dataTokenStartPos, endPos - dataTokenStartPos);
 
 
 			// Type
-			u64 dataTypeStartPos = dataCode.find(TT("<")) + 1;
-			u64 dataTypeEndPos = dataCode.find(TT(">"));
+			u64 dataTypeStartPos = dataCode.find("<") + 1;
+			u64 dataTypeEndPos = dataCode.find(">");
 
 
 
 			String typeCode = dataCode.substr(dataTypeStartPos, dataTypeEndPos - dataTypeStartPos);
-			typeCode = ReplaceAll(typeCode, TT(" "), TT(""));
+			typeCode = ReplaceAll(typeCode, " ", "");
 
 		
 			String typeName;
@@ -252,7 +252,7 @@ namespace JG
 
 
 			String nameCode = dataCode.substr(dataTypeEndPos + 1, dataCode.length() - dataTypeEndPos - 1);
-			nameCode = ReplaceAll(nameCode, TT(" "), TT(""));
+			nameCode = ReplaceAll(nameCode, " ", "");
 
 			if (RegisterStructuredBuffer(nameCode) == false)
 			{
@@ -275,7 +275,7 @@ namespace JG
 
 
 
-			code.insert(endPos, TT(" : register(t0, space") + std::to_wstring(structuredBufferData->RegisterSpace) + TT(")"));
+			code.insert(endPos, " : register(t0, space" + std::to_string(structuredBufferData->RegisterSpace) + ")");
 			startPos = endPos + 1;
 		}
 		else
@@ -290,40 +290,40 @@ namespace JG
 		u64 dataTokenStartPos = code.find(HLSL::Token::Texture2D, startPos);
 		if (dataTokenStartPos != String::npos && dataTokenStartPos >= 2)
 		{
-			String token = code.substr(dataTokenStartPos - 2, wcslen(HLSL::Token::RWTexture2D));
+			String token = code.substr(dataTokenStartPos - 2, strlen(HLSL::Token::RWTexture2D));
 			if (token == HLSL::Token::RWTexture2D)
 			{
-				return code.find(TT(";"), dataTokenStartPos) + 1;
+				return code.find(";", dataTokenStartPos) + 1;
 			}
 		}
 		if (dataTokenStartPos != String::npos)
 		{
-			u64 endPos = code.find(TT(";"), dataTokenStartPos);
+			u64 endPos = code.find(";", dataTokenStartPos);
 
 			String dataCode = code.substr(dataTokenStartPos, endPos - dataTokenStartPos);
 
 
-			String nameCode = ReplaceAll(dataCode, HLSL::Token::Texture2D, TT(""));
-			nameCode = ReplaceAll(nameCode, TT(" "), TT(""));
+			String nameCode = ReplaceAll(dataCode, HLSL::Token::Texture2D, "");
+			nameCode = ReplaceAll(nameCode, " ", "");
 
 			u64 arraySize = 1;
 
-			u64 arrayStartPos = dataCode.find(TT("["));
+			u64 arrayStartPos = dataCode.find("[");
 			if (arrayStartPos != String::npos)
 			{
 
-				nameCode = nameCode.substr(0, nameCode.find(TT("[")));
+				nameCode = nameCode.substr(0, nameCode.find("["));
 
 
 
 				arrayStartPos += 1;
-				u64 arrayEndPos = dataCode.find(TT("]"), arrayStartPos);
+				u64 arrayEndPos = dataCode.find("]", arrayStartPos);
 
 
 				String arraySizeCode = dataCode.substr(arrayStartPos, arrayEndPos - arrayStartPos);
-				arraySizeCode = ReplaceAll(arraySizeCode, TT(" "), TT(""));
+				arraySizeCode = ReplaceAll(arraySizeCode, " ", "");
 
-				arraySize = _wtoi64(arraySizeCode.c_str());
+				arraySize = atol(arraySizeCode.c_str());
 			}
 
 			if (RegisterTextureData(nameCode) == false)
@@ -347,8 +347,8 @@ namespace JG
 
 
 			code.insert(endPos,
-				TT(" : register(t") + std::to_wstring(TextureDataMap[nameCode]->RegisterNum) +
-				TT(", space") + std::to_wstring(TextureDataMap[nameCode]->RegisterSpace) + TT(")"));
+				" : register(t" + std::to_string(TextureDataMap[nameCode]->RegisterNum) +
+				", space" + std::to_string(TextureDataMap[nameCode]->RegisterSpace) + ")");
 			startPos = endPos + 1;
 		}
 		else
@@ -365,26 +365,26 @@ namespace JG
 
 		if (dataTokenStartPos != String::npos)
 		{
-			u64 endPos = code.find(TT(";"), dataTokenStartPos);
+			u64 endPos = code.find(";", dataTokenStartPos);
 			String dataCode = code.substr(dataTokenStartPos, endPos - dataTokenStartPos);
-			u64 samplerDataStartPos = dataCode.find(TT("{"));
+			u64 samplerDataStartPos = dataCode.find("{");
 
 			String nameCode = dataCode.substr(0, samplerDataStartPos);
-			nameCode = ReplaceAll(nameCode, HLSL::Token::SamplerState, TT(""));
-			nameCode = ReplaceAll(nameCode, TT(" "), TT(""));
-			nameCode = ReplaceAll(nameCode, TT("\n"), TT(""));
-			nameCode = ReplaceAll(nameCode, TT("\t"), TT(""));
+			nameCode = ReplaceAll(nameCode, HLSL::Token::SamplerState, "");
+			nameCode = ReplaceAll(nameCode, " ", "");
+			nameCode = ReplaceAll(nameCode, "\n", "");
+			nameCode = ReplaceAll(nameCode, "\t", "");
 
 			if (samplerDataStartPos != String::npos)
 			{
 				samplerDataStartPos += 1;
-				u64 samplerDataEndPos = dataCode.find(TT("}"), samplerDataStartPos);
+				u64 samplerDataEndPos = dataCode.find("}", samplerDataStartPos);
 
-				String samplerDataCode = dataCode.substr(samplerDataStartPos, samplerDataEndPos - samplerDataStartPos) + TT(",");
+				String samplerDataCode = dataCode.substr(samplerDataStartPos, samplerDataEndPos - samplerDataStartPos) + ",";
 
-				if (samplerDataCode.find_last_of(TT(",")) != samplerDataCode.length() - 1)
+				if (samplerDataCode.find_last_of(",") != samplerDataCode.length() - 1)
 				{
-					samplerDataCode += TT(",");
+					samplerDataCode += ",";
 				}
 				Dictionary<String, String> SamplerDataMap;
 
@@ -418,14 +418,14 @@ namespace JG
 				samplerStateData->RegisterSpace = 0;
 				samplerStateData->ElementType = HLSL::EHLSLElement::SamplerState;
 
-				u64 replaceStartPos = code.find(TT("{"), dataTokenStartPos);
-				u64 replaceEndPos = code.find(TT(";"), replaceStartPos) + 1;
-				code = ReplaceAll(code, code.substr(replaceStartPos, replaceEndPos - replaceStartPos), TT(""));
+				u64 replaceStartPos = code.find("{", dataTokenStartPos);
+				u64 replaceEndPos = code.find(";", replaceStartPos) + 1;
+				code = ReplaceAll(code, code.substr(replaceStartPos, replaceEndPos - replaceStartPos), "");
 
 
 				u64 insertStartPos = code.find(nameCode, dataTokenStartPos) + nameCode.length();
-				String additionalCode = TT(" : register(s") + std::to_wstring(samplerStateData->RegisterNum) +
-					TT(", space") + std::to_wstring(samplerStateData->RegisterSpace) + TT(");");
+				String additionalCode = " : register(s" + std::to_string(samplerStateData->RegisterNum) +
+					", space" + std::to_string(samplerStateData->RegisterSpace) + ");";
 
 				code.insert(insertStartPos, additionalCode);
 				endPos = insertStartPos + additionalCode.length();
@@ -451,19 +451,19 @@ namespace JG
 		u64 dataTokenStartPos = code.find(HLSL::Token::RWStructuredBuffer, startPos);
 		if (dataTokenStartPos != String::npos)
 		{
-			u64 endPos = code.find(TT(";"), dataTokenStartPos);
+			u64 endPos = code.find(";", dataTokenStartPos);
 
 			String dataCode = code.substr(dataTokenStartPos, endPos - dataTokenStartPos);
 
 
 			// Type
-			u64 dataTypeStartPos = dataCode.find(TT("<")) + 1;
-			u64 dataTypeEndPos = dataCode.find(TT(">"));
+			u64 dataTypeStartPos = dataCode.find("<") + 1;
+			u64 dataTypeEndPos = dataCode.find(">");
 
 
 
 			String typeCode = dataCode.substr(dataTypeStartPos, dataTypeEndPos - dataTypeStartPos);
-			typeCode = ReplaceAll(typeCode, TT(" "), TT(""));
+			typeCode = ReplaceAll(typeCode, " ", "");
 
 			String typeName;
 			u64 typeSize = 0;
@@ -477,7 +477,7 @@ namespace JG
 			}
 
 			String nameCode = dataCode.substr(dataTypeEndPos + 1, dataCode.length() - dataTypeEndPos - 1);
-			nameCode = ReplaceAll(nameCode, TT(" "), TT(""));
+			nameCode = ReplaceAll(nameCode, " ", "");
 
 			if (RegisterRWStructuredBuffer(nameCode) == false)
 			{
@@ -500,7 +500,7 @@ namespace JG
 
 
 
-			code.insert(endPos, TT(" : register(u0, space") + std::to_wstring(structuredBufferData->RegisterSpace) + TT(")"));
+			code.insert(endPos, " : register(u0, space" + std::to_string(structuredBufferData->RegisterSpace) + ")");
 			startPos = endPos + 1;
 		}
 		else
@@ -514,32 +514,32 @@ namespace JG
 		u64 dataTokenStartPos = code.find(HLSL::Token::RWTexture2D, startPos);
 		if (dataTokenStartPos != String::npos)
 		{
-			u64 endPos = code.find(TT(";"), dataTokenStartPos);
+			u64 endPos = code.find(";", dataTokenStartPos);
 
 			String dataCode = code.substr(dataTokenStartPos, endPos - dataTokenStartPos);
 
 
-			String nameCode = ReplaceAll(dataCode, HLSL::Token::RWTexture2D, TT(""));
-			nameCode = ReplaceAll(nameCode, TT(" "), TT(""));
+			String nameCode = ReplaceAll(dataCode, HLSL::Token::RWTexture2D, "");
+			nameCode = ReplaceAll(nameCode, " ", "");
 
 			u64 arraySize = 1;
 
-			u64 arrayStartPos = dataCode.find(TT("["));
+			u64 arrayStartPos = dataCode.find("[");
 			if (arrayStartPos != String::npos)
 			{
 
-				nameCode = nameCode.substr(0, nameCode.find(TT("[")));
+				nameCode = nameCode.substr(0, nameCode.find("["));
 
 
 
 				arrayStartPos += 1;
-				u64 arrayEndPos = dataCode.find(TT("]"), arrayStartPos);
+				u64 arrayEndPos = dataCode.find("]", arrayStartPos);
 
 
 				String arraySizeCode = dataCode.substr(arrayStartPos, arrayEndPos - arrayStartPos);
-				arraySizeCode = ReplaceAll(arraySizeCode, TT(" "), TT(""));
+				arraySizeCode = ReplaceAll(arraySizeCode, " ", "");
 
-				arraySize = _wtoi64(arraySizeCode.c_str());
+				arraySize = atol(arraySizeCode.c_str());
 			}
 
 			if (RegisterRWTextureData(nameCode) == false)
@@ -563,8 +563,8 @@ namespace JG
 
 
 			code.insert(endPos,
-				TT(" : register(u") + std::to_wstring(RWTextureDataMap[nameCode]->RegisterNum) +
-				TT(", space") + std::to_wstring(RWTextureDataMap[nameCode]->RegisterSpace) + TT(")"));
+				" : register(u" + std::to_string(RWTextureDataMap[nameCode]->RegisterNum) +
+				", space" + std::to_string(RWTextureDataMap[nameCode]->RegisterSpace) + ")");
 			startPos = endPos + 1;
 		}
 		else
@@ -610,12 +610,12 @@ namespace JG
 	}
 	void ShaderDataForm::ExtractStructName(const String& code, u64 pos, String* out_value)
 	{
-		u64 startPos = pos + wcslen(HLSL::Token::Struct);
-		u64 endPos = code.find_first_of(TT("{"), startPos);
+		u64 startPos = pos + strlen(HLSL::Token::Struct);
+		u64 endPos = code.find_first_of("{", startPos);
 		String structName = code.substr(startPos, endPos - startPos);
-		structName = ReplaceAll(structName, TT("\n"), TT(""));
-		structName = ReplaceAll(structName, TT("\t"), TT(""));
-		structName = ReplaceAll(structName, TT(" "), TT(""));
+		structName = ReplaceAll(structName, "\n", "");
+		structName = ReplaceAll(structName, "\t", "");
+		structName = ReplaceAll(structName, " ", "");
 
 		if (out_value != nullptr)
 		{
@@ -624,12 +624,12 @@ namespace JG
 	}
 	void ShaderDataForm::ExtractCBufferName(const String& code, u64 pos, String* out_value)
 	{
-		u64 startPos = pos + wcslen(HLSL::Token::CBuffer);
-		u64 endPos = code.find_first_of(TT("{"), startPos);
+		u64 startPos = pos + strlen(HLSL::Token::CBuffer);
+		u64 endPos = code.find_first_of("{", startPos);
 		String cbName = code.substr(startPos, endPos - startPos);
-		cbName = ReplaceAll(cbName, TT("\n"), TT(""));
-		cbName = ReplaceAll(cbName, TT("\t"), TT(""));
-		cbName = ReplaceAll(cbName, TT(" "), TT(""));
+		cbName = ReplaceAll(cbName, "\n", "");
+		cbName = ReplaceAll(cbName, "\t", "");
+		cbName = ReplaceAll(cbName, " ", "");
 
 		if (out_value != nullptr)
 		{
@@ -639,15 +639,15 @@ namespace JG
 	}
 	u64 ShaderDataForm::ExtractVarCode(const String& code, u64 pos, String* out_value)
 	{
-		u64 startPos = (pos == 0) ? 0 : code.find_first_of(TT("\n"), pos) + 1;
+		u64 startPos = (pos == 0) ? 0 : code.find_first_of("\n", pos) + 1;
 		if (startPos != String::npos)
 		{
-			u64 endPos = code.find_first_of(TT(";"), startPos);
+			u64 endPos = code.find_first_of(";", startPos);
 			if (endPos != String::npos)
 			{
 				String varCode = code.substr(startPos, endPos - startPos + 1);
-				varCode = ReplaceAll(varCode, TT("\n"), TT(""));
-				varCode = ReplaceAll(varCode, TT("\t"), TT(""));
+				varCode = ReplaceAll(varCode, "\n", "");
+				varCode = ReplaceAll(varCode, "\t", "");
 
 				if (out_value)
 				{
@@ -665,7 +665,7 @@ namespace JG
 	}
 	u64 ShaderDataForm::ExtractSamplerStateValue(const String& samplerStateDataCode, u64 startPos, String* out_key, String* out_value)
 	{
-		auto endPos = samplerStateDataCode.find(TT(","), startPos);
+		auto endPos = samplerStateDataCode.find(",", startPos);
 		if (endPos == String::npos)
 		{
 			return String::npos;
@@ -674,24 +674,24 @@ namespace JG
 		u64 result = endPos + 1;
 
 		String dataCode = samplerStateDataCode.substr(startPos, endPos - startPos);
-		dataCode = ReplaceAll(dataCode, TT("\t"), TT(""));
-		dataCode = ReplaceAll(dataCode, TT("\n"), TT(""));
+		dataCode = ReplaceAll(dataCode, "\t", "");
+		dataCode = ReplaceAll(dataCode, "\n", "");
 
 
 		startPos = 0;
-		u64 midPos = dataCode.find(TT("="));
+		u64 midPos = dataCode.find("=");
 		endPos = dataCode.length();
 
 		if (out_key != nullptr)
 		{
 			*out_key = dataCode.substr(startPos, midPos - startPos);
-			*out_key = ReplaceAll(*out_key, TT(" "), TT(""));
+			*out_key = ReplaceAll(*out_key, " ", "");
 		}
 
 		if (out_value != nullptr)
 		{
 			*out_value = dataCode.substr(midPos + 1, endPos - midPos - 1);
-			*out_value = ReplaceAll(*out_value, TT(" "), TT(""));
+			*out_value = ReplaceAll(*out_value, " ", "");
 		}
 
 
@@ -768,19 +768,19 @@ namespace JG
 
 		if (samplerDataMap.find(HLSL::Token::SamplerStateElement::MinLOD) != samplerDataMap.end())
 		{
-			desc.MinLOD = (f32)_wtof(samplerDataMap.at(HLSL::Token::SamplerStateElement::MinLOD).c_str());
+			desc.MinLOD = (f32)atof(samplerDataMap.at(HLSL::Token::SamplerStateElement::MinLOD).c_str());
 		}
 		if (samplerDataMap.find(HLSL::Token::SamplerStateElement::MaxLOD) != samplerDataMap.end())
 		{
-			desc.MaxLOD = (f32)_wtof(samplerDataMap.at(HLSL::Token::SamplerStateElement::MaxLOD).c_str());
+			desc.MaxLOD = (f32)atof(samplerDataMap.at(HLSL::Token::SamplerStateElement::MaxLOD).c_str());
 		}
 		if (samplerDataMap.find(HLSL::Token::SamplerStateElement::MaxAnisotropy) != samplerDataMap.end())
 		{
-			desc.MaxAnisotropy = (f32)_wtoi(samplerDataMap.at(HLSL::Token::SamplerStateElement::MaxAnisotropy).c_str());
+			desc.MaxAnisotropy = (f32)atoi(samplerDataMap.at(HLSL::Token::SamplerStateElement::MaxAnisotropy).c_str());
 		}
 		if (samplerDataMap.find(HLSL::Token::SamplerStateElement::MipLODBias) != samplerDataMap.end())
 		{
-			desc.MipLODBias = (f32)_wtof(samplerDataMap.at(HLSL::Token::SamplerStateElement::MipLODBias).c_str());
+			desc.MipLODBias = (f32)atof(samplerDataMap.at(HLSL::Token::SamplerStateElement::MipLODBias).c_str());
 		}
 		return desc;
 	}
@@ -958,18 +958,18 @@ namespace JG
 
 	bool ShaderDataForm::RegisterStructVar(StructData* structData, const String& varCode)
 	{
-		u64 varStartPos = varCode.find_first_not_of(TT(" "), varCode.find_first_not_of(TT("\t")));
-		u64 varMidPos = varCode.find(TT(" "), varStartPos);
-		u64 varEndPos = varCode.find(TT(";"), varMidPos) - 1;
+		u64 varStartPos = varCode.find_first_not_of(" ", varCode.find_first_not_of("\t"));
+		u64 varMidPos = varCode.find(" ", varStartPos);
+		u64 varEndPos = varCode.find(";", varMidPos) - 1;
 
 
 
 
 		String typeCode = varCode.substr(varStartPos, varMidPos - varStartPos);
-		typeCode = ReplaceAll(typeCode, TT(" "), TT(""));
+		typeCode = ReplaceAll(typeCode, " ", "");
 		String nameCode = varCode.substr(varMidPos + 1, varEndPos - varMidPos);
-		nameCode = ReplaceAll(nameCode, TT(" "), TT(""));
-		nameCode = ReplaceAll(nameCode, TT(";"), TT(""));
+		nameCode = ReplaceAll(nameCode, " ", "");
+		nameCode = ReplaceAll(nameCode, ";", "");
 
 		u64 varSize = 0;
 		if (FindTypeInfo(typeCode, nullptr, &varSize) == false)
@@ -1047,18 +1047,18 @@ namespace JG
 
 	bool ShaderDataForm::RegisterCBufferVar(CBufferData* cBuffer, const String& varCode, u64& uploadDataSize)
 	{
-		u64 varStartPos = varCode.find_first_not_of(TT(" "), varCode.find_first_not_of(TT("\t")));
-		u64 varMidPos = varCode.find(TT(" "), varStartPos);
-		u64 varEndPos = varCode.find(TT(";"), varMidPos) - 1;
+		u64 varStartPos = varCode.find_first_not_of(" ", varCode.find_first_not_of("\t"));
+		u64 varMidPos = varCode.find(" ", varStartPos);
+		u64 varEndPos = varCode.find(";", varMidPos) - 1;
 
 
 
 
 		String typeCode = varCode.substr(varStartPos, varMidPos - varStartPos);
-		typeCode = ReplaceAll(typeCode, TT(" "), TT(""));
+		typeCode = ReplaceAll(typeCode, " ", "");
 		String nameCode = varCode.substr(varMidPos + 1, varEndPos - varMidPos);
-		nameCode = ReplaceAll(nameCode, TT(" "), TT(""));
-		nameCode = ReplaceAll(nameCode, TT(";"), TT(""));
+		nameCode = ReplaceAll(nameCode, " ", "");
+		nameCode = ReplaceAll(nameCode, ";", "");
 
 
 

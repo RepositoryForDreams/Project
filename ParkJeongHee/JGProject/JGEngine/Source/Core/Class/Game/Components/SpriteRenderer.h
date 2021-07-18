@@ -3,7 +3,6 @@
 #include "Class/Asset/Asset.h"
 namespace JG
 {
-	
 	class SpriteRenderer : public BaseRenderer
 	{
 		JGCLASS
@@ -13,6 +12,7 @@ namespace JG
 
 		String  mSpritePath;
 		AssetID mSpriteID;
+		JVector2 mSpriteSize;
 		Asset<ITexture>* mAsset = nullptr;
 	public:
 		virtual ~SpriteRenderer() = default;

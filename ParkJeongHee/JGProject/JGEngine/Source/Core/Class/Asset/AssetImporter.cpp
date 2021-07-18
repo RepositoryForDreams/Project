@@ -15,7 +15,7 @@ namespace JG
 	EAssetImportResult AssetImporter::Import(const FBXAssetImportSettings& setting)
 	{
 		Assimp::Importer importer;
-		const aiScene* scene = importer.ReadFile(ws2s(setting.AssetPath),
+		const aiScene* scene = importer.ReadFile(setting.AssetPath,
 			aiProcess_JoinIdenticalVertices |     // 동일한 꼭지점 결합, 인덱싱 최적화
 			aiProcess_ValidateDataStructure |     // 로더의 출력을 검증
 			aiProcess_ImproveCacheLocality |      // 출력 정점의 캐쉬위치를 개선
@@ -37,7 +37,7 @@ namespace JG
 		if (scene != nullptr)
 		{
 			StaticMeshAssetStock meshInfo;
-			meshInfo.Name = s2ws(scene->mName.C_Str());
+			meshInfo.Name = scene->mName.C_Str();
 			if (scene->HasMeshes() == true)
 			{
 				u32 meshCount = scene->mNumMeshes;
@@ -73,12 +73,12 @@ namespace JG
 	{
 		TextureAssetStock stock;
 		
-		auto fileName = fs::path(settings.AssetPath).filename().wstring();
-		u64 extentionPos = fileName.find_last_of(TT("."));
+		auto fileName = fs::path(settings.AssetPath).filename().string();
+		u64 extentionPos = fileName.find_last_of(".");
 		stock.Name = fileName.substr(0, extentionPos);
 		
 		
-		byte* pixels = stbi_load(ws2s(settings.AssetPath).c_str(), &stock.Width, &stock.Height, &stock.Channels, STBI_rgb_alpha);
+		byte* pixels = stbi_load(settings.AssetPath.c_str(), &stock.Width, &stock.Height, &stock.Channels, STBI_rgb_alpha);
 		if (pixels == nullptr)
 		{
 			return EAssetImportResult::Fail;
@@ -102,7 +102,7 @@ namespace JG
 		}
 		List<JGVertex> vertices;
 		List<u32>   indices;
-		output->SubMeshNames.push_back(s2ws(mesh->mName.C_Str()));
+		output->SubMeshNames.push_back(mesh->mName.C_Str());
 
 		vertices.resize(mesh->mNumVertices);
 
@@ -115,6 +115,12 @@ namespace JG
 				v.Position.x = ai_pos.x;
 				v.Position.y = ai_pos.y;
 				v.Position.z = ai_pos.z;
+
+				for (i32 i = 0; i < 3; ++i)
+				{
+					output->BoundingBox.min[i] = std::min<float>(output->BoundingBox.min[i], v.Position[i]);
+					output->BoundingBox.max[i] = std::max<float>(output->BoundingBox.max[i], v.Position[i]);
+				}
 			}
 
 			if (mesh->HasNormals() == true)

@@ -10,7 +10,7 @@ namespace JG
 {
 	InspectorView::InspectorView()
 	{
-		UIManager::GetInstance().RegisterMainMenuItem(TT("Windows/Inspector"), 0, [&]()
+		UIManager::GetInstance().RegisterMainMenuItem("Windows/Inspector", 0, [&]()
 		{
 			Open();
 		}, nullptr);

@@ -62,13 +62,13 @@ namespace JG
 		if (mName.empty())
 		{
 			mName = GetType().GetName();
-			u64 pos = mName.find(TT("JG::"));
+			u64 pos = mName.find("JG::");
 			if (pos != String::npos)
 			{
 				mName = mName.substr(pos + 4);
 			}
-		
 		}
+
 		return mName;
 	}
 	void GameObject::SetName(const String& name)

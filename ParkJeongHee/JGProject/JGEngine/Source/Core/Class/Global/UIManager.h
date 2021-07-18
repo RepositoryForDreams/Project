@@ -34,9 +34,9 @@ namespace JG
 	public:
 		static const u64 DEFAULT_PRIORITY = 1000;
 		static const u64 SPERATOR_PRIORITY_DELTA = 10;
-		static const wchar CTRL_SHORTCUT_TOKEN  = TT('%');
-		static const wchar SHIFT_SHORTCUT_TOKEN = TT('#');
-		static const wchar ALT_SHORTCUT_TOKEN   = TT('&');
+		static const char CTRL_SHORTCUT_TOKEN  = '%';
+		static const char SHIFT_SHORTCUT_TOKEN = '#';
+		static const char ALT_SHORTCUT_TOKEN   = '&';
 	private:
 		Dictionary<JG::Type, UniquePtr<IUIView>>      mUIViewPool;
 		Dictionary<JG::Type, UniquePtr<IPopupUIView>> mPopupUIViewPool;

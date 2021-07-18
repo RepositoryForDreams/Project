@@ -31,11 +31,11 @@ namespace JG
 	{
 		switch(api)
 		{
-			case EGraphicsAPI::DirectX12: return TT("DirectX12");
-			case EGraphicsAPI::DirectX11: return TT("DirectX11");
-			case EGraphicsAPI::OpenGL:    return TT("OpenGL");
-			case EGraphicsAPI::Vulkan:    return TT("Vulkan");
-			default: return TT("None");
+			case EGraphicsAPI::DirectX12: return "DirectX12";
+			case EGraphicsAPI::DirectX11: return "DirectX11";
+			case EGraphicsAPI::OpenGL:    return "OpenGL";
+			case EGraphicsAPI::Vulkan:    return "Vulkan";
+			default: return "None";
 		}
 	}
 	enum class EAssetFormat
@@ -104,115 +104,115 @@ namespace JG
 	{
 		switch (code)
 		{
-		case EKeyCode::Num0:			return TT("0");
-		case EKeyCode::Num1:			return TT("1");
-		case EKeyCode::Num2:			return TT("2");
-		case EKeyCode::Num3:			return TT("3");
-		case EKeyCode::Num4:			return TT("4");
-		case EKeyCode::Num5:			return TT("5");
-		case EKeyCode::Num6:			return TT("6");
-		case EKeyCode::Num7:			return TT("7");
-		case EKeyCode::Num8:			return TT("8");
-		case EKeyCode::Num9:			return TT("9");
-		case EKeyCode::NumPad0:			return TT("NumPad0");
-		case EKeyCode::NumPad1:			return TT("NumPad1");
-		case EKeyCode::NumPad2:			return TT("NumPad2");
-		case EKeyCode::NumPad3:			return TT("NumPad3");
-		case EKeyCode::NumPad4:			return TT("NumPad4");
-		case EKeyCode::NumPad5:			return TT("NumPad5");
-		case EKeyCode::NumPad6:			return TT("NumPad6");
-		case EKeyCode::NumPad7:			return TT("NumPad7");
-		case EKeyCode::NumPad8:			return TT("NumPad8");
-		case EKeyCode::NumPad9:			return TT("NumPad9");
-		case EKeyCode::F1:				return TT("F1");
-		case EKeyCode::F2:				return TT("F2");
-		case EKeyCode::F3:				return TT("F3");
-		case EKeyCode::F4:				return TT("F4");
-		case EKeyCode::F5:				return TT("F5");
-		case EKeyCode::F6:				return TT("F6");
-		case EKeyCode::F7:				return TT("F7");
-		case EKeyCode::F8:				return TT("F8");
-		case EKeyCode::F9:				return TT("F9");
-		case EKeyCode::F10:				return TT("F10");
-		case EKeyCode::F11:				return TT("F11");
-		case EKeyCode::F12:				return TT("F12");
-		case EKeyCode::A:				return TT("A");
-		case EKeyCode::B:				return TT("B");
-		case EKeyCode::C:				return TT("C");
-		case EKeyCode::D:				return TT("D");
-		case EKeyCode::E:				return TT("E");
-		case EKeyCode::F:				return TT("F");
-		case EKeyCode::G:				return TT("G");
-		case EKeyCode::H:				return TT("H");
-		case EKeyCode::I:				return TT("I");
-		case EKeyCode::J:				return TT("J");
-		case EKeyCode::K:				return TT("K");
-		case EKeyCode::L:				return TT("L");
-		case EKeyCode::N:				return TT("N");
-		case EKeyCode::M:				return TT("M");
-		case EKeyCode::O:				return TT("O");
-		case EKeyCode::P:				return TT("P");
-		case EKeyCode::Q:				return TT("Q");
-		case EKeyCode::R:				return TT("R");
-		case EKeyCode::S:				return TT("S");
-		case EKeyCode::T:				return TT("T");
-		case EKeyCode::U:				return TT("U");
-		case EKeyCode::V:				return TT("V");
-		case EKeyCode::W:				return TT("W");
-		case EKeyCode::X:				return TT("X");
-		case EKeyCode::Y:				return TT("Y");
-		case EKeyCode::Z:				return TT("Z");
-		case EKeyCode::BackSpace:		return TT("BackSpace");
-		case EKeyCode::Tab:				return TT("Tab");
-		case EKeyCode::Clear:			return TT("Clear");
-		case EKeyCode::Enter:			return TT("Enter");
-		case EKeyCode::Shift:			return TT("Shift");
-		case EKeyCode::Ctrl:			return TT("Ctrl");
-		case EKeyCode::Alt:				return TT("Alt");
-		case EKeyCode::Pause:			return TT("Pause");
-		case EKeyCode::CapsLock:		return TT("CapsLock");
-		case EKeyCode::Esc:				return TT("Esc");
-		case EKeyCode::Space:			return TT("Space");
-		case EKeyCode::PgUp:			return TT("PgUp");
-		case EKeyCode::PgDown:			return TT("PgDown");
-		case EKeyCode::End:				return TT("End");
-		case EKeyCode::Home:			return TT("Home");
-		case EKeyCode::Left:			return TT("Left");
-		case EKeyCode::Up:				return TT("Up");
-		case EKeyCode::Right:			return TT("Right");
-		case EKeyCode::Down:			return TT("Down");
-		case EKeyCode::Select:			return TT("Select");
-		case EKeyCode::Print:			return TT("Print");
-		case EKeyCode::Execute:			return TT("Execute");
-		case EKeyCode::PrintScreen:		return TT("PrintScreen");
-		case EKeyCode::Insert:			return TT("Insert");
-		case EKeyCode::Help:			return TT("Help");
-		case EKeyCode::NumPadAdd:		return TT("NumPadAdd");
-		case EKeyCode::NumPadMultiply:	return TT("NumPadMultiply");
-		case EKeyCode::NumPadSubtract:	return TT("NumPadSubtract");
-		case EKeyCode::NumPadDemical:	return TT("NumPadDecimal");
-		case EKeyCode::NumPadDivide:	return TT("NumPadDivide");
-		case EKeyCode::NumLock:			return TT("NumLock");
-		case EKeyCode::ScrollLock:		return TT("ScrollLock");
-		case EKeyCode::LeftShift:		return TT("LeftShift");
-		case EKeyCode::RightShift:		return TT("RightShift");
-		case EKeyCode::LeftCtrl:		return TT("LeftCtrl");
-		case EKeyCode::RightCtrl:		return TT("RightCtrl");
-		case EKeyCode::LeftAlt:			return TT("LeftAlt");
-		case EKeyCode::RightAlt:		return TT("RightAlt");
-		case EKeyCode::LeftBracket:		return TT("[");
-		case EKeyCode::RightBracket:	return TT("]");
-		case EKeyCode::BackSlash:		return TT("'\'");
-		case EKeyCode::QuotationMark:	return TT("'");
-		case EKeyCode::Semicolon:		return TT(";");
-		case EKeyCode::Comma:			return TT(",");
-		case EKeyCode::Plus:			return TT("+");
-		case EKeyCode::Minus:			return TT("-");
-		case EKeyCode::Period:			return TT(".");
-		case EKeyCode::Slash:			return TT("/");
-		case EKeyCode::GraveAccent:		return TT("`");
+		case EKeyCode::Num0:			return "0";
+		case EKeyCode::Num1:			return "1";
+		case EKeyCode::Num2:			return "2";
+		case EKeyCode::Num3:			return "3";
+		case EKeyCode::Num4:			return "4";
+		case EKeyCode::Num5:			return "5";
+		case EKeyCode::Num6:			return "6";
+		case EKeyCode::Num7:			return "7";
+		case EKeyCode::Num8:			return "8";
+		case EKeyCode::Num9:			return "9";
+		case EKeyCode::NumPad0:			return "NumPad0";
+		case EKeyCode::NumPad1:			return "NumPad1";
+		case EKeyCode::NumPad2:			return "NumPad2";
+		case EKeyCode::NumPad3:			return "NumPad3";
+		case EKeyCode::NumPad4:			return "NumPad4";
+		case EKeyCode::NumPad5:			return "NumPad5";
+		case EKeyCode::NumPad6:			return "NumPad6";
+		case EKeyCode::NumPad7:			return "NumPad7";
+		case EKeyCode::NumPad8:			return "NumPad8";
+		case EKeyCode::NumPad9:			return "NumPad9";
+		case EKeyCode::F1:				return "F1";
+		case EKeyCode::F2:				return "F2";
+		case EKeyCode::F3:				return "F3";
+		case EKeyCode::F4:				return "F4";
+		case EKeyCode::F5:				return "F5";
+		case EKeyCode::F6:				return "F6";
+		case EKeyCode::F7:				return "F7";
+		case EKeyCode::F8:				return "F8";
+		case EKeyCode::F9:				return "F9";
+		case EKeyCode::F10:				return "F10";
+		case EKeyCode::F11:				return "F11";
+		case EKeyCode::F12:				return "F12";
+		case EKeyCode::A:				return "A";
+		case EKeyCode::B:				return "B";
+		case EKeyCode::C:				return "C";
+		case EKeyCode::D:				return "D";
+		case EKeyCode::E:				return "E";
+		case EKeyCode::F:				return "F";
+		case EKeyCode::G:				return "G";
+		case EKeyCode::H:				return "H";
+		case EKeyCode::I:				return "I";
+		case EKeyCode::J:				return "J";
+		case EKeyCode::K:				return "K";
+		case EKeyCode::L:				return "L";
+		case EKeyCode::N:				return "N";
+		case EKeyCode::M:				return "M";
+		case EKeyCode::O:				return "O";
+		case EKeyCode::P:				return "P";
+		case EKeyCode::Q:				return "Q";
+		case EKeyCode::R:				return "R";
+		case EKeyCode::S:				return "S";
+		case EKeyCode::T:				return "T";
+		case EKeyCode::U:				return "U";
+		case EKeyCode::V:				return "V";
+		case EKeyCode::W:				return "W";
+		case EKeyCode::X:				return "X";
+		case EKeyCode::Y:				return "Y";
+		case EKeyCode::Z:				return "Z";
+		case EKeyCode::BackSpace:		return "BackSpace";
+		case EKeyCode::Tab:				return "Tab";
+		case EKeyCode::Clear:			return "Clear";
+		case EKeyCode::Enter:			return "Enter";
+		case EKeyCode::Shift:			return "Shift";
+		case EKeyCode::Ctrl:			return "Ctrl";
+		case EKeyCode::Alt:				return "Alt";
+		case EKeyCode::Pause:			return "Pause";
+		case EKeyCode::CapsLock:		return "CapsLock";
+		case EKeyCode::Esc:				return "Esc";
+		case EKeyCode::Space:			return "Space";
+		case EKeyCode::PgUp:			return "PgUp";
+		case EKeyCode::PgDown:			return "PgDown";
+		case EKeyCode::End:				return "End";
+		case EKeyCode::Home:			return "Home";
+		case EKeyCode::Left:			return "Left";
+		case EKeyCode::Up:				return "Up";
+		case EKeyCode::Right:			return "Right";
+		case EKeyCode::Down:			return "Down";
+		case EKeyCode::Select:			return "Select";
+		case EKeyCode::Print:			return "Print";
+		case EKeyCode::Execute:			return "Execute";
+		case EKeyCode::PrintScreen:		return "PrintScreen";
+		case EKeyCode::Insert:			return "Insert";
+		case EKeyCode::Help:			return "Help";
+		case EKeyCode::NumPadAdd:		return "NumPadAdd";
+		case EKeyCode::NumPadMultiply:	return "NumPadMultiply";
+		case EKeyCode::NumPadSubtract:	return "NumPadSubtract";
+		case EKeyCode::NumPadDemical:	return "NumPadDecimal";
+		case EKeyCode::NumPadDivide:	return "NumPadDivide";
+		case EKeyCode::NumLock:			return "NumLock";
+		case EKeyCode::ScrollLock:		return "ScrollLock";
+		case EKeyCode::LeftShift:		return "LeftShift";
+		case EKeyCode::RightShift:		return "RightShift";
+		case EKeyCode::LeftCtrl:		return "LeftCtrl";
+		case EKeyCode::RightCtrl:		return "RightCtrl";
+		case EKeyCode::LeftAlt:			return "LeftAlt";
+		case EKeyCode::RightAlt:		return "RightAlt";
+		case EKeyCode::LeftBracket:		return "[";
+		case EKeyCode::RightBracket:	return "]";
+		case EKeyCode::BackSlash:		return "'\'";
+		case EKeyCode::QuotationMark:	return "'";
+		case EKeyCode::Semicolon:		return ";";
+		case EKeyCode::Comma:			return ",";
+		case EKeyCode::Plus:			return "+";
+		case EKeyCode::Minus:			return "-";
+		case EKeyCode::Period:			return ".";
+		case EKeyCode::Slash:			return "/";
+		case EKeyCode::GraveAccent:		return "`";
 		default:
-			return TT("None");
+			return "None";
 		}
 	}
 
@@ -220,113 +220,113 @@ namespace JG
 	inline EKeyCode StringToKeyCode(const String& code)
 	{
 		
-		if (code == TT("0")) { return  EKeyCode::Num0; }
-		else if(code == TT("1") ) { return  EKeyCode::Num1;	}		
-		else if(code == TT("2") ) { return  EKeyCode::Num2;	}		
-		else if(code == TT("3") ) { return  EKeyCode::Num3;	}		
-		else if(code == TT("4") ) { return  EKeyCode::Num4;	}		
-		else if(code == TT("5") ) { return  EKeyCode::Num5;	}		
-		else if(code == TT("6") ) { return  EKeyCode::Num6;	}		
-		else if(code == TT("7") ) { return  EKeyCode::Num7;	}		
-		else if(code == TT("8") ) { return  EKeyCode::Num8;	}		
-		else if(code == TT("9") ) { return  EKeyCode::Num9;	}		
-		else if(code == TT("NumPad0")) {return  EKeyCode::NumPad0; }		
-		else if(code == TT("NumPad1")) {return  EKeyCode::NumPad1; }		
-		else if(code == TT("NumPad2")) {return  EKeyCode::NumPad2; }		
-		else if(code == TT("NumPad3")) {return  EKeyCode::NumPad3; }		
-		else if(code == TT("NumPad4")) {return  EKeyCode::NumPad4; }		
-		else if(code == TT("NumPad5")) {return  EKeyCode::NumPad5; }		
-		else if(code == TT("NumPad6")) {return  EKeyCode::NumPad6; }		
-		else if(code == TT("NumPad7")) {return  EKeyCode::NumPad7; }		
-		else if(code == TT("NumPad8")) {return  EKeyCode::NumPad8; }		
-		else if(code == TT("NumPad9")) {return  EKeyCode::NumPad9; }		
-		else if(code == TT("F1") ) { return EKeyCode::F1; }				
-		else if(code == TT("F2") ) { return EKeyCode::F2; }				
-		else if(code == TT("F3") ) { return EKeyCode::F3; }				
-		else if(code == TT("F4") ) { return EKeyCode::F4; }				
-		else if(code == TT("F5") ) { return EKeyCode::F5; }				
-		else if(code == TT("F6") ) { return EKeyCode::F6; }				
-		else if(code == TT("F7") ) { return EKeyCode::F7; }				
-		else if(code == TT("F8") ) { return EKeyCode::F8; }				
-		else if(code == TT("F9") ) { return EKeyCode::F9; }				
-		else if(code == TT("F10")) { return EKeyCode::F10;}				
-		else if(code == TT("F11")) { return EKeyCode::F11;}				
-		else if(code == TT("F12")) { return EKeyCode::F12;}				
-		else if(code == TT("A")) { return EKeyCode::A; }				
-		else if(code == TT("B")) { return EKeyCode::B; }				
-		else if(code == TT("C")) { return EKeyCode::C; }				
-		else if(code == TT("D")) { return EKeyCode::D; }				
-		else if(code == TT("E")) { return EKeyCode::E; }				
-		else if(code == TT("F")) { return EKeyCode::F; }				
-		else if(code == TT("G")) { return EKeyCode::G; }				
-		else if(code == TT("H")) { return EKeyCode::H; }				
-		else if(code == TT("I")) { return EKeyCode::I; }				
-		else if(code == TT("J")) { return EKeyCode::J; }				
-		else if(code == TT("K")) { return EKeyCode::K; }				
-		else if(code == TT("L")) { return EKeyCode::L; }				
-		else if(code == TT("N")) { return EKeyCode::N; }				
-		else if(code == TT("M")) { return EKeyCode::M; }				
-		else if(code == TT("O")) { return EKeyCode::O; }				
-		else if(code == TT("P")) { return EKeyCode::P; }				
-		else if(code == TT("Q")) { return EKeyCode::Q; }				
-		else if(code == TT("R")) { return EKeyCode::R; }				
-		else if(code == TT("S")) { return EKeyCode::S; }				
-		else if(code == TT("T")) { return EKeyCode::T; }				
-		else if(code == TT("U")) { return EKeyCode::U; }				
-		else if(code == TT("V")) { return EKeyCode::V; }				
-		else if(code == TT("W")) { return EKeyCode::W; }				
-		else if(code == TT("X")) { return EKeyCode::X; }				
-		else if(code == TT("Y")) { return EKeyCode::Y; }				
-		else if(code == TT("Z")) { return EKeyCode::Z; }				
-		else if (code == TT("BackSpace"))	{ return EKeyCode::BackSpace; }
-		else if (code == TT("Tab"))			{ return EKeyCode::Tab; }
-		else if (code == TT("Clear"))		{ return EKeyCode::Clear; }
-		else if (code == TT("Enter"))		{ return EKeyCode::Enter; }
-		else if (code == TT("Shift"))		{ return EKeyCode::Shift; }
-		else if (code == TT("Ctrl"))		{ return EKeyCode::Ctrl; }
-		else if (code == TT("Alt"))			{ return EKeyCode::Alt; }
-		else if (code == TT("Pause"))		{ return EKeyCode::Pause; }
-		else if (code == TT("CapsLock"))	{ return EKeyCode::CapsLock; }
-		else if (code == TT("Esc"))			{ return EKeyCode::Esc; }
-		else if (code == TT("Space"))		{ return EKeyCode::Space; }
-		else if (code == TT("PgUp"))		{ return EKeyCode::PgUp; }
-		else if (code == TT("PgDown"))		{ return EKeyCode::PgDown; }
-		else if (code == TT("End"))			{ return EKeyCode::End; }
-		else if (code == TT("Home"))		{ return EKeyCode::Home; }
-		else if (code == TT("Left"))		{ return EKeyCode::Left; }
-		else if (code == TT("Up"))			{ return EKeyCode::Up; }
-		else if (code == TT("Right"))		{ return EKeyCode::Right; }
-		else if (code == TT("Down"))		{ return EKeyCode::Down; }
-		else if (code == TT("Select"))		{ return EKeyCode::Select; }
-		else if (code == TT("Print"))		{ return EKeyCode::Print; }
-		else if (code == TT("Execute"))		{ return EKeyCode::Execute; }
-		else if (code == TT("PrintScreen")) { return EKeyCode::PrintScreen; }
-		else if (code == TT("Insert")) { return EKeyCode::Insert; }
-		else if (code == TT("Help")) { return EKeyCode::Help; }
-		else if (code == TT("NumPadAdd")) { return EKeyCode::NumPadAdd; }
-		else if (code == TT("NumPadMultiply")) { return EKeyCode::NumPadMultiply; }
-		else if (code == TT("NumPadSubtract")) { return EKeyCode::NumPadSubtract; }
-		else if (code == TT("NumPadDecimal")) { return EKeyCode::NumPadDemical; }
-		else if (code == TT("NumPadDivide")) { return EKeyCode::NumPadDivide; }
-		else if (code == TT("NumLock")) { return EKeyCode::NumLock; }
-		else if (code == TT("ScrollLock")) { return EKeyCode::ScrollLock; }
-		else if (code == TT("LeftShift")) { return EKeyCode::LeftShift; }
-		else if (code == TT("RightShift")) { return EKeyCode::RightShift; }
-		else if (code == TT("LeftCtrl")) { return EKeyCode::LeftCtrl; }
-		else if (code == TT("RightCtrl")) { return EKeyCode::RightCtrl; }
-		else if (code == TT("LeftAlt")) { return EKeyCode::LeftAlt; }
-		else if (code == TT("RightAlt")) { return EKeyCode::RightAlt; }
-		else if (code == TT("[")) { return EKeyCode::LeftBracket; }
-		else if (code == TT("]")) { return EKeyCode::RightBracket; }
-		else if (code == TT("'\'")) { return EKeyCode::BackSlash; }
-		else if (code == TT("'")) { return EKeyCode::QuotationMark; }
-		else if (code == TT(";")) { return EKeyCode::Semicolon; }
-		else if (code == TT(",")) { return EKeyCode::Comma; }
-		else if (code == TT("+")) { return EKeyCode::Plus; }
-		else if (code == TT("-")) { return EKeyCode::Minus; }
-		else if (code == TT(".")) { return EKeyCode::Period; }
-		else if (code == TT("/")) { return EKeyCode::Slash; }
-		else if (code == TT("`")) { return EKeyCode::GraveAccent; }
+		if (code == "0") { return  EKeyCode::Num0; }
+		else if(code == "1" ) { return  EKeyCode::Num1;	}		
+		else if(code == "2" ) { return  EKeyCode::Num2;	}		
+		else if(code == "3" ) { return  EKeyCode::Num3;	}		
+		else if(code == "4" ) { return  EKeyCode::Num4;	}		
+		else if(code == "5" ) { return  EKeyCode::Num5;	}		
+		else if(code == "6" ) { return  EKeyCode::Num6;	}		
+		else if(code == "7" ) { return  EKeyCode::Num7;	}		
+		else if(code == "8" ) { return  EKeyCode::Num8;	}		
+		else if(code == "9" ) { return  EKeyCode::Num9;	}		
+		else if(code == "NumPad0") {return  EKeyCode::NumPad0; }		
+		else if(code == "NumPad1") {return  EKeyCode::NumPad1; }		
+		else if(code == "NumPad2") {return  EKeyCode::NumPad2; }		
+		else if(code == "NumPad3") {return  EKeyCode::NumPad3; }		
+		else if(code == "NumPad4") {return  EKeyCode::NumPad4; }		
+		else if(code == "NumPad5") {return  EKeyCode::NumPad5; }		
+		else if(code == "NumPad6") {return  EKeyCode::NumPad6; }		
+		else if(code == "NumPad7") {return  EKeyCode::NumPad7; }		
+		else if(code == "NumPad8") {return  EKeyCode::NumPad8; }		
+		else if(code == "NumPad9") {return  EKeyCode::NumPad9; }		
+		else if(code == "F1" ) { return EKeyCode::F1; }				
+		else if(code == "F2" ) { return EKeyCode::F2; }				
+		else if(code == "F3" ) { return EKeyCode::F3; }				
+		else if(code == "F4" ) { return EKeyCode::F4; }				
+		else if(code == "F5" ) { return EKeyCode::F5; }				
+		else if(code == "F6" ) { return EKeyCode::F6; }				
+		else if(code == "F7" ) { return EKeyCode::F7; }				
+		else if(code == "F8" ) { return EKeyCode::F8; }				
+		else if(code == "F9" ) { return EKeyCode::F9; }				
+		else if(code == "F10") { return EKeyCode::F10;}				
+		else if(code == "F11") { return EKeyCode::F11;}				
+		else if(code == "F12") { return EKeyCode::F12;}				
+		else if(code == "A") { return EKeyCode::A; }				
+		else if(code == "B") { return EKeyCode::B; }				
+		else if(code == "C") { return EKeyCode::C; }				
+		else if(code == "D") { return EKeyCode::D; }				
+		else if(code == "E") { return EKeyCode::E; }				
+		else if(code == "F") { return EKeyCode::F; }				
+		else if(code == "G") { return EKeyCode::G; }				
+		else if(code == "H") { return EKeyCode::H; }				
+		else if(code == "I") { return EKeyCode::I; }				
+		else if(code == "J") { return EKeyCode::J; }				
+		else if(code == "K") { return EKeyCode::K; }				
+		else if(code == "L") { return EKeyCode::L; }				
+		else if(code == "N") { return EKeyCode::N; }				
+		else if(code == "M") { return EKeyCode::M; }				
+		else if(code == "O") { return EKeyCode::O; }				
+		else if(code == "P") { return EKeyCode::P; }				
+		else if(code == "Q") { return EKeyCode::Q; }				
+		else if(code == "R") { return EKeyCode::R; }				
+		else if(code == "S") { return EKeyCode::S; }				
+		else if(code == "T") { return EKeyCode::T; }				
+		else if(code == "U") { return EKeyCode::U; }				
+		else if(code == "V") { return EKeyCode::V; }				
+		else if(code == "W") { return EKeyCode::W; }				
+		else if(code == "X") { return EKeyCode::X; }				
+		else if(code == "Y") { return EKeyCode::Y; }				
+		else if(code == "Z") { return EKeyCode::Z; }				
+		else if (code == "BackSpace")	{ return EKeyCode::BackSpace; }
+		else if (code == "Tab")			{ return EKeyCode::Tab; }
+		else if (code == "Clear")		{ return EKeyCode::Clear; }
+		else if (code == "Enter")		{ return EKeyCode::Enter; }
+		else if (code == "Shift")		{ return EKeyCode::Shift; }
+		else if (code == "Ctrl")		{ return EKeyCode::Ctrl; }
+		else if (code == "Alt")			{ return EKeyCode::Alt; }
+		else if (code == "Pause")		{ return EKeyCode::Pause; }
+		else if (code == "CapsLock")	{ return EKeyCode::CapsLock; }
+		else if (code == "Esc")			{ return EKeyCode::Esc; }
+		else if (code == "Space")		{ return EKeyCode::Space; }
+		else if (code == "PgUp")		{ return EKeyCode::PgUp; }
+		else if (code == "PgDown")		{ return EKeyCode::PgDown; }
+		else if (code == "End")			{ return EKeyCode::End; }
+		else if (code == "Home")		{ return EKeyCode::Home; }
+		else if (code == "Left")		{ return EKeyCode::Left; }
+		else if (code == "Up")			{ return EKeyCode::Up; }
+		else if (code == "Right")		{ return EKeyCode::Right; }
+		else if (code == "Down")		{ return EKeyCode::Down; }
+		else if (code == "Select")		{ return EKeyCode::Select; }
+		else if (code == "Print")		{ return EKeyCode::Print; }
+		else if (code == "Execute")		{ return EKeyCode::Execute; }
+		else if (code == "PrintScreen") { return EKeyCode::PrintScreen; }
+		else if (code == "Insert") { return EKeyCode::Insert; }
+		else if (code == "Help") { return EKeyCode::Help; }
+		else if (code == "NumPadAdd") { return EKeyCode::NumPadAdd; }
+		else if (code == "NumPadMultiply") { return EKeyCode::NumPadMultiply; }
+		else if (code == "NumPadSubtract") { return EKeyCode::NumPadSubtract; }
+		else if (code == "NumPadDecimal") { return EKeyCode::NumPadDemical; }
+		else if (code == "NumPadDivide") { return EKeyCode::NumPadDivide; }
+		else if (code == "NumLock") { return EKeyCode::NumLock; }
+		else if (code == "ScrollLock") { return EKeyCode::ScrollLock; }
+		else if (code == "LeftShift") { return EKeyCode::LeftShift; }
+		else if (code == "RightShift") { return EKeyCode::RightShift; }
+		else if (code == "LeftCtrl") { return EKeyCode::LeftCtrl; }
+		else if (code == "RightCtrl") { return EKeyCode::RightCtrl; }
+		else if (code == "LeftAlt") { return EKeyCode::LeftAlt; }
+		else if (code == "RightAlt") { return EKeyCode::RightAlt; }
+		else if (code == "[") { return EKeyCode::LeftBracket; }
+		else if (code == "]") { return EKeyCode::RightBracket; }
+		else if (code == "'\'") { return EKeyCode::BackSlash; }
+		else if (code == "'") { return EKeyCode::QuotationMark; }
+		else if (code == ";") { return EKeyCode::Semicolon; }
+		else if (code == ",") { return EKeyCode::Comma; }
+		else if (code == "+") { return EKeyCode::Plus; }
+		else if (code == "-") { return EKeyCode::Minus; }
+		else if (code == ".") { return EKeyCode::Period; }
+		else if (code == "/") { return EKeyCode::Slash; }
+		else if (code == "`") { return EKeyCode::GraveAccent; }
 		else { return EKeyCode::Unknown; }
 	}
 
@@ -340,10 +340,10 @@ namespace JG
 	{
 		switch(inputAction)
 		{
-		case EInputAction::Pressed:  return TT("Pressed");
-		case EInputAction::Released: return TT("Released");
+		case EInputAction::Pressed:  return "Pressed";
+		case EInputAction::Released: return "Released";
 		default:
-			return TT("None");
+			return "None";
 		}
 	}
 
@@ -366,13 +366,13 @@ namespace JG
 	{
 		switch (inputAction)
 		{
-		case EMouseButton::Left:     return TT("LeftButton");
-		case EMouseButton::Right:    return TT("RightButton");
-		case EMouseButton::Middle:   return TT("MiddleButton");
-		case EMouseButton::XButton1: return TT("XButton1");
-		case EMouseButton::XButton2: return TT("XButton2");
+		case EMouseButton::Left:     return "LeftButton";
+		case EMouseButton::Right:    return "RightButton";
+		case EMouseButton::Middle:   return "MiddleButton";
+		case EMouseButton::XButton1: return "XButton1";
+		case EMouseButton::XButton2: return "XButton2";
 		default:
-			return TT("None");
+			return "None";
 		}
 	}
 }

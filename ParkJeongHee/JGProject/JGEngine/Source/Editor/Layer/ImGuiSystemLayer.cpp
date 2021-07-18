@@ -24,7 +24,7 @@ namespace JG
 	}
 	String ImGuiSystemLayer::GetLayerName()
 	{
-		return TT("ImGuiSystemLayer");
+		return "ImGuiSystemLayer";
 	}
 
 

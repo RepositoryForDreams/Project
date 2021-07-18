@@ -8,7 +8,7 @@ namespace JG
 	class ProgressBarInitData
 	{
 	public:
-		String Title = TT("None");
+		String Title = "None";
 	public:
 		ProgressBarInitData() = default;
 		ProgressBarInitData(const String& title) : Title(title) {}

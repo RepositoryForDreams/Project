@@ -12,7 +12,7 @@ namespace JG
 		virtual ~AppOpenEvent() override {}
 		virtual String ToString() const override
 		{
-			return TT("AppOpenEvent");
+			return "AppOpenEvent";
 		}
 	};
 
@@ -23,7 +23,7 @@ namespace JG
 		virtual ~AppCloseEvent() override  {}
 		virtual String ToString() const override
 		{
-			return TT("AppCloseEvent");
+			return "AppCloseEvent";
 		}
 	};
 
@@ -34,7 +34,7 @@ namespace JG
 		virtual ~AppResizeEvent() override {}
 		virtual String ToString() const override
 		{
-			return TT("AppResizeEvent = [ W : ") + std::to_wstring(Width) + TT(", H : ") + std::to_wstring(Height) + TT(" ]");
+			return "AppResizeEvent = [ W : " + std::to_string(Width) + ", H : " + std::to_string(Height) + " ]";
 		}
 	public:
 		u32 Width  = 0;
@@ -50,7 +50,7 @@ namespace JG
 		virtual ~NotifyDestroyJGObjectEvent() = default;
 		virtual String ToString() const override
 		{
-			return TT("NotifyDestroyJGObjectEvent");
+			return "NotifyDestroyJGObjectEvent";
 		}
 	};
 	

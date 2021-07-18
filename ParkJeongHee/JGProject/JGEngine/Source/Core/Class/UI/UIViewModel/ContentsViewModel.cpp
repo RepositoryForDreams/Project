@@ -234,12 +234,12 @@ namespace JG
 			}
 			if (fs::exists(fileInfo->Path))
 			{
-				fs::path newFloderPath = CombinePath(fileInfo->Path, TT("NewFolder"));
+				fs::path newFloderPath = CombinePath(fileInfo->Path, "NewFolder");
 				fs::path newPath = newFloderPath;
 				i32 i = 0;
 				while (fs::exists(newPath) == true)
 				{
-					newPath = newFloderPath.wstring() + TT("(") + std::to_wstring(++i) + TT(")");
+					newPath = newFloderPath.string() + "(" + std::to_string(++i) + ")";
 				}
 
 				fs::create_directory(newPath);
@@ -377,7 +377,7 @@ namespace JG
 		}
 
 
-		mThreadLoadData->ContentsRoot = Async_CreateContentsFileInfo(TT("Asset"), contentsPath.wstring(), EAssetFormat::Directory, nullptr, true);
+		mThreadLoadData->ContentsRoot = Async_CreateContentsFileInfo("Asset", contentsPath.string(), EAssetFormat::Directory, nullptr, true);
 		Async_UpdateContentsDirectory(mThreadLoadData->ContentsRoot, fs::directory_iterator(contentsPath));
 
 		// 추가된 데이터 제거된 데이터 비교
@@ -405,7 +405,7 @@ namespace JG
 			// 디렉토리라면 파고든다.
 			if (fs::is_directory(filePath) == true)
 			{
-				auto ContentsFileInfo = Async_CreateContentsFileInfo(filePath.filename().wstring(), filePath.wstring(), EAssetFormat::Directory, currentFileInfo, true);
+				auto ContentsFileInfo = Async_CreateContentsFileInfo(filePath.filename().string(), filePath.string(), EAssetFormat::Directory, currentFileInfo, true);
 				mThreadLoadData->DirectoryList.push_back(ContentsFileInfo);
 				Async_UpdateContentsDirectory(ContentsFileInfo, fs::directory_iterator(filePath));
 			}
@@ -420,12 +420,12 @@ namespace JG
 				//}
 
 				// 관리받고있는 에셋이라면
-				Async_CreateContentsFileInfo(filePath.filename().wstring(), filePath.wstring(), fileFormat, currentFileInfo, false);
+				Async_CreateContentsFileInfo(filePath.filename().string(), filePath.string(), fileFormat, currentFileInfo, false);
 			}
 			else
 			{
 				// 다른 에셋이라면
-				Async_CreateContentsFileInfo(filePath.filename().wstring(), filePath.wstring(), EAssetFormat::None , currentFileInfo, false);
+				Async_CreateContentsFileInfo(filePath.filename().string(), filePath.string(), EAssetFormat::None , currentFileInfo, false);
 			}
 
 		}

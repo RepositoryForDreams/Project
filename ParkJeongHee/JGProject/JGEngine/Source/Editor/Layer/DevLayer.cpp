@@ -36,6 +36,6 @@ namespace JG
 	}
 	String DevLayer::GetLayerName()
 	{
-		return TT("DevLayer");
+		return "DevLayer";
 	}
 }

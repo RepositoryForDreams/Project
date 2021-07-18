@@ -5,6 +5,7 @@
 #include "Common/String.h"
 #include "Math/JVector.h"
 #include "Math/JMatrix.h"
+#include "Math/JBBox.h"
 #include <rapidjson/ostreamwrapper.h>
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/writer.h>
@@ -27,14 +28,10 @@ namespace JG
 		rapidjson::Document::AllocatorType& GetJsonAllocator();
 	public:
 		template<class T>
-		void AddMember(const String& key, const T& value) {
-			AddMember(ws2s(key), value);
-		}
-		template<class T>
-		void AddMember(const std::string& key, const T& value);
+		void AddMember(const String& key, const T& value);
 
 		template<>
-		void AddMember(const std::string& key, const SharedPtr<JsonData>& value) {
+		void AddMember(const String& key, const SharedPtr<JsonData>& value) {
 			AddMember_Base(key, value->GetValue());
 		}
 
@@ -62,6 +59,9 @@ namespace JG
 		rapidjson::Value MakeJsonValue(const JVector4& value);
 		template<>
 		rapidjson::Value MakeJsonValue(const JMatrix& value);
+		template<>
+		rapidjson::Value MakeJsonValue(const JBBox& value);
+
 
 		template<class T>
 		rapidjson::Value MakeJsonValue(const List<T>& valueList);
@@ -70,7 +70,7 @@ namespace JG
 		rapidjson::Value MakeJsonValue(const List<jbyte>& value);
 	private:
 		template<class T>
-		void AddMember_Base(const std::string& key, T& val)
+		void AddMember_Base(const String& key, T& val)
 		{
 			rapidjson::Value keyVal;
 			keyVal.SetString(key.c_str(), (rapidjson::SizeType)key.length(), mJson->GetAllocator());
@@ -92,7 +92,7 @@ namespace JG
 		u64  GetUint64() const { return mValue.GetUint64(); }
 		f32  GetFloat() const { return mValue.GetFloat(); }
 		f64  GetDouble() const { return mValue.GetDouble(); }
-		String GetString() const { auto str = mValue.GetString(); return s2ws(str); }
+		String GetString() const { return mValue.GetString(); }
 		SharedPtr<JsonData> GetJsonDataFromIndex(i32 index) 
 		{
 			auto cnt = (u64)mValue.Size();
@@ -109,9 +109,9 @@ namespace JG
 			auto cnt = (u64)mValue.Size();
 			if (cnt <= index)
 			{
-				return TT("");
+				return "";
 			}
-			return s2ws((mValue.MemberBegin() + index)->name.GetString());
+			return (mValue.MemberBegin() + index)->name.GetString();
 		}
 
 		List<jbyte> GetByteList() const
@@ -168,6 +168,27 @@ namespace JG
 			}
 			return result;
 		}
+		JBBox GetBoundingBox() const
+		{
+			JBBox jbbox;
+			i32 index = 0;
+			for (auto& val : mValue.GetArray())
+			{
+
+				if (index < 3)
+				{
+					jbbox.min[index] = val.GetFloat();
+				}
+				else
+				{
+					jbbox.max[index - 3] = val.GetFloat();
+				}
+
+
+				++index;
+			}
+			return jbbox;
+		}
 	public:
 		bool IsBool() const { return mValue.IsBool(); }
 		bool IsInt32() const { return mValue.IsInt(); }
@@ -180,11 +201,7 @@ namespace JG
 		bool IsString() const { return mValue.IsString(); }
 		bool IsByteList() const { return IsString(); }
 	public:
-		SharedPtr<JsonData> GetMember(const String& key)
-		{
-			return GetMember(ws2s(key));
-		}
-		SharedPtr<JsonData> GetMember(const std::string& key);
+		SharedPtr<JsonData> GetMember(const String& key);
 		
 	public:
 		rapidjson::Value& GetValue() {
@@ -276,7 +293,7 @@ namespace JG
 		return mJson->GetAllocator();
 	}
 	template<class T>
-	inline void JsonData::AddMember(const std::string& key, const T& value)
+	inline void JsonData::AddMember(const String& key, const T& value)
 	{
 		if (mJson == nullptr)
 		{
@@ -295,12 +312,12 @@ namespace JG
 		}
 	}
 
+
 	template<>
 	rapidjson::Value JsonData::MakeJsonValue(const String& value)
 	{
 		rapidjson::Value val;
-		auto convert = ws2s(value);
-		val.SetString(convert.c_str(), (rapidjson::SizeType)convert.length(), mJson->GetAllocator());
+		val.SetString(value.c_str(), (rapidjson::SizeType)value.length(), mJson->GetAllocator());
 		return val;
 	}
 	template<>
@@ -349,6 +366,19 @@ namespace JG
 		}
 		return val;
 	}
+	template<>
+	inline rapidjson::Value JsonData::MakeJsonValue(const JBBox& value)
+	{
+		rapidjson::Value val;
+		val.SetArray();
+		val.PushBack(value.min.x, mJson->GetAllocator());
+		val.PushBack(value.min.y, mJson->GetAllocator());
+		val.PushBack(value.min.z, mJson->GetAllocator());
+		val.PushBack(value.max.x, mJson->GetAllocator());
+		val.PushBack(value.max.y, mJson->GetAllocator());
+		val.PushBack(value.max.z, mJson->GetAllocator());
+		return val;
+	}
 	template<class T>
 	rapidjson::Value JsonData::MakeJsonValue(const List<T>& valueList)
 	{
@@ -377,7 +407,7 @@ namespace JG
 		val.SetString(value.data(), (rapidjson::SizeType)value.size(), mJson->GetAllocator());
 		return val;
 	}
-	inline SharedPtr<JsonData> JsonData::GetMember(const std::string& key) 
+	inline SharedPtr<JsonData> JsonData::GetMember(const String& key)
 	{
 		bool isFind = (mIsRoot) ?
 			mJson->GetDocument().FindMember(key.c_str()) != mJson->GetDocument().MemberEnd() :

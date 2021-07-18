@@ -33,13 +33,13 @@
                         "Name": "Transform",
                         "IsActive": true,
                         "Location": [
-                            0.0,
-                            0.0,
-                            -10.0
+                            -1.8758857250213624,
+                            10.568710327148438,
+                            -11.938887596130371
                         ],
                         "Rotation": [
-                            0.0,
-                            -0.0,
+                            19.683359146118165,
+                            16.225934982299806,
                             0.0
                         ],
                         "Scale": [
@@ -53,20 +53,20 @@
                         "Name": "EditorCamera",
                         "IsActive": true,
                         "Resolution": [
-                            800.0,
-                            600.0
+                            1920.0,
+                            1080.0
                         ],
                         "NearZ": 0.0010000000474974514,
                         "FarZ": 10000.0,
                         "FOV": 90.0,
                         "ClearColor": [
+                            0.0,
+                            0.0,
                             1.0,
-                            1.0,
-                            1.0,
-                            0.0
+                            0.01568627543747425
                         ],
                         "CullingLayerMask": 18446744073709551615,
-                        "IsOrthographic": true
+                        "IsOrthographic": false
                     }
                 ],
                 "Childs": []
@@ -85,7 +85,7 @@
                         ],
                         "Rotation": [
                             0.0,
-                            -0.0,
+                            0.0,
                             0.0
                         ],
                         "Scale": [
@@ -104,14 +104,14 @@
                                 "Name": "Transform",
                                 "IsActive": true,
                                 "Location": [
-                                    134.25360107421876,
-                                    -114.17681121826172,
-                                    0.0
+                                    -225.92823791503907,
+                                    65.27893829345703,
+                                    1.1450561743231447e-7
                                 ],
                                 "Rotation": [
                                     0.0,
-                                    -0.0,
-                                    4746.75927734375
+                                    0.000001534284479021153,
+                                    0.0
                                 ],
                                 "Scale": [
                                     1.0,
@@ -129,26 +129,26 @@
                                     1.0,
                                     1.0
                                 ],
-                                "SpritePath": "../../../JGGameProject/Project_C/Asset\\Resources\\T_Wood_Pine_D.jgasset"
+                                "SpritePath": "../../../JGGameProject/Project_C/Asset\\Resources\\UV.Grid.jgasset"
                             }
                         ],
                         "Childs": []
                     },
                     {
-                        "Name": "Empty",
+                        "Name": "Cube",
                         "Components": [
                             {
                                 "ComponentType": "JG::Transform",
                                 "Name": "Transform",
                                 "IsActive": true,
                                 "Location": [
-                                    3.936389684677124,
-                                    0.10312771797180176,
+                                    4.5495405197143559,
+                                    -0.03335118293762207,
                                     0.0
                                 ],
                                 "Rotation": [
                                     0.0,
-                                    -0.0,
+                                    0.0,
                                     0.0
                                 ],
                                 "Scale": [
@@ -175,12 +175,12 @@
                                 "IsActive": true,
                                 "Location": [
                                     18.000110626220704,
-                                    24.000022888183595,
+                                    114.0000228881836,
                                     0.0
                                 ],
                                 "Rotation": [
                                     0.0,
-                                    -0.0,
+                                    0.0,
                                     0.0
                                 ],
                                 "Scale": [
@@ -205,7 +205,7 @@
                         "Childs": []
                     },
                     {
-                        "Name": "Empty",
+                        "Name": "Sphere",
                         "Components": [
                             {
                                 "ComponentType": "JG::Transform",
@@ -218,7 +218,7 @@
                                 ],
                                 "Rotation": [
                                     0.0,
-                                    -0.0,
+                                    0.0,
                                     0.0
                                 ],
                                 "Scale": [
@@ -249,14 +249,14 @@
                                     -5.0
                                 ],
                                 "Rotation": [
-                                    -3286.52587890625,
-                                    -0.0,
+                                    313.4741516113281,
+                                    0.0,
                                     0.0
                                 ],
                                 "Scale": [
                                     1.0,
-                                    0.9999997615814209,
-                                    0.9999997615814209
+                                    0.9999934434890747,
+                                    0.9999934434890747
                                 ]
                             },
                             {

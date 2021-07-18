@@ -29,12 +29,13 @@ namespace JG
 	{
 	public:
 		virtual void AddMesh(SharedPtr<ISubMesh> subMesh) = 0;
+		virtual void SetBoundingBox(const JBBox& boundingBox) = 0;
 		virtual void SetInputLayout(SharedPtr<InputLayout> inputLayout)     = 0;
 
 
 		virtual SharedPtr<ISubMesh> GetSubMesh(i32 index) = 0;
 		virtual u64 GetSubMeshCount() const = 0;
-
+		virtual const JBBox& GetBoundingBox() const = 0;
 	public:
 		virtual void SetName(const String& name) = 0;
 		virtual const String& GetName()   = 0;

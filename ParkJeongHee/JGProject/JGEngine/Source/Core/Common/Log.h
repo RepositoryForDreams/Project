@@ -65,18 +65,18 @@ namespace JG
 		{
 			return std::forward<T>(arg);
 		}
-		static auto Convert(const wchar_t* arg)
-		{
-			return ws2s(arg);
-		}
-		static auto Convert(String& arg)
-		{
-			return ws2s(arg);
-		}
-		static auto Convert(const String& arg)
-		{
-			return ws2s(arg);
-		}
+		//static auto Convert(const wchar_t* arg)
+		//{
+		//	return ws2s(arg);
+		//}
+		//static auto Convert(String& arg)
+		//{
+		//	return ws2s(arg);
+		//}
+		//static auto Convert(const String& arg)
+		//{
+		//	return ws2s(arg);
+		//}
 	};
 }
 

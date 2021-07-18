@@ -25,7 +25,7 @@ namespace JG
 			{
 				return;
 			}
-			parent->AddNode(TT("Empty"));
+			parent->AddNode("Empty");
 		});
 
 		DeleteGameNode = CreateUniquePtr<Command<GameNode*>>();
@@ -109,7 +109,7 @@ namespace JG
 				inspectorVm->SetTargetObject(mCurrentSelectedNodeInInspector);
 			}
 		}
-		NotifySelectedGameNodeInEditor e;
+		NotifySelectedGameNodeInEditorEvent e;
 		e.SelectedGameNode = node;
 		SendEvent(e);
 

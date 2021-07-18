@@ -28,11 +28,11 @@ namespace JG
 	void GameLogicSystemLayer::Begin()
 	{
 		static bool testopen = false;
-		UIManager::GetInstance().RegisterMainMenuItem(TT("File/Save World %_S"), 0, [&]() {
+		UIManager::GetInstance().RegisterMainMenuItem("File/Save World %_S", 0, [&]() {
 			SaveGameWorld();
 		}, nullptr);
 
-		UIManager::GetInstance().RegisterMainMenuItem(TT("File/Load World"), 0, [&]() {
+		UIManager::GetInstance().RegisterMainMenuItem("File/Load World", 0, [&]() {
 		
 			LoadGameWrold();
 		}, nullptr);
@@ -41,7 +41,7 @@ namespace JG
 		RegisterGlobalGameSystem();
 		mGameWorld = GameObjectFactory::GetInstance().CreateObject<GameWorld>();
 		mGameWorld->SetGlobalGameSystemList(mGameSystemList); 
-		auto camNode = mGameWorld->AddNode(TT("EditorCamera"));
+		auto camNode = mGameWorld->AddNode("EditorCamera");
 		auto editorCam = camNode->AddComponent<EditorCamera>();
 		Camera::SetMainCamera(editorCam);
 		LoadGameWrold();
@@ -55,10 +55,11 @@ namespace JG
 		EventDispatcher eventDispatcher(e);
 		eventDispatcher.Dispatch<RequestGetGameWorldEvent>(EVENT_BIND_FN(&GameLogicSystemLayer::ResponseGetGameWorld));
 		eventDispatcher.Dispatch<NotifyRenderingReadyCompeleteEvent>(EVENT_BIND_FN(&GameLogicSystemLayer::ResponseNotfyRenderingReadyCompelete));
+		eventDispatcher.Dispatch<NotifyEditorSceneOnClickEvent>(EVENT_BIND_FN(&GameLogicSystemLayer::ResponseEditorSceneOnClickEvent));
 	}
 	String GameLogicSystemLayer::GetLayerName()
 	{
-		return TT("GameLogicSystemLayer");
+		return "GameLogicSystemLayer";
 	}
 	bool GameLogicSystemLayer::ResponseGetGameWorld(RequestGetGameWorldEvent& e)
 	{
@@ -81,14 +82,21 @@ namespace JG
 	}
 	bool GameLogicSystemLayer::ResponseEditorSceneOnClickEvent(NotifyEditorSceneOnClickEvent& e)
 	{
+		NotifySelectedGameNodeInEditorEvent pickingEvent;
 		if (mGameWorld != nullptr)
 		{
-
-
-
-
+			pickingEvent.SelectedGameNode = mGameWorld->Picking(e.ClickPos);
 		}
+		else
+		{
+			pickingEvent.SelectedGameNode = nullptr;
+		}
+		Application::GetInstance().SendEvent(pickingEvent);
 		return true;
+	}
+	GameNode* GameLogicSystemLayer::Picking() const
+	{
+		return nullptr;
 	}
 	void GameLogicSystemLayer::RegisterGlobalGameSystem()
 	{
@@ -121,12 +129,12 @@ namespace JG
 			auto progressBar = UIManager::GetInstance().GetPopupUIView<ProgressBarModalView>();
 			if (progressBar->IsOpen() == false)
 			{
-				UIManager::GetInstance().OpenPopupUIView<ProgressBarModalView>(ProgressBarInitData(TT("Save World")));
-				progressBar->Display(TT("Save.. "), 0.5f);
+				UIManager::GetInstance().OpenPopupUIView<ProgressBarModalView>(ProgressBarInitData("Save World"));
+				progressBar->Display("Save.. ", 0.5f);
 
 				handle = Scheduler::GetInstance().ScheduleAsync([&](void* data)
 				{
-					auto savePath = CombinePath(Application::GetAssetPath(), TT("testGameWorld")) + JG_ASSET_FORMAT;
+					auto savePath = CombinePath(Application::GetAssetPath(),"testGameWorld") + JG_ASSET_FORMAT;
 				
 					if (mGameWorld != nullptr)
 					{
@@ -149,7 +157,7 @@ namespace JG
 				if (handle->GetState() == EScheduleState::Compelete)
 				{
 					auto progressBar = UIManager::GetInstance().GetPopupUIView<ProgressBarModalView>();
-					progressBar->Display(TT("Compete"), 1.0f);
+					progressBar->Display("Compete", 1.0f);
 
 
 					handle->Reset();
@@ -188,12 +196,12 @@ namespace JG
 			
 			if (progressBar->IsOpen() == false)
 			{
-				UIManager::GetInstance().OpenPopupUIView<ProgressBarModalView>(ProgressBarInitData(TT("Load World")));
-				progressBar->Display(TT("Load.. "), 0.5f);
+				UIManager::GetInstance().OpenPopupUIView<ProgressBarModalView>(ProgressBarInitData("Load World"));
+				progressBar->Display("Load.. ", 0.5f);
 
 				handle = Scheduler::GetInstance().ScheduleAsync([&](void* data)
 				{
-					auto loadPath = CombinePath(Application::GetAssetPath(), TT("testGameWorld")) + JG_ASSET_FORMAT;
+					auto loadPath = CombinePath(Application::GetAssetPath(), "testGameWorld") + JG_ASSET_FORMAT;
 					auto json = CreateSharedPtr<Json>();
 					if (Json::Read(loadPath, json) == true)
 					{
@@ -227,7 +235,7 @@ namespace JG
 					if (is_LoadSucess)
 					{
 						auto progressBar = UIManager::GetInstance().GetPopupUIView<ProgressBarModalView>();
-						progressBar->Display(TT("Compete"), 1.0f);
+						progressBar->Display("Compete", 1.0f);
 
 						oldGameWorld = mGameWorld;
 						mGameWorld = newGameWorld;
@@ -260,7 +268,7 @@ namespace JG
 					else
 					{
 						auto progressBar = UIManager::GetInstance().GetPopupUIView<ProgressBarModalView>();
-						progressBar->Display(TT("Failed"), 1.0f);
+						progressBar->Display("Failed", 1.0f);
 						Scheduler::GetInstance().ScheduleOnce(0.1f, 0, [&]()->EScheduleResult
 						{
 							auto progressBar = UIManager::GetInstance().GetPopupUIView<ProgressBarModalView>();

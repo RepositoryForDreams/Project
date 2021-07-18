@@ -67,6 +67,11 @@ namespace JG
 		mSubMeshList.push_back(subMesh);
 	}
 
+	void DirectX12Mesh::SetBoundingBox(const JBBox& boundingBox)
+	{
+		mBoundingBox = boundingBox;
+	}
+
 	void DirectX12Mesh::SetInputLayout(SharedPtr<InputLayout> inputLayout)
 	{
 		mInputLayout = inputLayout;
@@ -81,6 +86,11 @@ namespace JG
 	u64 DirectX12Mesh::GetSubMeshCount() const
 	{
 		return mSubMeshList.size();
+	}
+
+	const JBBox& DirectX12Mesh::GetBoundingBox() const
+	{
+		return mBoundingBox;
 	}
 
 

@@ -21,7 +21,7 @@ namespace JG
 		virtual ~KeyPressedEvent() override  {}
 		virtual String ToString() const override
 		{
-			return TT("KeyPressed : ") + KeyCodeToString(KeyCode);
+			return "KeyPressed : " + KeyCodeToString(KeyCode);
 		}
 
 		
@@ -34,7 +34,7 @@ namespace JG
 		virtual ~KeyReleasedEvent() override  {}
 		virtual String ToString() const override
 		{
-			return TT("KeyReleased : ") + KeyCodeToString(KeyCode);
+			return "KeyReleased : " + KeyCodeToString(KeyCode);
 		}
 	};
 
@@ -46,7 +46,7 @@ namespace JG
 		virtual ~KeyTypingEvent() override {}
 		virtual String ToString() const override
 		{
-			return TT("KeyTyping : ") + Key;
+			return "KeyTyping : " + Key;
 		}
 	public:
 		wchar Key;

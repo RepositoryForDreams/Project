@@ -26,12 +26,12 @@ namespace JG
 
 			ImGui::BeginChild("##ComponentList", ImVec2(0, 600.0f), true, ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_NoMove);
 
-			FindComponentTypeList(s2ws(buf));
+			FindComponentTypeList(buf);
 			bool _bool = false;
 			for (auto& type : mFilteredTypeList)
 			{
-				auto name = ReplaceAll(type, TT("JG::"), TT(""));
-				if (ImGui::Selectable(ws2s(name).c_str(), &_bool))
+				auto name = ReplaceAll(type, "JG::", "");
+				if (ImGui::Selectable(name.c_str(), &_bool))
 				{
 					mSelectedComponentType = type;
 					ImGui::CloseCurrentPopup();
@@ -69,7 +69,7 @@ namespace JG
 				{
 					mFilteredTypeList.insert(type.GetName());
 				}
-				auto originName = ReplaceAll(type.GetName(), TT("JG::"), TT(""));
+				auto originName = ReplaceAll(type.GetName(), "JG::", "");
 				auto filterName = filter;
 
 				u64 pos = originName.find(filterName);

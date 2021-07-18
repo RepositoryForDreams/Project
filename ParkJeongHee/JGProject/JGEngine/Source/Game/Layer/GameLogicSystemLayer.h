@@ -22,12 +22,13 @@ namespace JG
 		virtual void Destroy() override;
 
 		virtual void OnEvent(IEvent& e) override;
-
 		virtual String GetLayerName() override;
 	public:
 		bool ResponseGetGameWorld(RequestGetGameWorldEvent& e);
 		bool ResponseNotfyRenderingReadyCompelete(NotifyRenderingReadyCompeleteEvent& e);
 		bool ResponseEditorSceneOnClickEvent(NotifyEditorSceneOnClickEvent& e);
+	public:
+		GameNode* Picking() const;
 	private:
 		void RegisterGlobalGameSystem();
 		void RegisterGameObjectType();

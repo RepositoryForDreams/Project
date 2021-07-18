@@ -3,6 +3,14 @@
     "Asset": {
         "Name": "Cone",
         "IsSkinned": false,
+        "BoundingBox": [
+            -1.0,
+            -1.0,
+            -1.0,
+            1.0,
+            1.0,
+            1.0
+        ],
         "SubMeshs": [
             {
                 "Name": "Cone",

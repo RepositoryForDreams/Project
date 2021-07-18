@@ -145,7 +145,7 @@ namespace JG
 			for (auto i = 0; i < childCnt; ++i)
 			{
 				auto childVal = childListVal->GetJsonDataFromIndex(i);
-				auto node = AddNode(std::to_wstring(i));
+				auto node = AddNode(std::to_string(i));
 				node->LoadJson(childVal);
 
 			}
@@ -163,12 +163,12 @@ namespace JG
 		ImGui::Text("Name"); ImGui::SameLine();
 
 		char objName[128] = { 0, };
-		strcpy(objName, ws2s(GetName()).c_str());
+		strcpy(objName, GetName().c_str());
 		const float input_width = width * 0.4f;
 		ImGui::SetNextItemWidth(input_width);
 		if (ImGui::InputText(("##GameNode InputName"), objName, 128))
 		{
-			SetName(s2ws(objName));
+			SetName(objName);
 		}
 
 
@@ -181,12 +181,12 @@ namespace JG
 		ImGui::Text("Layer"); ImGui::SameLine();
 		ImGui::SetNextItemWidth(combo_width);
 		ImGui::SameLine(width - combo_width - wpadding);
-		if (ImGui::BeginCombo("##Layer Combo Box", ws2s(mTargetLayer).c_str()))
+		if (ImGui::BeginCombo("##Layer Combo Box", mTargetLayer.c_str()))
 		{
 			GameLayerManager::GetInstance().ForEach([&](const String& layerName)
 			{
 				bool _bool = false;
-				if (ImGui::Selectable(ws2s(layerName).c_str(), &_bool))
+				if (ImGui::Selectable(layerName.c_str(), &_bool))
 				{
 					SetLayer(layerName);
 				}
@@ -202,9 +202,9 @@ namespace JG
 		{
 			bool is_open = true;
 			ImGui::Spacing();
-			String id = com->GetName() + TT("##") + std::to_wstring((ptraddr)com);
+			auto id = com->GetName() + "##" + std::to_string((ptraddr)com);
 			if (ImGui::CollapsingHeader(
-				ws2s(id).c_str(), &is_open, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader) == true)
+				id.c_str(), &is_open, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_CollapsingHeader) == true)
 			{
 				com->OnInspectorGUI();
 			}
@@ -393,6 +393,18 @@ namespace JG
 	{
 		return mTransform;
 	}
+	void GameNode::SetBoundingBox(const JBBox& boundingBox)
+	{
+		if (mBoundingBox == nullptr)
+		{
+			mBoundingBox = CreateUniquePtr<JBBox>();
+		}
+		*mBoundingBox = boundingBox;
+	}
+	const JBBox* GameNode::GetBoundingBox() const
+	{
+		return mBoundingBox.get();
+	}
 	void GameNode::SetLayer(const String& layer)
 	{
 		if (GameLayerManager::GetInstance().IsRegisterLayer(layer) == false)
@@ -411,6 +423,67 @@ namespace JG
 	bool GameNode::IsActive() const
 	{
 		return mIsActive;
+	}
+	GameNode* GameNode::Picking3DRecursive(const JRay& pickingRay)
+	{
+		if (IsActive() == false)
+		{
+			return nullptr;
+		}
+		auto bbox = GetBoundingBox();
+		if (bbox)
+		{
+			auto localRay = pickingRay;
+			auto& invWorld = GetTransform()->GetInvWorldMatrix();
+			localRay.dir    = invWorld.TransformVector(localRay.dir);
+			localRay.origin = invWorld.TransformPoint(localRay.origin);
+
+
+			if (bbox->Intersection(localRay) == true)
+			{
+				return this;
+			}
+		}
+		for (auto& child : mChilds)
+		{
+			auto pickingObj = child->Picking3DRecursive(pickingRay);
+			if (pickingObj != nullptr)
+			{
+				return pickingObj;
+			}
+		}
+		return nullptr;
+	}
+	GameNode* GameNode::Picking2DRecursive(const JVector2& pickingPos)
+	{
+
+		if (IsActive() == false)
+		{
+			return nullptr;
+		}
+		auto bbox = GetBoundingBox();
+		if (bbox)
+		{
+			auto worldMatrix = GetTransform()->GetWorldMatrix();
+			JBBox worldBBox;
+			worldBBox.min = worldMatrix.TransformPoint(bbox->min);
+			worldBBox.max = worldMatrix.TransformPoint(bbox->max);
+			worldBBox.min.z = 0.0f;
+			worldBBox.max.z = 0.0f;
+			if (worldBBox.Contain(JVector3(pickingPos, 0.0f)) == true)
+			{
+				return this;
+			}
+		}
+		for (auto& child : mChilds)
+		{
+			auto pickingObj = child->Picking2DRecursive(pickingPos);
+			if (pickingObj != nullptr)
+			{
+				return pickingObj;
+			}
+		}
+		return nullptr;
 	}
 	void GameNode::DestroyRecursive()
 	{

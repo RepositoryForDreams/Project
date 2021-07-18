@@ -8,6 +8,7 @@ int main(int argc, char** argv);
 
 namespace JG
 {
+	class Timer;
 	struct ApplicaionProps
 	{
 		EWindowPlatform WindowPlatform;
@@ -26,6 +27,8 @@ namespace JG
 		UniquePtr<IGraphicsAPI> mGraphcisAPI;
 
 		Queue<UniquePtr<IEvent>> mEventQueue;
+
+		SharedPtr<Timer> mAppTimer;
 
 		JVector2Uint mDisplaySize;
 		bool mIsRunning = true;
@@ -57,6 +60,7 @@ namespace JG
 	public:
 		IWindow*	  GetWindow() const;
 		IGraphicsAPI* GetGraphicsAPI() const;
+		const Timer* GetAppTimer() const;
 		JVector2Uint  GetDisplaySize() const;
 	public:
 		template<class T>

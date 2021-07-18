@@ -33,7 +33,7 @@ namespace JG
 		void OnClick(const JVector2& pos, int mouseBt);
 		//void OnClick(JVector2 pos);
 	private:
-		bool ResponseSelectedGameNodeInEditor(NotifySelectedGameNodeInEditor& e);
-		bool NotifyChangeMainSceneTexture(NotifyChangeMainSceneTextureEvent& e);
+		bool ResponseSelectedGameNodeInEditor(NotifySelectedGameNodeInEditorEvent& e);
+		bool ResponseChangeMainSceneTexture(NotifyChangeMainSceneTextureEvent& e);
 	};
 }

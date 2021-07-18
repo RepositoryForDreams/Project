@@ -30,7 +30,7 @@ namespace JG
 		if (mMainMenuItemRootNode == nullptr)
 		{
 			mMainMenuItemRootNode = CreateUniquePtr<MenuItemNode>();
-			mMainMenuItemRootNode->Name = TT("Root");
+			mMainMenuItemRootNode->Name = "Root";
 			mMainMenuItemRootNode->IsOpen = true;
 		}
 		RegisterMenuItem(mMainMenuItemRootNode.get(), menuPath, priority, action, enableAction);
@@ -225,7 +225,7 @@ namespace JG
 		ExtractPathAndShortcut(menuPath, &path, &shortCut);
 
 		// Path
-		u64  pos = path.find_first_of(TT("/"));
+		u64  pos = path.find_first_of("/");
 		MenuItemNode* currRootNode = nullptr;
 		if (pos == String::npos)
 		{
@@ -253,7 +253,7 @@ namespace JG
 		u64    start = 0;
 		while (true)
 		{
-			u64  end = path.find_first_of(TT("/"));
+			u64  end = path.find_first_of("/");
 			if (end == String::npos)
 			{
 				currRootNode = RegisterMenuNode(currRootNode, path, priority);
@@ -310,7 +310,7 @@ namespace JG
 		}
 		else
 		{
-			u64 midPos = menuPath.find_last_of(TT(" "));
+			u64 midPos = menuPath.find_last_of(" ");
 			if (out_path)
 			{
 				*out_path = menuPath.substr(0, midPos);
@@ -318,9 +318,9 @@ namespace JG
 			if (out_shortCut)
 			{
 				auto short_cut = menuPath.substr(midPos + 1, menuPath.length() - midPos);
-				short_cut = ReplaceAll(short_cut, TT(" "), TT(""));
+				short_cut = ReplaceAll(short_cut, " ", "");
 
-				wchar splitToken = TT('_');
+				char splitToken = '_';
 				u64 splitPos = short_cut.find_first_of(splitToken);
 				if (splitPos != String::npos)
 				{
@@ -329,15 +329,15 @@ namespace JG
 
 					if (token.find(CTRL_SHORTCUT_TOKEN) != String::npos)
 					{
-						*out_shortCut += TT("Ctrl + ");
+						*out_shortCut += "Ctrl + ";
 					}
 					if (token.find(SHIFT_SHORTCUT_TOKEN) != String::npos)
 					{
-						*out_shortCut += TT("Shift + ");
+						*out_shortCut += "Shift + ";
 					}
 					if (token.find(ALT_SHORTCUT_TOKEN) != String::npos)
 					{
-						*out_shortCut += TT("Alt + ");
+						*out_shortCut += "Alt + ";
 					}
 
 
@@ -353,7 +353,7 @@ namespace JG
 							}
 							else
 							{
-								*out_shortCut += short_cut.substr(0, pos) + TT(" + ");
+								*out_shortCut += short_cut.substr(0, pos) + " + ";
 								short_cut = short_cut.substr(pos + 1);
 							}
 						}

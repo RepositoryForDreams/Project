@@ -94,44 +94,44 @@ namespace JG
 
 
 		mRenderItemPriority[JGTYPE(Standard2DRenderItem)] = (u64)ERenderItemPriority::_2D;
-		mStandardDefaultMaterial = IMaterial::Create(TT("DefaultMaterial"), ShaderLibrary::Get(ShaderScript::Standard3DShader));
+		mStandardDefaultMaterial = IMaterial::Create("DefaultMaterial", ShaderLibrary::Get(ShaderScript::Standard3DShader));
 
 
 		// юс╫ц
-		String rawAssetPath = CombinePath(Application::GetAssetPath(), TT("RawResources"));
-		String outputPath = CombinePath(Application::GetAssetPath(), TT("Resources"));
+		String rawAssetPath = CombinePath(Application::GetAssetPath(), "RawResources");
+		String outputPath = CombinePath(Application::GetAssetPath(), "Resources");
 
 		for (auto& iter : fs::recursive_directory_iterator(rawAssetPath))
 		{
-			auto extenstion = iter.path().extension().wstring();
-			if (extenstion == TT(".fbx"))
+			auto extenstion = iter.path().extension().string();
+			if (extenstion == ".fbx")
 			{
 				FBXAssetImportSettings settings;
-				settings.AssetPath = iter.path();
+				settings.AssetPath = iter.path().string();
 				settings.OutputPath = outputPath;
 				auto result = AssetImporter::Import(settings);
 				if (result == EAssetImportResult::Success)
 				{
-					JG_CORE_INFO("Success Import {0}", iter.path().wstring());
+					JG_CORE_INFO("Success Import {0}", iter.path().string());
 				}
 				else
 				{
-					JG_CORE_INFO("Fail Import {0}", iter.path().wstring());
+					JG_CORE_INFO("Fail Import {0}", iter.path().string());
 				}
 			}
-			if (extenstion == TT(".png") || extenstion == TT(".jpg") || extenstion == TT(".TGA"))
+			if (extenstion == ".png" || extenstion == ".jpg" || extenstion == ".TGA")
 			{
 				TextureAssetImportSettings settings;
-				settings.AssetPath = iter.path();
+				settings.AssetPath = iter.path().string();
 				settings.OutputPath = outputPath;
 				auto result = AssetImporter::Import(settings);
 				if (result == EAssetImportResult::Success)
 				{
-					JG_CORE_INFO("Success Import {0}", iter.path().wstring());
+					JG_CORE_INFO("Success Import {0}", iter.path().string());
 				}
 				else
 				{
-					JG_CORE_INFO("Fail Import {0}", iter.path().wstring());
+					JG_CORE_INFO("Fail Import {0}", iter.path().string());
 				}
 			}
 
@@ -157,7 +157,7 @@ namespace JG
 
 	String GraphicsSystemLayer::GetLayerName()
 	{
-		return TT("GraphicsSystemLayer");
+		return "GraphicsSystemLayer";
 	}
 
 	bool GraphicsSystemLayer::ResponsePushRenderItem(RequestPushRenderItemEvent& e)
@@ -302,14 +302,14 @@ namespace JG
 
 				for (auto& t : mMainCamera->TargetTextures)
 				{
-					t = ITexture::Create(mainCam->GetName() + TT("TargetTexture"), mainTexInfo);
+					t = ITexture::Create(mainCam->GetName() + "TargetTexture", mainTexInfo);
 				}
 
 				mainTexInfo.Format = ETextureFormat::D24_Unorm_S8_Uint;
 				mainTexInfo.Flags  = ETextureFlags::Allow_DepthStencil;
 				for (auto& t : mMainCamera->TargetDepthTextures)
 				{
-					t = ITexture::Create(mainCam->GetName() + TT("TargetDepthTexture"), mainTexInfo);
+					t = ITexture::Create(mainCam->GetName() + "TargetDepthTexture", mainTexInfo);
 				}
 			}
 
@@ -356,7 +356,7 @@ namespace JG
 	{
 		{
 			auto shader = IShader::Create(ShaderScript::Standard2DShader,
-				TT(R"(
+				R"(
 		SamplerState gPointSampler
 		{
 			Template = Point_Wrap
@@ -398,13 +398,13 @@ namespace JG
 		{
 			return gTexture[pin.textureIndex].Sample(gPointSampler, pin.tex) * pin.color;
 		}
-		)"), EShaderFlags::Allow_VertexShader | EShaderFlags::Allow_PixelShader);
+		)", EShaderFlags::Allow_VertexShader | EShaderFlags::Allow_PixelShader);
 			ShaderLibrary::RegisterShader(shader);
 			
 		}
 		{
 			auto shader = IShader::Create(ShaderScript::Standard3DShader,
-				TT(R"(
+				R"(
 		SamplerState gPointSampler
 		{
 			Template = Point_Wrap
@@ -486,7 +486,7 @@ namespace JG
 
 			return saturate(output.albedo * NdotL + ambientLight);
 		}
-		)"), EShaderFlags::Allow_VertexShader | EShaderFlags::Allow_PixelShader);
+		)", EShaderFlags::Allow_VertexShader | EShaderFlags::Allow_PixelShader);
 			ShaderLibrary::RegisterShader(shader);
 		}
 	}

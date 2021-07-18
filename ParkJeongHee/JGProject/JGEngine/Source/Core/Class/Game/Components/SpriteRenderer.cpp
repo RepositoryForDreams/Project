@@ -17,7 +17,7 @@ namespace JG
 		mSpriteRI->WorldMatrix = JMatrix::Identity();
 		mSpriteRI->Color = Color::White();
 		auto assetPath = Application::GetAssetPath();
-		mSpritePath = CombinePath(assetPath, TT("Resources/NullTexture.jgasset"));
+		mSpritePath = CombinePath(assetPath, "Resources/NullTexture.jgasset");
 	}
 	void SpriteRenderer::Awake()
 	{
@@ -91,7 +91,19 @@ namespace JG
 			auto info = mAsset->Get()->GetTextureInfo();
 			mSpriteRI->Texture = mAsset->Get();
 			f32 adjust = (f32)info.PixelPerUnit / (f32)GameSettings::GetUnitSize();
-			mSpriteRI->WorldMatrix = JMatrix::Scaling(JVector3(info.Width * adjust, info.Height * adjust, 1)) * mSpriteRI->WorldMatrix;
+			f32 spriteWidth  = info.Width  * adjust;
+			f32 spriteHeight = info.Height * adjust;
+
+			if (mSpriteSize.x != spriteWidth || mSpriteSize.y != spriteHeight)
+			{
+				JBBox bbox;
+				bbox.min = JVector3(-spriteWidth * 0.5f, -spriteHeight * 0.5f, 0.0f);
+				bbox.max = JVector3(spriteWidth * 0.5f, spriteHeight * 0.5f, 0.0f);
+				GetOwner()->SetBoundingBox(bbox);
+				mSpriteSize = JVector2(spriteWidth, spriteHeight);
+				
+			}
+			mSpriteRI->WorldMatrix = JMatrix::Scaling(JVector3(spriteWidth, spriteHeight, 1)) * mSpriteRI->WorldMatrix;
 		}
 		return mSpriteRI;
 	}
@@ -107,9 +119,8 @@ namespace JG
 		
 		ImGui::ColorEdit4("Color", (float*)(&mSpriteRI->Color));
 		
-		auto fileName = ws2s(mSpritePath);
-		fs::path p = fileName;
-		fileName = p.filename().string();
+		fs::path p = mSpritePath;
+		auto fileName = p.filename().string();
 		ImGui::InputText("Texture", fileName.data(), ImGuiInputTextFlags_ReadOnly);
 		if (ImGui::BeginDragDropTarget() && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
 		{

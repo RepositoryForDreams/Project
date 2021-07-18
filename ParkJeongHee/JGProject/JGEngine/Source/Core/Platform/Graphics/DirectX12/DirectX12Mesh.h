@@ -26,14 +26,15 @@ namespace JG
 
 		List<SharedPtr<ISubMesh>> mSubMeshList;
 		SharedPtr<InputLayout> mInputLayout;
-
+		JBBox mBoundingBox;
 		String mName;
 	public:
 		virtual void AddMesh(SharedPtr<ISubMesh> subMesh) override;
+		virtual void SetBoundingBox(const JBBox& boundingBox) override;
 		virtual void SetInputLayout(SharedPtr<InputLayout> inputLayout) override;
 		virtual SharedPtr<ISubMesh> GetSubMesh(i32 index) override;
 		virtual u64 GetSubMeshCount() const override;
-
+		virtual const JBBox& GetBoundingBox() const override;
 
 		virtual void SetName(const String& name) override;
 		virtual const String& GetName() override;

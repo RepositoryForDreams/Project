@@ -23,10 +23,10 @@ namespace JG
 	{
 		switch (format)
 		{
-		case ETextureFormat::R8G8B8A8_Unorm: return TT("R8G8B8A8_Unorm");
-		case ETextureFormat::R16G16B16A16_Unorm: return TT("R16G16B16A16_Unorm");
-		case ETextureFormat::D24_Unorm_S8_Uint: return TT("D24_Unorm_S8_Uint");
-		default: return TT("None");
+		case ETextureFormat::R8G8B8A8_Unorm: return "R8G8B8A8_Unorm";
+		case ETextureFormat::R16G16B16A16_Unorm: return "R16G16B16A16_Unorm";
+		case ETextureFormat::D24_Unorm_S8_Uint: return "D24_Unorm_S8_Uint";
+		default: return "None";
 		}
 	}
 
@@ -130,43 +130,43 @@ namespace JG
 	{
 		switch (type)
 		{
-		case EShaderDataType::_bool:	return TT("bool");
-		case EShaderDataType::_int:		return TT("int");
-		case EShaderDataType::_int2:	return TT("int2");
-		case EShaderDataType::_int3:	return TT("int3");
-		case EShaderDataType::_int4:	return TT("int4");
-		case EShaderDataType::_uint:	return TT("uint");
-		case EShaderDataType::_uint2:	return TT("uint2");
-		case EShaderDataType::_uint3:	return TT("uint3");
-		case EShaderDataType::_uint4:	return TT("uin4");
-		case EShaderDataType::_float:	return TT("float");
-		case EShaderDataType::_float2:	return TT("float2");
-		case EShaderDataType::_float3:	return TT("float3");
-		case EShaderDataType::_float4:   return TT("float4");
-		case EShaderDataType::_float3x3: return TT("float3x3");
-		case EShaderDataType::_float4x4: return TT("float4x4");
+		case EShaderDataType::_bool:	return "bool";
+		case EShaderDataType::_int:		return "int";
+		case EShaderDataType::_int2:	return "int2";
+		case EShaderDataType::_int3:	return "int3";
+		case EShaderDataType::_int4:	return "int4";
+		case EShaderDataType::_uint:	return "uint";
+		case EShaderDataType::_uint2:	return "uint2";
+		case EShaderDataType::_uint3:	return "uint3";
+		case EShaderDataType::_uint4:	return "uin4";
+		case EShaderDataType::_float:	return "float";
+		case EShaderDataType::_float2:	return "float2";
+		case EShaderDataType::_float3:	return "float3";
+		case EShaderDataType::_float4:   return "float4";
+		case EShaderDataType::_float3x3: return "float3x3";
+		case EShaderDataType::_float4x4: return "float4x4";
 		default:
 			JG_CORE_CRITICAL("not supported ShaderDataType");
-			return TT("unknown");
+			return "unknown";
 		}
 	}
 	inline EShaderDataType  StringToShaderDataType(const String& type)
 	{
-		if (type == TT("bool")) return EShaderDataType::_bool;
-		else if (type == TT("int")) return EShaderDataType::_int;
-		else if (type == TT("int2")) return EShaderDataType::_int2;
-		else if (type == TT("int3")) return EShaderDataType::_int3;
-		else if (type == TT("int4")) return EShaderDataType::_int4;
-		else if (type == TT("uint")) return EShaderDataType::_uint;
-		else if (type == TT("uint2")) return EShaderDataType::_uint2;
-		else if (type == TT("uint3")) return EShaderDataType::_uint3;
-		else if (type == TT("uint4")) return EShaderDataType::_uint4;
-		else if (type == TT("float")) return EShaderDataType::_float;
-		else if (type == TT("float2")) return EShaderDataType::_float2;
-		else if (type == TT("float3")) return EShaderDataType::_float3;
-		else if (type == TT("float4")) return EShaderDataType::_float4;
-		else if (type == TT("float3x3")) return EShaderDataType::_float3x3;
-		else if (type == TT("float4x4")) return EShaderDataType::_float4x4;
+		if (type == "bool") return EShaderDataType::_bool;
+		else if (type == "int") return EShaderDataType::_int;
+		else if (type == "int2") return EShaderDataType::_int2;
+		else if (type == "int3") return EShaderDataType::_int3;
+		else if (type == "int4") return EShaderDataType::_int4;
+		else if (type == "uint") return EShaderDataType::_uint;
+		else if (type == "uint2") return EShaderDataType::_uint2;
+		else if (type == "uint3") return EShaderDataType::_uint3;
+		else if (type == "uint4") return EShaderDataType::_uint4;
+		else if (type == "float") return EShaderDataType::_float;
+		else if (type == "float2") return EShaderDataType::_float2;
+		else if (type == "float3") return EShaderDataType::_float3;
+		else if (type == "float4") return EShaderDataType::_float4;
+		else if (type == "float3x3") return EShaderDataType::_float3x3;
+		else if (type == "float4x4") return EShaderDataType::_float4x4;
 		else
 		{
 			return EShaderDataType::unknown;
@@ -195,21 +195,21 @@ namespace JG
 
 	inline ESamplerStateTemplate StringToSamplerStateTemplate(const String& _template)
 	{
-		if (_template == TT("Point_Wrap")) return ESamplerStateTemplate::Point_Wrap;
-		else if (_template == TT("Point_Clamp")) return ESamplerStateTemplate::Point_Clamp;
-		else if (_template == TT("Point_Border")) return ESamplerStateTemplate::Point_Border;
-		else if (_template == TT("Point_Mirror")) return ESamplerStateTemplate::Point_Mirror;
-		else if (_template == TT("Point_MirrorOnce")) return ESamplerStateTemplate::Point_MirrorOnce;
-		else if (_template == TT("Linear_Wrap")) return ESamplerStateTemplate::Linear_Wrap;
-		else if (_template == TT("Linear_Clamp")) return ESamplerStateTemplate::Linear_Clamp;
-		else if (_template == TT("Linear_Border")) return ESamplerStateTemplate::Linear_Border;
-		else if (_template == TT("Linear_Mirror")) return ESamplerStateTemplate::Linear_Mirror;
-		else if (_template == TT("Linear_MirrorOnce")) return ESamplerStateTemplate::Linear_MirrorOnce;
-		else if (_template == TT("Anisotropic_Wrap")) return ESamplerStateTemplate::Anisotropic_Wrap;
-		else if (_template == TT("Anisotropic_Clamp")) return ESamplerStateTemplate::Anisotropic_Clamp;
-		else if (_template == TT("Anisotropic_Border")) return ESamplerStateTemplate::Anisotropic_Border;
-		else if (_template == TT("Anisotropic_Mirror")) return ESamplerStateTemplate::Anisotropic_Mirror;
-		else if (_template == TT("Anisotropic_MirrorOnce")) return ESamplerStateTemplate::Anisotropic_MirrorOnce;
+		if (_template == "Point_Wrap") return ESamplerStateTemplate::Point_Wrap;
+		else if (_template == "Point_Clamp") return ESamplerStateTemplate::Point_Clamp;
+		else if (_template == "Point_Border") return ESamplerStateTemplate::Point_Border;
+		else if (_template == "Point_Mirror") return ESamplerStateTemplate::Point_Mirror;
+		else if (_template == "Point_MirrorOnce") return ESamplerStateTemplate::Point_MirrorOnce;
+		else if (_template == "Linear_Wrap") return ESamplerStateTemplate::Linear_Wrap;
+		else if (_template == "Linear_Clamp") return ESamplerStateTemplate::Linear_Clamp;
+		else if (_template == "Linear_Border") return ESamplerStateTemplate::Linear_Border;
+		else if (_template == "Linear_Mirror") return ESamplerStateTemplate::Linear_Mirror;
+		else if (_template == "Linear_MirrorOnce") return ESamplerStateTemplate::Linear_MirrorOnce;
+		else if (_template == "Anisotropic_Wrap") return ESamplerStateTemplate::Anisotropic_Wrap;
+		else if (_template == "Anisotropic_Clamp") return ESamplerStateTemplate::Anisotropic_Clamp;
+		else if (_template == "Anisotropic_Border") return ESamplerStateTemplate::Anisotropic_Border;
+		else if (_template == "Anisotropic_Mirror") return ESamplerStateTemplate::Anisotropic_Mirror;
+		else if (_template == "Anisotropic_MirrorOnce") return ESamplerStateTemplate::Anisotropic_MirrorOnce;
 		else return ESamplerStateTemplate::Unknown;
 	}
 
@@ -305,7 +305,7 @@ namespace JG
 	{
 		JGCLASS
 	public:
-		String  TargetLayer  = TT("Default");
+		String  TargetLayer  = "Default";
 		JMatrix WorldMatrix = JMatrix::Identity();
 	public:
 		virtual ~IRenderItem() = default;
@@ -316,7 +316,7 @@ namespace JG
 		JGCLASS
 	public:
 		Color  Color = Color::White();
-		String SortingLayer = TT("Default");
+		String SortingLayer = "Default";
 		i64    SortingOrder = 0;
 		SharedPtr<ITexture> Texture = nullptr;
 	public:
@@ -341,100 +341,100 @@ namespace JG
 
 	namespace ShaderScript
 	{
-		constexpr wchar* Standard2DShader = TT("Standard2DShader");
-		constexpr wchar* Standard3DShader = TT("Standard3DShader");
+		constexpr char* Standard2DShader = "Standard2DShader";
+		constexpr char* Standard3DShader = "Standard3DShader";
 		namespace Standard2D
 		{
-			constexpr wchar* ViewProj = TT("gViewProj");
-			constexpr wchar* Texture  = TT("gTexture");
+			constexpr char* ViewProj = "gViewProj";
+			constexpr char* Texture  = "gTexture";
 		}
 		namespace Standard3D
 		{
-			constexpr wchar* ViewProj = TT("gViewProj");
-			constexpr wchar* World    = TT("gWorld");
+			constexpr char* ViewProj = "gViewProj";
+			constexpr char* World    = "gWorld";
 		}
 
 	}
 	namespace HLSL
 	{
-		using token = wchar;
+		using token = char;
 		namespace Token
 		{
-			constexpr token* Struct                 = TT("struct ");
-			constexpr token* CBuffer                = TT("cbuffer ");
-			constexpr token* StructuredBuffer       = TT("StructuredBuffer");
-			constexpr token* Texture2D              = TT("Texture2D ");
-			constexpr token* RWStructuredBuffer		= TT("RWStructuredBuffer");
-			constexpr token* RWTexture2D			= TT("RWTexture2D ");
-			constexpr token* SamplerState           = TT("SamplerState ");
-			constexpr token* SamplerComparisonState = TT("SamplerComparisonState ");
+			constexpr token* Struct                 = "struct ";
+			constexpr token* CBuffer                = "cbuffer ";
+			constexpr token* StructuredBuffer       = "StructuredBuffer";
+			constexpr token* Texture2D              = "Texture2D ";
+			constexpr token* RWStructuredBuffer		= "RWStructuredBuffer";
+			constexpr token* RWTexture2D			= "RWTexture2D ";
+			constexpr token* SamplerState           = "SamplerState ";
+			constexpr token* SamplerComparisonState = "SamplerComparisonState ";
 			
 			namespace SamplerStateElement
 			{
-				constexpr token* Template = TT("Template");
-				constexpr token* Min = TT("Min");
-				constexpr token* Mag = TT("Mag");
-				constexpr token* Mip = TT("Mip");
-				constexpr token* AddressU = TT("AddressU");
-				constexpr token* AddressV = TT("AddressV");
-				constexpr token* AddressW = TT("AddressW");
-				constexpr token* ComparisonFunc = TT("ComparisonFunc");
-				constexpr token* BorderColor = TT("BorderColor");
-				constexpr token* MinLOD = TT("MinLOD");
-				constexpr token* MaxLOD = TT("MaxLOD");
-				constexpr token* MaxAnisotropy = TT("MaxAnisotropy");
-				constexpr token* MipLODBias = TT("MipLODBias");
+				constexpr token* Template = "Template";
+				constexpr token* Min = "Min";
+				constexpr token* Mag = "Mag";
+				constexpr token* Mip = "Mip";
+				constexpr token* AddressU = "AddressU";
+				constexpr token* AddressV = "AddressV";
+				constexpr token* AddressW = "AddressW";
+				constexpr token* ComparisonFunc = "ComparisonFunc";
+				constexpr token* BorderColor = "BorderColor";
+				constexpr token* MinLOD = "MinLOD";
+				constexpr token* MaxLOD = "MaxLOD";
+				constexpr token* MaxAnisotropy = "MaxAnisotropy";
+				constexpr token* MipLODBias = "MipLODBias";
 
 			}
 			namespace SamplerSatateFilter
 			{
-				constexpr token* Point = TT("Point");
-				constexpr token* Linear = TT("Linear");
-				constexpr token* Anisotropic = TT("Anisotropic");
+				constexpr token* Point = "Point";
+				constexpr token* Linear = "Linear";
+				constexpr token* Anisotropic = "Anisotropic";
 
 			}
 			namespace SamplerSatateAddressMode
 			{
-				constexpr token* Wrap = TT("Wrap");
-				constexpr token* Mirror = TT("Mirror");
-				constexpr token* Clamp = TT("Clamp");
-				constexpr token* Border = TT("Border");
-				constexpr token* MirrorOnce = TT("MirrorOnce");
+				constexpr token* Wrap   = "Wrap";
+				constexpr token* Mirror = "Mirror";
+				constexpr token* Clamp  = "Clamp";
+				constexpr token* Border = "Border";
+				constexpr token* MirrorOnce = "MirrorOnce";
 			}
 			namespace SamplerStateComparisonFunc
 			{
-				constexpr token* Never = TT("Never");
-				constexpr token* Less = TT("Less");
-				constexpr token* Equal = TT("Equal");
-				constexpr token* LessEqual = TT("LessEqual");
-				constexpr token* Greater = TT("Greater");
-				constexpr token* NotEqual = TT("NotEqual");
-				constexpr token* GreaterEqual = TT("GreaterEqual");
-				constexpr token* Always = TT("Always");
+				constexpr token* Never = "Never";
+				constexpr token* Less  = "Less";
+				constexpr token* Equal = "Equal";
+				constexpr token* LessEqual = "LessEqual";
+				constexpr token* Greater = "Greater";
+				constexpr token* NotEqual = "NotEqual";
+				constexpr token* GreaterEqual = "GreaterEqual";
+				constexpr token* Always = "Always";
 			}
 			namespace SamplerStateBorderColor
 			{
-				constexpr token* TransparentBlack = TT("TransparentBlack");
-				constexpr token* OpaqueBlack = TT("OpaqueBlack");
-				constexpr token* OpaqueWhite = TT("OpaqueWhite");
+				constexpr token* TransparentBlack = "TransparentBlack";
+				constexpr token* OpaqueBlack = "OpaqueBlack";
+				constexpr token* OpaqueWhite = "OpaqueWhite";
 			}
 
 
 		}
 
 
-		constexpr wchar* VSEntry = TT("vs_main");
-		constexpr wchar* DSEntry = TT("ds_main");
-		constexpr wchar* HSEntry = TT("hs_main");
-		constexpr wchar* GSEntry = TT("gs_main");
-		constexpr wchar* PSEntry = TT("ps_main");
-		constexpr wchar* CSEntry = TT("main");
-		constexpr wchar* VSTarget = TT("vs_5_1");
-		constexpr wchar* DSTarget = TT("ds_5_1");
-		constexpr wchar* HSTarget = TT("hs_5_1");
-		constexpr wchar* GSTarget = TT("gs_5_1");
-		constexpr wchar* PSTarget = TT("ps_5_1");
-		constexpr wchar* CSTarget = TT("cs_5_1");
+		constexpr char* VSEntry  = "vs_main";
+		constexpr char* DSEntry  = "ds_main";
+		constexpr char* HSEntry  = "hs_main";
+		constexpr char* GSEntry  = "gs_main";
+		constexpr char* PSEntry  = "ps_main";
+		constexpr char* CSEntry  = "main";
+		constexpr char* VSTarget = "vs_5_1";
+		constexpr char* DSTarget = "ds_5_1";
+		constexpr char* HSTarget = "hs_5_1";
+		constexpr char* GSTarget = "gs_5_1";
+		constexpr char* PSTarget = "ps_5_1";
+		constexpr char* CSTarget = "cs_5_1";
 
 
 
@@ -459,31 +459,31 @@ namespace JG
 		};
 		inline String GetHLSLElementToken(EHLSLElement)
 		{
-			return TT("");
+			return "";
 		}
 
 		inline String ShaderDataTypeToHLSLCode(EShaderDataType type)
 		{
 			switch (type)
 			{
-			case EShaderDataType::_bool:	return TT("bool");
-			case EShaderDataType::_int:		return TT("int");
-			case EShaderDataType::_int2:	return TT("int2");
-			case EShaderDataType::_int3:	return TT("int3");
-			case EShaderDataType::_int4:	return TT("int4");
-			case EShaderDataType::_uint:	return TT("uint");
-			case EShaderDataType::_uint2:	return TT("uint2");
-			case EShaderDataType::_uint3:	return TT("uint3");
-			case EShaderDataType::_uint4:	return TT("uin4");
-			case EShaderDataType::_float:	return TT("float");
-			case EShaderDataType::_float2:	return TT("float2");
-			case EShaderDataType::_float3:	return TT("float3");
-			case EShaderDataType::_float4:   return TT("float4");
-			case EShaderDataType::_float3x3: return TT("float3x3");
-			case EShaderDataType::_float4x4: return TT("float4x4");
+			case EShaderDataType::_bool:	return "bool";
+			case EShaderDataType::_int:		return "int";
+			case EShaderDataType::_int2:	return "int2";
+			case EShaderDataType::_int3:	return "int3";
+			case EShaderDataType::_int4:	return "int4";
+			case EShaderDataType::_uint:	return "uint";
+			case EShaderDataType::_uint2:	return "uint2";
+			case EShaderDataType::_uint3:	return "uint3";
+			case EShaderDataType::_uint4:	return "uin4";
+			case EShaderDataType::_float:	return "float";
+			case EShaderDataType::_float2:	return "float2";
+			case EShaderDataType::_float3:	return "float3";
+			case EShaderDataType::_float4:   return "float4";
+			case EShaderDataType::_float3x3: return "float3x3";
+			case EShaderDataType::_float4x4: return "float4x4";
 			default:
 				JG_CORE_CRITICAL("not supported ShaderDataType");
-				return TT("unknown");
+				return "unknown";
 			}
 		}
 

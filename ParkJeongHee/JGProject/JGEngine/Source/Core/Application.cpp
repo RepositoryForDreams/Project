@@ -12,7 +12,7 @@ namespace JG
 {
 	Application* Application::smInstance = nullptr;
 
-	static String gAssetPath = TT("../../../JGGameProject/Project_C/Asset");
+	static String gAssetPath = "../../../JGGameProject/Project_C/Asset";
 
 
 	const String& Application::GetAssetPath()
@@ -77,9 +77,9 @@ namespace JG
 
 			
 			mIsRunning = true;
-			return true;
 		}
-
+		mAppTimer = Timer::Create();
+		mAppTimer->Start();
 		return true;
 	}
 	void Application::Run()
@@ -215,6 +215,10 @@ namespace JG
 	IGraphicsAPI* Application::GetGraphicsAPI() const
 	{
 		return mGraphcisAPI.get();
+	}
+	const Timer* Application::GetAppTimer() const
+	{
+		return mAppTimer.get();
 	}
 	JVector2Uint Application::GetDisplaySize() const
 	{

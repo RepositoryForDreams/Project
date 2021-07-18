@@ -6,6 +6,7 @@
 #include "Graphics/Resource.h"
 #include "Graphics/Material.h"
 #include "Graphics/Shader.h"
+#include "Graphics/Mesh.h"
 #include "Class/UI/UIViewModel/ContentsViewModel.h"
 #include "Class/Game/GameWorld.h"
 
@@ -16,7 +17,7 @@ namespace JG
 	{
 		mStaticRI = CreateSharedPtr<StandardStaticMeshRenderItem>();
 		mStaticRI->Materials.resize(1);
-		mStaticRI->Materials[0] = IMaterial::Create(TT("DefaultMaterial"), ShaderLibrary::Get(ShaderScript::Standard3DShader));
+		mStaticRI->Materials[0] = IMaterial::Create("DefaultMaterial", ShaderLibrary::Get(ShaderScript::Standard3DShader));
 	}
 	void StaticMeshRenderer::Awake()
 	{
@@ -67,6 +68,7 @@ namespace JG
 		if (mMeshAsset != nullptr && mMeshAsset->Get() != nullptr)
 		{
 			mStaticRI->Mesh = mMeshAsset->Get();
+			GetOwner()->SetBoundingBox(mStaticRI->Mesh->GetBoundingBox());
 		}
 
 

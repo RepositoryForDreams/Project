@@ -10,7 +10,7 @@ namespace JG
 {
 	SceneView::SceneView()
 	{
-		UIManager::GetInstance().RegisterMainMenuItem(TT("Windows/SceneView"), 0,
+		UIManager::GetInstance().RegisterMainMenuItem("Windows/SceneView", 0,
 			[&]()
 		{
 			Open();
@@ -37,13 +37,35 @@ namespace JG
 				mCurrentGizmoOperation = ImGuizmo::ROTATE;
 			if (ImGui::IsKeyPressed((int)EKeyCode::E)) 
 				mCurrentGizmoOperation = ImGuizmo::SCALE;
-
-
-
-			
 		
 			if (mainCam == nullptr) return;
 			if (node == nullptr || node->GetType() != JGTYPE(GameNode)) return;
+
+			i32 snapIndex = 0;
+			if (mCurrentGizmoMode & ImGuizmo::TRANSLATE_X ||
+				mCurrentGizmoMode & ImGuizmo::TRANSLATE_Y ||
+				mCurrentGizmoMode & ImGuizmo::TRANSLATE_Z)
+			{
+				snapIndex = 0;
+			}
+			else if (mCurrentGizmoMode & ImGuizmo::ROTATE_X ||
+				mCurrentGizmoMode & ImGuizmo::ROTATE_Y ||
+				mCurrentGizmoMode & ImGuizmo::ROTATE_Z)
+			{
+				snapIndex = 1;
+			}
+			else if (mCurrentGizmoMode & ImGuizmo::SCALE_X ||
+				mCurrentGizmoMode & ImGuizmo::SCALE_Y ||
+				mCurrentGizmoMode & ImGuizmo::SCALE_Z)
+			{
+				snapIndex = 2;
+			}
+
+			f32 snapValue[3];
+			for (int i = 0; i < 3; ++i)
+			{
+				snapValue[i] = mSnapValue[snapIndex];
+			}
 
 
 			JVector3 location = node->GetTransform()->GetLocalLocation();
@@ -54,15 +76,26 @@ namespace JG
 			auto itemMin = ImGui::GetItemRectMin();
 			auto itemSize = ImGui::GetItemRectSize();
 			ImGuizmo::SetRect(itemMin.x, itemMin.y, itemSize.x, itemSize.y);
-
+			ImGuizmo::SetDrawlist();
+			ImGuizmo::SetOrthographic(mainCam->IsOrthographic());
+	
+			//ImGuizmo::SetGizmoSizeClipSpace
 			auto view = mainCam->GetViewMatrix();
 			auto proj = mainCam->GetProjMatrix();
-			bool result = ImGuizmo::Manipulate(view.GetFloatPtr(), proj.GetFloatPtr(), (ImGuizmo::OPERATION)mCurrentGizmoOperation, (ImGuizmo::MODE)mCurrentGizmoMode, worldMat.GetFloatPtr(), NULL, NULL);
+
+
+			ImGui::PushClipRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), true);
+			bool result = ImGuizmo::Manipulate(
+				view.GetFloatPtr(), proj.GetFloatPtr(), 
+				(ImGuizmo::OPERATION)mCurrentGizmoOperation, (ImGuizmo::MODE)mCurrentGizmoMode,
+				worldMat.GetFloatPtr(), nullptr , (mIsSnap) ? snapValue : nullptr, nullptr, nullptr);
+			ImGui::PopClipRect();
 			JVector3 matrixTranslation, matrixRotation, matrixScale;
 			ImGuizmo::DecomposeMatrixToComponents(worldMat.GetFloatPtr(), (float*)&matrixTranslation, (float*)&matrixRotation, (float*)&matrixScale);
 			node->GetTransform()->SetLocalLocation(matrixTranslation);
 			node->GetTransform()->SetLocalRotation(Math::ConvertToDegrees(matrixRotation));
 			node->GetTransform()->SetScale(matrixScale);
+
 		});
 
 	}
@@ -70,9 +103,8 @@ namespace JG
 	{
 		auto viewModel = GetViewModel();
 		ImGuizmo::BeginFrame();
-	
-		ImGui::Begin("SceneView", &mOpenGUI);
 
+		ImGui::Begin("SceneView", &mOpenGUI);
 		
 
 		auto minSize = viewModel->GetMinSize();
@@ -86,19 +118,19 @@ namespace JG
 
 		auto mainCam = Camera::GetMainCamera();
 
-		ImGui::Text("Translate"); ImGui::SameLine(); 
+		ImGui::Text("T"); ImGui::SameLine(); 
 		if (ImGui::RadioButton("##TranslateRadioButton", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
 		{
 			mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
 		}ImGui::SameLine();
 
-		ImGui::Text("Rotate"); ImGui::SameLine();
+		ImGui::Text("R"); ImGui::SameLine();
 		if (ImGui::RadioButton("##RotateRadioButton", mCurrentGizmoOperation == ImGuizmo::ROTATE))
 		{
 			mCurrentGizmoOperation = ImGuizmo::ROTATE;
 		}ImGui::SameLine();
 
-		ImGui::Text("Scaling"); ImGui::SameLine();
+		ImGui::Text("S"); ImGui::SameLine();
 		if (ImGui::RadioButton("##ScalingRadioButton", mCurrentGizmoOperation == ImGuizmo::SCALE))
 		{
 			mCurrentGizmoOperation = ImGuizmo::SCALE;
@@ -125,7 +157,14 @@ namespace JG
 			{
 				mCurrentCameraMode = !mainCam->IsOrthographic();
 			}
-			if (mCurrentCameraMode == 0) name = "2D";
+			if (mCurrentCameraMode == 0)
+			{
+				name = "2D";
+				//mainCam->GetOwner()->GetTransform()->SetLocalLocation(JVector3(0, 0, 0));
+				mainCam->GetOwner()->GetTransform()->SetLocalRotation(JVector3(0, 0, 0));
+				auto location = mainCam->GetOwner()->GetTransform()->GetLocalLocation(); location.z = -10;
+				mainCam->GetOwner()->GetTransform()->SetLocalLocation(location);
+			}
 			else name = "3D";
 
 			if (ImGui::Button(name.c_str()) == true)
@@ -136,19 +175,47 @@ namespace JG
 				{
 					mainCam->SetOrthographic(!mCurrentCameraMode);
 				}
-			}
+			}ImGui::SameLine();
 		}
 
+		// Gizmo Snap
+		{
+			if (ImGui::RadioButton("Snap", mIsSnap))
+			{
+				mIsSnap = !mIsSnap;
+			} ImGui::SameLine();
+			ImGui::SetNextItemWidth(210.0f);
+			ImGui::InputFloat3("##Snap_InputFloat", mSnapValue); ImGui::SameLine();
+		}
+		{
+			ImGui::Text("FPS : %d", Application::GetInstance().GetAppTimer()->GetFPS());
+
+		}
+
+		// Camera Settings
 		
 		// SceneTexture
+		f32 sceneRatio = 0.0f;
+		f32 fixSceneHeight = 0.0f;
+		f32 fixSceneWidth  = 0.0f;
+		f32 textureWidth = 0.0f;
+		f32 textureHeight = 0.0f;
 		auto sceneTexture = viewModel->GetSceneTexture();
 		if (sceneTexture != nullptr && sceneTexture->IsValid())
 		{
 			auto textureInfo = sceneTexture->GetTextureInfo();
+			sceneRatio     = (f32)textureInfo.Width / (f32)textureInfo.Height;
+			fixSceneHeight = 650;
+			fixSceneWidth  = fixSceneHeight * sceneRatio;
+			textureWidth   = textureInfo.Width;
+			textureHeight  = textureInfo.Height;
 			auto textureID = (ImTextureID)JGImGui::GetInstance().ConvertImGuiTextureID(sceneTexture->GetTextureID());
-			ImGui::Image(textureID, ImVec2(textureInfo.Width, textureInfo.Height));
+			ImGui::Image(textureID, ImVec2(fixSceneWidth, fixSceneHeight));
 			viewModel->ShowGizmo->Execute(viewModel->GetSelectedGameNode());
 		}
+
+
+
 
 
 
@@ -159,25 +226,27 @@ namespace JG
 			auto mousePos = ImGui::GetMousePos();
 
 			auto standardPos = JVector2(mousePos.x, mousePos.y) - JVector2(winPos.x ,winPos.y);
+			standardPos.x = (standardPos.x / fixSceneWidth) * textureWidth;
+			standardPos.y = (standardPos.y / fixSceneHeight) * textureHeight;
+
 			viewModel->OnClick(standardPos, 0);
 			JG_CORE_INFO("Scene View MousePos : {0}, {1}", standardPos.x, standardPos.y);
 		}
 
 
 		// 3d 화면 이동
-		if (ImGui::IsKeyPressed((i32)EKeyCode::Ctrl) == true)
+		bool isLeftMouseDown = ImGui::IsMouseDown(1) && ImGui::IsItemHovered();
+		if (mEnableEditorCameraControll == false && isLeftMouseDown)
 		{
-			mEnableEditorCameraControll = !mEnableEditorCameraControll;
+			mMousePos = JVector2(ImGui::GetIO().MousePos.x, ImGui::GetIO().MousePos.y);
+			mPrevMousePos = mMousePos;
 		}
-
-
-
-
+		mEnableEditorCameraControll = isLeftMouseDown;
 		if (mEnableEditorCameraControll)
 		{
 			ControllEditorCamera();
-			
 		}
+
 
 		ImGui::End();
 		if (mOpenGUI == false)
@@ -194,8 +263,7 @@ namespace JG
 	}
 	void SceneView::ControllEditorCamera()
 	{
-		static JVector2 mousePos = JVector2(ImGui::GetIO().MousePos.x, ImGui::GetIO().MousePos.y);
-		static JVector2 prevMousePos = mousePos;
+	
 
 		auto mainCam = Camera::GetMainCamera();
 		if (mainCam == nullptr)
@@ -203,39 +271,74 @@ namespace JG
 			return;
 		}
 		// 카메라 이동 시작
-		mousePos = JVector2(ImGui::GetIO().MousePos.x, ImGui::GetIO().MousePos.y);
+		mMousePos = JVector2(ImGui::GetIO().MousePos.x, ImGui::GetIO().MousePos.y);
 
 		JVector2 mouseDelta = JVector2(0.0f, 0.0f);
-		if (mousePos != prevMousePos)
+		if (mMousePos != mPrevMousePos)
 		{
-			mouseDelta = mousePos - prevMousePos;
-			prevMousePos = mousePos;
+			mouseDelta = mMousePos - mPrevMousePos;
+			mPrevMousePos = mMousePos;
 		}
+
+
+		static f32 cameraSensitivity = 15.0f;
+		static f32 cameraSpeed = 10.0f;
+		auto appTimer = Application::GetInstance().GetAppTimer();
+		auto tick = appTimer->GetTick();
+
 
 		auto camTransform = mainCam->GetOwner()->GetTransform();
-		JVector3 rotation = camTransform->GetLocalRotation();
-		//rotation.x += mouseDelta.y * 0.001f;
-		rotation.y += mouseDelta.x * 0.00005f;
-		camTransform->SetLocalRotation(rotation);
 
-
-
-
-		if (ImGui::IsKeyDown((int)EKeyCode::W))
+		if (mCurrentCameraMode == 0)
 		{
+			f32 offset = cameraSpeed * tick * 10;
+			JVector3 location = camTransform->GetLocalLocation();
+			location.x += (-mouseDelta.x * offset);
+			location.y += (mouseDelta.y * offset);
+			camTransform->SetLocalLocation(location);
+		}
+		else
+		{
+			JVector3 rotation = camTransform->GetLocalRotation();
+			rotation.x += mouseDelta.y * cameraSensitivity * tick;
+			rotation.y += mouseDelta.x * cameraSensitivity * tick;
+
+			camTransform->SetLocalRotation(rotation);
+
+			JVector3 location = camTransform->GetLocalLocation();
+			f32 offset = cameraSpeed * tick;
+			if (ImGui::IsKeyDown((int)EKeyCode::W))
+			{
+				location += mainCam->GetLook() * offset;
+				//loca
+			}
+			if (ImGui::IsKeyDown((int)EKeyCode::S))
+			{
+				location -= mainCam->GetLook() * offset;
+			}
+			if (ImGui::IsKeyDown((int)EKeyCode::A))
+			{
+				location -= mainCam->GetRight() * offset;
+			}
+			if (ImGui::IsKeyDown((int)EKeyCode::D))
+			{
+				location += mainCam->GetRight() * offset;
+			}
+			if (ImGui::IsKeyDown((int)EKeyCode::Q))
+			{
+				location.y -= offset;
+			}
+			if (ImGui::IsKeyDown((int)EKeyCode::E))
+			{
+				location.y += offset;
 			
-		}
-		if (ImGui::IsKeyDown((int)EKeyCode::S))
-		{
+			}
+
+			camTransform->SetLocalLocation(location);
+
 
 		}
-		if (ImGui::IsKeyDown((int)EKeyCode::A))
-		{
+		
 
-		}
-		if (ImGui::IsKeyDown((int)EKeyCode::D))
-		{
-
-		}
 	}
 }

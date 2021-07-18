@@ -6,7 +6,7 @@ namespace JG
 {
 	ContentsView::ContentsView()
 	{
-		UIManager::GetInstance().RegisterMainMenuItem(TT("Windows/ContentsView"), 0, [&]()
+		UIManager::GetInstance().RegisterMainMenuItem("Windows/ContentsView", 0, [&]()
 		{
 			Open();
 		}, nullptr);
@@ -17,16 +17,16 @@ namespace JG
 	void ContentsView::Load()
 	{
 		// Copy Paste Delete Move 이정도만 일단 생성
-		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("NewFolder"), 0, [&]() {
+		UIManager::GetInstance().RegisterContextMenuItem(GetType(), "NewFolder", 0, [&]() {
 			if (mVm != nullptr)
 			{
 				mVm->NewFolder->Execute();
 			}
 		}, nullptr);
-		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("Copy"), 20, [&]() {}, nullptr);
-		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("Paste"), 20, [&]() {}, nullptr);
-		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("Move"), 20, [&]() {}, nullptr);
-		UIManager::GetInstance().RegisterContextMenuItem(GetType(), TT("Delete"), 20, [&]() 
+		UIManager::GetInstance().RegisterContextMenuItem(GetType(), "Copy", 20, [&]() {}, nullptr);
+		UIManager::GetInstance().RegisterContextMenuItem(GetType(), "Paste", 20, [&]() {}, nullptr);
+		UIManager::GetInstance().RegisterContextMenuItem(GetType(), "Move", 20, [&]() {}, nullptr);
+		UIManager::GetInstance().RegisterContextMenuItem(GetType(), "Delete", 20, [&]() 
 		{
 			if (mVm != nullptr)
 			{
@@ -113,12 +113,12 @@ namespace JG
 
 			if (isRoot == true)
 			{
-				isOpen = ImGui::CollapsingHeader(ws2s(fileInfo->Name + TT("##ContentsDirectory")).c_str());
+				isOpen = ImGui::CollapsingHeader((fileInfo->Name + "##ContentsDirectory").c_str());
 				node->IsTreePop = false;
 			}
 			else
 			{
-				isOpen = ImGui::TreeNodeEx((void*)node, node->UserFlags, ws2s(fileInfo->Name).c_str());
+				isOpen = ImGui::TreeNodeEx((void*)node, node->UserFlags, fileInfo->Name.c_str());
 				node->IsIgnoreSelect = (isOpen != node->IsTreePop);
 				node->IsTreePop = isOpen;
 			}
@@ -160,16 +160,16 @@ namespace JG
 		
 			ImGui::Dummy(ImVec2(20.0f, 20.0f)); ImGui::SameLine();
 			
-			if (ImGui::Selectable(ws2s(fileInfo->Name).c_str(), false, ImGuiSelectableFlags_None, ImVec2(0, 20.0f)) == true)
+			if (ImGui::Selectable(fileInfo->Name.c_str(), false, ImGuiSelectableFlags_None, ImVec2(0, 20.0f)) == true)
 			{
 
 			}
 			if (ImGui::BeginDragDropSource())
 			{
 				DDDContentsFile ddd;
-				wcscpy(ddd.FilePath, fileInfo->Path.c_str());
-				ImGui::SetDragDropPayload(ws2s(ddd.GetType().GetName()).c_str(), &ddd, sizeof(DDDContentsFile));
-				ImGui::TextUnformatted(ws2s(fileInfo->Name).c_str());
+				strcpy(ddd.FilePath, fileInfo->Path.c_str());
+				ImGui::SetDragDropPayload(ddd.GetType().GetName().c_str(), &ddd, sizeof(DDDContentsFile));
+				ImGui::TextUnformatted(fileInfo->Name.c_str());
 				ImGui::EndDragDropSource();
 			}
 		});

@@ -16,7 +16,7 @@ namespace JG
 	{
 		JGCLASS
 	public:
-		wchar FilePath[256] = {};
+		char FilePath[256] = {};
 	};
 
 }

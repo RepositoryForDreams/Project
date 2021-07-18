@@ -125,9 +125,9 @@ namespace JG
 		EAssetFormat assetFormat = EAssetFormat::None;
 
 		auto json = CreateSharedPtr<Json>();
-		if (Json::Read(assetPath, json) == false)
+		if (Json::Read(assetPath.string(), json) == false)
 		{
-			JG_CORE_ERROR("Fail Load Asset : {0}", assetPath.wstring());
+			JG_CORE_ERROR("Fail Load Asset : {0}", assetPath.string());
 			return nullptr;
 		}
 		auto assetFormatVal = json->GetMember(JG_ASSET_FORMAT_KEY);
@@ -146,7 +146,7 @@ namespace JG
 		{
 			TextureAssetStock stock;
 			stock.LoadJson(assetVal);
-			auto textureAsset = CreateSharedPtr<Asset<ITexture>>(assetPath);
+			auto textureAsset = CreateSharedPtr<Asset<ITexture>>(assetPath.string());
 			textureAsset->mData = ITexture::Create(stock);
 			return textureAsset;
 		}
@@ -154,7 +154,7 @@ namespace JG
 		{
 			StaticMeshAssetStock stock;
 			stock.LoadJson(assetVal);
-			auto meshAsset = CreateSharedPtr<Asset<IMesh>>(assetPath);
+			auto meshAsset = CreateSharedPtr<Asset<IMesh>>(assetPath.string());
 			meshAsset->mData = IMesh::Create(stock);
 			return meshAsset;
 		}

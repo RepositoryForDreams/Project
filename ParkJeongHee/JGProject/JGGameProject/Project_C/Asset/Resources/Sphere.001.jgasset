@@ -3,6 +3,14 @@
     "Asset": {
         "Name": "Sphere.001",
         "IsSkinned": false,
+        "BoundingBox": [
+            -0.9999998211860657,
+            -1.0000003576278687,
+            -1.0,
+            1.000000238418579,
+            1.0,
+            1.0
+        ],
         "SubMeshs": [
             {
                 "Name": "Sphere.001",

@@ -17,6 +17,12 @@ namespace JG
 
 
 		bool mEnableEditorCameraControll = false;
+		bool mIsSnap = true;
+		f32 mSnapValue[3] = { 5.0f,10.0f,1.0f };
+		//
+		JVector2 mMousePos;
+		JVector2 mPrevMousePos;
+
 	public:
 		SceneView();
 		virtual ~SceneView() = default;

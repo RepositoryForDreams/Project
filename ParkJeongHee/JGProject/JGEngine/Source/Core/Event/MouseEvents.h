@@ -12,7 +12,7 @@ namespace JG
 		virtual ~MouseMovedEvent() override {}
 		virtual String ToString() const override
 		{
-			return TT("MouseMovedEvent : [ X : ") + std::to_wstring(X) + TT(", Y : ") + std::to_wstring(Y) + TT(" ]");
+			return "MouseMovedEvent : [ X : " + std::to_string(X) + ", Y : " + std::to_string(Y) + " ]";
 		}
 
 	public:
@@ -28,7 +28,7 @@ namespace JG
 		virtual ~MouseButtonPressedEvent() override {}
 		virtual String ToString() const override
 		{
-			return TT("MouseButtonPressed : ") + MouseButtonToString(MouseButton);
+			return "MouseButtonPressed : " + MouseButtonToString(MouseButton);
 		}
 	public:
 		EMouseButton MouseButton;
@@ -41,7 +41,7 @@ namespace JG
 		virtual ~MouseButtonReleasedEvent() override {}
 		virtual String ToString() const override
 		{
-			return TT("MouseButtonReleased : ") + MouseButtonToString(MouseButton);
+			return "MouseButtonReleased : " + MouseButtonToString(MouseButton);
 		}
 	public:
 		EMouseButton MouseButton;
@@ -54,7 +54,7 @@ namespace JG
 		virtual ~MouseScrollMovedEvent(){}
 		virtual String ToString() const override
 		{
-			return TT("MouseScrollMoved Offset : ") + std::to_wstring(Offset) + TT("  HOffset : ") + std::to_wstring(HOffset);
+			return "MouseScrollMoved Offset : " + std::to_string(Offset) + "  HOffset : " + std::to_string(HOffset);
 		}
 	public:
 		f64 Offset  = 0.0f;

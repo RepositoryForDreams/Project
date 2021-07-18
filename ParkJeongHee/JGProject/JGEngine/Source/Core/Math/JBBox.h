@@ -8,14 +8,14 @@ namespace JG
 	class JBBox
 	{
 	public:
-		bool Contain(const JVector3& point) {
+		bool Contain(const JVector3& point) const {
 
 			return
 				min.x <= point.x && max.x >= point.x &&
 				min.y <= point.y && max.y >= point.y &&
 				min.z <= point.z && max.z >= point.z;
 		}
-		bool Intersection(const JRay& ray)
+		bool Intersection(const JRay& ray) const
 		{
 			float MinT = FLT_MAX;
 			float MaxS = -FLT_MAX;

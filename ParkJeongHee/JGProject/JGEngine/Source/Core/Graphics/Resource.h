@@ -9,7 +9,7 @@ namespace JG
 	class IResource
 	{
 	private:
-		String mName = TT("IResource");
+		String mName = "IResource";
 	public:
 		IResource() = default;
 		virtual ~IResource() = default;

@@ -22,7 +22,7 @@ namespace JG
 			{
 				if (error)
 				{
-					*error = TT("ComputeShader cannot contain (Vertex, Domain, Hull, Geometry, Pixel) Shader.");
+					*error = "ComputeShader cannot contain (Vertex, Domain, Hull, Geometry, Pixel) Shader.";
 				}
 				return false;
 			}
@@ -44,7 +44,7 @@ namespace JG
 		{
 			if (error != nullptr)
 			{
-				*error = TT("Failed Analysis SourceCode");
+				*error = "Failed Analysis SourceCode";
 			}
 			return false;
 		}
@@ -233,20 +233,20 @@ namespace JG
 	{
 		ComPtr<ID3DBlob> errorData;
 		HRESULT hr = D3DCompile2(
-			ws2s(sourceCode).data(),
+			sourceCode.data(),
 			sourceCode.size(),
 			nullptr,
 			nullptr,
 			nullptr,
-			ws2s(config.Entry).c_str(),
-			ws2s(config.Target).c_str(),
+			config.Entry.c_str(),
+			config.Target.c_str(),
 			0, 0, 0, nullptr, 0,
 			blob.GetAddressOf(),
 			errorData.GetAddressOf()); 
 
 		if (FAILED(hr) && error != nullptr)
 		{
-			*error = s2ws((char*)errorData->GetBufferPointer());
+			*error = (char*)errorData->GetBufferPointer();
 			return false;
 		}
 		mIsCompileSuccess = true; 

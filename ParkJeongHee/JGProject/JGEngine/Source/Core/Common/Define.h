@@ -52,8 +52,7 @@
 #define JG_TEXTURE_ASSET_KEY     "@AssetKey_TextureAssetStock"
 #define JG_STATIC_MESH_ASSET_KEY "@AssetKey_StaticMeshAssetStock"
 #define JG_GAMEWORLD_ASSET_KEY "@AssetKey_GameWorld"
-#define JG_ASSET_FORMAT TT(".jgasset")
-#define ASSET_MESH_FORMAT TT(".mesh")
+#define JG_ASSET_FORMAT ".jgasset"
 
 namespace JG
 {
@@ -130,7 +129,7 @@ namespace JG
 
 
 	// String
-	using String = std::wstring;
+	using String = std::string;
 	using wchar  = wchar_t;
 
 	class JsonData;

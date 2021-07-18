@@ -20,6 +20,7 @@ namespace JG
 		bool mIsRunAwake = false;
 		bool mIsRunStart = false;
 		Transform* mTransform = nullptr;
+		UniquePtr<JBBox> mBoundingBox;
 		String mTargetLayer = GameLayer::DEFAULT_LAYER;
 	protected:
 		virtual void Start() override;
@@ -62,7 +63,6 @@ namespace JG
 
 		void SendChangeData(const ChangeData& data, EChangeDataFlags flags = EChangeDataFlags::Default);
 
-		
 	public:
 		GameNode* FindNode(const String& name) const;
 		GameNode* FindNode(u32 index) const;
@@ -85,11 +85,17 @@ namespace JG
 		virtual void SetParent(GameNode* node);
 		GameNode*    GetParent() const;
 		Transform*   GetTransform() const;
+
+		void SetBoundingBox(const JBBox& boundingBox);
+		const JBBox* GetBoundingBox() const;
+
 		void SetLayer(const String& layer);
 		const String& GetLayer();
 
 		bool IsActive() const;
 	protected:
+		GameNode* Picking3DRecursive(const JRay& pickingRay);
+		GameNode* Picking2DRecursive(const JVector2& pickingPos);
 		void DestroyRecursive();
 	};
 

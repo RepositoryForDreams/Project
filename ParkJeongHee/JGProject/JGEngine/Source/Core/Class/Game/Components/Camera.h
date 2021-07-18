@@ -22,6 +22,7 @@ namespace JG
 		//
 		mutable JMatrix  mProjMatrix;
 		mutable JMatrix  mViewMatrix;
+		mutable JMatrix  mInvViewMatrix;
 		mutable JMatrix  mViewProjMatrix;
 		//
 		JVector2 mResolution;
@@ -57,9 +58,13 @@ namespace JG
 		void SetCullingLayerMask(u64 mask);
 		void SetClearColor(const Color& color);
 		void SetRendererPath(ERendererPath rendererPath);
+
+		JVector3 ScreenToWorldPoint(const JVector3& screenPos) const;
+		JRay ScreenToWorldRay(const JVector3& screenPos) const;
 	public:
 		const JMatrix& GetViewProjMatrix() const;
 		const JMatrix& GetViewMatrix() const;
+		const JMatrix& GetInvViewMatrix() const;
 		const JMatrix& GetProjMatrix() const;
 
 		f32 GetFOV() const;

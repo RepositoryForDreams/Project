@@ -3,6 +3,14 @@
     "Asset": {
         "Name": "Cube.001",
         "IsSkinned": false,
+        "BoundingBox": [
+            -1.0,
+            -1.0,
+            -1.0,
+            1.0,
+            1.0,
+            1.0
+        ],
         "SubMeshs": [
             {
                 "Name": "Cube.001",

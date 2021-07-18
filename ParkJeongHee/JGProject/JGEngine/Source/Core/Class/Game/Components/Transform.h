@@ -15,10 +15,11 @@ namespace JG
 
 
 		mutable JMatrix mWorldMatrix;
+		mutable JMatrix mInvWorldMatrix;
 		mutable JMatrix mLocalMatrix;
 		mutable bool mIsDirty = true;
+		mutable bool mIsInvDirty = true;
 	public:
-
 		void SetLocalLocation(const JVector3& location);
 		void SetLocalRotation(const JVector3& rotation);
 		void SetScale(const JVector3& scale);
@@ -31,11 +32,13 @@ namespace JG
 		const JVector3& GetScale() const;
 
 		const JMatrix& GetWorldMatrix() const;
+		const JMatrix& GetInvWorldMatrix() const;
 	public:
 		virtual void MakeJson(SharedPtr<JsonData> jsonData)   const override;
 		virtual void LoadJson(SharedPtr<JsonData> jsonData) override;
 	private:
 		void UpdateWorldMatrix() const;
+		void UpdateInvWorldMatrix() const;
 		void CheckLimitRadian(JVector3& toRadian) const;
 		void CheckLimitRotation(JVector3& toDegree);
 	public:

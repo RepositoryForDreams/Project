@@ -67,7 +67,7 @@ namespace JG
 			return true;
 		}
 		String ToString() const {
-			return L"[" + std::to_wstring(left) + L", " + std::to_wstring(top) + L"], [" + std::to_wstring(right) + L", " + std::to_wstring(bottom) + L"]";
+			return "[" + std::to_string(left) + ", " + std::to_string(top) + "], [" + std::to_string(right) + ", " + std::to_string(bottom) + "]";
 		}
 
 	};

@@ -166,6 +166,33 @@ namespace JG
 	{
 		mRendererPath = rendererPath;
 	}
+	JVector3 Camera::ScreenToWorldPoint(const JVector3& screenPos) const
+	{
+		f32 farZ  = GetFarZ();
+		f32 nearZ = GetNearZ();
+
+
+		float z = (farZ + nearZ) / (2 * (farZ - nearZ)) + (1.0f / std::max<float>(screenPos.z, nearZ)) * ((-farZ * nearZ) / (farZ - nearZ)) + 0.5f;
+
+
+
+		JVector3 result = JVector3::UnProject(JVector3(screenPos.x, screenPos.y, z),
+			GetProjMatrix(), GetViewMatrix(),
+			JMatrix::Identity(), JVector2(0, 0), GetResolution());
+
+
+		return result;
+	}
+	JRay Camera::ScreenToWorldRay(const JVector3& screenPos) const
+	{
+		JRay result;
+		result.dir = JVector3::UnProject(JVector3(screenPos.x, screenPos.y, 1.0f),
+			GetProjMatrix(), GetViewMatrix(),
+			JMatrix::Identity(), JVector2(0, 0), GetResolution());
+		result.dir = JVector3::Normalize(result.dir);
+		result.origin = GetOwner()->GetTransform()->GetWorldLocation();
+		return result;
+	}
 	void Camera::SetCullingLayerMask(u64 mask)
 	{
 		mCullingLayerMask = mask;
@@ -191,6 +218,12 @@ namespace JG
 		UpdateView();
 
 		return mViewMatrix;
+	}
+	const JMatrix& Camera::GetInvViewMatrix() const
+	{
+		UpdateView();
+
+		return mInvViewMatrix;
 	}
 
 	const JMatrix& Camera::GetProjMatrix() const
@@ -218,21 +251,21 @@ namespace JG
 	JVector3 Camera::GetLook() const
 	{
 		auto rotation = GetOwner()->GetTransform()->GetWorldRotation();
-		rotation = JVector3(Math::ConvertToDegrees(rotation.x), Math::ConvertToDegrees(rotation.y), Math::ConvertToDegrees(rotation.z));
+		rotation = Math::ConvertToRadians(rotation);
 		return JVector3::Normalize(JMatrix::Rotation(rotation).TransformVector(JVector3(0, 0, 1)));
 	}
 
 	JVector3 Camera::GetRight() const
 	{
 		auto rotation = GetOwner()->GetTransform()->GetWorldRotation();
-		rotation = JVector3(Math::ConvertToDegrees(rotation.x), Math::ConvertToDegrees(rotation.y), Math::ConvertToDegrees(rotation.z));
+		rotation = Math::ConvertToRadians(rotation);
 		return JVector3::Normalize(JMatrix::Rotation(rotation).TransformVector(JVector3(1, 0, 0)));
 	}
 
 	JVector3 Camera::GetUp() const
 	{
 		auto rotation = GetOwner()->GetTransform()->GetWorldRotation();
-		rotation = JVector3(Math::ConvertToDegrees(rotation.x), Math::ConvertToDegrees(rotation.y), Math::ConvertToDegrees(rotation.z));
+		rotation = Math::ConvertToRadians(rotation);
 		return JVector3::Normalize(JMatrix::Rotation(rotation).TransformVector(JVector3(0, 1, 0)));
 	}
 
@@ -295,12 +328,12 @@ namespace JG
 
 		JVector3 target = JVector3(0, 0, 1);
 		auto rotation = GetOwner()->GetTransform()->GetWorldRotation();
-		rotation = JVector3(Math::ConvertToDegrees(rotation.x), Math::ConvertToDegrees(rotation.y), Math::ConvertToDegrees(rotation.z));
+		rotation = Math::ConvertToRadians(rotation);
 		auto& location = GetOwner()->GetTransform()->GetWorldLocation();
 		location.z -= GetNearZ();
 		target = JMatrix::Rotation(rotation).TransformVector(target);
 		mViewMatrix = JMatrix::LookAtLH(location, location + target, JVector3(0, 1, 0));
-
+		mInvViewMatrix = JMatrix::Inverse(mViewMatrix);
 
 		mIsViewProjDirty = true;
 	}

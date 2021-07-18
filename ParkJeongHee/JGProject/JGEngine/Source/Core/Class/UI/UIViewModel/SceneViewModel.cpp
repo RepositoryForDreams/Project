@@ -21,8 +21,8 @@ namespace JG
 	void SceneViewModel::OnEvent(IEvent& e)
 	{
 		EventDispatcher dispatcher(e);
-		dispatcher.Dispatch<NotifyChangeMainSceneTextureEvent>(EVENT_BIND_FN(&SceneViewModel::NotifyChangeMainSceneTexture));
-		dispatcher.Dispatch<NotifySelectedGameNodeInEditor>(EVENT_BIND_FN(&SceneViewModel::ResponseSelectedGameNodeInEditor));
+		dispatcher.Dispatch<NotifyChangeMainSceneTextureEvent>(EVENT_BIND_FN(&SceneViewModel::ResponseChangeMainSceneTexture));
+		dispatcher.Dispatch<NotifySelectedGameNodeInEditorEvent>(EVENT_BIND_FN(&SceneViewModel::ResponseSelectedGameNodeInEditor));
 	}
 
 	void SceneViewModel::SetMinSize(const JVector2& size)
@@ -54,12 +54,16 @@ namespace JG
 		SendEvent(e);
 		// 클릭을 하게 되면 -> 인스턴스 얻어오기
 	}
-	bool SceneViewModel::ResponseSelectedGameNodeInEditor(NotifySelectedGameNodeInEditor& e)
+	bool SceneViewModel::ResponseSelectedGameNodeInEditor(NotifySelectedGameNodeInEditorEvent& e)
 	{
+		if (e.SelectedGameNode == nullptr)
+		{
+			return false;
+		}
 		mSelectGameNode = e.SelectedGameNode;
 		return false;
 	}
-	bool SceneViewModel::NotifyChangeMainSceneTexture(NotifyChangeMainSceneTextureEvent& e)
+	bool SceneViewModel::ResponseChangeMainSceneTexture(NotifyChangeMainSceneTextureEvent& e)
 	{
 		if (mSceneMdoel != nullptr)
 		{

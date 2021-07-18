@@ -3,6 +3,14 @@
     "Asset": {
         "Name": "Torus",
         "IsSkinned": false,
+        "BoundingBox": [
+            -1.25,
+            -1.25,
+            -0.25,
+            1.25,
+            1.25,
+            0.25
+        ],
         "SubMeshs": [
             {
                 "Name": "Torus",

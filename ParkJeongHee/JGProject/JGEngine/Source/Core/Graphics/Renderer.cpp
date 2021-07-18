@@ -143,26 +143,26 @@ namespace JG
 		textureInfo.Width = 1; textureInfo.Height = 1; 	textureInfo.MipLevel = 1; 	textureInfo.ArraySize = 1;
 		textureInfo.ClearColor = Color::White();
 		textureInfo.Format = ETextureFormat::R8G8B8A8_Unorm; textureInfo.Flags = ETextureFlags::Allow_RenderTarget;
-		mWhiteTexture = ITexture::Create(TT("WhiteTexture"), textureInfo);
+		mWhiteTexture = ITexture::Create("WhiteTexture", textureInfo);
 
 		for (i32 i = 0; i < bufferCnt; ++i)
 		{
 			FrameResource rsc;
-			rsc.QuadMesh = IMesh::Create(TT("Renderer2D_QuadMesh"));
+			rsc.QuadMesh = IMesh::Create("Renderer2D_QuadMesh");
 			rsc.QuadMesh->SetInputLayout(inputLayout);
-			rsc.QuadMesh->AddMesh(ISubMesh::Create(TT("Renderer2D_QuadSubMesh")));
+			rsc.QuadMesh->AddMesh(ISubMesh::Create("Renderer2D_QuadSubMesh"));
 
 
 
-			rsc.QuadVBuffer = IVertexBuffer::Create(TT("Renderer2D_VBuffer"), EBufferLoadMethod::CPULoad);
-			rsc.QuadIBuffer = IIndexBuffer::Create(TT("Renderer2D_IBuffer"), EBufferLoadMethod::CPULoad);
+			rsc.QuadVBuffer = IVertexBuffer::Create("Renderer2D_VBuffer", EBufferLoadMethod::CPULoad);
+			rsc.QuadIBuffer = IIndexBuffer::Create("Renderer2D_IBuffer", EBufferLoadMethod::CPULoad);
 
 			rsc.QuadMesh->GetSubMesh(0)->SetVertexBuffer(rsc.QuadVBuffer);
 			rsc.QuadMesh->GetSubMesh(0)->SetIndexBuffer(rsc.QuadIBuffer);
 
-			rsc.Standard2DMaterial = IMaterial::Create(TT("Standard2DMaterial"), _2dShader);
+			rsc.Standard2DMaterial = IMaterial::Create("Standard2DMaterial", _2dShader);
 
-			if (rsc.Standard2DMaterial->SetTexture(TT("gTexture"), 0, mWhiteTexture) == false)
+			if (rsc.Standard2DMaterial->SetTexture("gTexture", 0, mWhiteTexture) == false)
 			{
 				JG_CORE_ERROR("Failed Set Texture in WhiteTexture");
 				return;

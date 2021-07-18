@@ -52,7 +52,7 @@ namespace JG
 	{
 		jsonData->AddMember("Name", Name);
 		jsonData->AddMember("IsSkinned", IsSkinned);
-		
+		jsonData->AddMember("BoundingBox", BoundingBox);
 
 		auto meshJson = jsonData->CreateJsonData();
 		auto cnt = SubMeshNames.size();
@@ -73,6 +73,8 @@ namespace JG
 
 			viJson->AddMember("Vertices", vArrayJson);
 			viJson->AddMember("Indices", Indices[i]);
+
+
 			meshJson->AddMember(viJson);
 		}
 		jsonData->AddMember("SubMeshs", meshJson);
@@ -93,7 +95,11 @@ namespace JG
 		{
 			IsSkinned = val->GetBool();
 		}
-
+		val = jsonData->GetMember("BoundingBox");
+		if (val)
+		{
+			BoundingBox = val->GetBoundingBox();
+		}
 		val = jsonData->GetMember("SubMeshs");
 		if (val)
 		{
