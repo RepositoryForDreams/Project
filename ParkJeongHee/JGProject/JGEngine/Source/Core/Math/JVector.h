@@ -114,6 +114,10 @@ namespace JG
 		bool operator!=(const JVector2& v) const {
 			return (v.x != x || v.y != y);
 		}
+
+		inline std::string ToString()  const {
+			return "[ " + std::to_string(x) + ", " + std::to_string(y) + " ]";
+		}
 	public:
 		inline static float Length(const JVector2& v) {
 			auto len = DirectX::XMVector2Length(GetSIMD(v));

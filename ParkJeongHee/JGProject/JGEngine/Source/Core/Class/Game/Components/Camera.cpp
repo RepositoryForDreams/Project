@@ -368,4 +368,77 @@ namespace JG
 		SetOrthographic(isOrth);
 		SetResolution(resolution);
 	}
+	f32 EditorCamera::GetZoom() const
+	{
+		return mZoom;
+	}
+	void EditorCamera::SetZoom(f32 zoom)
+	{
+		zoom = std::max<f32>(0.01f, zoom);
+		if (mZoom != zoom)
+		{
+			mIsProjDirty = true;
+		}
+		mZoom = zoom;
+	}
+	const JVector2& EditorCamera::GetFocusCenter() const
+	{
+		return mFocusCenter;
+	}
+	void EditorCamera::SetFocusCenter(const JVector2& focusCenter)
+	{
+		if (mFocusCenter != focusCenter)
+		{
+			mIsProjDirty = true;
+		}
+		mFocusCenter = focusCenter;
+	}
+	JRect EditorCamera::GetOrthograhicRect() const
+	{
+		f32 centerPosX = mOrthoRect.left + mOrthoRect.Width() * mFocusCenter.x;
+		f32 centerPosY = mOrthoRect.top  - mOrthoRect.Height() * mFocusCenter.y;
+		f32 zoomFactor = (1 / mZoom);
+		f32 hw = mResolution.x * 0.5f * zoomFactor;
+		f32 hh = mResolution.y * 0.5f * zoomFactor;
+
+		f32 leftOffset = mFocusCenter.x * hw;
+		f32 rightOffset = (1.0f - mFocusCenter.x) * hw;
+
+		f32 topOffset = mFocusCenter.y * hh;
+		f32 bottomOffset = (1.0f - mFocusCenter.y) * hh;
+		// 0.75f
+
+		mOrthoRect.left   = centerPosX - leftOffset;
+		mOrthoRect.right  = centerPosX + rightOffset;
+		mOrthoRect.top    = centerPosY + topOffset;
+		mOrthoRect.bottom = centerPosY - bottomOffset;
+		return mOrthoRect;
+	}
+	JRect EditorCamera::GetOrthograhicOriginRect() const
+	{
+		f32 hw = mResolution.x * 0.5f;
+		f32 hh = mResolution.y * 0.5f;
+		return JRect(-hw, hh, hw, -hh);
+	}
+	void EditorCamera::UpdateProj() const
+	{
+		if (mIsProjDirty == false)
+		{
+			return;
+		}
+		mIsProjDirty = false;
+
+
+		if (mIsOrthographic)
+		{
+			auto orthoRect = GetOrthograhicRect();
+			mProjMatrix = JMatrix::OrthographicOffCenterLH(orthoRect.left, orthoRect.right, orthoRect.bottom, orthoRect.top, mNearZ, mFarZ);
+		}
+		else
+		{
+			mProjMatrix = JMatrix::PerspectiveFovLH(mFov, GetAspectRatio(), mNearZ, mFarZ);
+		}
+
+		mIsViewProjDirty = true;
+	}
 }

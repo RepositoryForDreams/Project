@@ -98,6 +98,21 @@ namespace JG
 
 		// IUIErrorReceiver
 		virtual void ReceiveError(SharedPtr<IUIError> error) override {}
+	public:
+		virtual void MakeJson(SharedPtr<JsonData> jsonData)   const override {
+			jsonData->AddMember("IsOpen", IsOpen());
+		}
+		virtual void LoadJson(SharedPtr<JsonData> jsonData) override {
+			auto val = jsonData->GetMember("IsOpen");
+			bool open = false;
+			if (val)
+			{
+				open = val->GetBool();
+			}
+			if (open) Open();
+			else Close();
+
+		}
 
 	public:
 		virtual ~UIView() = default;

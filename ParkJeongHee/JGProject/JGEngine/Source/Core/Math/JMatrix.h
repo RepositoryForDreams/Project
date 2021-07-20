@@ -110,8 +110,13 @@ namespace JG
 			JMatrix result;
 			result.SetSIMD(DirectX::XMMatrixOrthographicLH(width, height, nearZ, farZ));
 			return result;
+		}
 
-
+		inline static JMatrix OrthographicOffCenterLH(f32 left,  f32 right, f32 bottom, f32 top, f32 nearZ, f32 farZ)
+		{
+			JMatrix result;
+			result.SetSIMD(DirectX::XMMatrixOrthographicOffCenterLH(left, right, bottom, top, nearZ, farZ));
+			return result;
 		}
 
 

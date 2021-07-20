@@ -94,10 +94,6 @@ namespace JG
 		Application::GetInstance().SendEvent(pickingEvent);
 		return true;
 	}
-	GameNode* GameLogicSystemLayer::Picking() const
-	{
-		return nullptr;
-	}
 	void GameLogicSystemLayer::RegisterGlobalGameSystem()
 	{
 

@@ -430,6 +430,14 @@ namespace JG
 		{
 			return nullptr;
 		}
+		for (auto& child : mChilds)
+		{
+			auto pickingObj = child->Picking3DRecursive(pickingRay);
+			if (pickingObj != nullptr)
+			{
+				return pickingObj;
+			}
+		}
 		auto bbox = GetBoundingBox();
 		if (bbox)
 		{
@@ -444,14 +452,7 @@ namespace JG
 				return this;
 			}
 		}
-		for (auto& child : mChilds)
-		{
-			auto pickingObj = child->Picking3DRecursive(pickingRay);
-			if (pickingObj != nullptr)
-			{
-				return pickingObj;
-			}
-		}
+	
 		return nullptr;
 	}
 	GameNode* GameNode::Picking2DRecursive(const JVector2& pickingPos)

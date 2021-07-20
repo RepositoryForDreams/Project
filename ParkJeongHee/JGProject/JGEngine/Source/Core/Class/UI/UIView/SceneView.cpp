@@ -153,14 +153,11 @@ namespace JG
 
 		// Gizmo Camera Mode
 		{
-			if (mainCam != nullptr)
-			{
-				mCurrentCameraMode = !mainCam->IsOrthographic();
-			}
+			auto mainCam = Camera::GetMainCamera();
+
 			if (mCurrentCameraMode == 0)
 			{
 				name = "2D";
-				//mainCam->GetOwner()->GetTransform()->SetLocalLocation(JVector3(0, 0, 0));
 				mainCam->GetOwner()->GetTransform()->SetLocalRotation(JVector3(0, 0, 0));
 				auto location = mainCam->GetOwner()->GetTransform()->GetLocalLocation(); location.z = -10;
 				mainCam->GetOwner()->GetTransform()->SetLocalLocation(location);
@@ -170,12 +167,12 @@ namespace JG
 			if (ImGui::Button(name.c_str()) == true)
 			{
 				mCurrentCameraMode = !mCurrentCameraMode;
-				auto mainCam = Camera::GetMainCamera();
-				if (mainCam != nullptr)
-				{
-					mainCam->SetOrthographic(!mCurrentCameraMode);
-				}
 			}ImGui::SameLine();
+
+			if (mainCam != nullptr)
+			{
+				mainCam->SetOrthographic(!mCurrentCameraMode);
+			}
 		}
 
 		// Gizmo Snap
@@ -247,6 +244,34 @@ namespace JG
 			ControllEditorCamera();
 		}
 
+		// Ä«¸Þ¶ó ÁÜ ¾Æ¿ô
+		// 
+		if (ImGui::IsWindowFocused() == true && mainCam->GetType() == JGTYPE(EditorCamera) && mCurrentCameraMode == 0)
+		{
+			auto editCamera = static_cast<EditorCamera*>(mainCam);
+			f32 zoom = editCamera->GetZoom();
+			f32 wheelDelta = ImGui::GetIO().MouseWheel;
+
+
+			if (wheelDelta != 0)
+			{
+				auto winPos = ImGui::GetItemRectMin();
+				auto mousePos = ImGui::GetMousePos();
+				auto appTimer = Application::GetInstance().GetAppTimer();
+				auto tick = appTimer->GetTick();
+
+				auto focusCenter = JVector2(mousePos.x, mousePos.y) - JVector2(winPos.x, winPos.y);
+
+				focusCenter.x = (focusCenter.x / fixSceneWidth);
+				focusCenter.y = (focusCenter.y / fixSceneHeight);
+
+				JG_CORE_INFO("focusCenter : {0}", focusCenter.ToString())
+				zoom += wheelDelta * tick * 20;
+				editCamera->SetZoom(zoom);
+				editCamera->SetFocusCenter(focusCenter);
+			}
+		}
+
 
 		ImGui::End();
 		if (mOpenGUI == false)
@@ -260,6 +285,53 @@ namespace JG
 	{
 		auto viewModel = GetViewModel();
 		viewModel->ShowGizmo->UnSubscribe(viewModel);
+	}
+	void SceneView::MakeJson(SharedPtr<JsonData> jsonData) const
+	{
+		UIView<SceneViewModel>::MakeJson(jsonData);
+		jsonData->AddMember("GizmoOperation", mCurrentGizmoOperation);
+		jsonData->AddMember("GizmoMode", mCurrentGizmoMode);
+		jsonData->AddMember("CameraMode", mCurrentCameraMode);
+
+
+		jsonData->AddMember("SnapValue0", mSnapValue[0]);
+		jsonData->AddMember("SnapValue1", mSnapValue[1]);
+		jsonData->AddMember("SnapValue2", mSnapValue[2]);
+	}
+	void SceneView::LoadJson(SharedPtr<JsonData> jsonData)
+	{
+		UIView<SceneViewModel>::LoadJson(jsonData);
+		auto val = jsonData->GetMember("GizmoOperation");
+		if (val)
+		{
+			mCurrentGizmoOperation = val->GetInt32();
+		}
+		val = jsonData->GetMember("GizmoMode");
+		if (val)
+		{
+			mCurrentGizmoMode = val->GetInt32();
+		}
+		val = jsonData->GetMember("CameraMode");
+		if (val)
+		{
+			mCurrentCameraMode = val->GetInt32();
+		}
+
+		val = jsonData->GetMember("SnapValue0");
+		if (val)
+		{
+			mSnapValue[0] = val->GetFloat();
+		}
+		val = jsonData->GetMember("SnapValue1");
+		if (val)
+		{
+			mSnapValue[1] = val->GetFloat();
+		}
+		val = jsonData->GetMember("SnapValue2");
+		if (val)
+		{
+			mSnapValue[2] = val->GetFloat();
+		}
 	}
 	void SceneView::ControllEditorCamera()
 	{
@@ -281,8 +353,8 @@ namespace JG
 		}
 
 
-		static f32 cameraSensitivity = 15.0f;
-		static f32 cameraSpeed = 10.0f;
+		static f32 cameraSensitivity = 30.0f;
+		static f32 cameraSpeed = 15.0f;
 		auto appTimer = Application::GetInstance().GetAppTimer();
 		auto tick = appTimer->GetTick();
 
@@ -333,6 +405,13 @@ namespace JG
 				location.y += offset;
 			
 			}
+			if (ImGui::GetIO().MouseWheel != 0.0f)
+			{
+				JVector3 look = mainCam->GetLook();
+				look = look * offset * ImGui::GetIO().MouseWheel;
+				location += look;
+			}
+
 
 			camTransform->SetLocalLocation(location);
 

@@ -52,11 +52,11 @@ namespace JG
 		UIManager::GetInstance().RegisterPopupUIView<AssetFinderContextView>();
 		// Modal
 		UIManager::GetInstance().RegisterPopupUIView<ProgressBarModalView>();
-		LoadUISettings("JGUI.ini");
+		LoadUISettings("JGUI.jgconfig");
 	}
 	void UISystemLayer::Destroy()
 	{
-		SaveUISettings("JGUI.ini");
+		SaveUISettings("JGUI.jgconfig");
 	}
 	void UISystemLayer::OnEvent(IEvent& e)
 	{
@@ -69,43 +69,19 @@ namespace JG
 
 	void UISystemLayer::LoadUISettings(const String& fileName)
 	{
-		Dictionary<String, bool> IsOpen;
-
 		auto json = CreateSharedPtr<Json>();
-		Json::Read(fileName, json);
-
+		if (Json::Read(fileName, json) == false)
+		{
+			return;
+		}
 		UIManager::GetInstance().ForEach([&](IUIView* view)
 		{
-			auto key = view->GetType().GetName();
-			auto member = json->GetMember(key);
-			if (member != nullptr)
+			auto viewJson = json->GetMember(view->GetType().GetName());
+			if (viewJson)
 			{
-				bool isOpen = member->GetBool();
-				if (isOpen == true) view->Open();
-				else view->Close();
+				view->LoadJson(viewJson);
 			}
 		});
-
-		if (IsOpen.empty() == false)
-		{
-			UIManager::GetInstance().ForEach([&](IUIView* view)
-			{
-
-				auto iter = IsOpen.find(view->GetType().GetName());
-				if (iter != IsOpen.end())
-				{
-					if (iter->second)
-					{
-						view->Open();
-					}
-					else
-					{
-						view->Close();
-					}
-				}
-			});
-		}
-
 	}
 	void UISystemLayer::SaveUISettings(const String& fileName)
 	{
@@ -113,11 +89,13 @@ namespace JG
 		Dictionary<String, bool> IsOpen;
 
 		auto json = CreateSharedPtr<Json>();
-
+		
 		
 		UIManager::GetInstance().ForEach([&](IUIView* view)
 		{
-			json->AddMember<bool>(view->GetType().GetName(), view->IsOpen());
+			auto viewJson = json->CreateJsonData();
+			view->MakeJson(viewJson);
+			json->AddMember(view->GetType().GetName(), viewJson);
 		});
 
 		Json::Write(fileName, json);

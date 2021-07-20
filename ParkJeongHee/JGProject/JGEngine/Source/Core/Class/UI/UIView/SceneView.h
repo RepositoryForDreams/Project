@@ -31,6 +31,10 @@ namespace JG
 		virtual void Initialize() override;
 		virtual void OnGUI() override;
 		virtual void Destroy() override;
+
+
+		virtual void MakeJson(SharedPtr<JsonData> jsonData) const override;
+		virtual void LoadJson(SharedPtr<JsonData> jsonData) override;
 	private:
 		void ControllEditorCamera();
 	};

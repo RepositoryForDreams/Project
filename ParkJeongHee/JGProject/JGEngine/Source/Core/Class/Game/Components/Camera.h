@@ -1,6 +1,6 @@
 #pragma once
 #include "Class/Game/GameComponent.h"
-
+#include "Math/JRect.h"
 
 
 namespace JG
@@ -13,8 +13,8 @@ namespace JG
 		static void SetMainCamera(Camera* mainCamera);
 	private:
 		friend class GraphicsSystemLayer;
-	private:
 		JGCLASS
+	protected:
 		mutable bool mIsViewDirty = true;
 		mutable bool mIsProjDirty = true;
 		mutable bool mIsViewProjDirty = true;
@@ -82,8 +82,8 @@ namespace JG
 
 		u64 GetCullingLayerMask() const;
 		ERendererPath GetRendererPath() const;
-	private:
-		void UpdateProj() const;
+	protected:
+		virtual void UpdateProj() const;
 		void UpdateView() const;
 	public:
 		virtual ~Camera() = default;
@@ -95,9 +95,33 @@ namespace JG
 
 	class EditorCamera : public Camera
 	{
+
+		//float zoom = 2; // 200%
+//float xPos = 0.75 * m_displaySize.Width; // where we are centred
+//float yPos = 0.5 * m_displaySize.Height; // where we are centred
+//float left = -m_displaySize.Width / (2 * zoom) + xPos;
+//float right = m_displaySize.Width / (2 * zoom) + xPos;
+//float top = -m_displaySize.Height / (2 * zoom) + yPos;
+//float bottom = m_displaySize.Height / (2 * zoom) + yPos;
+//m_projectionMatrix = Matrix.OrthoOffCenterLH(left, right, bottom, top, 0f, 100.0f);
+//DirectX::XMMatrixOrthographicOffCenterLH()
 	private:
 		JGCLASS
+		f32      mZoom = 1.0f;
+		mutable JRect    mOrthoRect = JRect(-960, 540, 960, -540);
+		JVector2 mFocusCenter = JVector2(0.5f, 0.5f);
 	public:
 		EditorCamera() : Camera() {}
+	public:
+		f32  GetZoom() const;
+		void SetZoom(f32 zoom);
+
+		const JVector2& GetFocusCenter() const;
+		void SetFocusCenter(const JVector2& focusCenter);
+
+		JRect GetOrthograhicRect() const;
+		JRect GetOrthograhicOriginRect() const;
+	private:
+		virtual void UpdateProj() const override;
 	};
 }

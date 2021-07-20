@@ -17,19 +17,6 @@ namespace JG
 
 		static JVector3 ConvertToRadians(const JVector3& vDegrees);
 		static JVector3 ConvertToDegrees(const JVector3& vRadians);
-		/*
-		  FXMVECTOR V,
-	  float     ViewportX,
-	  float     ViewportY,
-	  float     ViewportWidth,
-	  float     ViewportHeight,
-	  float     ViewportMinZ,
-	  float     ViewportMaxZ,
-	  FXMMATRIX Projection,
-	  CXMMATRIX View,
-	  CXMMATRIX World
-		*/
-
 	};
 
 
