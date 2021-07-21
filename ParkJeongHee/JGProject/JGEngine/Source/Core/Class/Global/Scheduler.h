@@ -168,7 +168,7 @@ namespace JG
 		SharedPtr<ScheduleHandle> ScheduleOnce(f32 delay, i32 priority, const SyncTaskFunction& task);
 		SharedPtr<ScheduleHandle> ScheduleByFrame(i32 delayFrame, i32 frameCycle, i32 repeat, i32 priority, const SyncTaskFunction& task);
 		SharedPtr<ScheduleHandle> ScheduleOnceByFrame(i32 delayFrame, i32 priority, const SyncTaskFunction& task);
-		SharedPtr<ScheduleHandle> ScheduleAsync(const AsyncTaskFunction& task, void* userData = nullptr);
+		SharedPtr<ScheduleHandle> ScheduleAsync(const AsyncTaskFunction& task, void* userData = nullptr, u64 dataSize = 0);
 
 
 		void FlushAsyncTask(bool isRestart = true);

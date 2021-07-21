@@ -33,8 +33,8 @@ namespace JG
         mesh->SetInputLayout(JGVertex::GetInputLayout());
         for (u64 i = 0; i < cnt; ++i)
         {
-            auto vBuffer = IVertexBuffer::Create(stock.SubMeshNames[i] + "_VBuffer", EBufferLoadMethod::GPULoad);
-            auto iBuffer = IIndexBuffer::Create(stock.SubMeshNames[i] + "_IBuffer", EBufferLoadMethod::GPULoad);
+            auto vBuffer = IVertexBuffer::Create(stock.SubMeshNames[i] + "_VBuffer", EBufferLoadMethod::CPULoad);
+            auto iBuffer = IIndexBuffer::Create(stock.SubMeshNames[i] + "_IBuffer", EBufferLoadMethod::CPULoad);
             auto subMesh = ISubMesh::Create(stock.SubMeshNames[i]);
 
             vBuffer->SetData(stock.Vertices[i].data(), sizeof(JGVertex), stock.Vertices[i].size());

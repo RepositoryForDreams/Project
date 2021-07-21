@@ -37,7 +37,6 @@ namespace JG
 			AssetID id;
 			id.Origin = mAssetIDPool[path];
 			id.ID = id.Origin;
-			id.ReadWrite = false;
 			return id;
 		}
 

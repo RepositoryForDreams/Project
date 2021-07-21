@@ -37,7 +37,7 @@ namespace JG
 		template<class T>
 		Asset<T>* GetAsset(AssetID id)
 		{
-			if (id.IsReadWrite() == false)
+			if (id.IsOrigin() == true)
 			{
 				auto iter = mAssetPoolByID.find(id.GetID());
 				if (iter == mAssetPoolByID.end())

@@ -136,7 +136,10 @@ namespace JG
 			}
 
 		}
-
+		for (auto& iter : fs::recursive_directory_iterator(outputPath))
+		{
+			//AssetDataBase::GetInstance().LoadOriginAsset(OUTPUT)
+		}
 	}
 
 	void GraphicsSystemLayer::Destroy()

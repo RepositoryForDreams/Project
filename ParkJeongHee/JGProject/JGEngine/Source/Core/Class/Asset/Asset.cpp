@@ -1,6 +1,9 @@
 #include "pch.h"
 #include "Asset.h"
 #include "AssetManager.h"
+#include "Application.h"
+#include "Graphics/GraphicsAPI.h"
+#include "Graphics/Mesh.h"
 namespace JG
 {
 	void TextureAssetStock::MakeJson(SharedPtr<JsonData> jsonData) const
@@ -139,14 +142,37 @@ namespace JG
 
 
 
-
+	                    
 	AssetDataBase::AssetDataBase()
 	{
+
 	}
 	AssetDataBase::~AssetDataBase()
 	{
+		if (mAssetLoadScheduleHandle)
+		{
+			mAssetLoadScheduleHandle->Reset();
+			mAssetLoadScheduleHandle = nullptr;
+		}
+		if (mAssetUnLoadScheduleHandle)
+		{
+			mAssetUnLoadScheduleHandle->Reset();
+			mAssetUnLoadScheduleHandle = nullptr;
+		}
 		mWaitingAssetManager.clear();
 		mAssetManagerPool.clear();
+
+
+		while(mLoadAssetDataQueue.empty() == false)
+		{
+			mLoadAssetDataQueue.pop();
+		}
+		while (mUnLoadAssetDataQueue.empty() == false)
+		{
+			mUnLoadAssetDataQueue.pop();
+		}
+		mOriginAssetDataPool.clear();
+		mAssetDataPool.clear();
 	}
 	SharedPtr<AssetManager> AssetDataBase::RequestAssetManager()
 	{
@@ -185,6 +211,249 @@ namespace JG
 		mAssetManagerPool.erase(assetManager.get());
 	}
 
+	AssetID AssetDataBase::LoadOriginAsset(const String& path)
+	{
+		if (mAssetLoadScheduleHandle == nullptr)
+		{
+			mAssetLoadScheduleHandle = 
+				Scheduler::GetInstance().ScheduleByFrame(0, 1, -1, SchedulePriority::EndSystem, SCHEDULE_BIND_FN(&AssetDataBase::LoadAsset_Update));
+		}
+		// 에셋 검사
+		auto iter = mOriginAssetDataPool.find(path);
+		if (iter != mOriginAssetDataPool.end())
+		{
+			iter->second->RefCount++;
+			return iter->second->ID;
+		}
+	
+		auto assetID   = RequestOriginAssetID();
+		auto assetData = CreateUniquePtr<AssetData>();
+		AssetLoadData assetLoadData;
+
+		assetData->ID       = assetID;
+		assetData->State    = EAssetDataState::Loading;
+		assetData->Path		= path;
+		assetLoadData.ID	= assetID;
+		strcpy(assetLoadData.Path, path.c_str());
+
+		// 에셋 추가
+		mOriginAssetDataPool.emplace(path, assetData.get());
+		mLoadAssetDataQueue.push(assetLoadData);
+		mAssetDataPool.emplace(assetID, std::move(assetData));
+	
+		return assetID;
+	}
+	AssetID AssetDataBase::LoadReadWriteAsset(AssetID originID)
+	{
+		return AssetID();
+	}
+	void AssetDataBase::UnLoadAsset(AssetID id)
+	{
+		if (mAssetUnLoadScheduleHandle == nullptr)
+		{
+			mAssetUnLoadScheduleHandle =
+				Scheduler::GetInstance().ScheduleByFrame(0, 1, -1, SchedulePriority::BeginSystem, SCHEDULE_BIND_FN(&AssetDataBase::UnLoadAsset_Update));
+		}
 
 
+		// 에셋 삭제
+		auto iter = mAssetDataPool.find(id);
+		if (iter == mAssetDataPool.end())
+		{
+			return;
+		}
+		iter->second->RefCount--;
+		if (iter->second->RefCount <= 0)
+		{
+			AssetUnLoadData unLoadData;
+			unLoadData.Asset = iter->second->Asset;
+			unLoadData.ID = iter->second->ID;
+			mUnLoadAssetDataQueue.push(unLoadData);
+			if (id.IsOrigin())
+			{
+				mOriginAssetDataPool.erase(iter->second->Path);
+			}
+			mAssetDataPool.erase(id);
+		}
+	}
+
+	AssetID AssetDataBase::RequestOriginAssetID()
+	{
+		AssetID id;
+		if (mAssetIDQueue.empty() == false)
+		{
+			id.Origin	 = mAssetIDQueue.front(); mAssetIDQueue.pop();
+			id.ID		 = id.Origin;
+		}
+		else
+		{
+			id.Origin    = mAssetIDOffset++;
+			id.ID		 = id.Origin;
+		}
+		return id;
+	}
+
+	AssetID AssetDataBase::RequestRWAssetID(AssetID originID)
+	{
+		if (originID.IsValid() == false || originID.IsOrigin() == false)
+		{
+			return AssetID();
+		}
+		if (mAssetDataPool.find(originID) == mAssetDataPool.end())
+		{
+			return AssetID();
+		}
+
+
+		AssetID id = RequestOriginAssetID();
+		id.Origin = originID.GetID();
+		return id;
+	}
+	void AssetDataBase::LoadAssetInternal(AssetLoadData* LoadData)
+	{
+		JG_CORE_INFO("Asset Loading... : {0}", LoadData->Path);
+		fs::path assetPath = LoadData->Path;
+		if (fs::exists(assetPath) == false)
+		{
+			return;
+		}
+		EAssetFormat assetFormat = EAssetFormat::None;
+		auto json = CreateSharedPtr<Json>();
+		if (Json::Read(assetPath.string(), json) == false)
+		{
+			return;
+		}
+		auto assetFormatVal = json->GetMember(JG_ASSET_FORMAT_KEY);
+		if (assetFormatVal)
+		{
+			assetFormat = (EAssetFormat)assetFormatVal->GetUint64();
+		}
+		auto assetVal = json->GetMember(JG_ASSET_KEY);
+		if (assetVal == nullptr)
+		{
+			return;
+		}
+
+		// 에셋 로드
+		switch (assetFormat)
+		{
+		case EAssetFormat::Texture:
+		{
+			TextureAssetStock stock;
+			stock.LoadJson(assetVal);
+			auto textureAsset   = CreateSharedPtr<Asset<ITexture>>(assetPath.string());
+			textureAsset->mData = ITexture::Create(stock);
+
+			LoadData->Asset = textureAsset;
+			break;
+		}
+		case EAssetFormat::Mesh:
+		{
+			StaticMeshAssetStock stock;
+			stock.LoadJson(assetVal);
+			auto meshAsset = CreateSharedPtr<Asset<IMesh>>(assetPath.string());
+			meshAsset->mData = IMesh::Create(stock);
+
+			LoadData->Asset = meshAsset;
+			break;
+		}
+		default:
+			JG_CORE_ERROR("{0} AssetFormat is not supported in LoadAsset", (int)assetFormat);
+			break;
+		}
+	}
+
+
+	EScheduleResult AssetDataBase::LoadAsset_Update()
+	{
+	
+		{
+			std::lock_guard<std::mutex> lock(mCompeleteMutex);
+			while (mLoadCompeleteAssetDataQueue.empty() == false)
+			{
+				auto compeleteData = mLoadCompeleteAssetDataQueue.front(); mLoadCompeleteAssetDataQueue.pop();
+
+				if (compeleteData.Asset == nullptr)
+				{
+					auto iter = mAssetDataPool.find(compeleteData.ID);
+					if (iter != mAssetDataPool.end())
+					{
+						JG_CORE_ERROR("Asset Load Fail  : {0}", iter->second->Path);
+						mOriginAssetDataPool.erase(iter->second->Path);
+						mAssetDataPool.erase(compeleteData.ID);
+					}
+				}
+				else
+				{
+					auto iter = mAssetDataPool.find(compeleteData.ID);
+					if (iter != mAssetDataPool.end())
+					{
+						JG_CORE_INFO("Asset Load Success : {0}", iter->second->Path);
+						iter->second->Asset = compeleteData.Asset;
+						iter->second->State = EAssetDataState::None;
+					}
+				}
+
+			}
+		}
+		u32 loopCnt = 0;
+		while (mLoadAssetDataQueue.empty() == false)
+		{
+			auto loadData = mLoadAssetDataQueue.front(); mLoadAssetDataQueue.pop();
+			Scheduler::GetInstance().ScheduleAsync(
+				[&](void* userData)
+			{
+				LoadAssetInternal((AssetLoadData*)userData);
+				AssetLoadData* _LoadData = (AssetLoadData*)userData;
+				AssetLoadCompeleteData data;
+				data.Asset = _LoadData->Asset;
+				data.ID = _LoadData->ID;
+				{
+					std::lock_guard<std::mutex> lock(mCompeleteMutex);
+					mLoadCompeleteAssetDataQueue.push(data);
+				}
+			}, &loadData);
+			++loopCnt;
+
+			if (loopCnt <= mMaxLoadAssetDataCount)
+			{
+				break;
+			}
+		}
+		return EScheduleResult::Continue;
+	}
+	EScheduleResult AssetDataBase::UnLoadAsset_Update()
+	{
+		u32 bufferCnt = Application::GetInstance().GetGraphicsAPI()->GetBufferCount();
+		List<AssetUnLoadData> aliveList;
+		u32 loopCnt = 0;
+		while (mUnLoadAssetDataQueue.empty() == false)
+		{
+			auto unLoadData = mUnLoadAssetDataQueue.front(); mUnLoadAssetDataQueue.pop();
+
+
+			if (unLoadData.FrameCount < bufferCnt)
+			{
+				aliveList.push_back(unLoadData);
+			}
+			else
+			{
+				unLoadData.Asset.reset();
+				unLoadData.Asset = nullptr;
+				mAssetIDQueue.push(unLoadData.ID.GetID());
+			}
+			++unLoadData.FrameCount;
+			++loopCnt;
+			if (loopCnt <= mMaxUnLoadAssetDataCount)
+			{
+				break;
+			}
+		}
+		for (auto& data : aliveList)
+		{
+			mUnLoadAssetDataQueue.push(data);
+		}
+
+		return EScheduleResult::Continue;
+	}
 }

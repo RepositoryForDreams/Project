@@ -178,11 +178,11 @@ namespace JG
 
 	class AssetID
 	{
+		friend class AssetDataBase;
 		friend class AssetManager;
 	private:
 		u64  Origin = ASSET_NULL_ID;
-		u64  ID = ASSET_NULL_ID;
-		bool ReadWrite = false;
+		u64  ID     = ASSET_NULL_ID;
 	public:
 		u64 GetID() const {
 			return ID;
@@ -190,11 +190,20 @@ namespace JG
 		u64 GetOriginID() const {
 			return Origin;
 		}
-		bool IsReadWrite() const {
-			return ReadWrite;
+		bool IsOrigin() const {
+			return Origin == ID;
 		}
 		bool IsValid() const {
 			return ID != ASSET_NULL_ID;
+		}
+	public:
+		bool operator==(const AssetID& id) const
+		{
+			return ID == id.GetID();
+		}
+		bool operator!=(const AssetID& id) const
+		{
+			return ID != id.GetID();
 		}
 	};
 
@@ -210,11 +219,11 @@ namespace JG
 	public:
 		virtual ~IAsset() = default;
 	};
-
 	template<class T>
 	class Asset : public IAsset
 	{
 		JGCLASS
+		friend class AssetDataBase;
 		friend class AssetManager;
 		u64    mAssetID = ASSET_NULL_ID;
 		String mAssetPath;
@@ -270,10 +279,110 @@ namespace JG
 		Dictionary<AssetManager*, SharedPtr<AssetManager>> mAssetManagerPool;
 		HashSet<SharedPtr<AssetManager>> mWaitingAssetManager;
 	public:
+		enum class EAssetDataState
+		{
+			None,
+			Loading,
+		};
+		struct AssetIDHash
+		{
+			std::size_t operator()(const AssetID& id) const {
+				return id.ID;
+			}
+		};
+		struct AssetData
+		{
+			AssetID ID;
+			String  Path;
+			u32               RefCount  = 0;
+			EAssetDataState   State     = EAssetDataState::None;
+			SharedPtr<IAsset> Asset		= nullptr;
+		};
+		struct AssetLoadData
+		{
+			AssetID ID;
+			SharedPtr<IAsset> Asset = nullptr;
+			char Path[256] = {0, };
+		};
+		struct AssetLoadCompeleteData
+		{
+			AssetID ID;
+			SharedPtr<IAsset> Asset = nullptr;
+		};
+		struct AssetUnLoadData
+		{
+			AssetID ID;
+			SharedPtr<IAsset> Asset;
+			u32 FrameCount  = 0;
+		};
+
+
+		// 에셋 데이터 Pool;
+		std::unordered_map<AssetID, UniquePtr<AssetData>, AssetIDHash> mAssetDataPool;
+		Dictionary<String, AssetData*>			  mOriginAssetDataPool;
+
+
+		// 현재 로딩/언로드 중인 에셋 데이터 
+		Queue<AssetLoadData>   mLoadAssetDataQueue;
+		Queue<AssetLoadCompeleteData>   mLoadCompeleteAssetDataQueue;
+		Queue<AssetUnLoadData> mUnLoadAssetDataQueue;
+		
+
+
+	
+		u64 mAssetIDOffset = 0;
+		Queue<u64> mAssetIDQueue;
+
+		const u32 mMaxLoadAssetDataCount   = 10;
+		const u32 mMaxUnLoadAssetDataCount = 10;
+
+		SharedPtr<ScheduleHandle> mAssetLoadScheduleHandle = nullptr;
+		SharedPtr<ScheduleHandle> mAssetUnLoadScheduleHandle = nullptr;
+
+		std::mutex mCompeleteMutex;
+	public:
 		AssetDataBase();
 		virtual ~AssetDataBase();
 	public:
 		SharedPtr<AssetManager> RequestAssetManager();
 		void ReturnAssetManager(SharedPtr<AssetManager> assetManager);
+	public:
+		AssetID LoadOriginAsset(const String& path);
+		AssetID LoadReadWriteAsset(AssetID originID);
+		void	UnLoadAsset(AssetID id);
+
+		template<class T>
+		Asset<T>* GetAsset(AssetID assetID)
+		{
+			auto iter = mAssetDataPool.find(assetID);
+			if (iter == mAssetDataPool.end())
+			{
+				return nullptr;
+			}
+			if (iter->second->State == EAssetDataState::None && iter->second->Asset->GetType() == JGTYPE(Asset<T>))
+			{
+				return static_cast<Asset<T>*>(iter->second->Asset.get());
+			}
+			return nullptr;
+		}
+	private:
+		AssetID RequestOriginAssetID();
+		AssetID RequestRWAssetID(AssetID originID);
+		void LoadAssetInternal(AssetLoadData* LoadData);
+
+
+		EScheduleResult LoadAsset_Update();
+		EScheduleResult UnLoadAsset_Update();
+		// 요청 받기
+
+		// 여기에 비동기로 에셋 로딩 로직 생성
+		// 에셋 종류
+		// 오리진 에셋
+		// 변형된 에셋
+
+
+		// 변형된 에셋은 오리진 에셋을 참조
+		// GetOriginAsset
+		// GetAsset( id 를 불러온다. )
 	};
 }

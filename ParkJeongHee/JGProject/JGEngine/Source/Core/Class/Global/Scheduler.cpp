@@ -52,6 +52,8 @@ namespace JG
                         // Task 실행
                         task->SetState(EScheduleState::Run);
                         task->Function(task->Handle->UserData);
+                        free(task->Handle->UserData);
+                        task->Handle->UserData = nullptr;
                         task->SetState(EScheduleState::Compelete);
                     }
 
@@ -86,23 +88,8 @@ namespace JG
                 break;
             }
         }
-
-        //for (auto& _pair : mSyncTaskByTickPool)
-        //{
-        //    _pair.second->ID          = SCHEDULE_NULL_ID;
-        //    _pair.second->Handle->mID = SCHEDULE_NULL_ID;
-        //}
-        //for (auto& _pair : mSyncTaskByFramePool)
-        //{
-        //    _pair.second->ID = SCHEDULE_NULL_ID;
-        //    _pair.second->Handle->mID = SCHEDULE_NULL_ID;
-        //}
         mSortedSyncTasks.clear();
         mSyncTaskPool.clear();
-        //mSortedSyncTaskByTicks.clear();
-        //mSortedSyncTaskByFrames.clear();
-        //mSyncTaskByTickPool.clear();
-        //mSyncTaskByFramePool.clear();
         mThreads.clear();
     }
     SharedPtr<ScheduleHandle> Scheduler::Schedule(f32 delay, f32 tickCycle, i32 repeat, i32 priority, const SyncTaskFunction& task)
@@ -131,16 +118,6 @@ namespace JG
         {
             mSortedSyncTasks[SyncTask->Priority].push_back(SyncTask);
         }
-
-        //mSyncTaskByTickPool.emplace(ID, SyncTask);
-        //if (mIsRunSyncTaskAll)
-        //{
-        //    mReservedSyncTaskByTick.push(SyncTask);
-        //}
-        //else
-        //{
-        //    mSortedSyncTaskByTicks[SyncTask->Priority].push_back(SyncTask);
-        //}
         return handle;
     }
     SharedPtr<ScheduleHandle> Scheduler::ScheduleOnce(f32 delay, i32 priority, const SyncTaskFunction& task)
@@ -174,23 +151,13 @@ namespace JG
         {
             mSortedSyncTasks[SyncTask->Priority].push_back(SyncTask);
         }
-        //mSyncTaskByFramePool.emplace(ID, SyncTask);
-        //if (mIsRunSyncTaskAll)
-        //{
-        //    mReservedSyncTaskByFrame.push(SyncTask);
-        //}
-        //else
-        //{
-        //    mSortedSyncTaskByFrames[SyncTask->Priority].push_back(SyncTask);
-        //}
-
         return handle;
     }
     SharedPtr<ScheduleHandle> Scheduler::ScheduleOnceByFrame(i32 delayFrame, i32 priority, const SyncTaskFunction& task)
     {
         return ScheduleByFrame(delayFrame, 0, 1, priority, task);
     }
-    SharedPtr<ScheduleHandle> Scheduler::ScheduleAsync(const AsyncTaskFunction& task, void* userData)
+    SharedPtr<ScheduleHandle> Scheduler::ScheduleAsync(const AsyncTaskFunction& task, void* userData, u64 dataSize)
     {
         auto asyncTask = CreateSharedPtr<AsyncTask>();
         auto handle    = CreateSharedPtr<ScheduleHandle>();
@@ -200,7 +167,11 @@ namespace JG
             handle->mID = ID;
             handle->mState = EScheduleState::Wait;
             handle->mType  = EScheduleType::Async;
-            handle->UserData = userData;
+            if (userData != nullptr)
+            {
+                userData = malloc(dataSize);
+                memcpy(handle->UserData, userData, dataSize);
+            }
             asyncTask->Handle = handle;
             asyncTask->Function = task;
 
@@ -266,57 +237,8 @@ namespace JG
                     break;
                     }
                 }
-
-    /*            if (task)
-                {
-                    Update(task);
-                }
-                else
-                {
-              
-                }*/
             }
         }
-
-        //for (auto& _pair : mSortedSyncTaskByTicks)
-        //{
-        //    auto& taskList = _pair.second;
-        //    Queue<u64> removeIndexQueue;
-        //    u64 cnt = _pair.second.size();
-
-        //    for (u64 i = 0; i < cnt; ++i)
-        //    {
-        //        auto task = taskList[i].lock();
-        //        if (task)
-        //        {
-        //            Update(task);
-        //        }
-        //        else
-        //        {
-        //            removeIndexQueue.push(i);
-        //        }
-        //    }
-        //}
-
-        //for (auto _pair : mSortedSyncTaskByFrames)
-        //{
-        //    auto& taskList = _pair.second;
-        //    Queue<u64> removeIndexQueue;
-        //    u64 cnt = _pair.second.size();
-
-        //    for (u64 i = 0; i < cnt; ++i)
-        //    {
-        //        auto task = taskList[i].lock();
-        //        if (task)
-        //        {
-        //            Update(task);
-        //        }
-        //        else
-        //        {
-        //            removeIndexQueue.push(i);
-        //        }
-        //    }
-        //}
         while (mReservedSyncTasks.empty() == false)
         {
             auto w_task = mReservedSyncTasks.front(); mReservedSyncTasks.pop();
@@ -327,25 +249,6 @@ namespace JG
             }
 
         }
-        // 추가 보충
-        //while (!mReservedSyncTaskByTick.empty())
-        //{
-        //    auto w_task = mReservedSyncTaskByTick.front(); mReservedSyncTaskByTick.pop();
-        //    auto task = w_task.lock();
-        //    if (task != nullptr)
-        //    {
-        //        mSortedSyncTaskByTicks[task->Priority].push_back(task);
-        //    }
-        //}
-        //while (!mReservedSyncTaskByFrame.empty())
-        //{
-        //    auto w_task = mReservedSyncTaskByFrame.front(); mReservedSyncTaskByFrame.pop();
-        //    auto task = w_task.lock();
-        //    if (task != nullptr)
-        //    {
-        //        mSortedSyncTaskByFrames[task->Priority].push_back(task);
-        //    }
-        //}
         mIsRunSyncTaskAll = false;
     }
     void Scheduler::Update(SyncTaskByTick* task)
