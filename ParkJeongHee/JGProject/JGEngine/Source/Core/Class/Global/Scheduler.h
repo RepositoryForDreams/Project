@@ -60,7 +60,11 @@ namespace JG
 		u64 mID = 0;
 		EScheduleState mState;
 		EScheduleType  mType;
+	private:
+		ScheduleHandle(const ScheduleHandle& copy) = delete;
+		ScheduleHandle& operator=(const ScheduleHandle& copy) = delete;
 	public:
+		ScheduleHandle() = default;
 		~ScheduleHandle();
 	public:
 		u64 GetID() const {
@@ -135,28 +139,20 @@ namespace JG
 			}
 		};
 	private:
-		u64 mIDOffset = 0;
+		u64 mIDOffset = 1;
 		Queue<u64> mIDQueue;
-		
+		std::thread::id mMainThreadID;
 		SharedPtr<Timer> mScheduleTimer;
 		//
 		Dictionary<u64, SharedPtr<SyncTask>>  mSyncTaskPool;
 		SortedDictionary<i32, List<WeakPtr<SyncTask>>>  mSortedSyncTasks;
 		Queue<WeakPtr<SyncTask>> mReservedSyncTasks;
-		//Dictionary<u64, SharedPtr<SyncTaskByTick>>  mSyncTaskByTickPool;
-		//Dictionary<u64, SharedPtr<SyncTaskByFrame>> mSyncTaskByFramePool;
-		//
-		//SortedDictionary<i32, List<WeakPtr<SyncTaskByTick>>>  mSortedSyncTaskByTicks;
-		//SortedDictionary<i32, List<WeakPtr<SyncTaskByFrame>>> mSortedSyncTaskByFrames;
-		//
-		//Queue<WeakPtr<SyncTaskByTick>> mReservedSyncTaskByTick;
-		//Queue<WeakPtr<SyncTaskByFrame>> mReservedSyncTaskByFrame;
-
 		// Thread ฐüทร
 		Queue<SharedPtr<AsyncTask>> mAsyncTaskQueue;
 		List<std::thread>			mThreads;
 		i32		   mMaxThreadCount = 0;
 		std::mutex mMutex;
+		std::mutex mTaskMutex;
 		std::condition_variable mRunAsyncTaskConVar;
 		bool mIsRunAsyncTaskAll = true;
 		bool mIsRunSyncTaskAll  = false;

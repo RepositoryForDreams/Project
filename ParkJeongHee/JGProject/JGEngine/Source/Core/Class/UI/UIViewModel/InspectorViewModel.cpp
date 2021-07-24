@@ -16,8 +16,10 @@ namespace JG
 	}
 	void InspectorViewModel::OnEvent(IEvent& e)
 	{
-		EventDispatcher dispatcher(e);
-		dispatcher.Dispatch<NotifyDestroyJGObjectEvent>(EVENT_BIND_FN(&InspectorViewModel::NotifyDestroyGameObject));
+		EventDispatcher dispatcher(e); // ResponseSelectedGameNodeInEditor
+		dispatcher.Dispatch<NotifyDestroyJGObjectEvent>(EVENT_BIND_FN(&InspectorViewModel::ResponseDestroyGameObject));
+		dispatcher.Dispatch<NotifySelectedGameNodeInEditorEvent>(EVENT_BIND_FN(&InspectorViewModel::ResponseSelectedGameNodeInEditor));
+
 	}
 	IJGObject* InspectorViewModel::GetTargetObject() const
 	{
@@ -63,7 +65,7 @@ namespace JG
 		}
 		
 	}
-	bool InspectorViewModel::NotifyDestroyGameObject(NotifyDestroyJGObjectEvent& e)
+	bool InspectorViewModel::ResponseDestroyGameObject(NotifyDestroyJGObjectEvent& e)
 	{
 		auto targetObject = GetTargetObject();
 		if (targetObject != nullptr)
@@ -73,6 +75,15 @@ namespace JG
 				SetTargetObject(nullptr);
 			}
 		}
+		return false;
+	}
+	bool InspectorViewModel::ResponseSelectedGameNodeInEditor(NotifySelectedGameNodeInEditorEvent& e)
+	{
+		if (e.SelectedGameNode != nullptr)
+		{
+			SetTargetObject(e.SelectedGameNode);
+		}
+		
 		return false;
 	}
 }

@@ -46,7 +46,7 @@ namespace JG
 		}
 		break;
 		case EBufferLoadMethod::CPULoad:
-			if (mD3DResource && originBtSize != btSize)
+			if (mD3DResource && (originBtSize != btSize || mCPUData == nullptr))
 			{
 				Reset();
 			}
@@ -63,15 +63,21 @@ namespace JG
 				if (SUCCEEDED(hResult))
 				{
 					ResourceStateTracker::RegisterResource(GetName(), mD3DResource.Get(), D3D12_RESOURCE_STATE_GENERIC_READ);
-					mD3DResource->Map(0, nullptr, &mCPUData);
+					auto result = mD3DResource->Map(0, nullptr, &mCPUData);
 				}
 			}
-			memcpy(mCPUData, datas, btSize);
+			if (mCPUData != nullptr)
+			{
+				memcpy(mCPUData, datas, btSize);
+			}
+			else
+			{
+				JG_CORE_WARN("{0} Buffer CPU Data is nullptr", GetName());
+
+			}
+	
 			break;
 		}
-
-
-
 		return true;
 	}
 
@@ -164,7 +170,7 @@ namespace JG
 		}
 		break;
 		case EBufferLoadMethod::CPULoad:
-			if (mD3DResource && originBtSize != btSize)
+			if (mD3DResource && (originBtSize != btSize || mCPUData == nullptr))
 			{
 				Reset();
 			}
@@ -181,10 +187,22 @@ namespace JG
 				if (SUCCEEDED(hResult))
 				{
 					ResourceStateTracker::RegisterResource(GetName(), mD3DResource.Get(), D3D12_RESOURCE_STATE_GENERIC_READ);
-					mD3DResource->Map(0, nullptr, (void**)&mCPUData);
+					hResult = mD3DResource->Map(0, nullptr, (void**)&mCPUData);
+					if (FAILED(hResult))
+					{
+						JG_CORE_WARN("{0} Buffer Fail Map", GetName());
+					}
 				}
 			}
-			memcpy(mCPUData, datas, btSize);
+			if (mCPUData != nullptr)
+			{
+				memcpy(mCPUData, datas, btSize);
+			}
+			else
+			{
+				JG_CORE_WARN("{0} Buffer CPU Data is nullptr", GetName());
+
+			}
 			break;
 		}
 		return true;

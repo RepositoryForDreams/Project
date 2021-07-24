@@ -245,7 +245,7 @@ namespace JG
 		return mShaderData->Bind();
 	}
 
-	void DirectX12Material::Init(SharedPtr<IShader> shader)
+	void DirectX12Material::Init(SharedPtr<IShader> shader, SharedPtr<IMaterialScript> script)
 	{
 		mShaderData = CreateUniquePtr<ShaderData>(shader);
 		SetDepthStencilState(EDepthStencilStateTemplate::Default);

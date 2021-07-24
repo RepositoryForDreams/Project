@@ -100,15 +100,6 @@ namespace JG
 
 		mCurrentSelectedNodeInInspector = node;
 
-		auto inspector = UIManager::GetInstance().GetUIView<InspectorView>();
-		if (inspector != nullptr)
-		{
-			auto inspectorVm = inspector->GetViewModel();
-			if (inspectorVm != nullptr)
-			{
-				inspectorVm->SetTargetObject(mCurrentSelectedNodeInInspector);
-			}
-		}
 		NotifySelectedGameNodeInEditorEvent e;
 		e.SelectedGameNode = node;
 		SendEvent(e);

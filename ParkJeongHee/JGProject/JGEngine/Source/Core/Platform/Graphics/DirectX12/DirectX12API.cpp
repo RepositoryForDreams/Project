@@ -265,11 +265,10 @@ namespace JG
 			desc.SrcBlend       = D3D12_BLEND_SRC_ALPHA;
 			desc.DestBlend      = D3D12_BLEND_INV_SRC_ALPHA;
 			desc.BlendOp        = D3D12_BLEND_OP_ADD;
-			desc.SrcBlendAlpha  = D3D12_BLEND_INV_DEST_ALPHA;
-			desc.DestBlendAlpha = D3D12_BLEND_ONE;
+			desc.SrcBlendAlpha  = D3D12_BLEND_ONE;
+			desc.DestBlendAlpha = D3D12_BLEND_INV_DEST_ALPHA;
 			desc.BlendOpAlpha   = D3D12_BLEND_OP_ADD;
-			desc.RenderTargetWriteMask = 0x0f;
-			break;
+			desc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL & ~D3D12_COLOR_WRITE_ENABLE_ALPHA;
 		}
 
 		if (out != nullptr)
@@ -635,7 +634,7 @@ namespace JG
 		}
 		return shader;
 	}
-	SharedPtr<IMaterial> DirectX12API::CreateMaterial(const String& name, SharedPtr<IShader> shader)
+	SharedPtr<IMaterial> DirectX12API::CreateMaterial(const String& name, SharedPtr<IShader> shader, SharedPtr<IMaterialScript> script)
 	{
 		if (shader == nullptr)
 		{
@@ -643,7 +642,7 @@ namespace JG
 		}
 		auto material = CreateSharedPtr<DirectX12Material>();
 		material->SetName(name);
-		material->Init(shader);
+		material->Init(shader, script);
 		return material;
 	}
 

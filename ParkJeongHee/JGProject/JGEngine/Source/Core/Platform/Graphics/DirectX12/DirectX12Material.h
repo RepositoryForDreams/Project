@@ -10,7 +10,7 @@ namespace JG
 	{
 	private:
 		String mName;
-		UniquePtr<ShaderData> mShaderData;
+		UniquePtr<ShaderData>    mShaderData;
 		D3D12_BLEND_DESC         mBlendDesc;
 		D3D12_DEPTH_STENCIL_DESC mDepthStencilDesc;
 		D3D12_RASTERIZER_DESC    mRasterzerDesc;
@@ -70,7 +70,7 @@ namespace JG
 		virtual const String& GetName() const override;
 	public:
 		virtual bool Bind() override;
-		virtual void Init(SharedPtr<IShader> shader) override;
+		virtual void Init(SharedPtr<IShader> shader, SharedPtr<IMaterialScript> script) override;
 	public:
 		virtual ~DirectX12Material() = default;
 	};

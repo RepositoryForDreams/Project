@@ -149,6 +149,8 @@ namespace JG
 	}
 	AssetDataBase::~AssetDataBase()
 	{
+		mAssetManagerPool.clear();
+
 		if (mAssetLoadScheduleHandle)
 		{
 			mAssetLoadScheduleHandle->Reset();
@@ -159,8 +161,7 @@ namespace JG
 			mAssetUnLoadScheduleHandle->Reset();
 			mAssetUnLoadScheduleHandle = nullptr;
 		}
-		mWaitingAssetManager.clear();
-		mAssetManagerPool.clear();
+	
 
 
 		while(mLoadAssetDataQueue.empty() == false)
@@ -177,27 +178,6 @@ namespace JG
 	SharedPtr<AssetManager> AssetDataBase::RequestAssetManager()
 	{
 		SharedPtr<AssetManager> result = nullptr;
-		if (mWaitingAssetManager.empty() == false)
-		{
-			
-			for (auto& assetManager : mWaitingAssetManager)
-			{
-				if (assetManager->IsResetting() == false)
-				{
-					result = assetManager;
-					break;
-				}
-			}
-
-			if (result != nullptr)
-			{
-				mAssetManagerPool[result.get()] = result;
-				mWaitingAssetManager.erase(result);
-				return result;
-			}
-
-		}
-		
 		result = CreateSharedPtr<AssetManager>();
 		mAssetManagerPool[result.get()] = result;
 
@@ -206,20 +186,35 @@ namespace JG
 	}
 	void AssetDataBase::ReturnAssetManager(SharedPtr<AssetManager> assetManager)
 	{
-		assetManager->Reset();
-		mWaitingAssetManager.insert(assetManager);
 		mAssetManagerPool.erase(assetManager.get());
+	}
+
+	EAssetFormat AssetDataBase::GetAssetFormat(const String& path)
+	{
+		auto absolutePath = fs::absolute(path).string();
+		{
+
+			std::shared_lock<std::shared_mutex> lock(mAssetFormatMutex);
+			auto iter = mOriginAssetFormatPool.find(absolutePath);
+			if (iter != mOriginAssetFormatPool.end())
+			{
+				return iter->second;
+			}
+		}
+		LoadOriginAsset(absolutePath);
+		return Json::GetAssetFormat(absolutePath);
 	}
 
 	AssetID AssetDataBase::LoadOriginAsset(const String& path)
 	{
+		auto absolutePath = fs::absolute(path).string();
 		if (mAssetLoadScheduleHandle == nullptr)
 		{
 			mAssetLoadScheduleHandle = 
 				Scheduler::GetInstance().ScheduleByFrame(0, 1, -1, SchedulePriority::EndSystem, SCHEDULE_BIND_FN(&AssetDataBase::LoadAsset_Update));
 		}
 		// 에셋 검사
-		auto iter = mOriginAssetDataPool.find(path);
+		auto iter = mOriginAssetDataPool.find(absolutePath);
 		if (iter != mOriginAssetDataPool.end())
 		{
 			iter->second->RefCount++;
@@ -232,12 +227,12 @@ namespace JG
 
 		assetData->ID       = assetID;
 		assetData->State    = EAssetDataState::Loading;
-		assetData->Path		= path;
+		assetData->Path		= absolutePath;
 		assetLoadData.ID	= assetID;
 		strcpy(assetLoadData.Path, path.c_str());
 
 		// 에셋 추가
-		mOriginAssetDataPool.emplace(path, assetData.get());
+		mOriginAssetDataPool.emplace(absolutePath, assetData.get());
 		mLoadAssetDataQueue.push(assetLoadData);
 		mAssetDataPool.emplace(assetID, std::move(assetData));
 	
@@ -311,7 +306,6 @@ namespace JG
 	}
 	void AssetDataBase::LoadAssetInternal(AssetLoadData* LoadData)
 	{
-		JG_CORE_INFO("Asset Loading... : {0}", LoadData->Path);
 		fs::path assetPath = LoadData->Path;
 		if (fs::exists(assetPath) == false)
 		{
@@ -339,20 +333,21 @@ namespace JG
 		{
 		case EAssetFormat::Texture:
 		{
-			TextureAssetStock stock;
-			stock.LoadJson(assetVal);
-			auto textureAsset   = CreateSharedPtr<Asset<ITexture>>(assetPath.string());
-			textureAsset->mData = ITexture::Create(stock);
-
-			LoadData->Asset = textureAsset;
+			LoadData->Stock = CreateSharedPtr<TextureAssetStock>();
+			LoadData->Asset = CreateSharedPtr<Asset<ITexture>>(assetPath.string());
+			LoadData->OnComplete = std::bind(&AssetDataBase::TextureAsset_OnCompelete, this, std::placeholders::_1);
+			LoadData->Stock->LoadJson(assetVal);
 			break;
 		}
 		case EAssetFormat::Mesh:
 		{
 			StaticMeshAssetStock stock;
 			stock.LoadJson(assetVal);
+
+
 			auto meshAsset = CreateSharedPtr<Asset<IMesh>>(assetPath.string());
 			meshAsset->mData = IMesh::Create(stock);
+
 
 			LoadData->Asset = meshAsset;
 			break;
@@ -361,6 +356,13 @@ namespace JG
 			JG_CORE_ERROR("{0} AssetFormat is not supported in LoadAsset", (int)assetFormat);
 			break;
 		}
+
+		{
+			auto absolutePath = fs::absolute(LoadData->Path).string();
+			std::lock_guard<std::shared_mutex> lock(mAssetFormatMutex);
+			mOriginAssetFormatPool[absolutePath] = assetFormat;
+		}
+
 	}
 
 
@@ -385,12 +387,16 @@ namespace JG
 				}
 				else
 				{
+					if (compeleteData.OnComplete)
+					{
+						compeleteData.OnComplete(&compeleteData);
+					}
 					auto iter = mAssetDataPool.find(compeleteData.ID);
 					if (iter != mAssetDataPool.end())
 					{
-						JG_CORE_INFO("Asset Load Success : {0}", iter->second->Path);
 						iter->second->Asset = compeleteData.Asset;
 						iter->second->State = EAssetDataState::None;
+						JG_CORE_INFO("Asset Load Success : {0}", iter->second->Path);
 					}
 				}
 
@@ -400,19 +406,22 @@ namespace JG
 		while (mLoadAssetDataQueue.empty() == false)
 		{
 			auto loadData = mLoadAssetDataQueue.front(); mLoadAssetDataQueue.pop();
+			JG_CORE_INFO("Asset Loading... : {0}", loadData.Path);
 			Scheduler::GetInstance().ScheduleAsync(
 				[&](void* userData)
 			{
 				LoadAssetInternal((AssetLoadData*)userData);
 				AssetLoadData* _LoadData = (AssetLoadData*)userData;
 				AssetLoadCompeleteData data;
-				data.Asset = _LoadData->Asset;
-				data.ID = _LoadData->ID;
+				data.Asset		= _LoadData->Asset;
+				data.ID			= _LoadData->ID;
+				data.Stock		= _LoadData->Stock;
+				data.OnComplete = _LoadData->OnComplete;
 				{
 					std::lock_guard<std::mutex> lock(mCompeleteMutex);
 					mLoadCompeleteAssetDataQueue.push(data);
 				}
-			}, &loadData);
+			}, &loadData, sizeof(AssetLoadData));
 			++loopCnt;
 
 			if (loopCnt <= mMaxLoadAssetDataCount)
@@ -455,5 +464,14 @@ namespace JG
 		}
 
 		return EScheduleResult::Continue;
+	}
+	void AssetDataBase::TextureAsset_OnCompelete(AssetLoadCompeleteData* data)
+	{
+		if (data == nullptr || data->Stock == nullptr || data->Asset == nullptr)
+		{
+			return;
+		}
+		auto textureAsset = static_cast<Asset<ITexture>*>(data->Asset.get());
+		textureAsset->mData = ITexture::Create(*(static_cast<TextureAssetStock*>(data->Stock.get())));
 	}
 }

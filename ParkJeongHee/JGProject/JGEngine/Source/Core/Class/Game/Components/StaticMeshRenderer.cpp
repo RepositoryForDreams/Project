@@ -17,7 +17,7 @@ namespace JG
 	{
 		mStaticRI = CreateSharedPtr<StandardStaticMeshRenderItem>();
 		mStaticRI->Materials.resize(1);
-		mStaticRI->Materials[0] = IMaterial::Create("DefaultMaterial", ShaderLibrary::Get(ShaderScript::Standard3DShader));
+		mStaticRI->Materials[0] = IMaterial::Create("DefaultMaterial", ShaderLibrary::GetInstance().GetShader(ShaderScript::Standard3DShader));
 	}
 	void StaticMeshRenderer::Awake()
 	{
@@ -31,10 +31,9 @@ namespace JG
 	}
 	void StaticMeshRenderer::Update()
 	{
-		if (mMeshID.IsValid() == false)
+		if (mMeshID.IsValid() && mMeshAsset == nullptr)
 		{
-			mMeshID    = GetGameWorld()->GetAssetManager()->LoadAsset(mMeshPath);
-			mMeshAsset = GetGameWorld()->GetAssetManager()->GetAsset<IMesh>(mMeshID);
+			mMeshAsset = AssetDataBase::GetInstance().GetAsset<IMesh>(mMeshID);
 		}
 	}
 	void StaticMeshRenderer::LateUpdate()
@@ -43,7 +42,7 @@ namespace JG
 	void StaticMeshRenderer::SetMesh(const String& path)
 	{
 		mMeshAsset = nullptr;
-		mMeshID = AssetID();
+		mMeshID = AssetDataBase::GetInstance().LoadOriginAsset(path);
 		mMeshPath = path;
 	}
 	void StaticMeshRenderer::MakeJson(SharedPtr<JsonData> jsonData) const
@@ -80,8 +79,11 @@ namespace JG
 	}
 	void StaticMeshRenderer::OnInspectorGUI()
 	{
+		BaseRenderer::OnInspectorGUI();
+		ImGui::AlignTextToFramePadding();
 		fs::path p = mMeshPath;
-		ImGui::InputText("Mesh", p.filename().string().data(), ImGuiInputTextFlags_ReadOnly);
+		ImGui::Text("Mesh    "); ImGui::SameLine();
+		ImGui::InputText("##Mesh Path", p.filename().string().data(), ImGuiInputTextFlags_ReadOnly);
 		if (ImGui::BeginDragDropTarget() && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
 		{
 			auto payLoad = ImGui::GetDragDropPayload();
@@ -96,5 +98,7 @@ namespace JG
 			}
 			ImGui::EndDragDropTarget();
 		}
+		ImGui::AlignTextToFramePadding();
+		ImGui::Text("Material"); ImGui::SameLine(); ImGui::InputText("##Mesh Path", "None", ImGuiInputTextFlags_ReadOnly);
 	}
 }

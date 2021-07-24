@@ -5,7 +5,7 @@
 
 namespace JG
 {
-	SharedPtr<IMaterial> IMaterial::Create(const String& name, SharedPtr<IShader> shader)
+	SharedPtr<IMaterial> IMaterial::Create(const String& name, SharedPtr<IShader> shader, SharedPtr<IMaterialScript> script)
 	{
 		auto api = Application::GetInstance().GetGraphicsAPI();
 		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");

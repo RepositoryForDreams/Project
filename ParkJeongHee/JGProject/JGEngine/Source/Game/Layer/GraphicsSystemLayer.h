@@ -59,6 +59,8 @@ namespace JG
 		SortedDictionary<u64, Dictionary<Type, List<SharedPtr<IRenderItem>>>> mPushedRenderItems;
 
 		SharedPtr<IMaterial> mStandardDefaultMaterial;
+
+		bool mIsRenderCompelete = false;
 	public:
 		virtual ~GraphicsSystemLayer() {}
 	public:
@@ -82,6 +84,7 @@ namespace JG
 		void Rendering(CameraItem* cameraItem, Type type, const List<SharedPtr<IRenderItem>>& renderItemList);
 	private:
 		EScheduleResult Update();
+		EScheduleResult Wait();
 	private:
 		void LoadShaderScript();
 		

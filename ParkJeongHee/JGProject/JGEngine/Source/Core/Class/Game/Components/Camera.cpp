@@ -346,6 +346,7 @@ namespace JG
 	}
 	void Camera::OnInspectorGUI()
 	{
+
 		JVector2 resolution = GetResolution();
 		f32 fov   = GetFOV();
 		Color color = GetClearColor();
@@ -353,12 +354,16 @@ namespace JG
 		f32 farZ  = GetFarZ();
 		bool isOrth = IsOrthographic();
 
-		ImGui::OnGui("Resolution", &resolution);
+		ImGui::OnGui("Resolution   ", &resolution);
 		ImGui::OnGui("Field of View", &fov);
-		ImGui::OnGui("NearZ", &nearZ);
-		ImGui::OnGui("FarZ", &farZ);
-		ImGui::Checkbox("Orthographic", &isOrth);
-		ImGui::ColorEdit4("ClearColor", (float*)&color);
+		ImGui::OnGui("NearZ        ", &nearZ);
+		ImGui::OnGui("FarZ         ", &farZ);
+		ImGui::AlignTextToFramePadding();
+		ImGui::Text("Orthographic  "); ImGui::SameLine();
+		ImGui::Checkbox("##Orthographic Toggle", &isOrth);
+		ImGui::AlignTextToFramePadding();
+		ImGui::Text( "ClearColor    "); ImGui::SameLine();
+		ImGui::ColorEdit4("## ClearColor Edit ", (float*)&color);
 
 
 		SetFOV(fov);

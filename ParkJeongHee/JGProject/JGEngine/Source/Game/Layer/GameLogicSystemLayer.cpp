@@ -15,6 +15,7 @@
 #include "Class/Asset/Asset.h"
 
 #include "Class/UI/ModalUI/ProgressBarModalView.h"
+#include <Class/UI/UIView/InspectorView.h>
 namespace JG
 {
 	void GameLogicSystemLayer::OnAttach()
@@ -85,7 +86,15 @@ namespace JG
 		NotifySelectedGameNodeInEditorEvent pickingEvent;
 		if (mGameWorld != nullptr)
 		{
-			pickingEvent.SelectedGameNode = mGameWorld->Picking(e.ClickPos);
+			List<IJGObject*> exceptObjectList;
+			auto inspectorView = UIManager::GetInstance().GetUIView<InspectorView>();
+			if (inspectorView)
+			{
+				exceptObjectList.push_back(inspectorView->GetViewModel()->GetTargetObject());
+			}
+
+
+			pickingEvent.SelectedGameNode = mGameWorld->Picking(e.ClickPos, exceptObjectList);
 		}
 		else
 		{

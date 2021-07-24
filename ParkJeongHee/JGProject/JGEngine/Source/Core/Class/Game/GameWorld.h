@@ -39,7 +39,7 @@ namespace JG
 		void Destroy(GameSystem* sys);
 		void Destroy(GameWorld* world);
 	public:
-		GameNode* Picking(const JVector2& screenPos);
+		GameNode* Picking(const JVector2& screenPos, List<IJGObject*> exceptObjectList);
 		// 에디터 카메라 컬링
 		// 
 	private:

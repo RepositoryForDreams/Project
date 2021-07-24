@@ -276,9 +276,7 @@ namespace JG
 	class AssetDataBase : public GlobalSingleton<AssetDataBase>
 	{
 		friend class Application;
-		Dictionary<AssetManager*, SharedPtr<AssetManager>> mAssetManagerPool;
-		HashSet<SharedPtr<AssetManager>> mWaitingAssetManager;
-	public:
+	private:
 		enum class EAssetDataState
 		{
 			None,
@@ -298,17 +296,25 @@ namespace JG
 			EAssetDataState   State     = EAssetDataState::None;
 			SharedPtr<IAsset> Asset		= nullptr;
 		};
+		// 로딩중인 에셋 데이터
+		struct AssetLoadCompeleteData;
 		struct AssetLoadData
 		{
 			AssetID ID;
+			char Path[256] = { 0, };
 			SharedPtr<IAsset> Asset = nullptr;
-			char Path[256] = {0, };
+			SharedPtr<IAssetStock> Stock = nullptr;
+			std::function<void(AssetLoadCompeleteData*)> OnComplete;
 		};
+		// 로드 완료된 에셋 데이터
 		struct AssetLoadCompeleteData
 		{
 			AssetID ID;
 			SharedPtr<IAsset> Asset = nullptr;
+			SharedPtr<IAssetStock> Stock = nullptr;
+			std::function<void(AssetLoadCompeleteData*)> OnComplete;
 		};
+		// 언로드 중인 에셋 데이터
 		struct AssetUnLoadData
 		{
 			AssetID ID;
@@ -317,16 +323,16 @@ namespace JG
 		};
 
 
+
 		// 에셋 데이터 Pool;
 		std::unordered_map<AssetID, UniquePtr<AssetData>, AssetIDHash> mAssetDataPool;
 		Dictionary<String, AssetData*>			  mOriginAssetDataPool;
-
+		Dictionary<String, EAssetFormat>		  mOriginAssetFormatPool;
 
 		// 현재 로딩/언로드 중인 에셋 데이터 
 		Queue<AssetLoadData>   mLoadAssetDataQueue;
 		Queue<AssetLoadCompeleteData>   mLoadCompeleteAssetDataQueue;
 		Queue<AssetUnLoadData> mUnLoadAssetDataQueue;
-		
 
 
 	
@@ -340,6 +346,11 @@ namespace JG
 		SharedPtr<ScheduleHandle> mAssetUnLoadScheduleHandle = nullptr;
 
 		std::mutex mCompeleteMutex;
+		std::shared_mutex mAssetFormatMutex;
+
+
+
+		Dictionary<AssetManager*, SharedPtr<AssetManager>> mAssetManagerPool;
 	public:
 		AssetDataBase();
 		virtual ~AssetDataBase();
@@ -347,6 +358,7 @@ namespace JG
 		SharedPtr<AssetManager> RequestAssetManager();
 		void ReturnAssetManager(SharedPtr<AssetManager> assetManager);
 	public:
+		EAssetFormat GetAssetFormat(const String& path);
 		AssetID LoadOriginAsset(const String& path);
 		AssetID LoadReadWriteAsset(AssetID originID);
 		void	UnLoadAsset(AssetID id);
@@ -373,6 +385,10 @@ namespace JG
 
 		EScheduleResult LoadAsset_Update();
 		EScheduleResult UnLoadAsset_Update();
+
+	private:
+		void TextureAsset_OnCompelete(AssetLoadCompeleteData* data);
+
 		// 요청 받기
 
 		// 여기에 비동기로 에셋 로딩 로직 생성

@@ -94,8 +94,8 @@ namespace JG
 
 		bool IsActive() const;
 	protected:
-		GameNode* Picking3DRecursive(const JRay& pickingRay);
-		GameNode* Picking2DRecursive(const JVector2& pickingPos);
+		void Picking3DRecursive(List<GameNode*>& refPickingObjectList, const JRay& pickingRay);
+		void Picking2DRecursive(List<GameNode*>& refPickingObjectList, const JVector2& pickingPos);
 		void DestroyRecursive();
 	};
 

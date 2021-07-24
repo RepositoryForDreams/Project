@@ -16,8 +16,6 @@ namespace JG
 		mSpriteRI = CreateUniquePtr<Standard2DRenderItem>();
 		mSpriteRI->WorldMatrix = JMatrix::Identity();
 		mSpriteRI->Color = Color::White();
-		auto assetPath = Application::GetAssetPath();
-		mSpritePath = CombinePath(assetPath, "Resources/NullTexture.jgasset");
 	}
 	void SpriteRenderer::Awake()
 	{
@@ -26,7 +24,11 @@ namespace JG
 	void SpriteRenderer::Start()
 	{
 		BaseRenderer::Start();
-	
+		if (mAssetHandle == nullptr)
+		{
+			auto assetPath = Application::GetAssetPath();
+			SetSprite(CombinePath(assetPath, "Resources/NullTexture.jgasset"));
+		}
 
 	}
 	void SpriteRenderer::Destory()
@@ -35,11 +37,7 @@ namespace JG
 	}
 	void SpriteRenderer::Update()
 	{
-		if (mSpriteID.IsValid() == false)
-		{
-			mSpriteID = GetGameWorld()->GetAssetManager()->LoadAsset(mSpritePath);
-			mAsset = GetGameWorld()->GetAssetManager()->GetAsset<ITexture>(mSpriteID);
-		}
+
 	}
 
 	void SpriteRenderer::LateUpdate()
@@ -72,12 +70,12 @@ namespace JG
 
 	void SpriteRenderer::SetSprite(const String& path)
 	{
-		if (Json::GetAssetFormat(path) != EAssetFormat::Texture)
+		auto assetManager = GetGameWorld()->GetAssetManager();
+		if (assetManager->GetAssetFormat(path) != EAssetFormat::Texture)
 		{
 			return;
 		}
-		mAsset = nullptr;
-		mSpriteID = AssetID();
+		mAssetHandle = assetManager->RequestOriginAsset<ITexture>(path);
 		mSpritePath = path;
 	}
 
@@ -86,10 +84,10 @@ namespace JG
 		auto transform = GetOwner()->GetTransform();
 		mSpriteRI->WorldMatrix = transform->GetWorldMatrix();
 
-		if (mAsset != nullptr && mAsset->Get())
+		if (mAssetHandle && mAssetHandle->IsValid())
 		{
-			auto info = mAsset->Get()->GetTextureInfo();
-			mSpriteRI->Texture = mAsset->Get();
+			auto info = mAssetHandle->GetAsset()->Get()->GetTextureInfo();
+			mSpriteRI->Texture = mAssetHandle->GetAsset()->Get();
 			f32 adjust = (f32)info.PixelPerUnit / (f32)GameSettings::GetUnitSize();
 			f32 spriteWidth  = info.Width  * adjust;
 			f32 spriteHeight = info.Height * adjust;
@@ -116,12 +114,16 @@ namespace JG
 	void SpriteRenderer::OnInspectorGUI()
 	{
 		BaseRenderer::OnInspectorGUI();
-		
-		ImGui::ColorEdit4("Color", (float*)(&mSpriteRI->Color));
+		ImGui::AlignTextToFramePadding();
+		ImGui::Text("Color "); ImGui::SameLine();
+		ImGui::ColorEdit4("##Color Editor", (float*)(&mSpriteRI->Color));
 		
 		fs::path p = mSpritePath;
 		auto fileName = p.filename().string();
-		ImGui::InputText("Texture", fileName.data(), ImGuiInputTextFlags_ReadOnly);
+	
+		ImGui::AlignTextToFramePadding();
+		ImGui::Text("Sprite"); ImGui::SameLine();
+		ImGui::InputText("##TextureSlot", fileName.data(), ImGuiInputTextFlags_ReadOnly);
 		if (ImGui::BeginDragDropTarget() && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
 		{
 			auto payLoad = ImGui::GetDragDropPayload();
@@ -137,4 +139,5 @@ namespace JG
 			ImGui::EndDragDropTarget();
 		}
 	}
+
 }

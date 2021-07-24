@@ -49,6 +49,7 @@ namespace JG
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
+		io.Fonts->AddFontFromFileTTF("../../Source/Font/Consolas.ttf", 16.0f);
 		ImGui::StyleColorsDark();
 
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls

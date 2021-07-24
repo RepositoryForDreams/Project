@@ -33,19 +33,19 @@
                         "Name": "Transform",
                         "IsActive": true,
                         "Location": [
-                            -1.8758857250213624,
-                            10.568710327148438,
-                            -11.938887596130371
+                            0.42881447076797488,
+                            7.086958408355713,
+                            -13.690011978149414
                         ],
                         "Rotation": [
-                            19.683359146118165,
-                            16.225934982299806,
+                            43.152286529541019,
+                            359.8258056640625,
                             0.0
                         ],
                         "Scale": [
-                            1.0,
-                            1.0,
-                            1.0
+                            0.9999810457229614,
+                            0.9999750852584839,
+                            0.9999850392341614
                         ]
                     },
                     {
@@ -62,8 +62,8 @@
                         "ClearColor": [
                             0.0,
                             0.0,
-                            1.0,
-                            0.01568627543747425
+                            0.0,
+                            1.0
                         ],
                         "CullingLayerMask": 18446744073709551615,
                         "IsOrthographic": false
@@ -104,9 +104,9 @@
                                 "Name": "Transform",
                                 "IsActive": true,
                                 "Location": [
-                                    -225.92823791503907,
-                                    65.27893829345703,
-                                    1.1450561743231447e-7
+                                    40.0,
+                                    60.0,
+                                    8.412658303313947e-8
                                 ],
                                 "Rotation": [
                                     0.0,
@@ -129,7 +129,7 @@
                                     1.0,
                                     1.0
                                 ],
-                                "SpritePath": "../../../JGGameProject/Project_C/Asset\\Resources\\UV.Grid.jgasset"
+                                "SpritePath": "../../../JGGameProject/Project_C/Asset\\Resources\\image.jgasset"
                             }
                         ],
                         "Childs": []
@@ -174,9 +174,9 @@
                                 "Name": "Transform",
                                 "IsActive": true,
                                 "Location": [
-                                    18.000110626220704,
-                                    114.0000228881836,
-                                    0.0
+                                    -200.0,
+                                    -45.0,
+                                    1.2151616601840943e-7
                                 ],
                                 "Rotation": [
                                     0.0,
@@ -199,7 +199,7 @@
                                     1.0,
                                     1.0
                                 ],
-                                "SpritePath": "../../../JGGameProject/Project_C/Asset/Resources/NullTexture.jgasset"
+                                "SpritePath": "../../../JGGameProject/Project_C/Asset\\Resources\\UV.Grid.jgasset"
                             }
                         ],
                         "Childs": []

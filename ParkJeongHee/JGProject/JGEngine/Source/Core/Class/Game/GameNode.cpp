@@ -424,19 +424,15 @@ namespace JG
 	{
 		return mIsActive;
 	}
-	GameNode* GameNode::Picking3DRecursive(const JRay& pickingRay)
+	void GameNode::Picking3DRecursive(List<GameNode*>& refPickingObjectList, const JRay& pickingRay)
 	{
 		if (IsActive() == false)
 		{
-			return nullptr;
+			return;
 		}
 		for (auto& child : mChilds)
 		{
-			auto pickingObj = child->Picking3DRecursive(pickingRay);
-			if (pickingObj != nullptr)
-			{
-				return pickingObj;
-			}
+			child->Picking3DRecursive(refPickingObjectList, pickingRay);
 		}
 		auto bbox = GetBoundingBox();
 		if (bbox)
@@ -446,21 +442,22 @@ namespace JG
 			localRay.dir    = invWorld.TransformVector(localRay.dir);
 			localRay.origin = invWorld.TransformPoint(localRay.origin);
 
-
 			if (bbox->Intersection(localRay) == true)
 			{
-				return this;
+				refPickingObjectList.push_back(this);
 			}
 		}
-	
-		return nullptr;
 	}
-	GameNode* GameNode::Picking2DRecursive(const JVector2& pickingPos)
+	void GameNode::Picking2DRecursive(List<GameNode*>& refPickingObjectList, const JVector2& pickingPos)
 	{
 
 		if (IsActive() == false)
 		{
-			return nullptr;
+			return;
+		}
+		for (auto& child : mChilds)
+		{
+			child->Picking2DRecursive(refPickingObjectList, pickingPos);
 		}
 		auto bbox = GetBoundingBox();
 		if (bbox)
@@ -471,20 +468,12 @@ namespace JG
 			worldBBox.max = worldMatrix.TransformPoint(bbox->max);
 			worldBBox.min.z = 0.0f;
 			worldBBox.max.z = 0.0f;
+
 			if (worldBBox.Contain(JVector3(pickingPos, 0.0f)) == true)
 			{
-				return this;
+				return refPickingObjectList.push_back(this);
 			}
 		}
-		for (auto& child : mChilds)
-		{
-			auto pickingObj = child->Picking2DRecursive(pickingPos);
-			if (pickingObj != nullptr)
-			{
-				return pickingObj;
-			}
-		}
-		return nullptr;
 	}
 	void GameNode::DestroyRecursive()
 	{

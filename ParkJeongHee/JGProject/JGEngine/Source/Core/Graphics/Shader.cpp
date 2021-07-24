@@ -18,23 +18,31 @@ namespace JG
 		{
 			return;
 		}
-		std::lock_guard<std::shared_mutex> lock(GetInstance().mMutex);
+		std::lock_guard<std::shared_mutex> lock(mMutex);
 
-		auto iter = GetInstance().mShaders.find(shader->GetName());
-		if (iter == GetInstance().mShaders.end())
+		auto iter = mShaders.find(shader->GetName());
+		if (iter == mShaders.end())
 		{
-			GetInstance().mShaders.emplace(shader->GetName(), shader);
+			mShaders.emplace(shader->GetName(), shader);
 		}
 	}
-	SharedPtr<IShader> ShaderLibrary::Get(const String& name)
+	void ShaderLibrary::RegisterScirpt(SharedPtr<IMaterialScript> script)
 	{
-		std::shared_lock<std::shared_mutex> lock(GetInstance().mMutex);
-		auto iter = GetInstance().mShaders.find(name);
-		if (iter != GetInstance().mShaders.end())
+	}
+	SharedPtr<IShader> ShaderLibrary::GetShader(const String& name)
+	{
+		std::shared_lock<std::shared_mutex> lock(mMutex);
+		auto iter = mShaders.find(name);
+		if (iter != mShaders.end())
 		{
 			return iter->second;
 		}
 		return nullptr;
+	}
+
+	SharedPtr<IMaterialScript> ShaderLibrary::GetScript(const String& name)
+	{
+		return SharedPtr<IMaterialScript>();
 	}
 
 

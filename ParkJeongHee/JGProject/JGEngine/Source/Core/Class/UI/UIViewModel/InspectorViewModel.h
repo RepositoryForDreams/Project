@@ -20,6 +20,7 @@ namespace JG
 		const SortedSet<String>& FindComponentTypeList(const String& filter);
 		void SelectComponentType(const String& typeName);
 	private:
-		bool NotifyDestroyGameObject(NotifyDestroyJGObjectEvent& e);
+		bool ResponseDestroyGameObject(NotifyDestroyJGObjectEvent& e);
+		bool ResponseSelectedGameNodeInEditor(NotifySelectedGameNodeInEditorEvent& e);
 	};
 }

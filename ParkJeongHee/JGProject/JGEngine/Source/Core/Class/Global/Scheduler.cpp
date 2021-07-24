@@ -17,12 +17,17 @@ namespace JG
         {
             Scheduler::GetInstance().RemoveSchedule(*this);
             mID = Scheduler::SCHEDULE_NULL_ID;
+            if (UserData != nullptr)
+            {
+                free(UserData);
+                UserData = nullptr;
+            }
         }
     }
 
     Scheduler::Scheduler()
     {
-
+        mMainThreadID = std::this_thread::get_id();
         mMaxThreadCount = std::thread::hardware_concurrency();
 
         JG_CORE_INFO("Scheduler Prepared Thread Count :  {0} ", mMaxThreadCount);
@@ -52,8 +57,6 @@ namespace JG
                         // Task ½ÇÇà
                         task->SetState(EScheduleState::Run);
                         task->Function(task->Handle->UserData);
-                        free(task->Handle->UserData);
-                        task->Handle->UserData = nullptr;
                         task->SetState(EScheduleState::Compelete);
                     }
 
@@ -94,9 +97,7 @@ namespace JG
     }
     SharedPtr<ScheduleHandle> Scheduler::Schedule(f32 delay, f32 tickCycle, i32 repeat, i32 priority, const SyncTaskFunction& task)
     {
-        u64 ID = ReceiveScheduleID();
         auto SyncTask = CreateSharedPtr<SyncTaskByTick>();
-        SyncTask->ID    = ID;
         SyncTask->Delay = delay;
         SyncTask->TickCycle = tickCycle;
         SyncTask->Repeat = repeat;
@@ -104,13 +105,19 @@ namespace JG
         SyncTask->Function = task;
 
         auto handle = CreateSharedPtr<ScheduleHandle>();
-        handle->mID = ID;
         handle->mState = EScheduleState::Wait;
         handle->mType  = EScheduleType::SyncByTick;
         SyncTask->Handle = handle;
 
+
+
+
+        std::lock_guard<std::mutex> lock(mTaskMutex);
+        u64 ID = ReceiveScheduleID();
+        SyncTask->ID = ID;
+        handle->mID  = ID;
         mSyncTaskPool.emplace(ID, SyncTask);
-        if (mIsRunSyncTaskAll)
+        if (mIsRunSyncTaskAll || mMainThreadID != std::this_thread::get_id())
         {
             mReservedSyncTasks.push(SyncTask);
         }
@@ -126,9 +133,7 @@ namespace JG
     }
     SharedPtr<ScheduleHandle> Scheduler::ScheduleByFrame(i32 delayFrame, i32 frameCycle, i32 repeat, i32 priority, const SyncTaskFunction& task)
     {
-        u64 ID = ReceiveScheduleID();
         auto SyncTask = CreateSharedPtr<SyncTaskByFrame>();
-        SyncTask->ID = ID;
         SyncTask->Delay = delayFrame;
         SyncTask->FrameCycle = frameCycle;
         SyncTask->Repeat = repeat;
@@ -136,14 +141,17 @@ namespace JG
         SyncTask->Function = task;
        
         auto handle = CreateSharedPtr<ScheduleHandle>();
-        handle->mID = ID;
         handle->mState = EScheduleState::Wait;
         handle->mType = EScheduleType::SyncByFrame;
         SyncTask->Handle = handle;
 
 
+        std::lock_guard<std::mutex> lock(mTaskMutex);
+        u64 ID = ReceiveScheduleID();
+        SyncTask->ID = ID;
+        handle->mID = ID;
         mSyncTaskPool.emplace(ID, SyncTask);
-        if (mIsRunSyncTaskAll)
+        if (mIsRunSyncTaskAll || mMainThreadID != std::this_thread::get_id())
         {
             mReservedSyncTasks.push(SyncTask);
         }
@@ -162,19 +170,19 @@ namespace JG
         auto asyncTask = CreateSharedPtr<AsyncTask>();
         auto handle    = CreateSharedPtr<ScheduleHandle>();
         {
-            std::lock_guard<std::mutex> lock(mMutex);
-            u64 ID = ReceiveScheduleID();
-            handle->mID = ID;
+
+            handle->mID = 0;
             handle->mState = EScheduleState::Wait;
             handle->mType  = EScheduleType::Async;
             if (userData != nullptr)
             {
-                userData = malloc(dataSize);
+                handle->UserData = malloc(dataSize);
                 memcpy(handle->UserData, userData, dataSize);
             }
             asyncTask->Handle = handle;
             asyncTask->Function = task;
 
+            std::lock_guard<std::mutex> lock(mMutex);
             mAsyncTaskQueue.push(asyncTask);
         }
         mRunAsyncTaskConVar.notify_one();
@@ -182,25 +190,26 @@ namespace JG
     }
     void Scheduler::FlushAsyncTask(bool isRestart)
     {
-        mIsRunAsyncTaskAll = false;
+        if (isRestart == false)
+        {
+            mIsRunAsyncTaskAll = false;
+        }
+
         {
             std::lock_guard<std::mutex> lock(mMutex);
             mRunAsyncTaskConVar.notify_all();
         }
-
-        for (auto& _thread : mThreads)
+        while (mAsyncTaskQueue.empty() == false) {}
+        if (isRestart == false)
         {
-            if (_thread.joinable())
+            for (auto& _thread : mThreads)
             {
-                _thread.join();
+                if (_thread.joinable())
+                {
+                    _thread.join();
+                }
             }
         }
-
-        if (isRestart)
-        {
-            mIsRunAsyncTaskAll = true;
-        }
-
     }
     const Timer* Scheduler::GetScheduleTimer() const
     {
@@ -239,6 +248,9 @@ namespace JG
                 }
             }
         }
+
+
+        std::lock_guard<std::mutex> lock(mTaskMutex);
         while (mReservedSyncTasks.empty() == false)
         {
             auto w_task = mReservedSyncTasks.front(); mReservedSyncTasks.pop();
@@ -247,7 +259,6 @@ namespace JG
             {
                 mSortedSyncTasks[task->Priority].push_back(task);
             }
-
         }
         mIsRunSyncTaskAll = false;
     }
@@ -357,17 +368,6 @@ namespace JG
     void Scheduler::RemoveSchedule(const ScheduleHandle& handle)
     {
         mSyncTaskPool.erase(handle.mID);
-        //switch (handle.mType)
-        //{
-        //case EScheduleType::SyncByTick:
-        //    mSyncTaskByTickPool.erase(handle.mID);
-        //    break;
-        //case EScheduleType::SyncByFrame:
-        //    mSyncTaskByFramePool.erase(handle.mID);
-        //    break;
-        //case EScheduleType::Async:
-        //    break;
-        //}
     }
     u64 Scheduler::ReceiveScheduleID()
     {

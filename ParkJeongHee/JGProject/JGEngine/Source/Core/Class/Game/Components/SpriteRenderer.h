@@ -1,6 +1,7 @@
 #pragma once
 #include "BaseRenderer.h"
 #include "Class/Asset/Asset.h"
+#include "Class/Asset/AssetManager.h"
 namespace JG
 {
 	class SpriteRenderer : public BaseRenderer
@@ -11,9 +12,9 @@ namespace JG
 
 
 		String  mSpritePath;
-		AssetID mSpriteID;
 		JVector2 mSpriteSize;
-		Asset<ITexture>* mAsset = nullptr;
+
+		SharedPtr<AssetHandle<ITexture>> mAssetHandle;
 	public:
 		virtual ~SpriteRenderer() = default;
 	public:

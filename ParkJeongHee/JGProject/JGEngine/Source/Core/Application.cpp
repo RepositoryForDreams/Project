@@ -89,7 +89,7 @@ namespace JG
 		{
 			layer->Begin();
 		});
-		
+		Scheduler::GetInstance().FlushAsyncTask(true);
 
 		while(mIsRunning)
 		{

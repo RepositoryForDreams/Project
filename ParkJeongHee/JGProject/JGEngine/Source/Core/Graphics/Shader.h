@@ -23,7 +23,7 @@ namespace JG
 	
 
 	/* Shader 자체
-	
+	FragmentShader 
 	*/
 	class IComputeBuffer;
 	class ITexture;
@@ -39,15 +39,54 @@ namespace JG
 	public:
 		static SharedPtr<IShader> Create(const String& name, const String& sourceCode, EShaderFlags flags);
 	};
+
+
+
+
+	class IMaterialScript
+	{
+	public:
+		virtual const String& GetCode() const    = 0;
+		virtual const String& GetName() const = 0;
+	};
+
+	class MaterialScript : public IMaterialScript
+	{
+	public:
+		enum : u64
+		{
+			Surface,
+		};
+	private:
+		String mName;
+		String mCode;
+	public:
+		MaterialScript(const String& code) : mCode(code) {}
+	public:
+		virtual const String& GetCode() const override 
+		{
+			return mCode;
+		}
+		virtual const String& GetName() const override
+		{
+			return mName;
+		}
+	};
+
+
 	class ShaderLibrary : public GlobalSingleton<ShaderLibrary>
 	{
 		friend class Application;
 	private:
 		Dictionary<String, SharedPtr<IShader>> mShaders;
+		Dictionary<String, SharedPtr<IMaterialScript>> mMaterialScirpt;
 		std::shared_mutex mMutex;
 	public:
-		static void RegisterShader(SharedPtr<IShader> shader);
-		static SharedPtr<IShader> Get(const String& name);
+		void RegisterShader(SharedPtr<IShader> shader);
+		void RegisterScirpt(SharedPtr<IMaterialScript> script);
+
+		SharedPtr<IShader> GetShader(const String& name);
+		SharedPtr<IMaterialScript> GetScript(const String& name);
 	};
 
 

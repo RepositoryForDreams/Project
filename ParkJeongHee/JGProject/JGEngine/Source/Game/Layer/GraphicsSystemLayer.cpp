@@ -89,15 +89,15 @@ namespace JG
 
 	void GraphicsSystemLayer::Begin()
 	{
-		Scheduler::GetInstance().Schedule(0, 0.0f, -1, SchedulePriority::EndSystem, SCHEDULE_BIND_FN(&GraphicsSystemLayer::Update));
+		Scheduler::GetInstance().ScheduleByFrame(0, 0, -1, SchedulePriority::BeginSystem, SCHEDULE_BIND_FN(&GraphicsSystemLayer::Update));
+		Scheduler::GetInstance().ScheduleByFrame(0, 0, -1, SchedulePriority::EndSystem, SCHEDULE_BIND_FN(&GraphicsSystemLayer::Wait));
 		mMainCamera = CreateUniquePtr<CameraItem>();
 
 
 		mRenderItemPriority[JGTYPE(Standard2DRenderItem)] = (u64)ERenderItemPriority::_2D;
-		mStandardDefaultMaterial = IMaterial::Create("DefaultMaterial", ShaderLibrary::Get(ShaderScript::Standard3DShader));
+		mStandardDefaultMaterial = IMaterial::Create("DefaultMaterial", ShaderLibrary::GetInstance().GetShader(ShaderScript::Standard3DShader));
 
 
-		// юс╫ц
 		String rawAssetPath = CombinePath(Application::GetAssetPath(), "RawResources");
 		String outputPath = CombinePath(Application::GetAssetPath(), "Resources");
 
@@ -138,8 +138,10 @@ namespace JG
 		}
 		for (auto& iter : fs::recursive_directory_iterator(outputPath))
 		{
-			//AssetDataBase::GetInstance().LoadOriginAsset(OUTPUT)
+			auto p = iter.path();
+			AssetDataBase::GetInstance().LoadOriginAsset(p.string());
 		}
+
 	}
 
 	void GraphicsSystemLayer::Destroy()
@@ -325,22 +327,28 @@ namespace JG
 			info.TargetTexture->SetClearColor(mainCam->GetClearColor());
 			mMainCamera->ChangeRenderer();
 			
-			if (mMainCamera->Renderer->Begin(info, {mMainCamera->_2DBatch}) == true)
+
+			mIsRenderCompelete = false;
+			Scheduler::GetInstance().ScheduleAsync([&](void* data)
 			{
-				for (auto& _pair : mPushedRenderItems)
+				if (mMainCamera->Renderer->Begin(*(RenderInfo*)data, { mMainCamera->_2DBatch }) == true)
 				{
-					for (auto& itemPair : _pair.second)
+					for (auto& _pair : mPushedRenderItems)
 					{
-						auto& type = itemPair.first;
-						auto& itemList = itemPair.second;
-						Rendering(mMainCamera.get(), type, itemList);
+						for (auto& itemPair : _pair.second)
+						{
+							auto& type = itemPair.first;
+							auto& itemList = itemPair.second;
+							Rendering(mMainCamera.get(), type, itemList);
 
-						itemList.clear();
+							itemList.clear();
+						}
 					}
+					mMainCamera->Renderer->End();
 				}
-				mMainCamera->Renderer->End();
-			}
-
+				
+				mIsRenderCompelete = true;
+			}, &info, sizeof(RenderInfo));
 			
 
 			mMainCamera->CurrentIndex = (mMainCamera->CurrentIndex + 1) % fmBufferCnt;
@@ -350,9 +358,14 @@ namespace JG
 				Application::GetInstance().SendEvent(e);
 			}
 
-			mPushedRenderItems.clear();
 			
 		}
+		return EScheduleResult::Continue;
+	}
+	EScheduleResult GraphicsSystemLayer::Wait()
+	{
+		while (mIsRenderCompelete == false) {}
+		mPushedRenderItems.clear();
 		return EScheduleResult::Continue;
 	}
 	void GraphicsSystemLayer::LoadShaderScript()
@@ -402,7 +415,7 @@ namespace JG
 			return gTexture[pin.textureIndex].Sample(gPointSampler, pin.tex) * pin.color;
 		}
 		)", EShaderFlags::Allow_VertexShader | EShaderFlags::Allow_PixelShader);
-			ShaderLibrary::RegisterShader(shader);
+			ShaderLibrary::GetInstance().RegisterShader(shader);
 			
 		}
 		{
@@ -490,7 +503,7 @@ namespace JG
 			return saturate(output.albedo * NdotL + ambientLight);
 		}
 		)", EShaderFlags::Allow_VertexShader | EShaderFlags::Allow_PixelShader);
-			ShaderLibrary::RegisterShader(shader);
+			ShaderLibrary::GetInstance().RegisterShader(shader);
 		}
 	}
 

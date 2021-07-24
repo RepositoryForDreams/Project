@@ -30,7 +30,6 @@ namespace JG
 		{
 			smCoreLogger.reset();
 			smClientLogger.reset();
-
 			spdlog::shutdown();
 		}
 	public:

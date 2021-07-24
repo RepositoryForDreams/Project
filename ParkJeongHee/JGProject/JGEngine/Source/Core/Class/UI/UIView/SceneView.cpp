@@ -246,7 +246,7 @@ namespace JG
 
 		// Ä«¸Þ¶ó ÁÜ ¾Æ¿ô
 		// 
-		if (ImGui::IsWindowFocused() == true && mainCam->GetType() == JGTYPE(EditorCamera) && mCurrentCameraMode == 0)
+		if (ImGui::IsWindowHovered() && ImGui::IsWindowFocused() == true && mainCam->GetType() == JGTYPE(EditorCamera) && mCurrentCameraMode == 0)
 		{
 			auto editCamera = static_cast<EditorCamera*>(mainCam);
 			f32 zoom = editCamera->GetZoom();

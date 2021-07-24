@@ -3,89 +3,54 @@
 #include "Asset.h"
 namespace JG
 {
+	template<class T>
+	class AssetHandle
+	{
+		friend class AssetManager;
+	private:
+		mutable Asset<T>* mAsset = nullptr;
+		AssetID   mID;
+	public:
+		Asset<T>* GetAsset() const {
+			if (mAsset == nullptr && mID.IsValid())
+			{
+				mAsset = AssetDataBase::GetInstance().GetAsset<T>(mID);
+			}
+			return mAsset;
+		}
+		bool IsValid() const  {
+			if (GetAsset() == nullptr)
+			{
+				return false;
+			}
+			return mAsset->Get() != nullptr;
+		}
+	};
+
+	// ÂüÁ¶¸¸
 	class AssetManager
 	{
-		struct LoadingData
+		struct AssetIDHash
 		{
-			String Path;
-			SharedPtr<IAsset> Asset;
+			std::size_t operator()(const AssetID& id) const {
+				return id.ID;
+			}
 		};
 
-		struct AssetContext
-		{
-			u64 OriginAssetID = ASSET_NULL_ID;
-			SharedPtr<IAsset> RWAsset;
-		};
-
-		Dictionary<String, SharedPtr<IAsset>>   mAssetPool;
-		Dictionary<u64, SharedPtr<IAsset>>		mAssetPoolByID;
-		Dictionary<String, u64>				    mAssetIDPool;
-
-		Dictionary<u64, SharedPtr<IAsset>> mRWAssetPool;
-		Dictionary<String, SharedPtr<LoadingData>> mLoadingAssetPool;
-
-		Queue<String> mWaitingLoadAsset;
-		bool mIsResetting = false;
+		std::unordered_set<AssetID, AssetIDHash> mAssetIDPool;
 	public:
-		AssetManager();
-	public:
-		AssetID  LoadAsset(const String& path);
-		AssetID  RequestReadWriteAsset(const String& path);
-		void Reset();
-		bool IsResetting() const;
+		~AssetManager();
 	public:
 		template<class T>
-		Asset<T>* GetAsset(AssetID id)
+		SharedPtr<AssetHandle<T>> RequestOriginAsset(const String& path)
 		{
-			if (id.IsOrigin() == true)
-			{
-				auto iter = mAssetPoolByID.find(id.GetID());
-				if (iter == mAssetPoolByID.end())
-				{
-					return nullptr;
-				}
+			auto handle   = CreateSharedPtr<AssetHandle<T>>();
+			handle->mID    = AssetDataBase::GetInstance().LoadOriginAsset(path);
+			handle->mAsset = AssetDataBase::GetInstance().GetAsset<T>(handle->mID);
 
-				return static_cast<Asset<T>*>(iter->second.get());
-			}
-			else
-			{
-				auto iter = mRWAssetPool.find(id.GetID());
-				if (iter == mRWAssetPool.end())
-				{
-					return nullptr;
-				}
-
-				return static_cast<Asset<T>*>(iter->second.get());
-			}
+			mAssetIDPool.insert(handle->mID);
+			return handle;
 		}
-
-		template<class T>
-		Asset<T>* GetOriginAsset(AssetID id)
-		{
-			auto iter = mAssetPoolByID.find(id.GetOriginID());
-			if (iter == mAssetPoolByID.end())
-			{
-				return nullptr;
-			}
-
-			return static_cast<Asset<T>*>(iter->second.get());
-		}
-
-		template<class T>
-		AssetID GetOriginAssetID(const String& path)
-		{
-			auto iter = mAssetIDPool.find(id.GetOriginID());
-			if (iter == mAssetIDPool.end())
-			{
-				return AssetID();
-			}
-			AssetID id;
-			id.Origin = iter->second;
-			id.ID = iter->second;
-			id.ReadWrite = false;
-			return id;
-		}
-	private:
-		SharedPtr<IAsset> LoadAssetInternal(const String path);
+		EAssetFormat GetAssetFormat(const String& path);
 	};
 }
