@@ -9,7 +9,7 @@ namespace JG
 	{
 		auto api = Application::GetInstance().GetGraphicsAPI();
 		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
-		return api->CreateMaterial(name, shader);
+		return api->CreateMaterial(name, shader, script);
 	}
 
 }

@@ -8,7 +8,7 @@
 
 namespace JG
 {
-	bool DirectX12Shader::Compile(const String& sourceCode, EShaderFlags flags, String* error)
+	bool DirectX12Shader::Compile(const String& sourceCode, const List<SharedPtr<IMaterialScript>>& scriptList, EShaderFlags flags, String* error)
 	{
 		mFlags = flags;
 
@@ -31,6 +31,11 @@ namespace JG
 
 		JG_CORE_INFO("{0} Compile Start", GetName());
 		String code = sourceCode;
+
+		if (scriptList.empty() == false)
+		{
+			InsertScript(code, scriptList);
+		}
 		if (mShaderDataForm == nullptr)
 		{
 			mShaderDataForm = CreateUniquePtr<ShaderDataForm>();
@@ -227,6 +232,12 @@ namespace JG
 		auto PSO = DirectX12API::GetComputePipelineState();
 		PSO->BindRootSignature(*RootSig);
 		PSO->BindShader(*this);
+	}
+
+	void DirectX12Shader::InsertScript(String& code, const List<SharedPtr<IMaterialScript>>& scriptList)
+	{
+
+
 	}
 
 	bool DirectX12Shader::Compile(ComPtr<ID3DBlob>& blob, const String& sourceCode, const CompileConfig& config, String* error)

@@ -12,6 +12,11 @@ namespace JG
 
 		return api->CreateShader(name, sourceCode, flags);
 	}
+	SharedPtr<IMaterialScript> IMaterialScript::Create(const String& name, const String& code)
+	{
+		auto script = CreateSharedPtr<MaterialScript>(name, code);
+		return script;
+	}
 	void ShaderLibrary::RegisterShader(SharedPtr<IShader> shader)
 	{
 		if (shader == nullptr)
@@ -28,6 +33,17 @@ namespace JG
 	}
 	void ShaderLibrary::RegisterScirpt(SharedPtr<IMaterialScript> script)
 	{
+		if (script == nullptr)
+		{
+			return;
+		}
+		std::lock_guard<std::shared_mutex> lock(mMutex);
+
+		auto iter = mMaterialScirpts.find(script->GetName());
+		if (iter == mMaterialScirpts.end())
+		{
+			mMaterialScirpts.emplace(script->GetName(), script);
+		}
 	}
 	SharedPtr<IShader> ShaderLibrary::GetShader(const String& name)
 	{
@@ -42,8 +58,17 @@ namespace JG
 
 	SharedPtr<IMaterialScript> ShaderLibrary::GetScript(const String& name)
 	{
-		return SharedPtr<IMaterialScript>();
+
+		std::shared_lock<std::shared_mutex> lock(mMutex);
+		auto iter = mMaterialScirpts.find(name);
+		if (iter != mMaterialScirpts.end())
+		{
+			return iter->second;
+		}
+		return nullptr;
 	}
+
+
 
 
 

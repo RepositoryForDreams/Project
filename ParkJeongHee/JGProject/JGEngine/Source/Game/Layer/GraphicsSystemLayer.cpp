@@ -448,24 +448,32 @@ namespace JG
 			float4 posH    : SV_POSITION;
 			float3 posW    : POSITION;
 			float3 normalW : NORMAL;
+			float3 tanW	   : TANGENT;
+			float3 bitW    : BITANGENT;
 			float2 tex     : TEXCOORD;
 		};
-		struct PS_MATERIAL_OUTPUT
+
+
+		// PS_SURFACE_PROPERTY_SCRIPT
+
+		struct PS_SURFACE_OUTPUT
 		{
 			float4 albedo;
+			float3 normal;
 		};
-		struct PS_MATERIAL_INPUT
+		struct PS_SURFACE_INPUT
 		{
-
+			float3 position;
+			float3 normal;
+			float3 tangent;
+			float3 bitangent;
 		};
 
-		PS_MATERIAL_OUTPUT PS_MATERIAL_FUNCTION(PS_MATERIAL_INPUT _input)
+		PS_SURFACE_OUTPUT PS_SURFACE_FUNCTION(PS_SURFACE_INPUT _input)
 		{
-			PS_MATERIAL_OUTPUT _output;
+			PS_SURFACE_OUTPUT _output;
 			_output.albedo = float4(1.0f,1.0f,1.0f,1.0f);
-
-
-			//PS_MATERIAL_FUNCTION_SCRIPT
+			//PS_SURFACE_FUNCTION_SCRIPT
 			return _output;
 		};
 		
@@ -478,7 +486,6 @@ namespace JG
 			float3 normalW = mul(float4(vin.normalL, 1.0f), gWorld);
 			float3 tanW =  mul(float4(vin.tanL, 1.0f), gWorld);
 			float3 bitW =  mul(float4(vin.bitL, 1.0f), gWorld);
-			//vout.posH = mul(float4(vin.posL, 1.0f), gViewProj);
 			vout.posH = mul(float4(posW, 1.0f), gViewProj);
 			vout.posW = posW;
 			vout.normalW = normalize(normalW);
@@ -487,8 +494,8 @@ namespace JG
 		}
 		float4 ps_main(VS_OUT pin) : SV_TARGET
 		{
-			PS_MATERIAL_INPUT input;
-			PS_MATERIAL_OUTPUT output = PS_MATERIAL_FUNCTION(input);
+			PS_SURFACE_INPUT input;
+			PS_SURFACE_OUTPUT output = PS_SURFACE_FUNCTION(input);
 
 			float3 dirLightColor = float3(0.9f, 0.95f, 1.0f);
 			float3 dirLight = float3(0.0f, -1.0f, 1.0f);
@@ -505,6 +512,28 @@ namespace JG
 		)", EShaderFlags::Allow_VertexShader | EShaderFlags::Allow_PixelShader);
 			ShaderLibrary::GetInstance().RegisterShader(shader);
 		}
+
+		{
+			auto script = MaterialScript::Create("StandardScript",
+				R"(
+Property {
+	// Texture2D
+	float  TestValue;
+	float4 TestColor;
+	Texture2D NormalTexture;
+}
+
+Surface {
+	_output.albedo = float4(_input.normal);
+}
+
+)");
+
+		}
+
+
+
+
 	}
 
 }

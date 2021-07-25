@@ -572,6 +572,11 @@ namespace JG
 		pso->SetRasterizerState(desc);
 	}
 
+	bool DirectX12API::ShaderCompile(SharedPtr<IShader> shader, List<IMaterialScript> scriptList)
+	{
+		return false;
+	}
+
 	SharedPtr<IFrameBuffer> DirectX12API::CreateFrameBuffer(const FrameBufferInfo& info)
 	{
 		if (info.Handle == 0) return nullptr;
@@ -627,7 +632,7 @@ namespace JG
 		String errorCode;
 		auto shader = CreateSharedPtr<DirectX12Shader>();
 		shader->SetName(name);
-		if (shader->Compile(sourceCode, flags, &errorCode) == false)
+		if (shader->Compile(sourceCode, List<SharedPtr<IMaterialScript>>(), flags,&errorCode) == false)
 		{
 			JG_CORE_ERROR("Failed Compile Shader \n Name : {0} Error : {1}  \n SourceCode : \n {2} ", name, errorCode, sourceCode);
 			return nullptr;

@@ -76,6 +76,8 @@ namespace JG
 		virtual void SetBlendState(u32 renderTargetSlot, EBlendStateTemplate _template) override;
 		virtual void SetRasterizerState(ERasterizerStateTemplate _template) override;
 	protected:
+		virtual bool ShaderCompile(SharedPtr<IShader> shader, List<IMaterialScript> scriptList) override;
+	protected:
 		virtual SharedPtr<IFrameBuffer>   CreateFrameBuffer(const FrameBufferInfo& info) override;
 		virtual SharedPtr<IVertexBuffer>  CreateVertexBuffer(const String& name, EBufferLoadMethod method) override;
 		virtual SharedPtr<IIndexBuffer>   CreateIndexBuffer(const String& name, EBufferLoadMethod method) override;

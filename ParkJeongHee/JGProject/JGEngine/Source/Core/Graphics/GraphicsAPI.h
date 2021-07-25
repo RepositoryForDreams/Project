@@ -53,9 +53,9 @@ namespace JG
 		virtual void SetRasterizerState(ERasterizerStateTemplate _template) = 0;
 
 
+		virtual bool ShaderCompile(SharedPtr<IShader> shader, List<IMaterialScript> scriptList) = 0;
+
 		// Create Resource
-
-
 		virtual SharedPtr<IFrameBuffer>   CreateFrameBuffer(const FrameBufferInfo& settings) = 0;
 		virtual SharedPtr<IVertexBuffer>  CreateVertexBuffer(const String& name, EBufferLoadMethod method) = 0;
 		virtual SharedPtr<IIndexBuffer>   CreateIndexBuffer(const String& name, EBufferLoadMethod method) = 0;

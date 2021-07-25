@@ -41,7 +41,7 @@ namespace JG
 		EShaderFlags     mFlags;
 		bool mIsCompileSuccess = false;
 	public:
-		virtual bool Compile(const String& sourceCode, EShaderFlags flags, String* error) override;
+		virtual bool Compile(const String& sourceCode, const List<SharedPtr<IMaterialScript>>& scriptList, EShaderFlags flags, String* error) override;
 		virtual bool Bind() override;
 	public:
 		virtual void  SetName(const String& name) override;
@@ -55,6 +55,8 @@ namespace JG
 		void GraphicsBind(SharedPtr<RootSignature> RootSig);
 		bool ComputeCompile(const String& code, String* error);
 		void ComputeBind(SharedPtr<RootSignature> RootSig);
+
+		void InsertScript(String& code, const List<SharedPtr<IMaterialScript>>& scriptList);
 	public:
 		ID3DBlob* GetVSData() const {
 			return mVSData.Get();
