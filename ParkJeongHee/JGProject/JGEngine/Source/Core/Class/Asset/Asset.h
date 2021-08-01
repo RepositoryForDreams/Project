@@ -168,7 +168,17 @@ namespace JG
 	{
 	public:
 		String Name;
-		// ShaderScript
+		String ShaderName;
+		List<String> ShaderScript;
+	public:
+		virtual void MakeJson(SharedPtr<JsonData> jsonData) const override;
+		virtual void LoadJson(SharedPtr<JsonData> jsonData) override;
+	public:
+		virtual ~MaterialAssetStock() = default;
+	public:
+		virtual EAssetFormat GetAssetFormat() const override {
+			return EAssetFormat::Material;
+		}
 	};
 
 
@@ -239,9 +249,9 @@ namespace JG
 			fs::path contentsPath = fs::absolute(Application::GetAssetPath()).string();
 			mAssetID = (u64)this;
 			mAssetFullPath = fs::absolute(assetPath).string();
-			mAssetPath = ReplaceAll(mAssetFullPath, contentsPath.string(), "");
-			mExtension = p.extension().string();
-			mName = ReplaceAll(p.string() ,mExtension, "");
+			mAssetPath	   = ReplaceAll(mAssetFullPath, contentsPath.string(), "");
+			mExtension     = p.extension().string();
+			mName = ReplaceAll(p.filename().string() ,mExtension, "");
 		}
 	public:
 		virtual u64 GetAssetID() const override

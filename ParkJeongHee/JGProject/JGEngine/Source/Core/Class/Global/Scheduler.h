@@ -153,9 +153,16 @@ namespace JG
 		i32		   mMaxThreadCount = 0;
 		std::mutex mMutex;
 		std::mutex mTaskMutex;
+
 		std::condition_variable mRunAsyncTaskConVar;
-		bool mIsRunAsyncTaskAll = true;
+		std::atomic_bool mIsRunAsyncTaskAll = true;
 		bool mIsRunSyncTaskAll  = false;
+
+
+
+		mutable Dictionary<std::thread::id, u64> mThreadMappingIDs;
+		mutable std::mutex mMappingIDMutex;
+		mutable u64 mThreadIndex = 0;
 	public:
 		Scheduler();
 		virtual ~Scheduler();
@@ -169,6 +176,9 @@ namespace JG
 
 		void FlushAsyncTask(bool isRestart = true);
 		const Timer* GetScheduleTimer() const;
+	public:
+		u64 GetThreadMappingID(std::thread::id threadID) const;
+		u64 GetThisThreadMappingID() const;
 	private:
 		void Update();
 		void Update(SyncTaskByTick* task);

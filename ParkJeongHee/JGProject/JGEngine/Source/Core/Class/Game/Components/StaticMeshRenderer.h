@@ -1,17 +1,20 @@
 #pragma once
 #include "Class/Game/Components/BaseRenderer.h"
-#include "Class/Asset/Asset.h"
 
 namespace JG
 {
+
 	class StaticMeshRenderer : public BaseRenderer
 	{
 		JGCLASS
 	private:
 		SharedPtr<StandardStaticMeshRenderItem> mStaticRI;
-		String  mMeshPath;
-		AssetID mMeshID;
-		Asset<IMesh>* mMeshAsset = nullptr;
+		SharedPtr<IMaterial> mNullMaterial;
+
+
+
+		SharedPtr<AssetHandle<IMesh>> mMeshAssetHandle = nullptr;
+		List<SharedPtr<AssetHandle<IMaterial>>> mMaterialAssetHandleList;
 	public:
 		virtual ~StaticMeshRenderer() = default;
 	public:
@@ -33,5 +36,9 @@ namespace JG
 	public:
 		virtual void OnChange(const ChangeData & data) override;
 		virtual void OnInspectorGUI() override;
+	private:
+		void OnInspector_MeshGUI();
+		void OnInspector_MaterialGUI();
+		void OnInspector_MaterialPropertyGUI(SharedPtr<IMaterial> material);
 	};
 }

@@ -8,8 +8,11 @@
 
 
 struct aiMesh;
+
 namespace JG
 {
+	class IShader;
+	class IShaderScript;
 	enum class EAssetImportResult
 	{
 		Success,
@@ -39,17 +42,26 @@ namespace JG
 		String OutputPath;
 		ETextureAssetImportFlags Flags = ETextureAssetImportFlags::None;
 	};
+	struct MaterialAssetImportSettings
+	{
 
+		SharedPtr<IShader> Shader;
+		List<SharedPtr<IShaderScript>> ScriptList;
+		String FileName;
+		String OutputPath;
+	};
 
 	class AssetImporter
 	{
 	public:
 		static EAssetImportResult Import(const FBXAssetImportSettings& setting);
 		static EAssetImportResult Import(const TextureAssetImportSettings& settings);
+		static EAssetImportResult Import(const MaterialAssetImportSettings& settings);
 	private:
 		static void ReadMesh(aiMesh* mesh, StaticMeshAssetStock* output);
 	private:
 		static void WriteMesh(const String& outputPath, StaticMeshAssetStock& info);
 		static void WriteTexture(const String& outputPath, TextureAssetStock& stock);
+		static void WriteMaterial(const String& outputPath, MaterialAssetStock& stock);
 	};
 }

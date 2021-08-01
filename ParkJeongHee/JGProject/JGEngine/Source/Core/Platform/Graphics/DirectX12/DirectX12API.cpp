@@ -34,15 +34,6 @@ namespace JG
 	static const u64 gFrameBufferCount = 3;
 	static u64       gFrameBufferIndex = 0;
 
-
-	static Dictionary<std::thread::id, List<GraphicsCommandList*>> gGraphicsCommandLists;
-	static Dictionary<std::thread::id, List<ComputeCommandList*>>  gComputeCommandLists;
-	static Dictionary<std::thread::id, List<CopyCommandList*>>     gCopyCommandLists;
-
-	static std::shared_mutex gGraphicsCommandListMutex;
-	static std::shared_mutex gComputeCommandListMutex;
-	static std::shared_mutex gCopyCommandListMutex;
-
 	static SharedPtr<GraphicsPipelineState> gGracphisPSO;
 	static SharedPtr<ComputePipelineState>  gComputePSO;
 	static SharedPtr<RootSignature> gRootSignature;
@@ -105,113 +96,17 @@ namespace JG
 		return gCSUAllocator->Allocate();
 	}
 
-	GraphicsCommandList* DirectX12API::GetGraphicsCommandList()
+	GraphicsCommandList* DirectX12API::GetGraphicsCommandList(u64 ID)
 	{
-		List<GraphicsCommandList*>* pCmdLists = nullptr;
-		GraphicsCommandList* result = nullptr;
-		u64 bufferIndex = GetFrameBufferIndex();
-		auto threadID = std::this_thread::get_id();
-		bool isFind = false;
-		{
-			std::shared_lock<std::shared_mutex> lock(gGraphicsCommandListMutex);
-			isFind = gGraphicsCommandLists.find(threadID) != gGraphicsCommandLists.end();
-			if (isFind)
-			{
-				pCmdLists = &gGraphicsCommandLists[threadID];
-			}
-		}
-
-		if (isFind == false)
-		{
-			std::lock_guard<std::shared_mutex> lock(gGraphicsCommandListMutex);
-			gGraphicsCommandLists[threadID].resize(GetFrameBufferCount(), nullptr);
-			pCmdLists = &gGraphicsCommandLists[threadID];
-		}
-
-		if (pCmdLists != nullptr)
-		{
-			if ((*pCmdLists)[bufferIndex] == nullptr)
-			{
-				std::lock_guard<std::shared_mutex> lock(gGraphicsCommandListMutex);
-				(*pCmdLists)[bufferIndex] = static_cast<GraphicsCommandList*>(gGraphicsCommandQueue->RequestCommandList(0));
-			}
-
-			result = (*pCmdLists)[bufferIndex];
-			return result;
-		}
-		return nullptr;
+		return static_cast<GraphicsCommandList*>(gGraphicsCommandQueue->RequestCommandList(ID));
 	}
-	ComputeCommandList* DirectX12API::GetComputeCommandList()
+	ComputeCommandList* DirectX12API::GetComputeCommandList(u64 ID)
 	{
-		List<ComputeCommandList*>* pCmdLists = nullptr;
-		ComputeCommandList* result = nullptr;
-		u64 bufferIndex = GetFrameBufferIndex();
-		auto threadID = std::this_thread::get_id();
-		bool isFind = false;
-		{
-			std::shared_lock<std::shared_mutex> lock(gComputeCommandListMutex);
-			isFind = gComputeCommandLists.find(threadID) != gComputeCommandLists.end();
-			if (isFind)
-			{
-				pCmdLists = &gComputeCommandLists[threadID];
-			}
-		}
-
-		if (isFind == false)
-		{
-			std::lock_guard<std::shared_mutex> lock(gComputeCommandListMutex);
-			gComputeCommandLists[threadID].resize(GetFrameBufferCount(), nullptr);
-			pCmdLists = &gComputeCommandLists[threadID];
-		}
-
-		if (pCmdLists != nullptr)
-		{
-			if ((*pCmdLists)[bufferIndex] == nullptr)
-			{
-				std::lock_guard<std::shared_mutex> lock(gComputeCommandListMutex);
-				(*pCmdLists)[bufferIndex] = static_cast<ComputeCommandList*>(gComputeCommandQueue->RequestCommandList(0));
-			}
-
-			result = (*pCmdLists)[bufferIndex];
-			return result;
-		}
-		return nullptr;
+		return static_cast<ComputeCommandList*>(gComputeCommandQueue->RequestCommandList(ID));
 	}
-	CopyCommandList* DirectX12API::GetCopyCommandList()
+	CopyCommandList* DirectX12API::GetCopyCommandList(u64 ID)
 	{
-		List<CopyCommandList*>* pCmdLists = nullptr;
-		CopyCommandList* result = nullptr;
-		u64 bufferIndex = GetFrameBufferIndex();
-		auto threadID = std::this_thread::get_id();
-		bool isFind = false;
-		{
-			std::shared_lock<std::shared_mutex> lock(gCopyCommandListMutex);
-			isFind = gCopyCommandLists.find(threadID) != gCopyCommandLists.end();
-			if (isFind)
-			{
-				pCmdLists = &gCopyCommandLists[threadID];
-			}
-		}
-
-		if (isFind == false)
-		{
-			std::lock_guard<std::shared_mutex> lock(gCopyCommandListMutex);
-			gCopyCommandLists[threadID].resize(GetFrameBufferCount(), nullptr);
-			pCmdLists = &gCopyCommandLists[threadID];
-		}
-
-		if (pCmdLists != nullptr)
-		{
-			if ((*pCmdLists)[bufferIndex] == nullptr)
-			{
-				std::lock_guard<std::shared_mutex> lock(gCopyCommandListMutex);
-				(*pCmdLists)[bufferIndex] = static_cast<CopyCommandList*>(gCopyCommandQueue->RequestCommandList(0));
-			}
-
-			result = (*pCmdLists)[bufferIndex];
-			return result;
-		}
-		return nullptr;
+		return static_cast<CopyCommandList*>(gCopyCommandQueue->RequestCommandList(ID));
 	}
 
 	SharedPtr<GraphicsPipelineState> DirectX12API::GetGraphicsPipelineState()
@@ -359,9 +254,9 @@ namespace JG
 		RootSignature::ClearCache();
 		ResourceStateTracker::ClearCache();
 
-		gGraphicsCommandLists.clear();
-		gComputeCommandLists.clear();
-		gCopyCommandLists.clear();
+		//gGraphicsCommandLists.clear();
+		//gComputeCommandLists.clear();
+		//gCopyCommandLists.clear();
 
 		
 		gCSUAllocator.reset();
@@ -383,28 +278,6 @@ namespace JG
 		gGraphicsCommandQueue->Begin();
 		gComputeCommandQueue->Begin();
 		gCopyCommandQueue->Begin();
-
-		for (auto& cmdLists : gGraphicsCommandLists)
-		{
-			for (auto& cmdList : cmdLists.second)
-			{
-				cmdList = nullptr;
-			}
-		}
-		for (auto& cmdLists : gComputeCommandLists)
-		{
-			for (auto& cmdList : cmdLists.second)
-			{
-				cmdList = nullptr;
-			}
-		}
-		for (auto& cmdLists : gCopyCommandLists)
-		{
-			for (auto& cmdList : cmdLists.second)
-			{
-				cmdList = nullptr;
-			}
-		}
 	}
 	void DirectX12API::End()
 	{
@@ -440,21 +313,21 @@ namespace JG
 		gCopyCommandQueue->Flush();
 	}
 
-	void DirectX12API::SetViewports(const List<Viewport>& viewPorts)
+	void DirectX12API::SetViewports(u64 commandID, const List<Viewport>& viewPorts)
 	{
-		auto commandList = GetGraphicsCommandList();
+		auto commandList = GetGraphicsCommandList(commandID);
 		commandList->SetViewports(viewPorts);
 	}
 
-	void DirectX12API::SetScissorRects(const List<ScissorRect>& scissorRects)
+	void DirectX12API::SetScissorRects(u64 commandID, const List<ScissorRect>& scissorRects)
 	{
-		auto commandList = GetGraphicsCommandList();
+		auto commandList = GetGraphicsCommandList(commandID);
 		commandList->SetScissorRects(scissorRects);
 	}
 
-	void DirectX12API::ClearRenderTarget(const List<SharedPtr<ITexture>>& rtTextures, SharedPtr<ITexture> depthTexture)
+	void DirectX12API::ClearRenderTarget(u64 commandID, const List<SharedPtr<ITexture>>& rtTextures, SharedPtr<ITexture> depthTexture)
 	{
-		auto commandList = GetGraphicsCommandList();
+		auto commandList = GetGraphicsCommandList(commandID);
 
 		for (auto& texture : rtTextures)
 		{
@@ -481,9 +354,9 @@ namespace JG
 		}
 	}
 
-	void DirectX12API::SetRenderTarget(const List<SharedPtr<ITexture>>& rtTextures, SharedPtr<ITexture> depthTexture)
+	void DirectX12API::SetRenderTarget(u64 commandID, const List<SharedPtr<ITexture>>& rtTextures, SharedPtr<ITexture> depthTexture)
 	{
-		auto commandList = GetGraphicsCommandList();
+		auto commandList = GetGraphicsCommandList(commandID);
 		auto pso = GetGraphicsPipelineState();
 		List<DXGI_FORMAT> rtFormats;
 		DXGI_FORMAT dsFormat = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
@@ -526,9 +399,9 @@ namespace JG
 		commandList->SetRenderTarget(d3dRTResources.data(), rtvHandles.data(), d3dRTResources.size(), d3dDSResource, dsvHandle.get());
 	}
 
-	void DirectX12API::DrawIndexed(u32 indexCount, u32 instancedCount, u32 startIndexLocation, u32 startVertexLocation, u32 startInstanceLocation)
+	void DirectX12API::DrawIndexed(u64 commandID, u32 indexCount, u32 instancedCount, u32 startIndexLocation, u32 startVertexLocation, u32 startInstanceLocation)
 	{
-		auto commandList = GetGraphicsCommandList();
+		auto commandList = GetGraphicsCommandList(commandID);
 
 		if (gGracphisPSO->Finalize() == false)
 		{
@@ -571,12 +444,6 @@ namespace JG
 
 		pso->SetRasterizerState(desc);
 	}
-
-	bool DirectX12API::ShaderCompile(SharedPtr<IShader> shader, List<IMaterialScript> scriptList)
-	{
-		return false;
-	}
-
 	SharedPtr<IFrameBuffer> DirectX12API::CreateFrameBuffer(const FrameBufferInfo& info)
 	{
 		if (info.Handle == 0) return nullptr;
@@ -627,19 +494,19 @@ namespace JG
 		computer->Init(shader);
 		return computer;
 	}
-	SharedPtr<IShader> DirectX12API::CreateShader(const String& name, const String& sourceCode, EShaderFlags flags)
+	SharedPtr<IShader> DirectX12API::CreateShader(const String& name, const String& sourceCode, EShaderFlags flags, const List<SharedPtr<IShaderScript>>& scriptList)
 	{
 		String errorCode;
 		auto shader = CreateSharedPtr<DirectX12Shader>();
 		shader->SetName(name);
-		if (shader->Compile(sourceCode, List<SharedPtr<IMaterialScript>>(), flags,&errorCode) == false)
+		if (shader->Compile(sourceCode, scriptList, flags,&errorCode) == false)
 		{
 			JG_CORE_ERROR("Failed Compile Shader \n Name : {0} Error : {1}  \n SourceCode : \n {2} ", name, errorCode, sourceCode);
 			return nullptr;
 		}
 		return shader;
 	}
-	SharedPtr<IMaterial> DirectX12API::CreateMaterial(const String& name, SharedPtr<IShader> shader, SharedPtr<IMaterialScript> script)
+	SharedPtr<IMaterial> DirectX12API::CreateMaterial(const String& name, SharedPtr<IShader> shader)
 	{
 		if (shader == nullptr)
 		{
@@ -647,7 +514,7 @@ namespace JG
 		}
 		auto material = CreateSharedPtr<DirectX12Material>();
 		material->SetName(name);
-		material->Init(shader, script);
+		material->Init(shader);
 		return material;
 	}
 

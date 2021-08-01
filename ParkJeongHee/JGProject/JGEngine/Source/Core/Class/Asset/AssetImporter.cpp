@@ -2,7 +2,7 @@
 
 #include "AssetImporter.h"
 #include "Application.h"
-
+#include "Graphics/Shader.h"
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
@@ -92,6 +92,20 @@ namespace JG
 		stbi_image_free(pixels);
 
 		WriteTexture(settings.OutputPath, stock);
+		return EAssetImportResult::Success;
+	}
+	EAssetImportResult AssetImporter::Import(const MaterialAssetImportSettings& settings)
+	{
+		MaterialAssetStock stock;
+
+		stock.Name = settings.FileName;
+		stock.ShaderName = settings.Shader->GetName();
+		for (auto& script : settings.ScriptList)
+		{
+			stock.ShaderScript.push_back(script->GetCode());
+		}
+
+		WriteMaterial(settings.OutputPath, stock);
 		return EAssetImportResult::Success;
 	}
 	void AssetImporter::ReadMesh(aiMesh* mesh, StaticMeshAssetStock* output)
@@ -201,6 +215,20 @@ namespace JG
 		if (Json::Write(filePath, json) == false)
 		{
 			JG_CORE_ERROR("Fail Write Texture : {0} ", outputPath);
+		}
+	}
+
+	void AssetImporter::WriteMaterial(const String& outputPath, MaterialAssetStock& stock)
+	{
+		auto filePath = CombinePath(outputPath, stock.Name) + JG_ASSET_FORMAT;
+
+		auto json	  = CreateSharedPtr<Json>();
+		json->AddMember(JG_ASSET_FORMAT_KEY, (u64)EAssetFormat::Material);
+		json->AddMember(JG_ASSET_KEY, stock);
+
+		if (Json::Write(filePath, json) == false)
+		{
+			JG_CORE_ERROR("Fail Write Material : {0} ", outputPath);
 		}
 	}
 

@@ -9,7 +9,8 @@ namespace JG
 	private:
 		ComPtr<ID3D12Fence>  mD3DFence;
 		std::mutex           mEventMutex;
-		std::atomic_uint64_t mFenceValue;
+		//std::atomic_uint64_t mFenceValue;
+		std::uint64_t mFenceValue;
 		HANDLE               mFenceEvent;
 
 	
@@ -22,7 +23,8 @@ namespace JG
 		}
 		// Fence 占쏙옙 占쏙옙占쏙옙
 		void IncreaseValue() {
-			mFenceValue.fetch_add(1);
+			++mFenceValue;
+			//mFenceValue.fetch_add(1);
 		}
 		void WaitForFenceValue(uint64_t value, std::chrono::milliseconds duration = std::chrono::milliseconds::max());
 

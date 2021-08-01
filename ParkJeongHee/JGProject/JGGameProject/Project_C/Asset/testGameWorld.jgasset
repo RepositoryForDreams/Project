@@ -33,13 +33,13 @@
                         "Name": "Transform",
                         "IsActive": true,
                         "Location": [
-                            0.42881447076797488,
-                            7.086958408355713,
-                            -13.690011978149414
+                            -1.124925136566162,
+                            2.5256874561309816,
+                            -10.92318058013916
                         ],
                         "Rotation": [
-                            43.152286529541019,
-                            359.8258056640625,
+                            17.349645614624025,
+                            354.71429443359377,
                             0.0
                         ],
                         "Scale": [
@@ -104,9 +104,9 @@
                                 "Name": "Transform",
                                 "IsActive": true,
                                 "Location": [
-                                    40.0,
-                                    60.0,
-                                    8.412658303313947e-8
+                                    25.0,
+                                    50.0,
+                                    9.113713161923443e-8
                                 ],
                                 "Rotation": [
                                     0.0,
@@ -129,7 +129,7 @@
                                     1.0,
                                     1.0
                                 ],
-                                "SpritePath": "../../../JGGameProject/Project_C/Asset\\Resources\\image.jgasset"
+                                "SpritePath": "C:\\Project\\ParkJeongHee\\JGProject\\JGGameProject\\Project_C\\Asset\\Resources\\NullTexture.jgasset"
                             }
                         ],
                         "Childs": []
@@ -161,7 +161,8 @@
                                 "ComponentType": "JG::StaticMeshRenderer",
                                 "Name": "StaticMeshRenderer",
                                 "IsActive": true,
-                                "MeshPath": "../../../JGGameProject/Project_C/Asset\\Resources\\Cube.001.jgasset"
+                                "MeshPath": "C:\\Project\\ParkJeongHee\\JGProject\\JGGameProject\\Project_C\\Asset\\Resources\\Cube.001.jgasset",
+                                "Materials": {}
                             }
                         ],
                         "Childs": []
@@ -174,8 +175,8 @@
                                 "Name": "Transform",
                                 "IsActive": true,
                                 "Location": [
-                                    -200.0,
-                                    -45.0,
+                                    -210.0,
+                                    -25.0,
                                     1.2151616601840943e-7
                                 ],
                                 "Rotation": [
@@ -199,7 +200,7 @@
                                     1.0,
                                     1.0
                                 ],
-                                "SpritePath": "../../../JGGameProject/Project_C/Asset\\Resources\\UV.Grid.jgasset"
+                                "SpritePath": "C:\\Project\\ParkJeongHee\\JGProject\\JGGameProject\\Project_C\\Asset\\Resources\\UV.Grid.jgasset"
                             }
                         ],
                         "Childs": []
@@ -231,7 +232,10 @@
                                 "ComponentType": "JG::StaticMeshRenderer",
                                 "Name": "StaticMeshRenderer",
                                 "IsActive": true,
-                                "MeshPath": "../../../JGGameProject/Project_C/Asset\\Resources\\Sphere.001.jgasset"
+                                "MeshPath": "C:\\Project\\ParkJeongHee\\JGProject\\JGGameProject\\Project_C\\Asset\\Resources\\Sphere.001.jgasset",
+                                "Materials": [
+                                    "C:\\Project\\ParkJeongHee\\JGProject\\JGGameProject\\Project_C\\Asset\\Resources\\TestMaterial.jgasset"
+                                ]
                             }
                         ],
                         "Childs": []
@@ -263,7 +267,8 @@
                                 "ComponentType": "JG::StaticMeshRenderer",
                                 "Name": "StaticMeshRenderer",
                                 "IsActive": true,
-                                "MeshPath": "../../../JGGameProject/Project_C/Asset\\Resources\\Torus.jgasset"
+                                "MeshPath": "C:\\Project\\ParkJeongHee\\JGProject\\JGGameProject\\Project_C\\Asset\\Resources\\Torus.jgasset",
+                                "Materials": {}
                             }
                         ],
                         "Childs": []

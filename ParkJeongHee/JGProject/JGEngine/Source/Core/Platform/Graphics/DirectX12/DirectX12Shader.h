@@ -4,17 +4,6 @@
 #include "Utill/ShaderDataForm.h"
 namespace JG
 {
-	/*
-	ConstantBuffer
-	StructedBuffer
-	SamplerState 정보
-	InputLayout  정보
-	
-	*/
-	/*
-	MaterialParam
-	블라 블라 
-	*/
 	class IComputeBuffer;
 	class GraphicsPipelineState;
 	class RootSignature;
@@ -31,6 +20,7 @@ namespace JG
 		};
 	private:
 		String mName;
+		String mOriginCode;
 		UniquePtr<ShaderDataForm> mShaderDataForm;
 		ComPtr<ID3DBlob> mVSData;
 		ComPtr<ID3DBlob> mDSData;
@@ -40,23 +30,28 @@ namespace JG
 		ComPtr<ID3DBlob> mCSData;
 		EShaderFlags     mFlags;
 		bool mIsCompileSuccess = false;
+		List<std::pair<EShaderDataType, String>> mPropertyList;
 	public:
-		virtual bool Compile(const String& sourceCode, const List<SharedPtr<IMaterialScript>>& scriptList, EShaderFlags flags, String* error) override;
+		virtual bool Compile(const String& sourceCode, const List<SharedPtr<IShaderScript>>& scriptList, EShaderFlags flags, String* error) override;
 		virtual bool Bind() override;
 	public:
 		virtual void  SetName(const String& name) override;
 		virtual const String& GetName() const override;
+		virtual const String& GetOriginCode() const override;
 		virtual EShaderFlags GetFlags() const override
 		{
 			return mFlags;
 		}
+
 	private:
 		bool GraphicsCompile(const String& code, String* error);
 		void GraphicsBind(SharedPtr<RootSignature> RootSig);
 		bool ComputeCompile(const String& code, String* error);
 		void ComputeBind(SharedPtr<RootSignature> RootSig);
 
-		void InsertScript(String& code, const List<SharedPtr<IMaterialScript>>& scriptList);
+		void InsertScript(String& code, const List<SharedPtr<IShaderScript>>& scriptList);
+		bool InsertScriptInternal(String& code, SharedPtr<IShaderScript> script);
+		bool ExtractScriptContents(const String& code, const String& key, String& out_code);
 	public:
 		ID3DBlob* GetVSData() const {
 			return mVSData.Get();
@@ -79,6 +74,7 @@ namespace JG
 		ShaderDataForm* GetShaderDataForm() const {
 			return mShaderDataForm.get();
 		}
+		const List<std::pair<EShaderDataType, String>>& GetPropertyList() const;
 	private:
 		bool Compile(ComPtr<ID3DBlob>& blob, const String& sourceCode, const CompileConfig& config, String* error);
 	};

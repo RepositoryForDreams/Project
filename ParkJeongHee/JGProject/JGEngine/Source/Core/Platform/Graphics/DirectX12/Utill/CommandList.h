@@ -31,6 +31,8 @@ namespace JG
 		List<ComPtr<ID3D12Object>> mTempObjectList;
 		UniquePtr<ResourceStateTracker> mResourceStateTracker;
 		UniquePtr<DynamicDescriptorAllocator> mDynamicDescriptorAllocator;
+
+		bool mIsClose = false;
 	public:
 		CommandList(D3D12_COMMAND_LIST_TYPE d3dType);
 		virtual ~CommandList();
@@ -42,7 +44,7 @@ namespace JG
 		virtual void Reset();
 		virtual void Close();
 		virtual bool Close(CommandList* commandList);
-
+		bool IsClosing() const;
 		void TransitionBarrier(ID3D12Resource* d3dResource, D3D12_RESOURCE_STATES state, u32 subResource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, bool flush = false);
 		void UAVBarrier(ID3D12Resource* d3dResource, bool flush = false);
 		void AliasBarrier(ID3D12Resource* beforeResource, ID3D12Resource* afterResource, bool flush = false);

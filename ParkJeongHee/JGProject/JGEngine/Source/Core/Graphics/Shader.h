@@ -5,43 +5,24 @@
 #include <shared_mutex>
 namespace JG
 {
-	/* Shader
-
-	// Global Shader 
-	-> 무조건 포한하는 셰이더
-
-	// Include Shader 
-	-> 부분적으로 포함하는 셰이더
-
-	// Material Shader
-	-> 머터리얼 셰이더
-
-
-	 */
-
-
-	
-
-	/* Shader 자체
-	FragmentShader 
-	*/
 	class IComputeBuffer;
-	class IMaterialScript;
+	class IShaderScript;
 	class ITexture;
-	class IShader
+	class IShader : public GraphicsCommandable
 	{
 	protected:
-		virtual bool Compile(const String& sourceCode, const List<SharedPtr<IMaterialScript>>& scriptList, EShaderFlags flags, String* error) = 0;
+		virtual bool Compile(const String& sourceCode, const List<SharedPtr<IShaderScript>>& scriptList, EShaderFlags flags, String* error) = 0;
 		virtual bool Bind() = 0;
 	public:
 		virtual void SetName(const String& name) = 0;
 		virtual const String& GetName() const    = 0;
+		virtual const String& GetOriginCode() const	 = 0;
 		virtual EShaderFlags  GetFlags() const   = 0;
 	public:
-		static SharedPtr<IShader> Create(const String& name, const String& sourceCode, EShaderFlags flags);
+		static SharedPtr<IShader> Create(const String& name, const String& sourceCode, EShaderFlags flags, const List<SharedPtr<IShaderScript>>& scriptList = List<SharedPtr<IShaderScript>>());
 	};
 
-	class IMaterialScript
+	class IShaderScript
 	{
 	public:
 		enum : u64
@@ -53,10 +34,10 @@ namespace JG
 		virtual const String& GetName() const = 0;
 
 	public:
-		static SharedPtr<IMaterialScript> Create(const String& name, const String& code);
+		static SharedPtr<IShaderScript> CreateMaterialScript(const String& name, const String& code);
 	};
 
-	class MaterialScript : public IMaterialScript
+	class MaterialScript : public IShaderScript
 	{
 	private:
 		String mName;
@@ -80,14 +61,18 @@ namespace JG
 		friend class Application;
 	private:
 		Dictionary<String, SharedPtr<IShader>> mShaders;
-		Dictionary<String, SharedPtr<IMaterialScript>> mMaterialScirpts;
+		Dictionary<String, SharedPtr<IShaderScript>> mMaterialScirpts;
 		std::shared_mutex mMutex;
 	public:
 		void RegisterShader(SharedPtr<IShader> shader);
-		void RegisterScirpt(SharedPtr<IMaterialScript> script);
+		void RegisterScirpt(SharedPtr<IShaderScript> script);
+
+
+
 
 		SharedPtr<IShader> GetShader(const String& name);
-		SharedPtr<IMaterialScript> GetScript(const String& name);
+		SharedPtr<IShader> GetShader(const String& name, const List<String>& scriptNameList);
+		SharedPtr<IShaderScript> GetScript(const String& name);
 	};
 
 

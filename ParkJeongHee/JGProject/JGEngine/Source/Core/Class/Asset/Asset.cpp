@@ -4,6 +4,8 @@
 #include "Application.h"
 #include "Graphics/GraphicsAPI.h"
 #include "Graphics/Mesh.h"
+#include "Graphics/Shader.h"
+#include "Graphics/Material.h"
 namespace JG
 {
 	void TextureAssetStock::MakeJson(SharedPtr<JsonData> jsonData) const
@@ -16,7 +18,6 @@ namespace JG
 		jsonData->AddMember("Pixels", Pixels);
 
 	}
-
 	void TextureAssetStock::LoadJson(SharedPtr<JsonData> jsonData)
 	{
 		auto Val = jsonData->GetMember("Name");
@@ -82,7 +83,6 @@ namespace JG
 		}
 		jsonData->AddMember("SubMeshs", meshJson);
 	}
-
 	void StaticMeshAssetStock::LoadJson(SharedPtr<JsonData> jsonData)
 	{
 		SubMeshNames.clear();
@@ -139,10 +139,50 @@ namespace JG
 			}
 		}
 	}
+	void MaterialAssetStock::MakeJson(SharedPtr<JsonData> jsonData) const
+	{
+		jsonData->AddMember("Name", Name);
+		jsonData->AddMember("ShaderName", ShaderName);
 
+		auto scriptList = jsonData->CreateJsonData();
+		for (auto& script : ShaderScript)
+		{
+			auto scriptJson = jsonData->CreateJsonData();
+			scriptJson->SetString(script);
+			scriptList->AddMember(scriptJson);
+		}
 
+		jsonData->AddMember("ShaderScriptList", scriptList);
+	}
+	void MaterialAssetStock::LoadJson(SharedPtr<JsonData> jsonData)
+	{
+		auto val = jsonData->GetMember("Name");
+		if (val && val->IsString())
+		{
+			Name = val->GetString();
+		}
 
-	                    
+		val = jsonData->GetMember("ShaderName");
+		if (val && val->IsString())
+		{
+			ShaderName = val->GetString();
+		}
+
+		val = jsonData->GetMember("ShaderScriptList");
+		if (val)
+		{
+			ShaderScript.resize(val->GetSize());
+			for(i32 i = 0; i<val->GetSize(); ++i)
+			{
+				auto scriptVal = val->GetJsonDataFromIndex(i);
+				if (scriptVal == nullptr) continue;
+
+				ShaderScript[i] = scriptVal->GetString();
+			}
+		}
+
+	}
+
 	AssetDataBase::AssetDataBase()
 	{
 
@@ -180,8 +220,6 @@ namespace JG
 		SharedPtr<AssetManager> result = nullptr;
 		result = CreateSharedPtr<AssetManager>();
 		mAssetManagerPool[result.get()] = result;
-
-
 		return result;
 	}
 	void AssetDataBase::ReturnAssetManager(SharedPtr<AssetManager> assetManager)
@@ -207,7 +245,10 @@ namespace JG
 
 	AssetID AssetDataBase::LoadOriginAsset(const String& path)
 	{
+
 		auto absolutePath = fs::absolute(path).string();
+
+
 		if (mAssetLoadScheduleHandle == nullptr)
 		{
 			mAssetLoadScheduleHandle = 
@@ -249,9 +290,6 @@ namespace JG
 			mAssetUnLoadScheduleHandle =
 				Scheduler::GetInstance().ScheduleByFrame(0, 1, -1, SchedulePriority::BeginSystem, SCHEDULE_BIND_FN(&AssetDataBase::UnLoadAsset_Update));
 		}
-
-
-		// 에셋 삭제
 		auto iter = mAssetDataPool.find(id);
 		if (iter == mAssetDataPool.end())
 		{
@@ -350,6 +388,34 @@ namespace JG
 
 
 			LoadData->Asset = meshAsset;
+			break;
+		}
+		case EAssetFormat::Material:
+		{
+			List<String> scriptNameList;
+			MaterialAssetStock stock;
+			stock.LoadJson(assetVal);
+
+
+			i32 cnt = 0;
+			for (auto& script : stock.ShaderScript)
+			{
+				auto name = stock.Name + "_Script_" + std::to_string(cnt);
+				ShaderLibrary::GetInstance().RegisterScirpt(IShaderScript::CreateMaterialScript(name, script));
+				scriptNameList.push_back(name);
+
+				cnt++;
+			}
+
+			auto materialAsset = CreateSharedPtr<Asset<IMaterial>>(assetPath.string());
+			auto shader = ShaderLibrary::GetInstance().GetShader(stock.ShaderName, scriptNameList);
+			if (shader == nullptr)
+			{
+				return;
+			}
+
+			materialAsset->mData = IMaterial::Create(stock.Name, shader);
+			LoadData->Asset = materialAsset;
 			break;
 		}
 		default:
@@ -474,4 +540,5 @@ namespace JG
 		auto textureAsset = static_cast<Asset<ITexture>*>(data->Asset.get());
 		textureAsset->mData = ITexture::Create(*(static_cast<TextureAssetStock*>(data->Stock.get())));
 	}
+
 }

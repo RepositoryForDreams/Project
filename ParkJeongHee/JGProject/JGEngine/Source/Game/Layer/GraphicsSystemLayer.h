@@ -58,9 +58,10 @@ namespace JG
 		Dictionary<Type, u64> mRenderItemPriority;
 		SortedDictionary<u64, Dictionary<Type, List<SharedPtr<IRenderItem>>>> mPushedRenderItems;
 
-		SharedPtr<IMaterial> mStandardDefaultMaterial;
+		//SharedPtr<IMaterial> mStandardDefaultMaterial;
 
-		bool mIsRenderCompelete = false;
+		//bool mIsRenderCompelete = false;
+		std::atomic_bool mIsRenderCompelete = false;
 	public:
 		virtual ~GraphicsSystemLayer() {}
 	public:

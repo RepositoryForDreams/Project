@@ -1137,7 +1137,7 @@ namespace JG
 
 		}
 	}
-	bool ShaderData::Bind()
+	bool ShaderData::Bind(u64 commandID)
 	{
 
 		auto loadedShader = mOwnerShader.lock();
@@ -1145,6 +1145,7 @@ namespace JG
 
 		if (dx12Shader != nullptr)
 		{
+			dx12Shader->SetCommandID(commandID);
 			if (dx12Shader->Bind() == false)
 			{
 				JG_CORE_ERROR("Failed Bind {0} Shader", dx12Shader->GetName());
@@ -1156,7 +1157,7 @@ namespace JG
 
 			if (dx12Shader->GetFlags() & EShaderFlags::Allow_ComputeShader)
 			{
-				auto commandList = DirectX12API::GetComputeCommandList();
+				auto commandList = DirectX12API::GetComputeCommandList(commandID);
 				for (auto& _pair : shaderDataForm->CBufferDataMap)
 				{
 					auto cBufferName = _pair.first;
@@ -1224,7 +1225,7 @@ namespace JG
 			}
 			else
 			{
-				auto commandList = DirectX12API::GetGraphicsCommandList();
+				auto commandList = DirectX12API::GetGraphicsCommandList(commandID);
 				for (auto& _pair : shaderDataForm->CBufferDataMap)
 				{
 					auto cBufferName = _pair.first;
@@ -1532,6 +1533,16 @@ namespace JG
 			return mReadWriteDatas[name];
 		}
 		return UploadAllocator::Allocation();
+	}
+	DirectX12Shader* ShaderData::GetOwnerShader() const
+	{
+		auto loadShader = mOwnerShader.lock();
+		if (loadShader == nullptr)
+		{
+			return nullptr;
+		}
+		auto dx12Shader = static_cast<DirectX12Shader*>(loadShader.get());
+		return dx12Shader;
 	}
 	ShaderDataForm::Data* ShaderData::GetAndCheckData(const String& name, EShaderDataType checkType)
 	{

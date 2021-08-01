@@ -1,7 +1,9 @@
 #include "pch.h"
 #include "ImGuiExternal.h"
-
-
+#include "Application.h"
+#include "Common/Type.h"
+#include "Common/DragAndDrop.h"
+#include "Class/Asset/Asset.h"
 namespace ImGui
 {
 	void OnGui(const char* label, JG::JVector3* v, float label_spacing)
@@ -56,5 +58,39 @@ namespace ImGui
 		ImGui::SameLine(); auto id_x = id + "_Value"; ImGui::InputInt(id_x.c_str(), (int*)v); ImGui::SameLine();
 		ImGui::PopItemWidth();
 		ImGui::Spacing();
+	}
+	bool AssetField(const JG::String& label, const JG::String& inputText, JG::EAssetFormat format, JG::String& out_AssetPath)
+	{
+		bool result = false;
+		auto id		= "##" + label + inputText;
+		auto inputT = inputText;
+		ImGui::AlignTextToFramePadding();
+		ImGui::Text(label.c_str()); ImGui::SameLine();
+		ImGui::InputText(id.c_str(), &inputT[0], ImGuiInputTextFlags_ReadOnly);
+		if (ImGui::BeginDragDropTarget() && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+		{
+			auto payLoad = ImGui::GetDragDropPayload();
+			if (payLoad != nullptr)
+			{
+				JG::IDragAndDropData* ddd = (JG::IDragAndDropData*)payLoad->Data;
+
+
+				if (ddd->GetType() == JGTYPE(JG::DDDContentsFile))
+				{
+					auto dddContentsFile = (JG::DDDContentsFile*)ddd;
+
+					auto assetFormat	 = JG::AssetDataBase::GetInstance().GetAssetFormat(dddContentsFile->FilePath);
+					if (assetFormat == format)
+					{
+						out_AssetPath = dddContentsFile->FilePath;
+						result = true;
+					}
+				}
+			}
+			ImGui::EndDragDropTarget();
+		}
+
+
+		return result;
 	}
 }

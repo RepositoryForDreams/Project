@@ -5,7 +5,7 @@
 #include <typeinfo>
 
 
-#define JGTYPE(x) Type(TypeID<##x>())
+#define JGTYPE(x) JG::Type(JG::TypeID<##x>())
 #define TYPE_NULL_ID -1
 namespace JG
 {

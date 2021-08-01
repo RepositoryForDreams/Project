@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "JGCore.h"
-
+#include "GraphicsDefine.h"
 namespace JG
 {
 	class IRenderContext;
@@ -27,7 +27,7 @@ namespace JG
 	};
 
 
-	class IRenderer
+	class IRenderer : public GraphicsCommandable
 	{
 	private:
 		List<SharedPtr<IRenderBatch>> mBatchList;
@@ -61,7 +61,7 @@ namespace JG
 		virtual ERendererPath GetRendererPath() const override { return ERendererPath::Foward; }
 	};
 
-	class IRenderBatch
+	class IRenderBatch : public GraphicsCommandable
 	{
 		IRenderer* mConnectedRenderer = nullptr;
 	public:

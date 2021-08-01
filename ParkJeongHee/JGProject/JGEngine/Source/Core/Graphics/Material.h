@@ -6,8 +6,8 @@ namespace JG
 {
 	class IShader;
 	class ITexture;
-	class IMaterialScript;
-	class IMaterial 
+	class IShaderScript;
+	class IMaterial : public GraphicsCommandable
 	{
 	public:
 		virtual bool SetFloat(const String& name, float value) = 0;
@@ -68,14 +68,16 @@ namespace JG
 
 		virtual void SetName(const String& name) = 0;
 		virtual const String& GetName() const = 0;
+
+		virtual List<std::pair<EShaderDataType, String>> GetPropertyList() const = 0;
 	protected:
-		virtual void Init(SharedPtr<IShader> shader, SharedPtr<IMaterialScript> script) = 0;
+		virtual void Init(SharedPtr<IShader> shader) = 0;
 	public:
 		virtual bool Bind() = 0;
 	public:
 		virtual ~IMaterial() = default;
 	public:
-		static SharedPtr<IMaterial> Create(const String& name, SharedPtr<IShader> shader, SharedPtr<IMaterialScript> script = nullptr);
+		static SharedPtr<IMaterial> Create(const String& name, SharedPtr<IShader> shader);
 
 	};
 }

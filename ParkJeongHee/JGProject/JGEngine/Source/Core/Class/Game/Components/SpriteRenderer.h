@@ -9,12 +9,9 @@ namespace JG
 		JGCLASS
 	private:
 		SharedPtr<Standard2DRenderItem> mSpriteRI;
-
-
-		String  mSpritePath;
 		JVector2 mSpriteSize;
 
-		SharedPtr<AssetHandle<ITexture>> mAssetHandle;
+		SharedPtr<AssetHandle<ITexture>> mSpriteAssetHandle;
 	public:
 		virtual ~SpriteRenderer() = default;
 	public:

@@ -113,7 +113,6 @@ namespace JG
 			}
 			return (mValue.MemberBegin() + index)->name.GetString();
 		}
-
 		List<jbyte> GetByteList() const
 		{
 			auto rawData = mValue.GetString();
@@ -190,6 +189,18 @@ namespace JG
 			return jbbox;
 		}
 	public:
+		void SetString(const String& str) {
+			mValue.SetString(str.c_str(), (rapidjson::SizeType)str.length(), GetJsonAllocator());
+		}
+		void SetBool(bool _bool) { mValue.SetBool(_bool); }
+		void SetInt32(i32 _i32) { mValue.SetInt(_i32); }
+		void SetInt64(i64 _i64) { mValue.SetInt64(_i64); }
+		void SetUint32(u32 _u32) { mValue.SetUint(_u32); }
+		void SetUint64(u64 _u64) { mValue.SetUint64(_u64); }
+		void SetFloat(f32 _f32) { mValue.SetFloat(_f32); }
+		void SetDouble(f64 _f64) { mValue.SetDouble(_f64); }
+
+	public:
 		bool IsBool() const { return mValue.IsBool(); }
 		bool IsInt32() const { return mValue.IsInt(); }
 		bool IsInt64() const { return mValue.IsInt64(); }
@@ -200,6 +211,7 @@ namespace JG
 		bool IsObject() const { return mValue.IsObject(); }
 		bool IsString() const { return mValue.IsString(); }
 		bool IsByteList() const { return IsString(); }
+		bool IsArray() const { return mValue.IsArray(); }
 	public:
 		SharedPtr<JsonData> GetMember(const String& key);
 		

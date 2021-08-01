@@ -88,7 +88,7 @@ namespace JG
 		{
 			List<IJGObject*> exceptObjectList;
 			auto inspectorView = UIManager::GetInstance().GetUIView<InspectorView>();
-			if (inspectorView)
+			if (inspectorView && inspectorView->GetViewModel())
 			{
 				exceptObjectList.push_back(inspectorView->GetViewModel()->GetTargetObject());
 			}
@@ -140,7 +140,6 @@ namespace JG
 				handle = Scheduler::GetInstance().ScheduleAsync([&](void* data)
 				{
 					auto savePath = CombinePath(Application::GetAssetPath(),"testGameWorld") + JG_ASSET_FORMAT;
-				
 					if (mGameWorld != nullptr)
 					{
 						auto json = CreateSharedPtr<Json>();

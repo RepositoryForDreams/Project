@@ -68,9 +68,12 @@ namespace JG
 
 		virtual void  SetName(const String& name) override;
 		virtual const String& GetName() const override;
+
+
+		virtual List<std::pair<EShaderDataType, String>> GetPropertyList() const override;
 	public:
 		virtual bool Bind() override;
-		virtual void Init(SharedPtr<IShader> shader, SharedPtr<IMaterialScript> script) override;
+		virtual void Init(SharedPtr<IShader> shader) override;
 	public:
 		virtual ~DirectX12Material() = default;
 	};

@@ -6,10 +6,10 @@ namespace JG
 {
 	class ITexture;
 	class IShader;
-	class IResource
+	class IResource : public GraphicsCommandable
 	{
 	private:
-		String mName = "IResource";
+		String mName   = "IResource";
 	public:
 		IResource() = default;
 		virtual ~IResource() = default;
@@ -73,7 +73,7 @@ namespace JG
 		static SharedPtr<IComputeBuffer> Create(const String& name, u64 btSize);
 	};
 
-	class IComputer
+	class IComputer : public GraphicsCommandable
 	{
 	public:
 		virtual bool SetComputeBuffer(SharedPtr<IComputeBuffer> computeBuffer) = 0;

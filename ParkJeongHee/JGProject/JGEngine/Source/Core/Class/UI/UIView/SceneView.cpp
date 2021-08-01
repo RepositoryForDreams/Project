@@ -31,12 +31,15 @@ namespace JG
 		{
 			auto mainCam = Camera::GetMainCamera();
 
-			if (ImGui::IsKeyPressed((int)EKeyCode::Q))
-				mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-			if (ImGui::IsKeyPressed((int)EKeyCode::W))
-				mCurrentGizmoOperation = ImGuizmo::ROTATE;
-			if (ImGui::IsKeyPressed((int)EKeyCode::E)) 
-				mCurrentGizmoOperation = ImGuizmo::SCALE;
+			if (mEnableEditorCameraControll == false) {
+				if (ImGui::IsKeyPressed((int)EKeyCode::Q))
+					mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+				if (ImGui::IsKeyPressed((int)EKeyCode::W))
+					mCurrentGizmoOperation = ImGuizmo::ROTATE;
+				if (ImGui::IsKeyPressed((int)EKeyCode::E))
+					mCurrentGizmoOperation = ImGuizmo::SCALE;
+			}
+
 		
 			if (mainCam == nullptr) return;
 			if (node == nullptr || node->GetType() != JGTYPE(GameNode)) return;
@@ -109,6 +112,8 @@ namespace JG
 
 		auto minSize = viewModel->GetMinSize();
 		auto currSize = ImGui::GetWindowSize();
+	
+
 
 		if (currSize.x <= minSize.x || currSize.y <= minSize.y)
 		{
@@ -117,6 +122,8 @@ namespace JG
 
 
 		auto mainCam = Camera::GetMainCamera();
+
+
 
 		ImGui::Text("T"); ImGui::SameLine(); 
 		if (ImGui::RadioButton("##TranslateRadioButton", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
@@ -207,7 +214,7 @@ namespace JG
 			textureWidth   = textureInfo.Width;
 			textureHeight  = textureInfo.Height;
 			auto textureID = (ImTextureID)JGImGui::GetInstance().ConvertImGuiTextureID(sceneTexture->GetTextureID());
-			ImGui::Image(textureID, ImVec2(fixSceneWidth, fixSceneHeight));
+			ImGui::Image(textureID, ImVec2(fixSceneWidth, fixSceneHeight), ImVec2(0,0), ImVec2(0.9999f, 0.9999f));
 			viewModel->ShowGizmo->Execute(viewModel->GetSelectedGameNode());
 		}
 
@@ -217,7 +224,7 @@ namespace JG
 
 
 		// Picking & 2D & 이동 모드 일시 화면 이동
-		if (ImGui::IsMouseClicked(0) == true) 
+		if (ImGui::IsMouseClicked(0) == true && ImGui::IsWindowHovered()) 
 		{
 			auto winPos   = ImGui::GetItemRectMin();
 			auto mousePos = ImGui::GetMousePos();

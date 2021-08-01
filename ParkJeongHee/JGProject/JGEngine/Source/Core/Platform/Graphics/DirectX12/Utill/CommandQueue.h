@@ -16,17 +16,18 @@ namespace JG
 	private:
 		ComPtr<ID3D12CommandQueue> mD3DCmdQueue;
 		D3D12_COMMAND_LIST_TYPE    mD3DType;
-		Dictionary<CommandList*, UniquePtr<CommandList>>   mCmdLists;
-		SortedDictionary<i32, List<CommandList*>> mExpectExcuteCmdLists;
-		SortedDictionary<u64, Queue<UniquePtr<CommandList>>>     mPendingCmdLists;
-		Queue<UniquePtr<CommandList>> mCurrentPendingCmdLists;
 		UniquePtr<Fence> mFence;
 		List<u64> mFenceValue;
+		std::mutex mMutex;
+		std::atomic_bool mIsCommandListExcute = false;
+		Dictionary<u64, SortedDictionary<u64, SharedPtr<CommandList>>> mExcuteCmdLists;
+		Dictionary<u64, SortedDictionary<u64, SharedPtr<CommandList>>> mExcutePendingCmdLists;
+		//Dictionary<CommandList*, SharedPtr<CommandList>> mExcutePendingCmdLists;
 	public:
 		CommandQueue(u64 bufferCount, D3D12_COMMAND_LIST_TYPE type);
 		~CommandQueue();
 	public:
-		CommandList* RequestCommandList(i32 priority);
+		CommandList* RequestCommandList(u64 ID);
 		void Begin();
 		void End();
 		void Flush();
@@ -35,7 +36,7 @@ namespace JG
 			return mD3DCmdQueue.Get();
 		}
 	private:
-		CommandList* RequestCommandList();
+		SharedPtr<CommandList> CreateCommandList();
 	};
 }
 

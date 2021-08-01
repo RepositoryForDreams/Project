@@ -10,7 +10,21 @@ namespace JG
 {
 #define MAX_RENDERTARGET 8
 #define TEXTURE_ID_NULL  0
+#define MAIN_GRAPHICS_COMMAND_ID 0
+
 	using TextureID = u64;
+
+	class GraphicsCommandable
+	{
+		u64 mCommandID = MAIN_GRAPHICS_COMMAND_ID;
+	public:
+		void SetCommandID(u64 id) {
+			mCommandID;
+		}
+		u64 GetCommandID() const {
+			return mCommandID;
+		}
+	};
 
 	enum class ETextureFormat
 	{
@@ -100,6 +114,8 @@ namespace JG
 		_uint, _uint2, _uint3, _uint4,
 		_float, _float2, _float3, _float4,
 		_float3x3, _float4x4,
+
+		texture2D,
 	};
 
 	inline u64 GetShaderDataTypeSize(EShaderDataType type)
@@ -145,6 +161,7 @@ namespace JG
 		case EShaderDataType::_float4:   return "float4";
 		case EShaderDataType::_float3x3: return "float3x3";
 		case EShaderDataType::_float4x4: return "float4x4";
+		case EShaderDataType::texture2D: return "Texture2D";
 		default:
 			JG_CORE_CRITICAL("not supported ShaderDataType");
 			return "unknown";
@@ -167,6 +184,7 @@ namespace JG
 		else if (type == "float4") return EShaderDataType::_float4;
 		else if (type == "float3x3") return EShaderDataType::_float3x3;
 		else if (type == "float4x4") return EShaderDataType::_float4x4;
+		else if (type == "Texture2D") return EShaderDataType::texture2D;
 		else
 		{
 			return EShaderDataType::unknown;
@@ -354,21 +372,38 @@ namespace JG
 			constexpr char* World    = "gWorld";
 		}
 
+		namespace Type
+		{
+			constexpr char* Resources = "_Resources";
+			constexpr char* Variables = "_Variables";
+			constexpr char* Surface   = "_Surface";
+		}
+		namespace Variables
+		{
+			constexpr char* Surface = "__SurfaceConstantBuffer__";
+		}
+
+		namespace Location
+		{
+			constexpr char* SurfaceResources = "__PS_SURFACE_RESOURCES_SCRIPT__";
+			constexpr char* SurfaceVariables = "__PS_SURFACE_VARIABLES_SCRIPT__";
+			constexpr char* SurfaceContents  = "__PS_SURFACE_FUNCTION_SCRIPT__";
+		}
 	}
 	namespace HLSL
 	{
 		using token = char;
 		namespace Token
 		{
-			constexpr token* Struct                 = "struct ";
-			constexpr token* CBuffer                = "cbuffer ";
-			constexpr token* StructuredBuffer       = "StructuredBuffer";
-			constexpr token* Texture2D              = "Texture2D ";
-			constexpr token* RWStructuredBuffer		= "RWStructuredBuffer";
-			constexpr token* RWTexture2D			= "RWTexture2D ";
-			constexpr token* SamplerState           = "SamplerState ";
+			constexpr token* Struct = "struct ";
+			constexpr token* CBuffer = "cbuffer ";
+			constexpr token* StructuredBuffer = "StructuredBuffer";
+			constexpr token* Texture2D = "Texture2D ";
+			constexpr token* RWStructuredBuffer = "RWStructuredBuffer";
+			constexpr token* RWTexture2D = "RWTexture2D ";
+			constexpr token* SamplerState = "SamplerState ";
 			constexpr token* SamplerComparisonState = "SamplerComparisonState ";
-			
+
 			namespace SamplerStateElement
 			{
 				constexpr token* Template = "Template";
@@ -395,16 +430,16 @@ namespace JG
 			}
 			namespace SamplerSatateAddressMode
 			{
-				constexpr token* Wrap   = "Wrap";
+				constexpr token* Wrap = "Wrap";
 				constexpr token* Mirror = "Mirror";
-				constexpr token* Clamp  = "Clamp";
+				constexpr token* Clamp = "Clamp";
 				constexpr token* Border = "Border";
 				constexpr token* MirrorOnce = "MirrorOnce";
 			}
 			namespace SamplerStateComparisonFunc
 			{
 				constexpr token* Never = "Never";
-				constexpr token* Less  = "Less";
+				constexpr token* Less = "Less";
 				constexpr token* Equal = "Equal";
 				constexpr token* LessEqual = "LessEqual";
 				constexpr token* Greater = "Greater";
@@ -423,12 +458,12 @@ namespace JG
 		}
 
 
-		constexpr char* VSEntry  = "vs_main";
-		constexpr char* DSEntry  = "ds_main";
-		constexpr char* HSEntry  = "hs_main";
-		constexpr char* GSEntry  = "gs_main";
-		constexpr char* PSEntry  = "ps_main";
-		constexpr char* CSEntry  = "main";
+		constexpr char* VSEntry = "vs_main";
+		constexpr char* DSEntry = "ds_main";
+		constexpr char* HSEntry = "hs_main";
+		constexpr char* GSEntry = "gs_main";
+		constexpr char* PSEntry = "ps_main";
+		constexpr char* CSEntry = "main";
 		constexpr char* VSTarget = "vs_5_1";
 		constexpr char* DSTarget = "ds_5_1";
 		constexpr char* HSTarget = "hs_5_1";

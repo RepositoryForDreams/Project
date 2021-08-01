@@ -20,6 +20,7 @@ namespace JG
 		{
 			for (auto& batch : mBatchList)
 			{
+				batch->SetCommandID(GetCommandID());
 				batch->ConnectRenderer(this);
 				if (batch->Begin(info) == false)
 				{
@@ -61,12 +62,11 @@ namespace JG
 
 		mRenderTarges[0] = info.TargetTexture;
 
-		api->SetViewports({ Viewport(info.Resolutoin.x, info.Resolutoin.y) });
-		api->SetScissorRects({ ScissorRect(0,0, info.Resolutoin.x,info.Resolutoin.y) });
-		api->ClearRenderTarget(mRenderTarges, info.TargetDepthTexture);
-		api->SetRenderTarget(mRenderTarges, info.TargetDepthTexture);
+		api->SetViewports(GetCommandID(), { Viewport(info.Resolutoin.x, info.Resolutoin.y) });
+		api->SetScissorRects(GetCommandID() ,{ ScissorRect(0,0, info.Resolutoin.x,info.Resolutoin.y) });
+		api->ClearRenderTarget(GetCommandID(),mRenderTarges, info.TargetDepthTexture);
+		api->SetRenderTarget(GetCommandID(),mRenderTarges, info.TargetDepthTexture);
 		
-
 		return BeginBatch(info, batchList);
 	}
 	void FowardRenderer::DrawCall(const JMatrix& worldMatrix, SharedPtr<IMesh> mesh, List<SharedPtr<IMaterial>> materialList)
@@ -77,13 +77,20 @@ namespace JG
 		}
 		auto api = Application::GetInstance().GetGraphicsAPI();
 		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
+		mesh->SetCommandID(GetCommandID());
 		if (mesh->Bind() == false)
 		{
 			JG_CORE_ERROR("{0} : Fail Mesh Bind", mesh->GetName());
 		}
+
+
+
+
+
 		auto transposedViewProj = JMatrix::Transpose(mCurrentRenderInfo.ViewProj);
 		for (u64 i = 0; i < mesh->GetSubMeshCount(); ++i)
 		{
+			mesh->GetSubMesh(i)->SetCommandID(GetCommandID());
 			if (mesh->GetSubMesh(i)->Bind() == false)
 			{
 				JG_CORE_ERROR("{0} : Fail Mesh Bind", mesh->GetSubMesh(0)->GetName());
@@ -109,13 +116,13 @@ namespace JG
 				JG_CORE_INFO("{0} : Fail SetWorldMatrix in ObjectParams", material->GetName());
 				continue;
 			}
-
+			material->SetCommandID(GetCommandID());
 			if (material->Bind() == false)
 			{
 				JG_CORE_INFO("{0} : Fail Material Bind", material->GetName());
 				continue;
 			}
-			api->DrawIndexed(mesh->GetSubMesh(i)->GetIndexCount());
+			api->DrawIndexed(GetCommandID(), mesh->GetSubMesh(i)->GetIndexCount());
 		}
 		
 		
@@ -201,7 +208,7 @@ namespace JG
 
 		auto api = Application::GetInstance().GetGraphicsAPI();
 		JGASSERT_IF(api != nullptr, "GraphicsApi is nullptr");
-		api->ClearRenderTarget({ mWhiteTexture }, nullptr);
+		api->ClearRenderTarget(MAIN_GRAPHICS_COMMAND_ID, { mWhiteTexture }, nullptr);
 
 		StartBatch();
 	}
@@ -319,12 +326,14 @@ namespace JG
 		
 		mCurrFrameResource->QuadVBuffer->SetData(mVertices.data(), sizeof(QuadVertex), quadVertexCount);
 		mCurrFrameResource->QuadIBuffer->SetData(mIndices.data(), quadIndexCount);
+		mCurrFrameResource->QuadMesh->SetCommandID(GetCommandID());
 		if (mCurrFrameResource->QuadMesh->Bind() == false)
 		{
 			JG_CORE_ERROR("Failed Bind QuadMesh");
 			StartBatch();
 			return;
 		}
+		mCurrFrameResource->QuadMesh->GetSubMesh(0)->SetCommandID(GetCommandID());
 		if (mCurrFrameResource->QuadMesh->GetSubMesh(0)->Bind() == false)
 		{
 			JG_CORE_ERROR("Failed Bind QuadMesh");
@@ -332,7 +341,7 @@ namespace JG
 			return;
 		}
 
-		api->DrawIndexed(quadIndexCount);
+		api->DrawIndexed(GetCommandID(), quadIndexCount);
 		StartBatch();
 	}
 

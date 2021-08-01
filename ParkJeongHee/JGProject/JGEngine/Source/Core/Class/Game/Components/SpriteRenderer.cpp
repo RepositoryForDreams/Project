@@ -24,10 +24,9 @@ namespace JG
 	void SpriteRenderer::Start()
 	{
 		BaseRenderer::Start();
-		if (mAssetHandle == nullptr)
+		if (mSpriteAssetHandle == nullptr)
 		{
-			auto assetPath = Application::GetAssetPath();
-			SetSprite(CombinePath(assetPath, "Resources/NullTexture.jgasset"));
+			SetSprite("Resources/NullTexture.jgasset");
 		}
 
 	}
@@ -49,7 +48,12 @@ namespace JG
 	{
 		BaseRenderer::MakeJson(jsonData);
 		jsonData->AddMember("Color", JVector4(mSpriteRI->Color));
-		jsonData->AddMember("SpritePath", mSpritePath);
+
+		if (mSpriteAssetHandle && mSpriteAssetHandle->IsValid())
+		{
+			jsonData->AddMember("SpritePath", mSpriteAssetHandle->GetAsset()->GetAssetFullPath());
+		}
+	
 
 	}
 
@@ -75,8 +79,8 @@ namespace JG
 		{
 			return;
 		}
-		mAssetHandle = assetManager->RequestOriginAsset<ITexture>(path);
-		mSpritePath = path;
+		mSpriteAssetHandle = assetManager->RequestOriginAsset<ITexture>(path);
+		//mSpritePath = path;
 	}
 
 	SharedPtr<IRenderItem> SpriteRenderer::PushRenderItem()
@@ -84,10 +88,10 @@ namespace JG
 		auto transform = GetOwner()->GetTransform();
 		mSpriteRI->WorldMatrix = transform->GetWorldMatrix();
 
-		if (mAssetHandle && mAssetHandle->IsValid())
+		if (mSpriteAssetHandle && mSpriteAssetHandle->IsValid())
 		{
-			auto info = mAssetHandle->GetAsset()->Get()->GetTextureInfo();
-			mSpriteRI->Texture = mAssetHandle->GetAsset()->Get();
+			auto info = mSpriteAssetHandle->GetAsset()->Get()->GetTextureInfo();
+			mSpriteRI->Texture = mSpriteAssetHandle->GetAsset()->Get();
 			f32 adjust = (f32)info.PixelPerUnit / (f32)GameSettings::GetUnitSize();
 			f32 spriteWidth  = info.Width  * adjust;
 			f32 spriteHeight = info.Height * adjust;
@@ -118,25 +122,20 @@ namespace JG
 		ImGui::Text("Color "); ImGui::SameLine();
 		ImGui::ColorEdit4("##Color Editor", (float*)(&mSpriteRI->Color));
 		
-		fs::path p = mSpritePath;
-		auto fileName = p.filename().string();
-	
-		ImGui::AlignTextToFramePadding();
-		ImGui::Text("Sprite"); ImGui::SameLine();
-		ImGui::InputText("##TextureSlot", fileName.data(), ImGuiInputTextFlags_ReadOnly);
-		if (ImGui::BeginDragDropTarget() && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+		String path;
+		if (mSpriteAssetHandle && mSpriteAssetHandle->IsValid())
 		{
-			auto payLoad = ImGui::GetDragDropPayload();
-			if (payLoad != nullptr)
+			if (ImGui::AssetField("Sprite ", mSpriteAssetHandle->GetAsset()->GetAssetName(), EAssetFormat::Texture, path) == true)
 			{
-				IDragAndDropData* ddd = (IDragAndDropData*)payLoad->Data;
-				if (ddd->GetType() == JGTYPE(DDDContentsFile))
-				{
-					auto dddContentsFile = (DDDContentsFile*)ddd;
-					SetSprite(dddContentsFile->FilePath);
-				}
+				mSpriteAssetHandle = GetGameWorld()->GetAssetManager()->RequestOriginAsset<ITexture>(path);
 			}
-			ImGui::EndDragDropTarget();
+		}
+		else
+		{
+			if (ImGui::AssetField("Sprite ", "none", EAssetFormat::Texture, path) == true)
+			{
+				mSpriteAssetHandle = GetGameWorld()->GetAssetManager()->RequestOriginAsset<ITexture>(path);
+			}
 		}
 	}
 

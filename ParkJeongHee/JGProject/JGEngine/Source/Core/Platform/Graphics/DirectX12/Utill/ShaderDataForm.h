@@ -159,7 +159,7 @@ namespace JG
 	public:
 		ShaderData(SharedPtr<IShader> shader);
 	public:
-		bool Bind();
+		bool Bind(u64 commandID);
 		void Reset();
 	public:
 		bool SetFloat(const String& name, float value);
@@ -209,6 +209,7 @@ namespace JG
 		bool GetTexture(const String& name, u32 textureSlot, SharedPtr<ITexture>* out_value);
 	public:
 		UploadAllocator::Allocation GetRWData(const String& name);
+		DirectX12Shader* GetOwnerShader() const;
 	public:
 		template<class T, EShaderDataType type>
 		bool SetData(const String& name, const T* value)

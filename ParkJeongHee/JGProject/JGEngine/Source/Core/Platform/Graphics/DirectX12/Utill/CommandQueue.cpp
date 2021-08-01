@@ -14,64 +14,80 @@ namespace JG
 		mFence = CreateUniquePtr<Fence>();
 		mD3DCmdQueue = CreateD3DCommandQueue(DirectX12API::GetD3DDevice(), mD3DType);
 		mFenceValue.resize(bufferCount, 0);
+
+		auto bufferCnt = DirectX12API::GetFrameBufferCount();
+		for (u64 i = 0; i < bufferCnt; ++i)
+		{
+			mExcuteCmdLists[i] = SortedDictionary<u64, SharedPtr<CommandList>>();
+			mExcutePendingCmdLists[i] = SortedDictionary<u64, SharedPtr<CommandList>>();
+		}
 	}
 
 	CommandQueue::~CommandQueue() = default;
 
-	CommandList* CommandQueue::RequestCommandList(i32 priority) 
+	CommandList* CommandQueue::RequestCommandList(u64 ID)
 	{
-		auto cmdList = RequestCommandList();
-		mExpectExcuteCmdLists[priority].push_back(cmdList);
-		return cmdList;
+		while (mIsCommandListExcute == true) {}
+	
+
+		std::lock_guard<std::mutex> lock(mMutex);
+		auto& CmdLists = mExcuteCmdLists[DirectX12API::GetFrameBufferIndex()];
+		auto& PendingCmdLists = mExcutePendingCmdLists[DirectX12API::GetFrameBufferIndex()];
+
+		if (CmdLists.find(ID) == CmdLists.end())
+		{
+			auto pCmdList = CreateCommandList();
+			CmdLists[ID] = pCmdList;
+			PendingCmdLists[ID] = CreateCommandList();
+			return CmdLists[ID].get();
+		}
+		else
+		{
+			auto pCmdList = CmdLists[ID].get();
+			auto pPendingCmdList = PendingCmdLists[ID].get();
+			if (pCmdList->IsClosing())
+			{
+				pCmdList->Reset();
+				pPendingCmdList->Reset();
+			}
+			return pCmdList;
+		}
 	}
 
 	void CommandQueue::Begin()
 	{
 		uint64_t value = mFenceValue[DirectX12API::GetFrameBufferIndex()];
 		mFence->WaitForFenceValue(value);
-
-		while (mPendingCmdLists[DirectX12API::GetFrameBufferIndex()].empty() == false)
-		{
-			mCurrentPendingCmdLists.push(std::move(mPendingCmdLists[DirectX12API::GetFrameBufferIndex()].front()));
-			mPendingCmdLists[DirectX12API::GetFrameBufferIndex()].pop();
-		}
 	}
 
 	void CommandQueue::End()
 	{
+		mIsCommandListExcute = true;
 		List<ID3D12CommandList*>   d3dCmdLists;
 		ResourceStateTracker::Lock();
-		for (auto& cmdLists : mExpectExcuteCmdLists)
+
+		auto& PendingCmdLists = mExcutePendingCmdLists[DirectX12API::GetFrameBufferIndex()];
+		for (auto cmdList : mExcuteCmdLists[DirectX12API::GetFrameBufferIndex()])
 		{
+			if (cmdList.second->IsClosing() == true) continue;
+			auto pendCmdList = PendingCmdLists[cmdList.first];
+			bool has_pending_barrier = cmdList.second->Close(pendCmdList.get());
 
-			for (auto& cmdList : cmdLists.second)
+			pendCmdList->Close();
+			if (has_pending_barrier)
 			{
-				auto pendingCmdList = RequestCommandList();
-
-				bool has_pending_barrier = cmdList->Close(pendingCmdList);
-
-				pendingCmdList->Close();
-				if (has_pending_barrier)
-				{
-					d3dCmdLists.push_back(pendingCmdList->Get());
-				}
-				d3dCmdLists.push_back(cmdList->Get());
-
-				mPendingCmdLists[DirectX12API::GetFrameBufferIndex()].push(move(mCmdLists[pendingCmdList]));
-				mPendingCmdLists[DirectX12API::GetFrameBufferIndex()].push(move(mCmdLists[cmdList]));
-				mCmdLists.erase(pendingCmdList);
-				mCmdLists.erase(cmdList);
+				d3dCmdLists.push_back(pendCmdList->Get());
 			}
+			d3dCmdLists.push_back(cmdList.second->Get());
 		}
 		ResourceStateTracker::UnLock();
-		mExpectExcuteCmdLists.clear();
 		mD3DCmdQueue->ExecuteCommandLists((uint32_t)d3dCmdLists.size(), d3dCmdLists.data());
-
-
 
 		mFence->IncreaseValue();
 		mD3DCmdQueue->Signal(mFence->Get(), mFence->GetValue());
 		mFenceValue[DirectX12API::GetFrameBufferIndex()] = mFence->GetValue();
+
+		mIsCommandListExcute = false;
 	}
 
 	void CommandQueue::Flush()
@@ -80,36 +96,22 @@ namespace JG
 		mD3DCmdQueue->Signal(mFence->Get(), mFence->GetValue());
 		mFence->WaitForFenceValue(mFence->GetValue());
 	}
-
-	CommandList* CommandQueue::RequestCommandList()
+	SharedPtr<CommandList> CommandQueue::CreateCommandList()
 	{
-		UniquePtr<CommandList> cmdList = nullptr;
-		CommandList* result = nullptr;
-		if (!mCurrentPendingCmdLists.empty())
+		SharedPtr<CommandList> cmdList = nullptr;
+		switch (mD3DType)
 		{
-			cmdList = std::move(mCurrentPendingCmdLists.front()); mCurrentPendingCmdLists.pop();
-			cmdList->Reset();
-			result = cmdList.get();
-			mCmdLists[cmdList.get()] = std::move(cmdList);
+		case D3D12_COMMAND_LIST_TYPE_DIRECT:
+			cmdList = CreateSharedPtr<GraphicsCommandList>(mD3DType);
+			break;
+		case D3D12_COMMAND_LIST_TYPE_COMPUTE:
+			cmdList = CreateSharedPtr<ComputeCommandList>(mD3DType);
+			break;
+		default:
+			cmdList = CreateSharedPtr<CommandList>(mD3DType);
+			break;
 		}
-		else
-		{
-			switch (mD3DType)
-			{
-			case D3D12_COMMAND_LIST_TYPE_DIRECT:
-				cmdList = CreateUniquePtr<GraphicsCommandList>(mD3DType);
-				break;
-			case D3D12_COMMAND_LIST_TYPE_COMPUTE:
-				cmdList = CreateUniquePtr<ComputeCommandList>(mD3DType);
-				break;
-			default:
-				cmdList = CreateUniquePtr<CommandList>(mD3DType);
-				break;
-			}
-		
-			result = cmdList.get();
-			mCmdLists[cmdList.get()] = std::move(cmdList);
-		}
-		return result;
+
+		return cmdList;
 	}
 }

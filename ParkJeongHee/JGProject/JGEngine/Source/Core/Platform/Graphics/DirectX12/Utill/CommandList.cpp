@@ -41,20 +41,31 @@ namespace JG
 		mBindedPipelineState   = nullptr;
 		mBindedGraphicsRootSig = nullptr;
 		mBindedComputeRootSig  = nullptr;
+
+		mIsClose = false;
 	}
 
 	void CommandList::Close()
 	{
 		mResourceStateTracker->FlushResourceBarrier(Get());
 		mD3DCommandList->Close();
+		mIsClose = true;
 	}
 
 	bool CommandList::Close(CommandList* commandList)
 	{
 		Close();
-		bool isExistBarrier = mResourceStateTracker->FlushPendingResourceBarrier(commandList->Get());
+		bool isExistBarrier = false;
+		if (commandList != nullptr) {
+			isExistBarrier = mResourceStateTracker->FlushPendingResourceBarrier(commandList->Get());
+		}
 		mResourceStateTracker->CommitResourceState();
 		return isExistBarrier;
+	}
+
+	bool CommandList::IsClosing() const
+	{
+		return mIsClose;
 	}
 
 	void CommandList::TransitionBarrier(ID3D12Resource* d3dResource, D3D12_RESOURCE_STATES state, u32 subResource, bool flush)
@@ -263,7 +274,7 @@ namespace JG
 		if (resource == nullptr || dsvHandle.ptr == 0) return;
 
 
-		TransitionBarrier(resource, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+		TransitionBarrier(resource, D3D12_RESOURCE_STATE_DEPTH_WRITE); 
 		FlushResourceBarrier();
 
 

@@ -1,7 +1,7 @@
 #pragma once
 #include "JGCore.h"
 #include "InputLayout.h"
-
+#include "GraphicsDefine.h"
 // VertexArray
 // VertexBuffer ¿Í IndexBuffer ¹­À½
 namespace JG
@@ -10,7 +10,7 @@ namespace JG
 	class IIndexBuffer;
 	class StaticMeshAssetStock;
 
-	class ISubMesh
+	class ISubMesh : public GraphicsCommandable
 	{
 	public:
 		virtual void SetVertexBuffer(SharedPtr<IVertexBuffer> vertexBuffer) = 0;
@@ -25,7 +25,7 @@ namespace JG
 	public:
 		static SharedPtr<ISubMesh> Create(const String& name);
 	};
-	class IMesh
+	class IMesh : public GraphicsCommandable
 	{
 	public:
 		virtual void AddMesh(SharedPtr<ISubMesh> subMesh) = 0;

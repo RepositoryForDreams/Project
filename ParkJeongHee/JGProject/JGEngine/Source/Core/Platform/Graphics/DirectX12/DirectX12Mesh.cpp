@@ -41,7 +41,7 @@ namespace JG
 			return false;
 		}
 		// vertexBuffer, IndexBuffer ¹ÙÀÎµù
-		auto commandList = DirectX12API::GetGraphicsCommandList();
+		auto commandList = DirectX12API::GetGraphicsCommandList(GetCommandID());
 		commandList->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 

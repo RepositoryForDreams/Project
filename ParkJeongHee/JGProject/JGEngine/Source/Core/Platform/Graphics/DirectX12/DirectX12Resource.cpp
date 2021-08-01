@@ -1,4 +1,5 @@
 ﻿#include "pch.h"
+
 #include "DirectX12Resource.h"
 #include "DirectX12API.h"
 #include "DirectX12Shader.h"
@@ -7,7 +8,7 @@
 #include "Utill/DescriptorAllocator.h"
 #include "Utill/CommandList.h"
 #include "Utill/PipelineState.h"
-
+#include "Dev/Dev.h"
 namespace JG
 {
 	DirectX12VertexBuffer::~DirectX12VertexBuffer()
@@ -40,7 +41,7 @@ namespace JG
 			{
 				ResourceStateTracker::RegisterResource(GetName(), mD3DResource.Get(), D3D12_RESOURCE_STATE_COMMON);
 
-				auto commandList = DirectX12API::GetCopyCommandList();
+				auto commandList = DirectX12API::GetCopyCommandList(GetCommandID());
 				commandList->CopyBuffer(mD3DResource.Get(), datas, elementSize, elementCount);
 			}
 		}
@@ -63,7 +64,7 @@ namespace JG
 				if (SUCCEEDED(hResult))
 				{
 					ResourceStateTracker::RegisterResource(GetName(), mD3DResource.Get(), D3D12_RESOURCE_STATE_GENERIC_READ);
-					auto result = mD3DResource->Map(0, nullptr, &mCPUData);
+					mD3DResource->Map(0, nullptr, &mCPUData);
 				}
 			}
 			if (mCPUData != nullptr)
@@ -99,7 +100,7 @@ namespace JG
 		{
 			return;
 		}
-		auto commandList = DirectX12API::GetGraphicsCommandList();
+		auto commandList = DirectX12API::GetGraphicsCommandList(GetCommandID());
 
 
 		D3D12_VERTEX_BUFFER_VIEW View = {};
@@ -164,7 +165,7 @@ namespace JG
 			{
 				ResourceStateTracker::RegisterResource(GetName(), mD3DResource.Get(), D3D12_RESOURCE_STATE_COMMON);
 
-				auto commandList = DirectX12API::GetCopyCommandList();
+				auto commandList = DirectX12API::GetCopyCommandList(GetCommandID());
 				commandList->CopyBuffer(mD3DResource.Get(), datas, sizeof(u32), mIndexCount);
 			}
 		}
@@ -201,7 +202,6 @@ namespace JG
 			else
 			{
 				JG_CORE_WARN("{0} Buffer CPU Data is nullptr", GetName());
-
 			}
 			break;
 		}
@@ -227,7 +227,7 @@ namespace JG
 		{
 			return;
 		}
-		auto commandList = DirectX12API::GetGraphicsCommandList();
+		auto commandList = DirectX12API::GetGraphicsCommandList(GetCommandID());
 		D3D12_INDEX_BUFFER_VIEW View;
 		View.BufferLocation = mD3DResource->GetGPUVirtualAddress();
 		View.Format = DXGI_FORMAT_R32_UINT;
@@ -356,7 +356,7 @@ namespace JG
 		auto srcResource = alloc.OwnerPage->Get();
 		auto srcOffset = alloc.GPU - srcResource->GetGPUVirtualAddress();
 
-		auto commandList = DirectX12API::GetCopyCommandList();
+		auto commandList = DirectX12API::GetCopyCommandList(GetCommandID());
 		dx12Buffer->mState = EComputeBufferState::Run;
 		commandList->CopyBufferRegion(dx12Buffer->Get(), 0, srcResource, srcOffset, computeBuffer->GetDataSize());
 		dx12Buffer->ReserveCompletion();
@@ -584,7 +584,7 @@ namespace JG
 		{
 			return false;
 		}
-		if (mShaderData->Bind() == false)
+		if (mShaderData->Bind(GetCommandID()) == false)
 		{
 			return false;
 		}
@@ -599,7 +599,7 @@ namespace JG
 
 
 		mState = EComputerState::Run;
-		auto commandList = DirectX12API::GetComputeCommandList();
+		auto commandList = DirectX12API::GetComputeCommandList(GetCommandID());
 		commandList->BindPipelineState(PSO);
 		commandList->Dispatch(groupX, groupY, groupZ);
 
@@ -692,13 +692,16 @@ namespace JG
 
 		
 
-		DirectX12API::GetD3DDevice()->CreateCommittedResource(
+		HRESULT hResult = DirectX12API::GetD3DDevice()->CreateCommittedResource(
 			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT), D3D12_HEAP_FLAG_NONE,
 			&rscDesc,
 			D3D12_RESOURCE_STATE_COMMON,
 			clearValue.get(), IID_PPV_ARGS(mD3DResource.GetAddressOf()));
-		mD3DResource->SetName(s2ws(GetName()).c_str());
-		ResourceStateTracker::RegisterResource(GetName(), mD3DResource.Get(), D3D12_RESOURCE_STATE_COMMON);
+		if (SUCCEEDED(hResult))
+		{
+			mD3DResource->SetName(s2ws(GetName()).c_str());
+			ResourceStateTracker::RegisterResource(GetName(), mD3DResource.Get(), D3D12_RESOURCE_STATE_COMMON);
+		}
 	}
 	void DirectX12Texture::SetClearColor(const Color& clearColor)
 	{
@@ -729,7 +732,7 @@ namespace JG
 		info.PixelPerUnit = pixelPerUnit;
 		SetName(name);
 		SetTextureInfo(info);
-		auto commandList = DirectX12API::GetCopyCommandList();
+		auto commandList = DirectX12API::GetCopyCommandList(GetCommandID());
 		commandList->CopyTextrueFromMemory(Get(), pixels, width, height, channels);
 		Scheduler::GetInstance().ScheduleByFrame(DirectX12API::GetFrameBufferCount() + 1, 0, 1,
 			0, [&]() -> EScheduleResult

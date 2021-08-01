@@ -236,16 +236,26 @@ namespace JG
 		return mName;
 	}
 
+	List<std::pair<EShaderDataType, String>> DirectX12Material::GetPropertyList() const
+	{
+		auto shader = mShaderData->GetOwnerShader();
+		if (shader != nullptr)
+		{
+			return shader->GetPropertyList();
+		}
+		return List<std::pair<EShaderDataType, String>>();
+	}
+
 	bool DirectX12Material::Bind()
 	{
 		auto pso = DirectX12API::GetGraphicsPipelineState();
 		pso->SetDepthStencilState(mDepthStencilDesc);
 		pso->SetBlendState(mBlendDesc);
 		pso->SetRasterizerState(mRasterzerDesc);
-		return mShaderData->Bind();
+		return mShaderData->Bind(GetCommandID());
 	}
 
-	void DirectX12Material::Init(SharedPtr<IShader> shader, SharedPtr<IMaterialScript> script)
+	void DirectX12Material::Init(SharedPtr<IShader> shader)
 	{
 		mShaderData = CreateUniquePtr<ShaderData>(shader);
 		SetDepthStencilState(EDepthStencilStateTemplate::Default);

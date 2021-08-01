@@ -215,6 +215,20 @@ namespace JG
     {
         return mScheduleTimer.get();
     }
+    u64 Scheduler::GetThreadMappingID(std::thread::id threadID) const
+    {
+        std::lock_guard<std::mutex> lock(mMappingIDMutex);
+        if (mThreadMappingIDs.find(threadID) == mThreadMappingIDs.end())
+        {
+            mThreadMappingIDs[threadID] = mThreadIndex;
+            mThreadIndex++;
+        }
+        return mThreadMappingIDs[threadID];
+    }
+    u64 Scheduler::GetThisThreadMappingID() const
+    {
+        return GetThreadMappingID(std::this_thread::get_id());
+    }
     void Scheduler::Update()
     {
         mIsRunSyncTaskAll = true;

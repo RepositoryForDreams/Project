@@ -1,0 +1,10 @@
+{
+    "AssetFormat": 3,
+    "Asset": {
+        "Name": "TestMaterial",
+        "ShaderName": "Standard3DShader",
+        "ShaderScriptList": [
+            "\n_Resources {\n\tTexture2D NormalTexture;\n}\n\n\n_Variables {\n\tfloat  TestValue;\n\tfloat4 TestColor;\n}\n\n\n_Surface {\n\t_output.albedo = float4(TestColor);\n}\n\n"
+        ]
+    }
+}

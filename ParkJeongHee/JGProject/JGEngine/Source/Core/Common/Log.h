@@ -80,19 +80,19 @@ namespace JG
 }
 
 
-#if   _DEBUG
+//#if   _DEBUG
 #define JG_CORE_TRACE(...)    ::JG::Log::TraceLog(::JG::Log::GetCoreLogger(), __VA_ARGS__);
 #define JG_CORE_INFO(...)     ::JG::Log::InfoLog(::JG::Log::GetCoreLogger(), __VA_ARGS__);
 #define JG_CORE_WARN(...)     ::JG::Log::WarnLog(::JG::Log::GetCoreLogger(), __VA_ARGS__);
 #define JG_CORE_ERROR(...)    ::JG::Log::ErrorLog(::JG::Log::GetCoreLogger(), __VA_ARGS__);
 #define JG_CORE_CRITICAL(...) ::JG::Log::CriticalLog(::JG::Log::GetCoreLogger(), __VA_ARGS__);
-#elif _RELEASE
-#define JG_CORE_TRACE(...)   
-#define JG_CORE_INFO(...)     
-#define JG_CORE_WARN(...)     
-#define JG_CORE_ERROR(...)    
-#define JG_CORE_CRITICAL(...) 
-#endif //  
+//#elif _RELEASE
+//#define JG_CORE_TRACE(...)   
+//#define JG_CORE_INFO(...)     
+//#define JG_CORE_WARN(...)     
+//#define JG_CORE_ERROR(...)    
+//#define JG_CORE_CRITICAL(...) 
+//#endif //  
 
 #if   _DEBUG
 #define JG_TRACE(...)   ::JG::Log::TraceLog(::JG::Log::GetClientLogger(), __VA_ARGS__);

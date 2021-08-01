@@ -91,11 +91,8 @@ namespace JG
 	{
 		Scheduler::GetInstance().ScheduleByFrame(0, 0, -1, SchedulePriority::BeginSystem, SCHEDULE_BIND_FN(&GraphicsSystemLayer::Update));
 		Scheduler::GetInstance().ScheduleByFrame(0, 0, -1, SchedulePriority::EndSystem, SCHEDULE_BIND_FN(&GraphicsSystemLayer::Wait));
-		mMainCamera = CreateUniquePtr<CameraItem>();
-
 
 		mRenderItemPriority[JGTYPE(Standard2DRenderItem)] = (u64)ERenderItemPriority::_2D;
-		mStandardDefaultMaterial = IMaterial::Create("DefaultMaterial", ShaderLibrary::GetInstance().GetShader(ShaderScript::Standard3DShader));
 
 
 		String rawAssetPath = CombinePath(Application::GetAssetPath(), "RawResources");
@@ -136,12 +133,17 @@ namespace JG
 			}
 
 		}
+		MaterialAssetImportSettings settings;
+		settings.OutputPath = outputPath;
+		settings.FileName = "TestMaterial";
+		settings.Shader = ShaderLibrary::GetInstance().GetShader(ShaderScript::Standard3DShader);
+		settings.ScriptList.push_back(ShaderLibrary::GetInstance().GetScript("StandardScript"));
+		AssetImporter::Import(settings);
+
 		for (auto& iter : fs::recursive_directory_iterator(outputPath))
 		{
-			auto p = iter.path();
-			AssetDataBase::GetInstance().LoadOriginAsset(p.string());
+			AssetDataBase::GetInstance().LoadOriginAsset(iter.path().string());
 		}
-
 	}
 
 	void GraphicsSystemLayer::Destroy()
@@ -204,7 +206,7 @@ namespace JG
 
 	bool GraphicsSystemLayer::ResponseRegisterMainCamera(RequestRegisterMainCameraEvent& e)
 	{
-		if (mMainCamera->pCamera == nullptr)
+		if (mMainCamera == nullptr)
 		{
 			mMainCamera = CreateUniquePtr<CameraItem>(e.MainCamera);
 		}
@@ -239,9 +241,8 @@ namespace JG
 				cameraItem->_2DBatch->DrawCall(_2dItem->WorldMatrix, _2dItem->Texture, _2dItem->Color);
 			}
 		}
-		if (type == JGTYPE(StandardStaticMeshRenderItem))
+		else if (type == JGTYPE(StandardStaticMeshRenderItem))
 		{
-
 			u64 layerMask = cameraItem->pCamera->GetCullingLayerMask();
 			for (auto& item : renderItemList)
 			{
@@ -251,7 +252,7 @@ namespace JG
 				auto _3dItem = static_cast<StandardStaticMeshRenderItem*>(item.get());
 				if (_3dItem->Materials.empty())
 				{
-					_3dItem->Materials.push_back(mStandardDefaultMaterial);
+					_3dItem->Materials.push_back(IMaterial::Create("DefaultMaterial", ShaderLibrary::GetInstance().GetShader(ShaderScript::Standard3DShader)));
 				}
 				cameraItem->Renderer->DrawCall(_3dItem->WorldMatrix, _3dItem->Mesh, _3dItem->Materials);
 			}
@@ -266,6 +267,10 @@ namespace JG
 		{
 			NotifyRenderingReadyCompeleteEvent e;
 			Application::GetInstance().SendEvent(e);
+		}
+		if (mMainCamera == nullptr)
+		{
+			return EScheduleResult::Continue;
 		}
 		bool isResize = false;
 		if (mMainCamera->pCamera != nullptr && mMainCamera->Resolution != mMainCamera->pCamera->GetResolution())
@@ -289,7 +294,6 @@ namespace JG
 			JG_CORE_INFO("Graphics API Flush");
 			Application::GetInstance().GetGraphicsAPI()->Flush();
 		}
-
 		auto fmBufferCnt = Application::GetInstance().GetGraphicsAPI()->GetBufferCount();
 		if (mMainCamera->pCamera != nullptr)
 		{
@@ -297,7 +301,7 @@ namespace JG
 			if (mMainCamera->IsValid() == false)
 			{
 				TextureInfo mainTexInfo;
-				mainTexInfo.Width  = std::max<u32>(1, mMainCamera->Resolution.x);
+				mainTexInfo.Width = std::max<u32>(1, mMainCamera->Resolution.x);
 				mainTexInfo.Height = std::max<u32>(1, mMainCamera->Resolution.y);
 				mainTexInfo.ArraySize = 1;
 				mainTexInfo.Format = ETextureFormat::R8G8B8A8_Unorm;
@@ -311,61 +315,63 @@ namespace JG
 				}
 
 				mainTexInfo.Format = ETextureFormat::D24_Unorm_S8_Uint;
-				mainTexInfo.Flags  = ETextureFlags::Allow_DepthStencil;
+				mainTexInfo.Flags = ETextureFlags::Allow_DepthStencil;
 				for (auto& t : mMainCamera->TargetDepthTextures)
 				{
 					t = ITexture::Create(mainCam->GetName() + "TargetDepthTexture", mainTexInfo);
 				}
 			}
-
-			RenderInfo info;
-			info.CurrentBufferIndex = mMainCamera->CurrentIndex;
-			info.Resolutoin			= mMainCamera->pCamera->GetResolution();
-			info.ViewProj = mMainCamera->pCamera->GetViewProjMatrix();
-			info.TargetTexture		= mMainCamera->TargetTextures[info.CurrentBufferIndex];
-			info.TargetDepthTexture = mMainCamera->TargetDepthTextures[info.CurrentBufferIndex];
-			info.TargetTexture->SetClearColor(mainCam->GetClearColor());
-			mMainCamera->ChangeRenderer();
-			
-
-			mIsRenderCompelete = false;
-			Scheduler::GetInstance().ScheduleAsync([&](void* data)
-			{
-				if (mMainCamera->Renderer->Begin(*(RenderInfo*)data, { mMainCamera->_2DBatch }) == true)
-				{
-					for (auto& _pair : mPushedRenderItems)
-					{
-						for (auto& itemPair : _pair.second)
-						{
-							auto& type = itemPair.first;
-							auto& itemList = itemPair.second;
-							Rendering(mMainCamera.get(), type, itemList);
-
-							itemList.clear();
-						}
-					}
-					mMainCamera->Renderer->End();
-				}
-				
-				mIsRenderCompelete = true;
-			}, &info, sizeof(RenderInfo));
-			
-
-			mMainCamera->CurrentIndex = (mMainCamera->CurrentIndex + 1) % fmBufferCnt;
-			{
-				NotifyChangeMainSceneTextureEvent e;
-				e.SceneTexture = mMainCamera->TargetTextures[mMainCamera->CurrentIndex];
-				Application::GetInstance().SendEvent(e);
-			}
-
-			
 		}
+
+		RenderInfo info; auto mainCam = mMainCamera->pCamera;
+		info.CurrentBufferIndex = mMainCamera->CurrentIndex;
+		info.Resolutoin			= mMainCamera->pCamera->GetResolution();
+		info.ViewProj = mMainCamera->pCamera->GetViewProjMatrix();
+		info.TargetTexture		= mMainCamera->TargetTextures[info.CurrentBufferIndex];
+		info.TargetDepthTexture = mMainCamera->TargetDepthTextures[info.CurrentBufferIndex];
+		info.TargetTexture->SetClearColor(mainCam->GetClearColor());
+		mMainCamera->ChangeRenderer();
+
+		mIsRenderCompelete = false;
+		Scheduler::GetInstance().ScheduleAsync([&](void* data)
+		{
+			mMainCamera->Renderer->SetCommandID(1);
+			if (mMainCamera->Renderer->Begin(*(RenderInfo*)data, { mMainCamera->_2DBatch }) == true)
+			{
+				for (auto& _pair : mPushedRenderItems)
+				{
+					for (auto& itemPair : _pair.second)
+					{
+						auto& type = itemPair.first;
+						auto& itemList = itemPair.second;
+						Rendering(mMainCamera.get(), type, itemList);
+
+						itemList.clear();
+					}
+				}
+				mMainCamera->Renderer->End();
+				mIsRenderCompelete = true;
+			}
+		}, &info, sizeof(RenderInfo));
+
+		mMainCamera->CurrentIndex = (mMainCamera->CurrentIndex + 1) % fmBufferCnt;
+		{
+			NotifyChangeMainSceneTextureEvent e;
+			e.SceneTexture = mMainCamera->TargetTextures[mMainCamera->CurrentIndex];
+			Application::GetInstance().SendEvent(e);
+		}
+
+		
 		return EScheduleResult::Continue;
 	}
 	EScheduleResult GraphicsSystemLayer::Wait()
 	{
 		while (mIsRenderCompelete == false) {}
-		mPushedRenderItems.clear();
+		if (mIsRenderCompelete == true)
+		{
+			mPushedRenderItems.clear();
+		}
+
 		return EScheduleResult::Continue;
 	}
 	void GraphicsSystemLayer::LoadShaderScript()
@@ -454,7 +460,10 @@ namespace JG
 		};
 
 
-		// PS_SURFACE_PROPERTY_SCRIPT
+
+
+		__PS_SURFACE_VARIABLES_SCRIPT__
+		__PS_SURFACE_RESOURCES_SCRIPT__
 
 		struct PS_SURFACE_OUTPUT
 		{
@@ -473,7 +482,9 @@ namespace JG
 		{
 			PS_SURFACE_OUTPUT _output;
 			_output.albedo = float4(1.0f,1.0f,1.0f,1.0f);
-			//PS_SURFACE_FUNCTION_SCRIPT
+
+
+			__PS_SURFACE_FUNCTION_SCRIPT__
 			return _output;
 		};
 		
@@ -483,9 +494,9 @@ namespace JG
 			VS_OUT vout;
 		    
 			float3 posW = mul(float4(vin.posL, 1.0f), gWorld);
-			float3 normalW = mul(float4(vin.normalL, 1.0f), gWorld);
-			float3 tanW =  mul(float4(vin.tanL, 1.0f), gWorld);
-			float3 bitW =  mul(float4(vin.bitL, 1.0f), gWorld);
+			float3 normalW = mul(float4(vin.normalL, 0.0f), gWorld);
+			float3 tanW =  mul(float4(vin.tanL, 0.0f), gWorld);
+			float3 bitW =  mul(float4(vin.bitL, 0.0f), gWorld);
 			vout.posH = mul(float4(posW, 1.0f), gViewProj);
 			vout.posW = posW;
 			vout.normalW = normalize(normalW);
@@ -498,37 +509,39 @@ namespace JG
 			PS_SURFACE_OUTPUT output = PS_SURFACE_FUNCTION(input);
 
 			float3 dirLightColor = float3(0.9f, 0.95f, 1.0f);
-			float3 dirLight = float3(0.0f, -1.0f, 1.0f);
+			float3 dirLight = float3(0.0f, 0.0f, 1.0f);
 
 			float4 ambientLight = float4(0.2f, 0.2f, 0.25f, 1.0f);
 
 			float3 N = normalize(pin.normalW);
 			float3 L = normalize(-dirLight);
 			float NdotL = saturate(dot(N,L));
-
-
-			return saturate(output.albedo * NdotL + ambientLight);
+			return output.albedo * NdotL + ambientLight;
 		}
 		)", EShaderFlags::Allow_VertexShader | EShaderFlags::Allow_PixelShader);
 			ShaderLibrary::GetInstance().RegisterShader(shader);
 		}
 
 		{
-			auto script = MaterialScript::Create("StandardScript",
+			auto script = IShaderScript::CreateMaterialScript("StandardScript",
 				R"(
-Property {
-	// Texture2D
-	float  TestValue;
-	float4 TestColor;
+_Resources {
 	Texture2D NormalTexture;
 }
 
-Surface {
-	_output.albedo = float4(_input.normal);
+
+_Variables {
+	float  TestValue;
+	float4 TestColor;
+}
+
+
+_Surface {
+	_output.albedo = float4(TestColor);
 }
 
 )");
-
+			ShaderLibrary::GetInstance().RegisterScirpt(script);
 		}
 
 
