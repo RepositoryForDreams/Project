@@ -135,7 +135,7 @@ namespace JG
 		}
 		MaterialAssetImportSettings settings;
 		settings.OutputPath = outputPath;
-		settings.FileName = "TestMaterial";
+		settings.FileName   = "TestMaterial";
 		settings.Shader = ShaderLibrary::GetInstance().GetShader(ShaderScript::Standard3DShader);
 		settings.ScriptList.push_back(ShaderLibrary::GetInstance().GetScript("StandardScript"));
 		AssetImporter::Import(settings);
@@ -523,25 +523,17 @@ namespace JG
 		}
 
 		{
-			auto script = IShaderScript::CreateMaterialScript("StandardScript",
-				R"(
-_Resources {
-	Texture2D NormalTexture;
-}
-
-
-_Variables {
-	float  TestValue;
-	float4 TestColor;
-}
-
-
-_Surface {
-	_output.albedo = float4(TestColor);
-}
-
-)");
-			ShaderLibrary::GetInstance().RegisterScirpt(script);
+			String scriptPath = CombinePath(Application::GetAssetPath(), "Engine/Shader/Script/TestScript.script");
+			fs::path p(scriptPath);
+			if (fs::exists(p))
+			{
+				std::ifstream fin(p.string());
+				std::stringstream ss;
+				ss << fin.rdbuf();
+				
+				auto script = IShaderScript::CreateMaterialScript("StandardScript", ss.str());
+				ShaderLibrary::GetInstance().RegisterScirpt(script);
+			}	
 		}
 
 

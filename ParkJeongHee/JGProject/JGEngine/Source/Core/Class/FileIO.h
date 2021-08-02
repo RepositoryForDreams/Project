@@ -199,7 +199,6 @@ namespace JG
 		void SetUint64(u64 _u64) { mValue.SetUint64(_u64); }
 		void SetFloat(f32 _f32) { mValue.SetFloat(_f32); }
 		void SetDouble(f64 _f64) { mValue.SetDouble(_f64); }
-
 	public:
 		bool IsBool() const { return mValue.IsBool(); }
 		bool IsInt32() const { return mValue.IsInt(); }

@@ -229,25 +229,34 @@ namespace JG
 
 	EAssetFormat AssetDataBase::GetAssetFormat(const String& path)
 	{
-		auto absolutePath = fs::absolute(path).string();
+		String absolutePath;
+		String resourcePath;
+		if (GetResourcePath(path, absolutePath, resourcePath) == false)
 		{
-
+			return EAssetFormat::None;
+		}
+		{
 			std::shared_lock<std::shared_mutex> lock(mAssetFormatMutex);
-			auto iter = mOriginAssetFormatPool.find(absolutePath);
+			auto iter = mOriginAssetFormatPool.find(resourcePath);
 			if (iter != mOriginAssetFormatPool.end())
 			{
 				return iter->second;
 			}
 		}
-		LoadOriginAsset(absolutePath);
+
+
+		LoadOriginAsset(resourcePath);
 		return Json::GetAssetFormat(absolutePath);
 	}
 
 	AssetID AssetDataBase::LoadOriginAsset(const String& path)
 	{
-
-		auto absolutePath = fs::absolute(path).string();
-
+		String resourcePath;
+		String absolutePath;
+		if (GetResourcePath(path, absolutePath, resourcePath) == false)
+		{
+			return AssetID();
+		}
 
 		if (mAssetLoadScheduleHandle == nullptr)
 		{
@@ -255,14 +264,14 @@ namespace JG
 				Scheduler::GetInstance().ScheduleByFrame(0, 1, -1, SchedulePriority::EndSystem, SCHEDULE_BIND_FN(&AssetDataBase::LoadAsset_Update));
 		}
 		// 에셋 검사
-		auto iter = mOriginAssetDataPool.find(absolutePath);
+		auto iter = mOriginAssetDataPool.find(resourcePath);
 		if (iter != mOriginAssetDataPool.end())
 		{
 			iter->second->RefCount++;
 			return iter->second->ID;
 		}
 	
-		auto assetID   = RequestOriginAssetID();
+		auto assetID   = RequestOriginAssetID(resourcePath);
 		auto assetData = CreateUniquePtr<AssetData>();
 		AssetLoadData assetLoadData;
 
@@ -273,7 +282,7 @@ namespace JG
 		strcpy(assetLoadData.Path, path.c_str());
 
 		// 에셋 추가
-		mOriginAssetDataPool.emplace(absolutePath, assetData.get());
+		mOriginAssetDataPool.emplace(resourcePath, assetData.get());
 		mLoadAssetDataQueue.push(assetLoadData);
 		mAssetDataPool.emplace(assetID, std::move(assetData));
 	
@@ -304,13 +313,13 @@ namespace JG
 			mUnLoadAssetDataQueue.push(unLoadData);
 			if (id.IsOrigin())
 			{
-				mOriginAssetDataPool.erase(iter->second->Path);
+				mOriginAssetDataPool.erase(id.ResourcePath);
 			}
 			mAssetDataPool.erase(id);
 		}
 	}
 
-	AssetID AssetDataBase::RequestOriginAssetID()
+	AssetID AssetDataBase::RequestOriginAssetID(const String& resourcePath)
 	{
 		AssetID id;
 		if (mAssetIDQueue.empty() == false)
@@ -323,6 +332,7 @@ namespace JG
 			id.Origin    = mAssetIDOffset++;
 			id.ID		 = id.Origin;
 		}
+		strcpy(id.ResourcePath, resourcePath.c_str());
 		return id;
 	}
 
@@ -338,7 +348,7 @@ namespace JG
 		}
 
 
-		AssetID id = RequestOriginAssetID();
+		AssetID id = RequestOriginAssetID(originID.ResourcePath);
 		id.Origin = originID.GetID();
 		return id;
 	}
@@ -424,9 +434,8 @@ namespace JG
 		}
 
 		{
-			auto absolutePath = fs::absolute(LoadData->Path).string();
 			std::lock_guard<std::shared_mutex> lock(mAssetFormatMutex);
-			mOriginAssetFormatPool[absolutePath] = assetFormat;
+			mOriginAssetFormatPool[LoadData->ID.ResourcePath] = assetFormat;
 		}
 
 	}
@@ -539,6 +548,49 @@ namespace JG
 		}
 		auto textureAsset = static_cast<Asset<ITexture>*>(data->Asset.get());
 		textureAsset->mData = ITexture::Create(*(static_cast<TextureAssetStock*>(data->Stock.get())));
+	}
+
+	bool AssetDataBase::GetResourcePath(const String& path, String& out_absolutePath, String& out_resourcePath) const
+	{
+		auto originPath = path;
+		auto absolutePath      = fs::absolute(path).string();
+		auto absoluteAssetPath = fs::absolute(Application::GetAssetPath()).string();
+		auto homePath = fs::current_path().string();
+
+		originPath        = ReplaceAll(originPath, "\\", "/");
+		absolutePath      = ReplaceAll(absolutePath, "\\", "/");
+		absoluteAssetPath = ReplaceAll(absoluteAssetPath, "\\", "/");
+		homePath		  = ReplaceAll(homePath, "\\", "/");
+
+
+		String resourcePath;
+
+		// 
+		if (absolutePath.find(absoluteAssetPath) == String::npos )
+		{
+			if (path.find_first_of("Asset/") != String::npos) {
+
+				resourcePath = ReplaceAll(absolutePath, homePath + "/", "");
+				absolutePath = ReplaceAll(absolutePath, homePath + "/", "");
+				absolutePath = ReplaceAll(absolutePath, "Asset/", "");
+				absolutePath = CombinePath(absoluteAssetPath, absolutePath);
+				out_absolutePath = absolutePath;
+				out_resourcePath = resourcePath;
+				return true;
+			}
+		}
+		// in AssetPath
+		else
+		{
+			resourcePath = ReplaceAll(absolutePath, absoluteAssetPath, "Asset");
+			out_absolutePath = absolutePath;
+			out_resourcePath = resourcePath;
+			return true;
+		}
+
+
+		JG_CORE_ERROR("{0} is not exist in AssetFolder", path);
+		return false;
 	}
 
 }

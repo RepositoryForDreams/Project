@@ -39,6 +39,11 @@ namespace JG
 	}
 	void StaticMeshRenderer::SetMesh(const String& path)
 	{
+		auto assetManager = GetGameWorld()->GetAssetManager();
+		if (assetManager->GetAssetFormat(path) != EAssetFormat::Mesh)
+		{
+			return;
+		}
 		mMeshAssetHandle = GetGameWorld()->GetAssetManager()->RequestOriginAsset<IMesh>(path);
 	}
 	void StaticMeshRenderer::MakeJson(SharedPtr<JsonData> jsonData) const
@@ -46,7 +51,7 @@ namespace JG
 		BaseRenderer::MakeJson(jsonData);
 		if (mMeshAssetHandle && mMeshAssetHandle->IsValid())
 		{
-			jsonData->AddMember("MeshPath", mMeshAssetHandle->GetAsset()->GetAssetFullPath());
+			jsonData->AddMember("MeshPath", mMeshAssetHandle->GetAsset()->GetAssetPath());
 		}
 
 
@@ -56,7 +61,7 @@ namespace JG
 			if (material == nullptr || material->IsValid() == false) continue;
 			auto materialJson = jsonData->CreateJsonData();
 
-			materialJson->SetString(material->GetAsset()->GetAssetFullPath());
+			materialJson->SetString(material->GetAsset()->GetAssetPath());
 			materialListJson->AddMember(materialJson);
 		}
 		auto type = materialListJson->GetValue().GetType();
@@ -187,26 +192,50 @@ namespace JG
 					}
 					ImGui::TreePop();
 				}
-
-
 			}
 			ImGui::TreePop();
 		}
 	}
 	void StaticMeshRenderer::OnInspector_MaterialPropertyGUI(SharedPtr<IMaterial> material)
 	{
-		auto propertyList = material->GetPropertyList();
+		//auto propertyList = material->GetPropertyList();
+		//for (auto& _pair : propertyList)
+		//{
+		//	auto type = _pair.first;
+		//	auto name = _pair.second;
+		//	ImGui::Text(("Name : " + name).c_str());
+		//	switch (type)
+		//	{
+		//	case EShaderDataType::_bool:
+		//		break;
+		//	case EShaderDataType::_float:
+		//		break;
+		//	case EShaderDataType::_float2:
+		//		break;
+		//	case EShaderDataType::_float3:
+		//		break;
+		//	case EShaderDataType::_float4:
+		//		break;
+		//	case EShaderDataType::_int:
+		//		break;
+		//	case EShaderDataType::_int2:
+		//		break;
+		//	case EShaderDataType::_int3:
+		//		break;
+		//	case EShaderDataType::_int4:
+		//		break;
+		//	case EShaderDataType::_uint:
+		//		break;
+		//	case EShaderDataType::_uint2:
+		//		break;
+		//	case EShaderDataType::_uint3:
+		//		break;
+		//	case EShaderDataType::_uint4:
+		//		break;
 
 
-		for (auto& _pair : propertyList)
-		{
-			auto type = _pair.first;
-			auto name = _pair.second;
-			ImGui::Text(("Type : " +  ShaderDataTypeToString(type)).c_str()); ImGui::SameLine();
-			ImGui::Text(("Name : " +  name).c_str());
-		}
 
-
-
+		//	}
+		//}
 	}
 }

@@ -26,7 +26,7 @@ namespace JG
 		BaseRenderer::Start();
 		if (mSpriteAssetHandle == nullptr)
 		{
-			SetSprite("Resources/NullTexture.jgasset");
+			SetSprite("Asset/Resources/NullTexture.jgasset");
 		}
 
 	}
@@ -51,7 +51,7 @@ namespace JG
 
 		if (mSpriteAssetHandle && mSpriteAssetHandle->IsValid())
 		{
-			jsonData->AddMember("SpritePath", mSpriteAssetHandle->GetAsset()->GetAssetFullPath());
+			jsonData->AddMember("SpritePath", mSpriteAssetHandle->GetAsset()->GetAssetPath());
 		}
 	
 
@@ -80,7 +80,6 @@ namespace JG
 			return;
 		}
 		mSpriteAssetHandle = assetManager->RequestOriginAsset<ITexture>(path);
-		//mSpritePath = path;
 	}
 
 	SharedPtr<IRenderItem> SpriteRenderer::PushRenderItem()

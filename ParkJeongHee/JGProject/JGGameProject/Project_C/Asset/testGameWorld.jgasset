@@ -33,13 +33,13 @@
                         "Name": "Transform",
                         "IsActive": true,
                         "Location": [
-                            -1.124925136566162,
-                            2.5256874561309816,
-                            -10.92318058013916
+                            1.7248830795288087,
+                            0.5505553483963013,
+                            -12.2908353805542
                         ],
                         "Rotation": [
-                            17.349645614624025,
-                            354.71429443359377,
+                            8.4893798828125,
+                            356.32366943359377,
                             0.0
                         ],
                         "Scale": [
@@ -104,8 +104,8 @@
                                 "Name": "Transform",
                                 "IsActive": true,
                                 "Location": [
-                                    25.0,
-                                    50.0,
+                                    250.0,
+                                    10.0,
                                     9.113713161923443e-8
                                 ],
                                 "Rotation": [
@@ -129,7 +129,7 @@
                                     1.0,
                                     1.0
                                 ],
-                                "SpritePath": "C:\\Project\\ParkJeongHee\\JGProject\\JGGameProject\\Project_C\\Asset\\Resources\\NullTexture.jgasset"
+                                "SpritePath": "Asset\\Resources\\UV.Grid.jgasset"
                             }
                         ],
                         "Childs": []
@@ -161,7 +161,7 @@
                                 "ComponentType": "JG::StaticMeshRenderer",
                                 "Name": "StaticMeshRenderer",
                                 "IsActive": true,
-                                "MeshPath": "C:\\Project\\ParkJeongHee\\JGProject\\JGGameProject\\Project_C\\Asset\\Resources\\Cube.001.jgasset",
+                                "MeshPath": "Asset\\Resources\\Cube.001.jgasset",
                                 "Materials": {}
                             }
                         ],
@@ -200,7 +200,7 @@
                                     1.0,
                                     1.0
                                 ],
-                                "SpritePath": "C:\\Project\\ParkJeongHee\\JGProject\\JGGameProject\\Project_C\\Asset\\Resources\\UV.Grid.jgasset"
+                                "SpritePath": "Asset\\Resources\\uvTest2.jgasset"
                             }
                         ],
                         "Childs": []
@@ -232,9 +232,9 @@
                                 "ComponentType": "JG::StaticMeshRenderer",
                                 "Name": "StaticMeshRenderer",
                                 "IsActive": true,
-                                "MeshPath": "C:\\Project\\ParkJeongHee\\JGProject\\JGGameProject\\Project_C\\Asset\\Resources\\Sphere.001.jgasset",
+                                "MeshPath": "Asset\\Resources\\Sphere.001.jgasset",
                                 "Materials": [
-                                    "C:\\Project\\ParkJeongHee\\JGProject\\JGGameProject\\Project_C\\Asset\\Resources\\TestMaterial.jgasset"
+                                    "Asset\\Resources\\TestMaterial.jgasset"
                                 ]
                             }
                         ],
@@ -267,7 +267,7 @@
                                 "ComponentType": "JG::StaticMeshRenderer",
                                 "Name": "StaticMeshRenderer",
                                 "IsActive": true,
-                                "MeshPath": "C:\\Project\\ParkJeongHee\\JGProject\\JGGameProject\\Project_C\\Asset\\Resources\\Torus.jgasset",
+                                "MeshPath": "Asset\\Resources\\Torus.jgasset",
                                 "Materials": {}
                             }
                         ],

@@ -20,6 +20,8 @@ namespace JG
 		return gAssetPath;
 	}
 
+
+
 	Application::~Application() {}
 
 	bool Application::Create(const ApplicaionProps& prop)

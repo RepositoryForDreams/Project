@@ -193,6 +193,7 @@ namespace JG
 	private:
 		u64  Origin = ASSET_NULL_ID;
 		u64  ID     = ASSET_NULL_ID;
+		char ResourcePath[256] = { 0, };
 	public:
 		u64 GetID() const {
 			return ID;
@@ -249,7 +250,7 @@ namespace JG
 			fs::path contentsPath = fs::absolute(Application::GetAssetPath()).string();
 			mAssetID = (u64)this;
 			mAssetFullPath = fs::absolute(assetPath).string();
-			mAssetPath	   = ReplaceAll(mAssetFullPath, contentsPath.string(), "");
+			mAssetPath	   = ReplaceAll(mAssetFullPath, contentsPath.string(), "Asset");
 			mExtension     = p.extension().string();
 			mName = ReplaceAll(p.filename().string() ,mExtension, "");
 		}
@@ -388,14 +389,14 @@ namespace JG
 			return nullptr;
 		}
 	private:
-		AssetID RequestOriginAssetID();
+		AssetID RequestOriginAssetID(const String& resourcePath);
 		AssetID RequestRWAssetID(AssetID originID);
 		void LoadAssetInternal(AssetLoadData* LoadData);
 
 
 		EScheduleResult LoadAsset_Update();
 		EScheduleResult UnLoadAsset_Update();
-
+		bool GetResourcePath(const String& path, String& out_absolutePath, String& out_resourcePath) const;
 	private:
 		void TextureAsset_OnCompelete(AssetLoadCompeleteData* data);
 
