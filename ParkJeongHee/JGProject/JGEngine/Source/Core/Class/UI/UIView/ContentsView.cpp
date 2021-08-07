@@ -17,11 +17,20 @@ namespace JG
 	void ContentsView::Load()
 	{
 		// Copy Paste Delete Move 이정도만 일단 생성
-		UIManager::GetInstance().RegisterContextMenuItem(GetType(), "NewFolder", 0, [&]() {
+		UIManager::GetInstance().RegisterContextMenuItem(GetType(), "Create/Folder", 0, [&]() {
 			if (mVm != nullptr)
 			{
-				mVm->NewFolder->Execute();
+				mVm->Create_Folder->Execute();
 			}
+		}, nullptr);
+		UIManager::GetInstance().RegisterContextMenuItem(GetType(), "Create/Material/Surface", 0, [&]() {
+			if (mVm != nullptr)
+			{
+				mVm->Create_Material_Surface->Execute();
+			}
+		}, nullptr);
+		UIManager::GetInstance().RegisterContextMenuItem(GetType(), "Create/Material/Lighting", 0, [&]() {
+
 		}, nullptr);
 		UIManager::GetInstance().RegisterContextMenuItem(GetType(), "Copy", 20, [&]() {}, nullptr);
 		UIManager::GetInstance().RegisterContextMenuItem(GetType(), "Paste", 20, [&]() {}, nullptr);
@@ -162,7 +171,7 @@ namespace JG
 			
 			if (ImGui::Selectable(fileInfo->Name.c_str(), false, ImGuiSelectableFlags_None, ImVec2(0, 20.0f)) == true)
 			{
-
+				Vm->SelectedAssetFile(fileInfo->Path);
 			}
 			if (ImGui::BeginDragDropSource())
 			{

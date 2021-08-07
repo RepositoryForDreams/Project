@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "InspectorViewModel.h"
+#include "Class/Asset/Asset.h"
 #include "Class/Game/GameObjectFactory.h"
 #include "Class/Game/GameNode.h"
 #include "Class/UI/UIModel/InspectorModel.h"
@@ -19,7 +20,7 @@ namespace JG
 		EventDispatcher dispatcher(e); // ResponseSelectedGameNodeInEditor
 		dispatcher.Dispatch<NotifyDestroyJGObjectEvent>(EVENT_BIND_FN(&InspectorViewModel::ResponseDestroyGameObject));
 		dispatcher.Dispatch<NotifySelectedGameNodeInEditorEvent>(EVENT_BIND_FN(&InspectorViewModel::ResponseSelectedGameNodeInEditor));
-
+		dispatcher.Dispatch< NotifySelectedAssetInEditorEvent>(EVENT_BIND_FN(&InspectorViewModel::ResponseSelectedAssetInEditor));
 	}
 	IJGObject* InspectorViewModel::GetTargetObject() const
 	{
@@ -84,6 +85,15 @@ namespace JG
 			SetTargetObject(e.SelectedGameNode);
 		}
 		
+		return false;
+	}
+	bool InspectorViewModel::ResponseSelectedAssetInEditor(NotifySelectedAssetInEditorEvent& e)
+	{
+		auto asset = AssetDataBase::GetInstance().GetIAsset((*e.SelectedAsset));
+		if (asset != nullptr)
+		{
+			SetTargetObject(asset);
+		}
 		return false;
 	}
 }

@@ -144,7 +144,7 @@ namespace JG
 		inputLayout->Add(EShaderDataType::_float4, "COLOR", 0);
 		inputLayout->Add(EShaderDataType::_int, "TEXTUREINDEX", 0);
 
-		auto _2dShader = ShaderLibrary::GetInstance().GetShader(ShaderScript::Standard2DShader);
+		auto _2dShader = ShaderLibrary::GetInstance().GetShader(ShaderScript::Template::Standard2DShader);
 
 		TextureInfo textureInfo;
 		textureInfo.Width = 1; textureInfo.Height = 1; 	textureInfo.MipLevel = 1; 	textureInfo.ArraySize = 1;

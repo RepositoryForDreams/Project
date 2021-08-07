@@ -22,7 +22,6 @@ namespace JG
 		std::atomic_bool mIsCommandListExcute = false;
 		Dictionary<u64, SortedDictionary<u64, SharedPtr<CommandList>>> mExcuteCmdLists;
 		Dictionary<u64, SortedDictionary<u64, SharedPtr<CommandList>>> mExcutePendingCmdLists;
-		//Dictionary<CommandList*, SharedPtr<CommandList>> mExcutePendingCmdLists;
 	public:
 		CommandQueue(u64 bufferCount, D3D12_COMMAND_LIST_TYPE type);
 		~CommandQueue();

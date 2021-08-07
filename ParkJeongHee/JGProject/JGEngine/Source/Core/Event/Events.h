@@ -141,13 +141,15 @@ private: \
 	class IRenderItem;
 	class Camera;
 	class GameNode;
+	class IAsset;
+	class AssetID;
 	NOTIFY_EVENT(NotifyRenderingReadyCompeleteEvent)
 	NOTIFY_ONE_ARG_EVENT(NotifyChangeMainSceneTextureEvent, SharedPtr<ITexture>, SceneTexture)
 	NOTIFY_ONE_ARG_EVENT(NotifyChangeGameWorldEvent, GameWorld*, GameWorld)
 	NOTIFY_ONE_ARG_EVENT(NotifyEditorSceneOnClickEvent, JVector2, ClickPos)
 	NOTIFY_ONE_ARG_EVENT(NotifySelectedGameNodeInEditorEvent, GameNode*, SelectedGameNode)
-
-
+	NOTIFY_ONE_ARG_EVENT(NotifySelectedAssetInEditorEvent, SharedPtr<AssetID>, SelectedAsset)
+		
 	REQUEST_ONE_ARG_EVENT(RequestGetGameWorldEvent, GameWorld*, GameWorld)
 	REQUEST_ONE_ARG_EVENT(RequestPushRenderItemEvent, SharedPtr<IRenderItem>, RenderItem)
 	REQUEST_ONE_ARG_EVENT(RequestRegisterCameraEvent, Camera*, pCamera)

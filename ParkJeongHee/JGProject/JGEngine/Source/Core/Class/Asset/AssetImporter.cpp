@@ -98,12 +98,10 @@ namespace JG
 	{
 		MaterialAssetStock stock;
 
-		stock.Name = settings.FileName;
-		stock.ShaderName = settings.Shader->GetName();
-		for (auto& script : settings.ScriptList)
-		{
-			stock.ShaderScript.push_back(script->GetCode());
-		}
+		stock.Name           = settings.FileName;
+		stock.ShaderTemplate = settings.Shader;
+		stock.ShaderScript   = settings.ShaderScript;
+		
 
 		WriteMaterial(settings.OutputPath, stock);
 		return EAssetImportResult::Success;

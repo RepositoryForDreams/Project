@@ -33,36 +33,9 @@ namespace JG
 			IJGObject* object = mVm->GetTargetObject();
 			if (object != nullptr)
 			{
-
-
-				bool isGameNode = GameObjectFactory::GetInstance().IsGameNode(object->GetType());
 				object->OnInspectorGUI();
-
-		
-
-				//if (isGameNode == true)
-				//{
-				//	auto gameNode = static_cast<GameNode*>(object);
-				//	if (gameNode->GetParent() != nullptr)
-				//	{
-				//		auto padding = ImGui::GetStyle().FramePadding;
-				//		if (ImGui::Button("Add Component", ImVec2(ImGui::GetWindowSize().x - (padding.x * 4), 0)) == true)
-				//		{
-				//			UIManager::GetInstance().OpenPopupUIView<ComponentFinderContextView>(ComponentFinderInitData());
-				//		}
-				//	}
-				//}
-				//if (UIManager::GetInstance().OnContextUIView<ComponentFinderContextView>())
-				//{
-				//	auto comFinder = UIManager::GetInstance().GetPopupUIView<ComponentFinderContextView>();
-				//	auto selectedType = comFinder->GetSelectedComponent();
-				//	mVm->SelectComponentType(selectedType);
-				//}
 			}
-			else
-			{
-				
-			}
+
 		}
 
 		ImGui::End();

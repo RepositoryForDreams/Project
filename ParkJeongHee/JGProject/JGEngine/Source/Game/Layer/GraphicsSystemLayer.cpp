@@ -131,14 +131,7 @@ namespace JG
 					JG_CORE_INFO("Fail Import {0}", iter.path().string());
 				}
 			}
-
 		}
-		MaterialAssetImportSettings settings;
-		settings.OutputPath = outputPath;
-		settings.FileName   = "TestMaterial";
-		settings.Shader = ShaderLibrary::GetInstance().GetShader(ShaderScript::Standard3DShader);
-		settings.ScriptList.push_back(ShaderLibrary::GetInstance().GetScript("StandardScript"));
-		AssetImporter::Import(settings);
 
 		for (auto& iter : fs::recursive_directory_iterator(outputPath))
 		{
@@ -252,7 +245,7 @@ namespace JG
 				auto _3dItem = static_cast<StandardStaticMeshRenderItem*>(item.get());
 				if (_3dItem->Materials.empty())
 				{
-					_3dItem->Materials.push_back(IMaterial::Create("DefaultMaterial", ShaderLibrary::GetInstance().GetShader(ShaderScript::Standard3DShader)));
+					_3dItem->Materials.push_back(IMaterial::Create("DefaultMaterial", ShaderLibrary::GetInstance().GetShader(ShaderScript::Template::Standard3DShader)));
 				}
 				cameraItem->Renderer->DrawCall(_3dItem->WorldMatrix, _3dItem->Mesh, _3dItem->Materials);
 			}
@@ -345,14 +338,13 @@ namespace JG
 						auto& type = itemPair.first;
 						auto& itemList = itemPair.second;
 						Rendering(mMainCamera.get(), type, itemList);
-
 						itemList.clear();
 					}
 				}
 				mMainCamera->Renderer->End();
 				mIsRenderCompelete = true;
 			}
-		}, &info, sizeof(RenderInfo));
+		}, & info, sizeof(RenderInfo));
 
 		mMainCamera->CurrentIndex = (mMainCamera->CurrentIndex + 1) % fmBufferCnt;
 		{
@@ -361,7 +353,7 @@ namespace JG
 			Application::GetInstance().SendEvent(e);
 		}
 
-		
+
 		return EScheduleResult::Continue;
 	}
 	EScheduleResult GraphicsSystemLayer::Wait()
@@ -376,169 +368,87 @@ namespace JG
 	}
 	void GraphicsSystemLayer::LoadShaderScript()
 	{
-		{
-			auto shader = IShader::Create(ShaderScript::Standard2DShader,
-				R"(
-		SamplerState gPointSampler
-		{
-			Template = Point_Wrap
-		};
-		
-		Texture2D gTexture[64];
-		
-		cbuffer Camera
-		{
-			float4x4 gViewProj;
-		};
-		
-		struct VS_IN
-		{
-			float3 posL : POSITION;
-			float2 tex  : TEXCOORD;
-			float4 color : COLOR;
-			int textureIndex : TEXTUREINDEX;
-		};
-		struct VS_OUT
-		{
-			float4 posH : SV_POSITION;
-			float2 tex   : TEXCOORD;
-			float4 color : COLOR;
-			int textureIndex : TEXTUREINDEX;
-		};
-		
-		VS_OUT vs_main(VS_IN vin)
-		{
-			VS_OUT vout;
-		    
-			vout.posH = mul(float4(vin.posL, 1.0f), gViewProj);
-			vout.tex = vin.tex;
-			vout.color = vin.color;
-			vout.textureIndex = vin.textureIndex;
-			return vout;
-		}
-		float4 ps_main(VS_OUT pin) : SV_TARGET
-		{
-			return gTexture[pin.textureIndex].Sample(gPointSampler, pin.tex) * pin.color;
-		}
-		)", EShaderFlags::Allow_VertexShader | EShaderFlags::Allow_PixelShader);
-			ShaderLibrary::GetInstance().RegisterShader(shader);
-			
-		}
-		{
-			auto shader = IShader::Create(ShaderScript::Standard3DShader,
-				R"(
-		SamplerState gPointSampler
-		{
-			Template = Point_Wrap
-		};
+		auto templatePath = Application::GetShaderTemplatePath();
 
-		cbuffer Camera
+		for (auto& iter : fs::recursive_directory_iterator(templatePath))
 		{
-			float4x4 gViewProj;
-		};
-		cbuffer ObjectParams
-		{
-			float4x4 gWorld;
-		}
-
-		struct VS_IN
-		{
-			float3 posL : POSITION;
-			float2 tex : TEXCOORD;
-			float3 normalL : NORMAL;
-			float3 tanL : TANGENT;
-			float3 bitL : BITANGENT;
-		};
-		struct VS_OUT
-		{
-			float4 posH    : SV_POSITION;
-			float3 posW    : POSITION;
-			float3 normalW : NORMAL;
-			float3 tanW	   : TANGENT;
-			float3 bitW    : BITANGENT;
-			float2 tex     : TEXCOORD;
-		};
-
-
-
-
-		__PS_SURFACE_VARIABLES_SCRIPT__
-		__PS_SURFACE_RESOURCES_SCRIPT__
-
-		struct PS_SURFACE_OUTPUT
-		{
-			float4 albedo;
-			float3 normal;
-		};
-		struct PS_SURFACE_INPUT
-		{
-			float3 position;
-			float3 normal;
-			float3 tangent;
-			float3 bitangent;
-		};
-
-		PS_SURFACE_OUTPUT PS_SURFACE_FUNCTION(PS_SURFACE_INPUT _input)
-		{
-			PS_SURFACE_OUTPUT _output;
-			_output.albedo = float4(1.0f,1.0f,1.0f,1.0f);
-
-
-			__PS_SURFACE_FUNCTION_SCRIPT__
-			return _output;
-		};
-		
-		
-		VS_OUT vs_main(VS_IN vin)
-		{
-			VS_OUT vout;
-		    
-			float3 posW = mul(float4(vin.posL, 1.0f), gWorld);
-			float3 normalW = mul(float4(vin.normalL, 0.0f), gWorld);
-			float3 tanW =  mul(float4(vin.tanL, 0.0f), gWorld);
-			float3 bitW =  mul(float4(vin.bitL, 0.0f), gWorld);
-			vout.posH = mul(float4(posW, 1.0f), gViewProj);
-			vout.posW = posW;
-			vout.normalW = normalize(normalW);
-			vout.tex   = vin.tex;
-			return vout;
-		}
-		float4 ps_main(VS_OUT pin) : SV_TARGET
-		{
-			PS_SURFACE_INPUT input;
-			PS_SURFACE_OUTPUT output = PS_SURFACE_FUNCTION(input);
-
-			float3 dirLightColor = float3(0.9f, 0.95f, 1.0f);
-			float3 dirLight = float3(0.0f, 0.0f, 1.0f);
-
-			float4 ambientLight = float4(0.2f, 0.2f, 0.25f, 1.0f);
-
-			float3 N = normalize(pin.normalW);
-			float3 L = normalize(-dirLight);
-			float NdotL = saturate(dot(N,L));
-			return output.albedo * NdotL + ambientLight;
-		}
-		)", EShaderFlags::Allow_VertexShader | EShaderFlags::Allow_PixelShader);
-			ShaderLibrary::GetInstance().RegisterShader(shader);
-		}
-
-		{
-			String scriptPath = CombinePath(Application::GetAssetPath(), "Engine/Shader/Script/TestScript.script");
-			fs::path p(scriptPath);
-			if (fs::exists(p))
+			auto p = iter.path();
+			if (p.extension() != ".shadertemplate")
 			{
-				std::ifstream fin(p.string());
+				continue;
+			}
+			auto fileName = ReplaceAll(p.filename().string(), p.extension().string(), "");
+			EShaderFlags shaderFlags = EShaderFlags::None;
+
+			std::ifstream fin(p.string());
+
+			if (fin.is_open() == true)
+			{
 				std::stringstream ss;
 				ss << fin.rdbuf();
-				
-				auto script = IShaderScript::CreateMaterialScript("StandardScript", ss.str());
-				ShaderLibrary::GetInstance().RegisterScirpt(script);
-			}	
+				String sourceCode = ss.str();
+				if (sourceCode.find(HLSL::CSEntry) != String::npos)
+				{
+					shaderFlags = shaderFlags | EShaderFlags::Allow_ComputeShader;
+				}
+				else
+				{
+					if (sourceCode.find(HLSL::VSEntry) != String::npos)
+					{
+						shaderFlags = shaderFlags | EShaderFlags::Allow_VertexShader;
+					}
+					if (sourceCode.find(HLSL::GSEntry) != String::npos)
+					{
+						shaderFlags = shaderFlags | EShaderFlags::Allow_GeometryShader;
+					}
+					if (sourceCode.find(HLSL::HSEntry) != String::npos)
+					{
+						shaderFlags = shaderFlags | EShaderFlags::Allow_HullShader;
+					}
+					if (sourceCode.find(HLSL::DSEntry) != String::npos)
+					{
+						shaderFlags = shaderFlags | EShaderFlags::Allow_DomainShader;
+					}
+					if (sourceCode.find(HLSL::PSEntry) != String::npos)
+					{
+						shaderFlags = shaderFlags | EShaderFlags::Allow_PixelShader;
+					}
+				}
+				auto shader = IShader::Create(fileName, sourceCode, shaderFlags);
+				ShaderLibrary::GetInstance().RegisterShader(shader);
+				fin.close();
+			}
 		}
+		auto scriptPath = Application::GetShaderScriptPath();
+
+		for (auto& iter : fs::recursive_directory_iterator(scriptPath))
+		{
+			auto p = iter.path();
+
+			if (p.extension() != ".shaderscript")
+			{
+				continue;
+			}
+			auto fileName = ReplaceAll(p.filename().string(), p.extension().string(), "");
+			std::ifstream fin(p.string());
+
+			if (fin.is_open() == true)
+			{
+				std::stringstream ss;
+				ss << fin.rdbuf();
+				String scriptCode = ss.str();
+				SharedPtr<IShaderScript> script;
+				if (scriptCode.find(ShaderScript::Type::Surface) != String::npos)
+				{
+					script = IShaderScript::CreateMaterialScript("Surface/" + fileName, scriptCode);
+				}
 
 
-
-
+				ShaderLibrary::GetInstance().RegisterScirpt(script);
+				fin.close();
+			}
+			
+		}
 	}
 
 }

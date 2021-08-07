@@ -75,13 +75,18 @@ namespace JG
 		ContentsDirectoryNode* mTargetNode = nullptr;
 
 		bool mIsCtrl = false;
+
+
+		String mSelectedAssetPath;
 	public:
-		UniquePtr<Command<>> NewFolder;
+
 		UniquePtr<Command<>> Copy;
 		UniquePtr<Command<>> Paste;
 		UniquePtr<Command<>> Move;
 		UniquePtr<Command<>> Delete;
 
+		UniquePtr<Command<>> Create_Folder;
+		UniquePtr<Command<>> Create_Material_Surface;
 	protected:
 		virtual void Initialize() override;
 		virtual void Destroy() override;
@@ -98,6 +103,7 @@ namespace JG
 		const String& GetSelectedContentsDirectory() const;
 
 		bool IsSelectedContentsDirectory(ContentsFileInfo* info) const;
+		void SelectedAssetFile(const String& path);
 	private:
 		void ForEeach(
 			ContentsDirectoryNode* CurrNode,
@@ -107,6 +113,10 @@ namespace JG
 		void Subscribe(ContentsDirectoryNode* node);
 		void UnSubscribe(ContentsDirectoryNode* node, bool is_remove_hashset = true);
 		void UnSubscribe();
+		// 생성 함수
+	private:
+		void CreateSurfaceMaterial(const String& parentDir);
+
 		// 비동기 함수
 	private:
 		ContentsFileInfo* Async_CreateContentsFileInfo(

@@ -20,6 +20,21 @@ namespace JG
 		return gAssetPath;
 	}
 
+	const String Application::GetEnginePath()
+	{
+		return CombinePath(GetAssetPath(), "Engine");
+	}
+
+	const String Application::GetShaderScriptPath()
+	{
+		return CombinePath(GetAssetPath(), "Engine/Shader/Script");
+	}
+
+	const String Application::GetShaderTemplatePath()
+	{
+		return CombinePath(GetAssetPath(), "Engine/Shader/Template");
+	}
+
 
 
 	Application::~Application() {}

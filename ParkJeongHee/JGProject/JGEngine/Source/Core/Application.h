@@ -18,6 +18,9 @@ namespace JG
 	{
 	public:
 		static const String& GetAssetPath();
+		static const String  GetEnginePath();
+		static const String  GetShaderScriptPath();
+		static const String  GetShaderTemplatePath();
 	private:
 		static Application* smInstance;
 	private:
@@ -43,7 +46,6 @@ namespace JG
 		bool Open(AppOpenEvent& e);
 		bool Resize(AppResizeEvent& e);
 		bool Close(AppCloseEvent& e);
-
 	protected:
 		virtual void LoadImpl() {}
 		virtual void OpenImpl() {}

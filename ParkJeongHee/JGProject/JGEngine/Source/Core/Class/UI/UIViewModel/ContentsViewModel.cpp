@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "ContentsViewModel.h"
 #include "Class/FileIO.h"
-
+#include "Class/Asset/AssetImporter.h"
 
 namespace JG
 {
@@ -82,20 +82,27 @@ namespace JG
 		});
 		
 
-		NewFolder = CreateUniquePtr<Command<>>();
+
 		Copy	  = CreateUniquePtr<Command<>>();
 		Paste	  = CreateUniquePtr<Command<>>();
 		Move	  = CreateUniquePtr<Command<>>();
 		Delete	  = CreateUniquePtr<Command<>>();
+
+		Create_Folder = CreateUniquePtr<Command<>>();
+		Create_Material_Surface = CreateUniquePtr<Command<>>();
 	}
 
 	void ContentsViewModel::Destroy()
 	{
-		NewFolder->Clear(); NewFolder = nullptr;
+
 		Copy->Clear();	    Copy = nullptr;
 		Paste->Clear();	    Paste = nullptr;
 		Move->Clear();	    Move = nullptr;
 		Delete->Clear();	Delete = nullptr;
+
+		Create_Folder->Clear(); Create_Folder = nullptr;
+		Create_Material_Surface->Clear(); Create_Material_Surface = nullptr;
+
 
 		mTargetNode = nullptr;
 		mTargetNodeList.clear();
@@ -167,7 +174,20 @@ namespace JG
 
 		return info == selectedInfo;
 	}
+	void ContentsViewModel::SelectedAssetFile(const String& path)
+	{
+		if (mSelectedAssetPath == path)
+		{
+			return;
+		}
 
+
+		mSelectedAssetPath = path;
+		NotifySelectedAssetInEditorEvent e;
+		e.SelectedAsset = CreateSharedPtr<AssetID>();
+		(*e.SelectedAsset) = AssetDataBase::GetInstance().LoadOriginAsset(mSelectedAssetPath);
+		SendEvent(e);
+	}
 	void ContentsViewModel::ForEeach(ContentsDirectoryNode* CurrNode, const std::function<bool(ContentsDirectoryNode*)>& pushAction, const std::function<void(ContentsDirectoryNode*)>& action, const std::function<void(ContentsDirectoryNode*)>& popAction)
 	{
 		if (CurrNode == nullptr)
@@ -221,7 +241,7 @@ namespace JG
 			return;
 		}
 		mTargetNodeList.insert(node);
-		NewFolder->Subscribe(node, [&]()
+		Create_Folder->Subscribe(node, [&]()
 		{
 			if (mTargetNode == nullptr)
 			{
@@ -260,7 +280,6 @@ namespace JG
 			// TODO Copy
 
 		});
-
 		Paste->Subscribe(node, [&]()
 		{
 			if (mTargetNode == nullptr)
@@ -276,7 +295,6 @@ namespace JG
 			// TODO Paste
 
 		});
-
 		Move->Subscribe(node, [&]()
 		{
 			if (mTargetNode == nullptr)
@@ -289,8 +307,6 @@ namespace JG
 				return;
 			}
 		});
-
-
 		Delete->Subscribe(node, [&]()
 		{
 			for (auto node : mTargetNodeList)
@@ -313,6 +329,22 @@ namespace JG
 				}
 			}
 		});
+		Create_Material_Surface->Subscribe(node, [&]()
+		{
+			if (mTargetNode == nullptr)
+			{
+				return;
+			}
+			auto fileInfo = GetContentsFileInfo(mTargetNode->Path);
+			if (fileInfo == nullptr)
+			{
+				return;
+			}
+			if (fs::exists(fileInfo->Path))
+			{
+				CreateSurfaceMaterial(fileInfo->Path);
+			}
+		});
 	}
 	void ContentsViewModel::UnSubscribe(ContentsDirectoryNode* node, bool is_remove_hashset)
 	{
@@ -324,11 +356,13 @@ namespace JG
 		{
 			mTargetNodeList.erase(node);
 		}
-		NewFolder->UnSubscribe(node);
+
 		Copy->UnSubscribe(node);
 		Paste->UnSubscribe(node);
 		Move->UnSubscribe(node);
 		Delete->UnSubscribe(node);
+		Create_Material_Surface->UnSubscribe(node);
+		Create_Folder->UnSubscribe(node);
 	}
 	void ContentsViewModel::UnSubscribe()
 	{
@@ -337,6 +371,32 @@ namespace JG
 			UnSubscribe(node, false);
 		}
 		mTargetNodeList.clear();
+	}
+	void ContentsViewModel::CreateSurfaceMaterial(const String& parentDir)
+	{
+
+		MaterialAssetImportSettings  settings;
+		settings.OutputPath = parentDir;
+		settings.Shader = ShaderScript::Template::Standard3DShader;
+		settings.ShaderScript = "Surface/Standard";
+		settings.FileName = "DefaultMaterial";
+
+		i32 cnt = 0;
+		while (true)
+		{
+			auto filePath = CombinePath(parentDir, settings.FileName + JG_ASSET_FORMAT);
+			if (fs::exists(filePath) == false) 
+			{
+				break;
+			}
+			else 
+			{
+				++cnt;
+				settings.FileName += "_" + std::to_string(cnt);
+			}
+		}
+
+		AssetImporter::Import(settings);
 	}
 	ContentsFileInfo* ContentsViewModel::Async_CreateContentsFileInfo(const String& name, const String& path, EAssetFormat fileFormat, ContentsFileInfo* ownerDirectory, bool isDirectory)
 	{

@@ -22,5 +22,6 @@ namespace JG
 	private:
 		bool ResponseDestroyGameObject(NotifyDestroyJGObjectEvent& e);
 		bool ResponseSelectedGameNodeInEditor(NotifySelectedGameNodeInEditorEvent& e);
+		bool ResponseSelectedAssetInEditor(NotifySelectedAssetInEditorEvent& e);
 	};
 }

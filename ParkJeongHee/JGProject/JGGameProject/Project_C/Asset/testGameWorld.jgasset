@@ -35,11 +35,11 @@
                         "Location": [
                             1.7248830795288087,
                             0.5505553483963013,
-                            -12.2908353805542
+                            -10.0
                         ],
                         "Rotation": [
-                            8.4893798828125,
-                            356.32366943359377,
+                            0.0,
+                            0.0,
                             0.0
                         ],
                         "Scale": [
@@ -200,7 +200,7 @@
                                     1.0,
                                     1.0
                                 ],
-                                "SpritePath": "Asset\\Resources\\uvTest2.jgasset"
+                                "SpritePath": "Asset\\Resources\\NullTexture.jgasset"
                             }
                         ],
                         "Childs": []
@@ -233,9 +233,7 @@
                                 "Name": "StaticMeshRenderer",
                                 "IsActive": true,
                                 "MeshPath": "Asset\\Resources\\Sphere.001.jgasset",
-                                "Materials": [
-                                    "Asset\\Resources\\TestMaterial.jgasset"
-                                ]
+                                "Materials": {}
                             }
                         ],
                         "Childs": []

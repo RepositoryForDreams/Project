@@ -168,8 +168,8 @@ namespace JG
 	{
 	public:
 		String Name;
-		String ShaderName;
-		List<String> ShaderScript;
+		String ShaderTemplate;
+		String ShaderScript;
 	public:
 		virtual void MakeJson(SharedPtr<JsonData> jsonData) const override;
 		virtual void LoadJson(SharedPtr<JsonData> jsonData) override;
@@ -180,8 +180,6 @@ namespace JG
 			return EAssetFormat::Material;
 		}
 	};
-
-
 	
 
 #define ASSET_NULL_ID -1
@@ -218,7 +216,6 @@ namespace JG
 		}
 	};
 
-
 	class IAsset : public IJGObject
 	{
 	public:
@@ -230,6 +227,20 @@ namespace JG
 	public:
 		virtual ~IAsset() = default;
 	};
+
+
+	class AssetInspectorGUI
+	{
+		template<class T>
+		friend class Asset;
+
+	private:
+		static void InspectorGUI(IAsset* targetAsset);
+	private:
+		static void Material_InsepctorGUI(Asset<IMaterial>* targetAsset);
+	};
+
+
 	template<class T>
 	class Asset : public IAsset
 	{
@@ -278,9 +289,18 @@ namespace JG
 		SharedPtr<T> Get() const {
 			return mData;
 		}
+		virtual void OnInspectorGUI() override {
+			AssetInspectorGUI::InspectorGUI(this);
+		}
 	public:
 		virtual ~Asset() = default;
 	};
+
+
+
+
+
+
 
 
 	class AssetManager;
@@ -375,7 +395,7 @@ namespace JG
 		void	UnLoadAsset(AssetID id);
 
 		template<class T>
-		Asset<T>* GetAsset(AssetID assetID)
+		Asset<T>* GetAsset(AssetID assetID) const
 		{
 			auto iter = mAssetDataPool.find(assetID);
 			if (iter == mAssetDataPool.end())
@@ -385,6 +405,19 @@ namespace JG
 			if (iter->second->State == EAssetDataState::None && iter->second->Asset->GetType() == JGTYPE(Asset<T>))
 			{
 				return static_cast<Asset<T>*>(iter->second->Asset.get());
+			}
+			return nullptr;
+		}
+		IAsset* GetIAsset(AssetID assetID) const 
+		{
+			auto iter = mAssetDataPool.find(assetID);
+			if (iter == mAssetDataPool.end())
+			{
+				return nullptr;
+			}
+			if (iter->second->State == EAssetDataState::None)
+			{
+				return iter->second->Asset.get();
 			}
 			return nullptr;
 		}

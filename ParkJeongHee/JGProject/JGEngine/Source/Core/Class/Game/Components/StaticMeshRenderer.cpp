@@ -120,7 +120,7 @@ namespace JG
 		if (matAssetCnt == 0 && mStaticRI->Materials.empty()) {
 			if (mNullMaterial == nullptr)
 			{
-				mNullMaterial = IMaterial::Create("DefaultMaterial", ShaderLibrary::GetInstance().GetShader(ShaderScript::Standard3DShader));
+				mNullMaterial = IMaterial::Create("DefaultMaterial", ShaderLibrary::GetInstance().GetShader(ShaderScript::Template::Standard3DShader));
 			}
 			mStaticRI->Materials.push_back(mNullMaterial);
 		}
@@ -171,6 +171,7 @@ namespace JG
 
 		if (isOpenTree)
 		{
+			cnt = mMaterialAssetHandleList.size();
 			for (i32 i = 0; i < cnt; ++i)
 			{
 				String out;

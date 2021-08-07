@@ -51,8 +51,11 @@
 
 #define JG_TEXTURE_ASSET_KEY     "@AssetKey_TextureAssetStock"
 #define JG_STATIC_MESH_ASSET_KEY "@AssetKey_StaticMeshAssetStock"
-#define JG_GAMEWORLD_ASSET_KEY "@AssetKey_GameWorld"
+#define JG_GAMEWORLD_ASSET_KEY   "@AssetKey_GameWorld"
 #define JG_ASSET_FORMAT ".jgasset"
+#define JG_SHADER_SCRIPT_FORMAT   ".shaderscript"
+#define JG_SHADER_TEMPLATE_FORMAT ".shadertemplate"
+
 
 namespace JG
 {

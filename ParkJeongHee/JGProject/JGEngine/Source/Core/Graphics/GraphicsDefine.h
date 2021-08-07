@@ -359,8 +359,12 @@ namespace JG
 
 	namespace ShaderScript
 	{
-		constexpr char* Standard2DShader = "Standard2DShader";
-		constexpr char* Standard3DShader = "Standard3DShader";
+		namespace Template
+		{
+			constexpr char* Standard2DShader = "Standard2DShader";
+			constexpr char* Standard3DShader = "Standard3DShader";
+		}
+
 		namespace Standard2D
 		{
 			constexpr char* ViewProj = "gViewProj";
@@ -463,7 +467,7 @@ namespace JG
 		constexpr char* HSEntry = "hs_main";
 		constexpr char* GSEntry = "gs_main";
 		constexpr char* PSEntry = "ps_main";
-		constexpr char* CSEntry = "main";
+		constexpr char* CSEntry = "cs_main";
 		constexpr char* VSTarget = "vs_5_1";
 		constexpr char* DSTarget = "ds_5_1";
 		constexpr char* HSTarget = "hs_5_1";

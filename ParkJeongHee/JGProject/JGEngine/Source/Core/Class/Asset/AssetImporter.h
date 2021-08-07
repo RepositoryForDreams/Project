@@ -45,8 +45,8 @@ namespace JG
 	struct MaterialAssetImportSettings
 	{
 
-		SharedPtr<IShader> Shader;
-		List<SharedPtr<IShaderScript>> ScriptList;
+		String Shader;
+		String ShaderScript;
 		String FileName;
 		String OutputPath;
 	};

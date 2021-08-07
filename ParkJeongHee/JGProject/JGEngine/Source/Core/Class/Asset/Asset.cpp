@@ -6,6 +6,8 @@
 #include "Graphics/Mesh.h"
 #include "Graphics/Shader.h"
 #include "Graphics/Material.h"
+
+#include "Imgui/imgui.h"
 namespace JG
 {
 	void TextureAssetStock::MakeJson(SharedPtr<JsonData> jsonData) const
@@ -103,56 +105,47 @@ namespace JG
 		{
 			BoundingBox = val->GetBoundingBox();
 		}
-		val = jsonData->GetMember("SubMeshs");
-		if (val)
+val = jsonData->GetMember("SubMeshs");
+if (val)
+{
+	auto cnt = val->GetSize();
+	Vertices.resize(cnt);
+	Indices.resize(cnt);
+	SubMeshNames.resize(cnt);
+	for (auto i = 0; i < cnt; ++i)
+	{
+		auto meshJson = val->GetJsonDataFromIndex(i);
+
+		auto verticesJson = meshJson->GetMember("Vertices");
+		auto indicesJson = meshJson->GetMember("Indices");
+		auto meshName = meshJson->GetMember("Name");
+
+		SubMeshNames[i] = meshName->GetString();
+		Vertices[i].resize(verticesJson->GetSize());
+		Indices[i].resize(indicesJson->GetSize());
+		for (auto j = 0; j < verticesJson->GetSize(); ++j)
 		{
-			auto cnt = val->GetSize();
-			Vertices.resize(cnt);
-			Indices.resize(cnt);
-			SubMeshNames.resize(cnt);
-			for (auto i = 0; i < cnt; ++i)
-			{
-				auto meshJson = val->GetJsonDataFromIndex(i);
-
-				auto verticesJson = meshJson->GetMember("Vertices");
-				auto indicesJson  = meshJson->GetMember("Indices");
-				auto meshName     = meshJson->GetMember("Name");
-
-				SubMeshNames[i] = meshName->GetString();
-				Vertices[i].resize(verticesJson->GetSize());
-				Indices[i].resize(indicesJson->GetSize());
-				for (auto j = 0; j < verticesJson->GetSize(); ++j)
-				{
-					auto vJson = verticesJson->GetJsonDataFromIndex(j);
-					JGVertex v;
-					v.LoadJson(vJson);
-					Vertices[i][j] = v;
-				}
-				for (auto j = 0; j < indicesJson->GetSize(); ++j)
-				{
-					auto iJson = indicesJson->GetJsonDataFromIndex(j);
-					u32 index;
-					index = iJson->GetUint32();
-					Indices[i][j] = index;
-				}
-
-			}
+			auto vJson = verticesJson->GetJsonDataFromIndex(j);
+			JGVertex v;
+			v.LoadJson(vJson);
+			Vertices[i][j] = v;
 		}
+		for (auto j = 0; j < indicesJson->GetSize(); ++j)
+		{
+			auto iJson = indicesJson->GetJsonDataFromIndex(j);
+			u32 index;
+			index = iJson->GetUint32();
+			Indices[i][j] = index;
+		}
+
+	}
+}
 	}
 	void MaterialAssetStock::MakeJson(SharedPtr<JsonData> jsonData) const
 	{
 		jsonData->AddMember("Name", Name);
-		jsonData->AddMember("ShaderName", ShaderName);
-
-		auto scriptList = jsonData->CreateJsonData();
-		for (auto& script : ShaderScript)
-		{
-			auto scriptJson = jsonData->CreateJsonData();
-			scriptJson->SetString(script);
-			scriptList->AddMember(scriptJson);
-		}
-
-		jsonData->AddMember("ShaderScriptList", scriptList);
+		jsonData->AddMember("ShaderTemplate", ShaderTemplate);
+		jsonData->AddMember("ShaderScript", ShaderScript);
 	}
 	void MaterialAssetStock::LoadJson(SharedPtr<JsonData> jsonData)
 	{
@@ -162,26 +155,230 @@ namespace JG
 			Name = val->GetString();
 		}
 
-		val = jsonData->GetMember("ShaderName");
+		val = jsonData->GetMember("ShaderTemplate");
 		if (val && val->IsString())
 		{
-			ShaderName = val->GetString();
+			ShaderTemplate = val->GetString();
 		}
 
-		val = jsonData->GetMember("ShaderScriptList");
-		if (val)
+		val = jsonData->GetMember("ShaderScript");
+		if (val && val->IsString())
 		{
-			ShaderScript.resize(val->GetSize());
-			for(i32 i = 0; i<val->GetSize(); ++i)
-			{
-				auto scriptVal = val->GetJsonDataFromIndex(i);
-				if (scriptVal == nullptr) continue;
+			ShaderScript = val->GetString();
+		}
+	}
 
-				ShaderScript[i] = scriptVal->GetString();
+
+
+
+	void AssetInspectorGUI::InspectorGUI(IAsset* targetAsset)
+	{
+		if (targetAsset == nullptr)
+		{
+			return;
+		}
+		if (targetAsset->GetType() == JGTYPE(Asset<IMaterial>))
+		{
+			Material_InsepctorGUI(static_cast<Asset<IMaterial>*>(targetAsset));
+		}
+	}
+
+	void AssetInspectorGUI::Material_InsepctorGUI(Asset<IMaterial>* targetAsset)
+	{
+		if (targetAsset->Get() == nullptr)
+		{
+			return;
+		}
+		auto propertyList = targetAsset->Get()->GetPropertyList();
+		auto material     = targetAsset->Get();
+
+		for (auto& property : propertyList)
+		{
+			auto type = property.first;
+			auto name = property.second;
+			ImGui::Text(ShaderDataTypeToString(type).c_str());
+			switch (property.first)
+			{
+			case EShaderDataType::_int:
+			{
+				i32 value = 0;
+				material->GetInt(name, &value);
+				if (ImGui::InputInt("##Material_InputInt", &value) == true)
+				{
+					material->SetInt(name, value);
+				}
+				
 			}
+				break;
+			case EShaderDataType::_int2:
+			{
+				JVector2Int value = 0;
+				material->GetInt2(name, &value);
+				if (ImGui::InputInt2("##Material_InputInt2", (i32*)&value) == true)
+				{
+					material->SetInt2(name, value);
+				}
+			}
+				break;
+			case EShaderDataType::_int3:
+			{
+				JVector3Int value = 0;
+				material->GetInt3(name, &value);
+				if (ImGui::InputInt2("##Material_InputInt3", (i32*)&value) == true)
+				{
+					material->SetInt3(name, value);
+				}
+
+			}
+				break;
+			case EShaderDataType::_int4:
+			{
+				JVector4Int value = 0;
+				material->GetInt4(name, &value);
+				if (ImGui::InputInt4("##Material_InputInt4", (i32*)&value) == true)
+				{
+					material->SetInt4(name, value);
+				}
+			}
+				break;
+			case EShaderDataType::_uint:
+			{
+				u32 value = 0;
+				material->GetUint(name, &value);
+				if (ImGui::InputInt("##Material_InputUint", (i32*)&value) == true)
+				{
+					material->SetUint(name, value);
+				}
+			}
+				break;
+			case EShaderDataType::_uint2:
+			{
+				JVector2Uint value;
+				material->GetUint2(name, &value);
+				if (ImGui::InputInt2("##Material_InputUint2", (i32*)&value) == true)
+				{
+					material->SetUint2(name, value);
+				}
+			}
+				break;
+			case EShaderDataType::_uint3:
+			{
+				JVector3Uint value;
+				material->GetUint3(name, &value);
+				if (ImGui::InputInt3("##Material_InputUint3", (i32*)&value) == true)
+				{
+					material->SetUint3(name, value);
+				}
+			}
+				break;
+			case EShaderDataType::_uint4:
+			{
+				JVector4Uint value;
+				material->GetUint4(name, &value);
+				if (ImGui::InputInt4("##Material_InputUint4", (i32*)&value) == true)
+				{
+					material->SetUint4(name, value);
+				}
+			}
+				break;
+			case EShaderDataType::_float:
+			{
+				f32 value;
+				material->GetFloat(name, &value);
+				if (ImGui::InputFloat2("##Material_InputFloat", (f32*)&(value)) == true)
+				{
+					material->SetFloat(name, value);
+				}
+			}
+				break;
+			case EShaderDataType::_float2:
+			{
+				JVector2 value;
+				material->GetFloat2(name, &value);
+				if (ImGui::InputFloat2("##Material_InputFloat2", (f32*)&(value)) == true)
+				{
+					material->SetFloat2(name, value);
+				}
+			}
+				break;
+			case EShaderDataType::_float3:
+			{
+				JVector3 value;
+				material->GetFloat3(name, &value);
+				if (ImGui::InputFloat3("##Material_InputFloat3", (f32*)&(value)) == true)
+				{
+					material->SetFloat3(name, value);
+				}
+			}
+				break;
+			case EShaderDataType::_float4:
+			{
+				JVector4 value;
+				material->GetFloat4(name, &value);
+				if (ImGui::InputFloat4("##Material_InputFloat4", (float*)&(value)) == true)
+				{
+					material->SetFloat4(name, value);
+				}
+			}
+				break;
+			case EShaderDataType::_float3x3:
+				break;
+			case EShaderDataType::_float4x4:
+				break;
+			case EShaderDataType::texture2D:
+				break;
+			default:
+				break;
+			}
+
+			//switch (property.first)
+			//{
+			//case EShaderDataType::texture2D:
+			//	break;
+			//case EShaderDataType::_float:
+			//	break;
+			//case EShaderDataType::_float2:
+			//	break;
+			//case EShaderDataType::_float3:
+			//	break;
+			//case EShaderDataType::_float4:
+			//	break;
+			//case EShaderDataType::_uint:
+			//	break;
+			//case EShaderDataType::texture2D:
+			//	break;
+			//case EShaderDataType::texture2D:
+			//	break;
+			//case EShaderDataType::texture2D:
+			//	break;
+			//case EShaderDataType::texture2D:
+			//	break;
+			//case EShaderDataType::texture2D:
+			//	break;
+			//}
+
+
 		}
 
+
+
+
+
+
+		if (ImGui::Button("Save") == true)
+		{
+			// targetAsset Save
+		}
 	}
+
+
+
+
+
+
+
+
+
 
 	AssetDataBase::AssetDataBase()
 	{
@@ -402,30 +599,21 @@ namespace JG
 		}
 		case EAssetFormat::Material:
 		{
-			List<String> scriptNameList;
 			MaterialAssetStock stock;
 			stock.LoadJson(assetVal);
 
 
-			i32 cnt = 0;
-			for (auto& script : stock.ShaderScript)
+			// 
+			auto shader = ShaderLibrary::GetInstance().GetShader(stock.ShaderTemplate, { stock.ShaderScript });
+			if (shader != nullptr)
 			{
-				auto name = stock.Name + "_Script_" + std::to_string(cnt);
-				ShaderLibrary::GetInstance().RegisterScirpt(IShaderScript::CreateMaterialScript(name, script));
-				scriptNameList.push_back(name);
+				auto materialAsset = CreateSharedPtr<Asset<IMaterial>>(assetPath.string());
+				materialAsset->mData = IMaterial::Create(assetPath.string(), shader);
 
-				cnt++;
+
+
+				LoadData->Asset = materialAsset;
 			}
-
-			auto materialAsset = CreateSharedPtr<Asset<IMaterial>>(assetPath.string());
-			auto shader = ShaderLibrary::GetInstance().GetShader(stock.ShaderName, scriptNameList);
-			if (shader == nullptr)
-			{
-				return;
-			}
-
-			materialAsset->mData = IMaterial::Create(stock.Name, shader);
-			LoadData->Asset = materialAsset;
 			break;
 		}
 		default:
@@ -592,5 +780,7 @@ namespace JG
 		JG_CORE_ERROR("{0} is not exist in AssetFolder", path);
 		return false;
 	}
+
+
 
 }
